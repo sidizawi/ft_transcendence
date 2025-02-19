@@ -1,7 +1,11 @@
 // ESM
 import Fastify    from 'fastify'
 import cors       from '@fastify/cors'
-import Database   from 'better-sqlite3'
+
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+const Database = require('better-sqlite3');
+
 import pingRoutes from './routes/ping.js'
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -23,7 +27,7 @@ await fastify.register(userRoutes, { prefix: '/user' })
  */
 const start = async () => {
     try {
-        await fastify.listen({ port: 3000 })
+        await fastify.listen({ port: 3000, host: '0.0.0.0' })
     } catch (err) {
         fastify.log.error(err)
         process.exit(1)
