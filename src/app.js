@@ -10,13 +10,15 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
+import view from '@fastify/view';
+
 import fastifyStatic     from '@fastify/static';
 import path              from 'path';
 import { fileURLToPath } from 'url';
-
-import pingRoutes from './routes/ping.js'
+import ejs from 'ejs';
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
+import homeRoutes from './routes/homeRoutes.js';
 import db         from './db.js';
 
 
@@ -32,11 +34,18 @@ fastify.decorate('db', db);
 await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET })
 fastify.decorate('authenticate', async (request, reply) => {
     try {
-      await request.jwtVerify();
+        await request.jwtVerify();
     } catch (err) {
-      reply.send(err);
+        reply.send(err);
     }
 })
+
+await fastify.register(view, {
+    engine: {
+        ejs: ejs
+    },
+    templates: path.join(__dirname, '..', 'views')
+});
 
 await fastify.register(fastifyStatic, {
     root: path.join(__dirname, 'public'),
@@ -44,9 +53,9 @@ await fastify.register(fastifyStatic, {
 });
 
 await fastify.register(cors, {})
-await fastify.register(pingRoutes)
 await fastify.register(authRoutes, { prefix: '/auth' })
 await fastify.register(userRoutes, { prefix: '/user' })
+await fastify.register(homeRoutes)
 
 /**
  * Run the server!
