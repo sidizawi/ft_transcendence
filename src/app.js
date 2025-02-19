@@ -1,6 +1,10 @@
 // ESM
-import Fastify    from 'fastify'
-import cors       from '@fastify/cors'
+import dotenv from 'dotenv';
+dotenv.config();
+
+import Fastify    from 'fastify';
+import cors       from '@fastify/cors';
+import fastifyJwt from '@fastify/jwt';
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -25,10 +29,19 @@ const fastify = Fastify({
 
 fastify.decorate('db', db);
 
+await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET })
+fastify.decorate('authenticate', async (request, reply) => {
+    try {
+      await request.jwtVerify();
+    } catch (err) {
+      reply.send(err);
+    }
+})
+
 await fastify.register(fastifyStatic, {
     root: path.join(__dirname, 'public'),
     prefix: '/'
-  });
+});
 
 await fastify.register(cors, {})
 await fastify.register(pingRoutes)

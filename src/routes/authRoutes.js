@@ -10,16 +10,16 @@ const __dirname = path.dirname(__filename);
 
 export default async function authRoutes(fastify, options) {
 
+    //Register
     fastify.get('/register', async (request, reply) => {
         try {
             const html = await fs.readFile(path.join(__dirname, '..', 'public', 'register.html'), 'utf8');
             reply.type('text/html').send(html);
         } catch (error) {
-            reply.code(500).send('Erreur interne');
+            reply.code(500).send('Internal error');
         }
     });
 
-    //Register
     fastify.post('/register', async (request, reply) => {
         const { username, email, password } = request.body;
 
@@ -52,15 +52,44 @@ export default async function authRoutes(fastify, options) {
     });
 
     //Login
+    fastify.get('/login', async (request, reply) => {
+        try {
+            const html = await fs.readFile(path.join(__dirname, '..', 'public', 'login.html'), 'utf8');
+            reply.type('text/html').send(html);
+        } catch (error) {
+            reply.code(500).send('Internal error');
+        }
+    });
+
     fastify.post('/login', async (request, reply) => {
         const { email, password } = request.body;
-
+      
         if (!email || !password) {
             reply.code(400);
             return { error: 'Email et mot de passe requis' };
         }
-
-        return { message: 'User logged in successfully' };
+      
+        const user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+        if (!user) {
+            reply.code(401);
+            return { error: 'Utilisateur non trouvé' };
+        }
+      
+        const isValidPassword = await bcrypt.compare(password, user.password);
+        if (!isValidPassword) {
+            reply.code(401);
+            return { error: 'Mot de passe incorrect' };
+        }
+      
+        const token = fastify.jwt.sign({
+            id: user.id,
+            username: user.username,
+            email: user.email
+        });
+      
+        reply.code(200);
+        return { message: 'User logged in successfully', token };
     });
+      
 }
 
