@@ -1,8 +1,23 @@
 // Inscription, login,...
 
 import bcrypt from 'bcrypt';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export default async function authRoutes(fastify, options) {
+
+    fastify.get('/register', async (request, reply) => {
+        try {
+            const html = await fs.readFile(path.join(__dirname, '..', 'public', 'register.html'), 'utf8');
+            reply.type('text/html').send(html);
+        } catch (error) {
+            reply.code(500).send('Erreur interne');
+        }
+    });
 
     //Register
     fastify.post('/register', async (request, reply) => {

@@ -1,15 +1,16 @@
-all : run
+all: run
 
-build :
-	mkdir -p "$(HOME)/Database"
+DATABASE_DIR := $(shell pwd)/Database
+
+build:
+	mkdir -p "$(DATABASE_DIR)"
 	docker build -t fastify .
 
-run : build
-	docker run -p 3001:3000 -v "$(HOME)/Database/test.sqlite:/app/data/test.sqlite" fastify
+run: build
+	docker run -p 3001:3000 -v "$(DATABASE_DIR):/app/data" fastify
 
-prune :
+prune:
 	docker system prune -a
 
-#In case of port already used by a process and blocking
-kill :
+kill:
 	lsof -ti :3001 | xargs kill -9

@@ -6,6 +6,8 @@ COPY package* ./
 
 RUN npm install
 
+RUN mkdir -p data
+
 COPY . .
 
 EXPOSE 3000
