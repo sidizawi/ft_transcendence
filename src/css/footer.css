@@ -1,0 +1,23 @@
+/* Footer Styling */
+.footer {
+    position: fixed;
+    bottom: 5px;
+    width: 100%;
+    text-align: center;
+    font-size: 1vw;
+}
+
+.footer p {
+    margin: 0 0;
+    color: var(--toggle-border);
+}
+
+.footer hr {
+    width: 100%;
+    border: none;         /* Remove default styles */
+    height: 0.5vh;          /* Thickness of the divider */
+    background: var(--toggle-border);     /* Color of the divider */
+    margin-top: 10px;     /* Moves the bar downward */
+    margin-bottom: 5px;  /* Adjusts spacing below */
+}
+/*bg footer hr ne fonctionne pas*/

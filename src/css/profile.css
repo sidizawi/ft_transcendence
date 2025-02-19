@@ -1,0 +1,28 @@
+/* Profile Info */
+.profile-info {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+/* Statistics Table */
+.profile-table {
+    width: 100%;
+    max-width: 400px;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.profile-table th, .profile-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: center;
+}
+
+.profile-table th {
+    background-color: #f4f4f4;
+}
+
+.dark-mode .profile-table th {
+    background-color: #333;
+    color: white;
+}
