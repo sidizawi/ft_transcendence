@@ -42,7 +42,14 @@ export default async function authRoutes(fastify, options) {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const stmt = fastify.db.prepare("INSERT INTO users (username, email, password) VALUES (?, ?, ?)");
+        const initialGameData = {
+            games_played: 0,
+            games_won: 0,
+            games_lost: 0,
+            total_points: 0
+        };
+        
+        const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data) VALUES (?, ?, ?, ?)");
         const result = stmt.run(username, email, hashedPassword);
 
         const userId = result.lastInsertRowid;
