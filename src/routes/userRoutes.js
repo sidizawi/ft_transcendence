@@ -10,6 +10,9 @@ export default async function userRoutes(fastify, options) {
 
     fastify.get('/profile', { preValidation: [fastify.authenticate] }, async (request, reply) => {
 
+        if (!request.cookies || !request.cookies.token) {
+            return reply.redirect('/auth/login'); 
+        }
         const userId = request.user.id;
     
         const user = fastify.db

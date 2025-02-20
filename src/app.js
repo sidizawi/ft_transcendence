@@ -39,16 +39,14 @@ fastify.decorate('authenticate', async (request, reply) => {
     try {
       const token = request.cookies.token;
       if (!token) {
-        reply.code(401).send(new Error('Token introuvable dans les cookies'));
-        return;
+        return reply.redirect('/auth/login');
       }
-      request.headers.authorization = 'Bearer ' + token;
-      await request.jwtVerify();
+        request.headers.authorization = 'Bearer ' + token;
+        await request.jwtVerify();
     } catch (err) {
-      reply.code(401).send(err);
+        return reply.redirect('/auth/login');
     }
-  });
-  
+});
 
 await fastify.register(view, {
     engine: {

@@ -13,17 +13,22 @@ export default async function authRoutes(fastify, options) {
     //Register
     fastify.get('/register', async (request, reply) => {
         try {
-            if (request.cookies && request.cookies.token) {
-                try {
-                    await request.jwtVerify({ cookie: 'token' });
-                    return reply.redirect('/user/profile');
-                  } catch (err) {}
+            const token = request.cookies && request.cookies.token;
+            if (token) {
+              const decoded = fastify.jwt.decode(token);
+              console.log('Token décodé:', decoded);
+              const currentTime = Math.floor(Date.now() / 1000);
+              if (decoded && (!decoded.exp || decoded.exp > currentTime)) {
+                return reply.redirect('/user/profile');
+              } else {
+                reply.clearCookie('token');
+              }
             }
             const html = await fs.readFile(path.join(__dirname, '..', 'public', 'register.html'), 'utf8');
             reply.type('text/html').send(html);
-        } catch (error) {
+          } catch (error) {
             reply.code(500).send('Internal error');
-        }
+          }
     });
 
     fastify.post('/register', async (request, reply) => {
@@ -67,18 +72,24 @@ export default async function authRoutes(fastify, options) {
     //Login
     fastify.get('/login', async (request, reply) => {
         try {
-            if (request.cookies && request.cookies.token) {
-                try {
-                    await request.jwtVerify({ cookie: 'token' });
-                    return reply.redirect('/user/profile');
-                  } catch (err) {}
+          const token = request.cookies && request.cookies.token;
+          if (token) {
+            const decoded = fastify.jwt.decode(token);
+            console.log('Token décodé:', decoded);
+            const currentTime = Math.floor(Date.now() / 1000);
+            if (decoded && (!decoded.exp || decoded.exp > currentTime)) {
+              return reply.redirect('/user/profile');
+            } else {
+              reply.clearCookie('token');
             }
-            const html = await fs.readFile(path.join(__dirname, '..', 'public', 'login.html'), 'utf8');
-            reply.type('text/html').send(html);
+          }
+          const html = await fs.readFile(path.join(__dirname, '..', 'public', 'login.html'), 'utf8');
+          reply.type('text/html').send(html);
         } catch (error) {
-            reply.code(500).send('Internal error');
+          reply.code(500).send('Internal error');
         }
-    });
+      });
+      
 
     fastify.post('/login', async (request, reply) => {
         const { email, password } = request.body;
@@ -93,7 +104,6 @@ export default async function authRoutes(fastify, options) {
             reply.code(401);
             return { error: 'Utilisateur non trouvé' };
         }
-      
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             reply.code(401);
@@ -108,7 +118,7 @@ export default async function authRoutes(fastify, options) {
       
         reply.setCookie('token', token, {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
+            secure: process.env.NODE_ENV === 'production' ? true : false,
             sameSite: 'strict',
             path: '/'
         });
@@ -120,7 +130,6 @@ export default async function authRoutes(fastify, options) {
     //Logout
     fastify.get('/logout', async (request, reply) => {
         reply.clearCookie('token')
-        reply.redirect('/')
         reply.redirect('/home')
     });
 }
