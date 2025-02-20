@@ -50,7 +50,7 @@ export default async function authRoutes(fastify, options) {
         };
         
         const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data) VALUES (?, ?, ?, ?)");
-        const result = stmt.run(username, email, hashedPassword);
+        const result = stmt.run(username, email, hashedPassword, initialGameData);
 
         const userId = result.lastInsertRowid;
         
