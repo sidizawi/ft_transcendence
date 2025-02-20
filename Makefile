@@ -3,6 +3,7 @@ all: run
 DATABASE_DIR := $(shell pwd)/Database
 
 build:
+	docker stop $(shell docker ps -aq)
 	mkdir -p "$(DATABASE_DIR)"
 	docker build -t fastify .
 
@@ -11,6 +12,3 @@ run: build
 
 prune:
 	docker system prune -a
-
-kill:
-	lsof -ti :3001 | xargs kill -9
