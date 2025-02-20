@@ -1,0 +1,22 @@
+<form id="signIn-form">
+    <label for="user-identifier">Username or Email</label>
+    <input type="text" id="user-identifier" required>
+    <span class="error-message" id="identifier-error"></span>
+    
+    <label for="password">Password</label>
+    <div class="password-container">
+        <input type="password" id="password" required>
+        <span id="toggle-password" class="eye-icon">👁️</span>
+    </div>
+    <span class="error-message" id="password-error"></span>
+    
+    <button type="submit">Sign In</button>
+</form>
+
+<p id="signIn-message" class="hidden"></p>
+
+<!-- External authentication link -->
+<p><a href="" id="auth-42" target="_blank">Login with 42</a></p>
+
+
+<p class="switch">New here? <a href="signUp.html" data-page="signUp">Create an account</a></p>

@@ -1,3 +1,16 @@
+.switch {
+    display: flex;
+    justify-content: right;
+    margin-top: 20px;
+    margin-right: 40px;
+}
+
+.switch a {
+    color: #007BFF;
+    text-decoration: none;
+    margin-left: 10px;
+}
+
 form {
     display: flex;
     flex-direction: column;
@@ -78,7 +91,7 @@ button:hover {
     display: none;
 }
 
-#signUp-message {
+#sign-message {
     text-align: center;
     font-size: 14px;
     margin-top: 10px;

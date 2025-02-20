@@ -1,21 +1,48 @@
-<!-- User Info -->
-<div class="profile-info">
-    <p><strong>Username:</strong> <span id="user-name">Loading...</span></p>
-    <p><strong>Email:</strong> <span id="user-email">Loading...</span></p>
-</div>
+<div class="profile-container">
+    <!-- Profile Picture & Info -->
+    <div class="profile-header">
+        <div class="profile-pic">
+            <img id="profileImg" src="default-avatar.png" alt="Profile Picture">
+            <input type="file" id="uploadPic" accept="image/*">
+        </div>
+        <div class="user-info">
+            <h2 id="username">Guest</h2>
+            <p id="email">Not logged in</p>
+        </div>
+    </div>
 
-<!-- Statistics Table -->
-<h2>Statistics</h2>
-<table class="profile-table">
-    <tr>
-        <th>Wins</th>
-        <th>Losses</th>
-        <th>Total Games</th>
-    </tr>
-    <tr>
-        <td id="games-won">0</td>
-        <td id="games-lost">0</td>
-        <td id="total-games">0</td>
-    </tr>
-</table>
-<div id="logout-container"></div>
+    <!-- Dashboard & Friends Section -->
+    <div class="dashboard-container">
+        <!-- Dashboard Table -->
+        <div class="dashboard">
+            <h3>Dashboard</h3>
+            <table class="dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Wins</th>
+                        <th>Losts</th>
+                        <th>Total Games</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td id="gamesWon">0</td>
+                        <td id="gamesLost">0</td>
+                        <td id="totalGames">0</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Friends Section (full right column) -->
+        <div class="friends-section">
+            <h3>Friends</h3>
+            <ul id="friends"></ul>
+            <button id="addFriendBtn">ADD</button>
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <button id="tournamentBtn">Tournament</button>
+    <div id="logout-container"></div>
+</div>

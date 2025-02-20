@@ -12,11 +12,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 // pageSubtitle.textContent = page.charAt(0).toUpperCase() + page.slice(1);
 
                 if (addToHistory) {
-                    history.pushState({ page }, "", page);
+                    history.pushState({ page }, "", `${page}.html`);
                 }
 
-                if (page === "profile") updateProfilePage();
-                if (page === "signUp") handleSignUpForm();
+                if (page === "Profile") updateProfilePage(); //pq des majuscules aux deux?
+                if (page === "SignUp") handleSignUpForm();
+                if (page === "SignIn") handleSignInForm();
             })
             .catch(() => {
                 contentDiv.innerHTML = "<h1>Page Not Found</h1>";
@@ -33,19 +34,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     window.addEventListener("popstate", (event) => {
         if (event.state && event.state.page) {
-            loadPage(event.state.page, false);
+            let page = event.state.page.replace(".html", ""); // Retirer .html si présent
+            loadPage(page, false);
         } else {
-            loadPage("profile", false);
+            loadPage("home", false);
         }
     });
-
-    const initialPage = window.location.hash.replace("#", "") || "home";
-    showPage(initialPage);
-
-    window.addEventListener("popstate", (event) => {
-        const pageId = event.state? event.state.page: "home";
-        if (document.getElementById(pageId)) {
-            showPage(pageId);
-        }
-    });
+    window.loadPage = loadPage;
 });
