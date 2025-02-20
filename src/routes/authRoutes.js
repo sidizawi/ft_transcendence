@@ -13,6 +13,12 @@ export default async function authRoutes(fastify, options) {
     //Register
     fastify.get('/register', async (request, reply) => {
         try {
+            if (request.cookies && request.cookies.token) {
+                try {
+                    await request.jwtVerify({ cookie: 'token' });
+                    return reply.redirect('/user/profile');
+                  } catch (err) {}
+            }
             const html = await fs.readFile(path.join(__dirname, '..', 'public', 'register.html'), 'utf8');
             reply.type('text/html').send(html);
         } catch (error) {
@@ -28,7 +34,7 @@ export default async function authRoutes(fastify, options) {
             return { error: 'Tous les champs sont requis' };
         }
 
-        const userExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(email);
+        const userExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(username);
         if (userExists) {
             reply.code(400);
             return { error: 'Cet username est déjà utilisé.' };
@@ -50,7 +56,7 @@ export default async function authRoutes(fastify, options) {
         };
         
         const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data) VALUES (?, ?, ?, ?)");
-        const result = stmt.run(username, email, hashedPassword, initialGameData);
+        const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData));
 
         const userId = result.lastInsertRowid;
         
@@ -61,6 +67,12 @@ export default async function authRoutes(fastify, options) {
     //Login
     fastify.get('/login', async (request, reply) => {
         try {
+            if (request.cookies && request.cookies.token) {
+                try {
+                    await request.jwtVerify({ cookie: 'token' });
+                    return reply.redirect('/user/profile');
+                  } catch (err) {}
+            }
             const html = await fs.readFile(path.join(__dirname, '..', 'public', 'login.html'), 'utf8');
             reply.type('text/html').send(html);
         } catch (error) {
@@ -94,9 +106,22 @@ export default async function authRoutes(fastify, options) {
             email: user.email
         });
       
+        reply.setCookie('token', token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            path: '/'
+        });
+
         reply.code(200);
         return { message: 'User logged in successfully', token };
     });
-      
+    
+    //Logout
+    fastify.get('/logout', async (request, reply) => {
+        reply.clearCookie('token')
+        reply.redirect('/')
+        reply.redirect('/home')
+    });
 }
 

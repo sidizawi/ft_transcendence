@@ -5,6 +5,7 @@ dotenv.config();
 import Fastify    from 'fastify';
 import cors       from '@fastify/cors';
 import fastifyJwt from '@fastify/jwt';
+import fastifyCookie from '@fastify/cookie';
 
 import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
@@ -31,14 +32,23 @@ const fastify = Fastify({
 
 fastify.decorate('db', db);
 
+await fastify.register(fastifyCookie, {});
+
 await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET })
 fastify.decorate('authenticate', async (request, reply) => {
     try {
-        await request.jwtVerify();
+      const token = request.cookies.token;
+      if (!token) {
+        reply.code(401).send(new Error('Token introuvable dans les cookies'));
+        return;
+      }
+      request.headers.authorization = 'Bearer ' + token;
+      await request.jwtVerify();
     } catch (err) {
-        reply.send(err);
+      reply.code(401).send(err);
     }
-})
+  });
+  
 
 await fastify.register(view, {
     engine: {
