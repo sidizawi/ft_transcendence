@@ -10,17 +10,17 @@ const __dirname = path.dirname(__filename);
 
 export default async function authRoutes(fastify, options) {
 
-    //Register
-    fastify.get('/register', async (request, reply) => {
+    //signUp
+    fastify.get('/signUp', async (request, reply) => {
         try {
-            const html = await fs.readFile(path.join(__dirname, '..', 'public', 'register.html'), 'utf8');
+            const html = await fs.readFile(path.join(__dirname, '..', 'public', 'signUp.html'), 'utf8');
             reply.type('text/html').send(html);
         } catch (error) {
             reply.code(500).send('Internal error');
         }
     });
 
-    fastify.post('/register', async (request, reply) => {
+    fastify.post('/signUp', async (request, reply) => {
         const { username, email, password } = request.body;
 
         if (!username || !email || !password) {

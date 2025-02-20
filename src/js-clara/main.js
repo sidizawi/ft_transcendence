@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
 
                 if (page === "profile") updateProfilePage();
-                if (page === "login") handleLoginForm();
+                if (page === "signUp") handleSignUpForm();
             })
             .catch(() => {
                 contentDiv.innerHTML = "<h1>Page Not Found</h1>";
