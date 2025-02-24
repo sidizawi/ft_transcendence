@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Frontend avec API Gateway</title>
+</head>
+<body>
+    <h1>Connexion</h1>
+    <button onclick="login()">Se connecter</button>
+
+    <script>
+        function login() {
+            fetch("http://localhost:3000/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ username: "player1", password: "secret" })
+            })
+            .then(response => response.json())
+            .then(data => alert("Réponse du serveur: " + JSON.stringify(data)))
+            .catch(error => console.error("Erreur:", error));
+        }
+    </script>
+</body>
+</html>

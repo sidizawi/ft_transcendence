@@ -1,0 +1,17 @@
+{
+	"name": "auth-service",
+	"version": "1.0.0",
+	"type": "module",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "nodemon --watch src --exec node index.js"
+  	},
+	"dependencies": {
+		"fastify": "^5.0.0",
+		"bcrypt": "^5.1.1"
+	},
+	"devDependencies": {
+		"nodemon": "^2.0.20"
+  	}
+  }
+  

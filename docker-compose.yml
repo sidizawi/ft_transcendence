@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      # - game-service
+    volumes:
+      - ./front/public:/app/front/public
+
+  auth-service:
+    build: ./services/auth-service
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./front/public:/app/front/public
+
+  # game-service:
+  #   build: ./services/game-service
+  #   ports:
+  #     - "3002:3002"
+  #     - "8080:8080"
+  #   # volumes:
+  #   #     - ./front/public:/app/front/public
