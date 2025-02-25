@@ -2,7 +2,7 @@ import { createRequire } from 'module';
 const require = createRequire(import.meta.url);
 const Database = require('better-sqlite3');
 
-const db = new Database('data/test.sqlite', { verbose: console.log });
+const db = new Database('data/transcendence.db', { verbose: console.log });
 
 db.exec(`
     CREATE TABLE IF NOT EXISTS users (

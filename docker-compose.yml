@@ -1,6 +1,10 @@
 version: '3.8'
 
 services:
+  db:
+    build: ./services/db
+    volumes:
+      - database:/data
   api-gateway:
     build: ./services/api-gateway
     ports:
@@ -10,7 +14,7 @@ services:
       # - game-service
     volumes:
       - ./front/public:/app/front/public
-      - ./database:/app/data/
+      # - ./database:/app/data/
 
   auth-service:
     build: ./services/auth-service
@@ -18,7 +22,8 @@ services:
       - "3001:3001"
     volumes:
       - ./front/public:/app/front/public
-      - ./database:/app/data/
+      - database:/app/data
+      # - ./services/auth-service:/app
 
   # game-service:
   #   build: ./services/game-service
@@ -27,3 +32,6 @@ services:
   #     - "8080:8080"
   #   # volumes:
   #   #     - ./front/public:/app/front/public
+
+volumes:
+  database:
