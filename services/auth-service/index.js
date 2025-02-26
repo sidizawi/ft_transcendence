@@ -39,7 +39,7 @@ fastify.decorate('db', db);
         }
     });
 
-    fastify.post('/register', async (request, reply) => {
+    fastify.post('/auth/register', async (request, reply) => {
         const { username, email, password } = request.body;
         if (!username || !email || !password) {
             reply.code(400);
@@ -70,6 +70,7 @@ fastify.decorate('db', db);
         reply.code(201);
         return { message: 'User registered successfully' };
     });
+    
     //Login
     fastify.get('/login', async (request, reply) => {
         try {

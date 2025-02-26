@@ -27,6 +27,13 @@ services:
       - ./front/public:/app/front/public
       - database:/app/data
       # - ./services/auth-service:/app
+    environment:
+      DB_HOST: db
+      DB_PORT: 2999
+      DB_NAME: management
+      DB_PATH: /app/data/management.db
+    depends_on:
+      - db
 
   # game-service:
   #   build: ./services/game-service
