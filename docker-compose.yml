@@ -3,8 +3,11 @@ version: '3.8'
 services:
   db:
     build: ./services/db
+    ports:
+      - "2999:2999"
     volumes:
-      - database:/data
+      - ./database:/data
+      
   api-gateway:
     build: ./services/api-gateway
     ports:
@@ -35,3 +38,8 @@ services:
 
 volumes:
   database:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: './database'
