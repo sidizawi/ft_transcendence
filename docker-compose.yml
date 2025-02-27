@@ -16,7 +16,7 @@ services:
       - auth-service
       # - game-service
     volumes:
-      - ./front/public:/app/front/public
+      - ./front:/app/front
       # - ./database:/app/data/
 
   auth-service:
@@ -24,7 +24,7 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - ./front/public:/app/front/public
+      - ./front:/app/front
       - database:/app/data
       # - ./services/auth-service:/app
     environment:

@@ -1,0 +1,28 @@
+<p class="switch">Already have an account? -> <a href="signIn.html" data-page="signIn">Sign In</a></p>
+
+<form id="signUp-form">
+    <label for="username">Username:</label>
+    <input type="text" id="username" >
+    <span class="error-message" id="username-error"></span>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" >
+    <span class="error-message" id="email-error"></span>
+
+    <label for="password">Password:</label>
+    <div class="password-container">
+        <input type="password" id="password" >
+        <span id="toggle-password" class="eye-icon">👁️</span>
+    </div>
+    <span class="error-message" id="password-error"></span>
+
+    <div id="sign-page">
+    <button type="submit">Sign Up</button>
+    </div>
+</form>
+
+<p id="sign-message" class="hidden"></p>
+
+<!-- External authentication link -->
+<!-- <p><a href="https://login.42.fr/oauth/authorize" id="auth-42" target="_blank">Login with 42</a></p> -->
+<p><a href="" id="auth-42" target="_blank">Login with 42</a></p>

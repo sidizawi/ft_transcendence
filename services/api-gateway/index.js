@@ -35,7 +35,7 @@ fastify.get('/', async (request, reply) => {
 
 fastify.get('/home', async (request, reply) => {
   try {
-      const html = await fs.readFile(path.join(__dirname, 'front', 'public', 'index.html'), 'utf8');
+      const html = await fs.readFile(path.join(__dirname, 'front', 'public', 'home.html'), 'utf8');
       reply.type('text/html').send(html);
   } catch (error) {
       reply.code(500).send('Internal error test');
