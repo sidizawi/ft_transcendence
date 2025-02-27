@@ -6,4 +6,4 @@ COPY . .
 
 # RUN mkdir -p front/public
 # COPY front/public/* ./front/public
-CMD ["node", "index.js"]
+ENTRYPOINT ["npm", "run", "dev"]

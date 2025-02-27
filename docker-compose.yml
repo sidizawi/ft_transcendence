@@ -17,6 +17,7 @@ services:
       # - game-service
     volumes:
       - ./front:/app/front
+      - ./services/api-gateway:/app
       # - ./database:/app/data/
 
   auth-service:
@@ -26,7 +27,7 @@ services:
     volumes:
       - ./front:/app/front
       - database:/app/data
-      # - ./services/auth-service:/app
+      - ./services/auth-service:/app
     environment:
       DB_HOST: db
       DB_PORT: 2999

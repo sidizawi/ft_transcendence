@@ -1,2 +1,3 @@
 services/**/node_modules/*
 services/**/package-lock.json
+node_modules/
