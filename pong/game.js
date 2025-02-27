@@ -2,7 +2,7 @@ import { aiMove } from "./ai.js";
 import { draw, drawMenu } from "./draw.js";
 
 const WINNING_SCORE = 2;
-const BALL_SPEED = 2;
+const BALL_SPEED = 8;
 
 export const startGame = (state) => {
     state.gameStarted = true;
@@ -10,7 +10,7 @@ export const startGame = (state) => {
     state.rightPlayerScore = 0;
     state.gameLoopId = requestAnimationFrame(() => gameLoop(state));
     if (state.singlePlayer) {
-        setInterval(() => aiMove(state), 1000);
+        state.aiInterval = setInterval(() => aiMove(state), 1000);
     }
 };
 
@@ -20,6 +20,10 @@ export const stopGame = (win, state) => {
     state.leftPlayerScore = 0;
     state.rightPlayerScore = 0;
     state.winner = win;
+
+    if (state.aiInterval) {
+        clearInterval(state.aiInterval);
+    }
     drawMenu(state);
 };
 
@@ -33,13 +37,6 @@ export const update = (state) => {
         leftPlayer.moveDown();
     }
     if (!singlePlayer) {
-        if (keys["ArrowUp"] && rightPlayer.y > 0) {
-            rightPlayer.moveUp();
-        }
-        if (keys["ArrowDown"] && rightPlayer.y + rightPlayer.height < canvas.height) {
-            rightPlayer.moveDown();
-        }
-    } else {
         if (keys["ArrowUp"] && rightPlayer.y > 0) {
             rightPlayer.moveUp();
         }
@@ -113,6 +110,7 @@ export const resetBall = (towardsLeft, state) => {
 };
 
 export const gameLoop = (state) => {
+    
     if (state.gameStarted) {
         update(state);
         draw(state);
