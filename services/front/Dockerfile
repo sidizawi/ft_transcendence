@@ -1,8 +1,8 @@
-FROM python:3.12-slim
+FROM node:22-alpine
 
-VOLUME /app
 WORKDIR /app
+COPY package.json ./
+RUN npm install
 COPY . .
-EXPOSE 8000
 
-ENTRYPOINT [ "python3", "-m", "http.server", "8000" ]
+ENTRYPOINT ["npm", "run", "dev"]
