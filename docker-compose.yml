@@ -16,7 +16,7 @@ services:
       - auth-service
       # - game-service
     volumes:
-      - ./front:/app/front
+      - ./services/front:/app/front
       - ./services/api-gateway:/app
       # - ./database:/app/data/
 
@@ -25,7 +25,7 @@ services:
     ports:
       - "3001:3001"
     volumes:
-      - ./front:/app/front
+      - ./services/front:/app/front
       - database:/app/data
       - ./services/auth-service:/app
     environment:
@@ -35,6 +35,15 @@ services:
       DB_PATH: /app/data/management.db
     depends_on:
       - db
+  front:
+    build: ./services/front
+    ports:
+      - 8000:8000
+    depends_on:
+      - api-gateway
+      - auth-service
+    volumes:
+      - ./services/front:/app
 
   # game-service:
   #   build: ./services/game-service
