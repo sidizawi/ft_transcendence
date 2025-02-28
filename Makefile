@@ -1,19 +1,3 @@
-<<<<<<< HEAD
-all: run
-
-DATABASE_DIR := $(shell pwd)/Database
-
-build:
-	docker stop $(shell docker ps -aq)
-	mkdir -p "$(DATABASE_DIR)"
-	docker build -t fastify .
-
-run: build
-	docker run -p 3001:3000 -v "$(DATABASE_DIR):/app/data" fastify
-
-prune:
-	docker system prune -a
-=======
 # Nom du projet
 PROJECT_NAME = ft_transcendence
 
@@ -72,4 +56,3 @@ run-auth:
 
 run-game:
 	cd services/game-service && npm start
->>>>>>> 582c5e87403b04fadf7e5adecfc5c4e7a286c709
