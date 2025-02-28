@@ -63,5 +63,49 @@ function handleSignInForm() {
             console.error(err);
         }
     });
-    
-}   
+}
+
+function getSignInPage() {
+    return `
+        <form id="signIn-form">
+            <label for="user-identifier">Username or Email</label>
+            <input type="text" id="user-identifier" required>
+            <span class="error-message" id="identifier-error"></span>
+            
+            <label for="password">Password</label>
+            <div class="password-container">
+                <input type="password" id="password" required>
+                <span id="toggle-password" class="eye-icon">👁️</span>
+            </div>
+            <span class="error-message" id="password-error"></span>
+            <div id="sign-page">
+            <button type="submit">Sign In</button>
+            </div>
+        </form>
+
+        <p id="sign-message" class="hidden"></p>
+
+        <!-- External authentication link -->
+        <p><a href="" id="auth-42" target="_blank">Login with 42</a></p>
+
+        <p class="switch">New here? <a href="signUp" data-page="signUp">Create an account</a></p>
+    `;
+}
+
+function setupSingInPage() {
+
+    const contentDiv = document.getElementById("content");
+    const pageTitle = document.getElementById("page-title");
+
+    pageTitle.textContent = "Sign In";
+    contentDiv.innerHTML = getSignInPage();
+
+    handleSignInForm();
+    contentDiv.querySelectorAll("a[data-page]").forEach(link => {
+        link.addEventListener("click", (event) => {
+            event.preventDefault();
+            const page = event.target.getAttribute("data-page");
+            handleRoutes(page);
+        });
+    });
+}
