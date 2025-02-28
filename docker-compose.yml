@@ -1,0 +1,62 @@
+version: '3.8'
+
+services:
+  db:
+    build: ./services/db
+    ports:
+      - "2999:2999"
+    volumes:
+      - ./database:/data
+      
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      # - game-service
+    volumes:
+      - ./services/front:/app/front
+      - ./services/api-gateway:/app
+      # - ./database:/app/data/
+
+  auth-service:
+    build: ./services/auth-service
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./services/front:/app/front
+      - database:/app/data
+      - ./services/auth-service:/app
+    environment:
+      DB_HOST: db
+      DB_PORT: 2999
+      DB_NAME: management
+      DB_PATH: /app/data/management.db
+    depends_on:
+      - db
+  front:
+    build: ./services/front
+    ports:
+      - 8000:8000
+    depends_on:
+      - api-gateway
+      - auth-service
+    volumes:
+      - ./services/front:/app
+
+  # game-service:
+  #   build: ./services/game-service
+  #   ports:
+  #     - "3002:3002"
+  #     - "8080:8080"
+  #   # volumes:
+  #   #     - ./front/public:/app/front/public
+
+volumes:
+  database:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: './database'

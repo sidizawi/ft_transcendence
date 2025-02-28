@@ -1,0 +1,10 @@
+{
+	"name": "game-service",
+	"version": "1.0.0",
+	"type": "module",
+	"dependencies": {
+		"fastify": "^5.0.0",
+	  	"ws": "^8.15.0"
+	}
+  }
+  
