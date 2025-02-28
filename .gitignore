@@ -138,4 +138,8 @@ dist
 =======
 package-lock.json
 node_modules/
+<<<<<<< HEAD
 >>>>>>> 582c5e87403b04fadf7e5adecfc5c4e7a286c709
+=======
+database/
+>>>>>>> 36a2340518b654e3687853a54278e72159f42bb2
