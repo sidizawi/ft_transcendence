@@ -20,18 +20,19 @@ function handleSignInForm() {
     signInForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const username = document.getElementById("username").value;
-        const email = document.getElementById("email").value;
+        // const username = document.getElementById("username").value;
+        // const email = document.getElementById("email").value;
         const password = document.getElementById("password").value;
-        
+        const email = document.getElementById("user-identifier").value;
+
         try {
             // Envoie de la requête POST vers le backend
-            const response = await fetch("http://localhost:3001/auth/register", {
+            const response = await fetch("http://localhost:3000/auth/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ username, email, password })
+                body: JSON.stringify({ email, password })
             });
             
             // Récupération et affichage de la réponse
@@ -43,7 +44,9 @@ function handleSignInForm() {
                 signInMessage.classList.remove("hidden");
 
                 //ajout de la redirection ici
-                
+                const token = data.token;
+                localStorage.setItem("token", token);
+                navigateTo(PROFILEPATH);
                 
             } else {
                 if (data.error.includes("username")) {

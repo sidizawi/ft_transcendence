@@ -1,26 +1,28 @@
 function handleRoutes(page, isPopState = false) {
+    // console.log();
+
     if (!page) {
         page = location.pathname.replace("/", "");
         if (page === "") {
-            page = "home";
+            page = HOMEPATH;
         }
     }
     if (!isPopState) {
         history.pushState({ page }, "", page);
     }
-    if (page == "signUp") {
+    if (page == SIGNUPPATH) {
         setupSingUpPage();
-    } else if (page == "signIn") {
+    } else if (page == SIGNINPATH) {
         setupSingInPage();
-    } else if (page == "profile") {
+    } else if (page == PROFILEPATH) {
         setupProfilePage();
-    } else if (page == "pong") {
+    } else if (page == PONGPATH) {
         setPongPage();
-    } else if (page == "tournament") {
+    } else if (page == TOURNAMENTPATH) {
         setTournamentPage();
-    } else if (page == "power4") {
+    } else if (page == POWER4PATH) {
         setPower4Page();
-    } else if (page == "home") {
+    } else if (page == HOMEPATH) {
         setHomePage();
     } else {
         setErrorPage();
@@ -45,5 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
             handleRoutes(null, true);
         }
     });
-    window.loadPage = handleRoutes(null);
+    // window.loadPage = handleRoutes(null);
+    // console.log(location)
+    // location.reload = handleRoutes(null);
+    window.handleRoutes = handleRoutes;
 });

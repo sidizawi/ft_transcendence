@@ -30,41 +30,42 @@ function handleSignUpForm() {
         console.log("✅ email", email);
         console.log("✅ password", password)
 
-        // try {
-        //     // Envoie de la requête POST vers le backend
-        //     const response = await fetch("http://localhost:3001/auth/signUp", {
-        //         method: "POST",
-        //         headers: {
-        //             "Content-Type": "application/json"
-        //         },
-        //         body: JSON.stringify({ username, email, password })
-        //     });
+        try {
+            // Envoie de la requête POST vers le backend
+            const response = await fetch("http://localhost:3001/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, email, password })
+            });
             
-        //     // Récupération et affichage de la réponse
-        //     const data = await response.json();
-        //     if (response.ok) {
-        //     // signMessage.textContent = `✅ ${data.message}`;
-        //         signMessage.textContent = "✅ Sign Up successful! Redirecting...";
-        //         signMessage.className = "success";
-        //         signMessage.classList.remove("hidden");                
-                
-        //     } else {
-        //         if (data.error.includes("username")) {
-        //             signMessage.textContent = "❌ This username is already taken. Please choose another one.";
-        //         } else if (data.error.includes("email")) {
-        //             signMessage.textContent = "❌ This email is already taken. Please choose another one.";
-        //         } else if (data.error.includes("password")) {
-        //             signMessage.textContent = "❌ Password must contain at least 8 characters.";
-        //         } else {
-        //             signMessage.textContent = `❌ ${data.error}`;
-        //         }
-        //         signMessage.className = "error";
-        //         signMessage.classList.remove("hidden");
-        //     }
-        // } catch (err) {
-        //     signMessage.textContent = `<p style="color:red;">Erreur lors de l'envoi de la requête.</p>`;
-        //     console.error(err);
-        // }
+            // Récupération et affichage de la réponse
+            const data = await response.json();
+            if (response.ok) {
+                // signMessage.textContent = `✅ ${data.message}`;
+                signMessage.textContent = "✅ Sign Up successful! Redirecting...";
+                signMessage.className = "success";
+                signMessage.classList.remove("hidden");                
+                // todo: redirect to profile
+
+            } else {
+                if (data.error.includes("username")) {
+                    signMessage.textContent = "❌ This username is already taken. Please choose another one.";
+                } else if (data.error.includes("email")) {
+                    signMessage.textContent = "❌ This email is already taken. Please choose another one.";
+                } else if (data.error.includes("password")) {
+                    signMessage.textContent = "❌ Password must contain at least 8 characters.";
+                } else {
+                    signMessage.textContent = `❌ ${data.error}`;
+                }
+                signMessage.className = "error";
+                signMessage.classList.remove("hidden");
+            }
+        } catch (err) {
+            signMessage.textContent = `<p style="color:red;">Erreur lors de l'envoi de la requête.</p>`;
+            console.error(err);
+        }
     });
 } // inclure document pour toggle
 
