@@ -7,6 +7,8 @@ services:
       - "2999:2999"
     volumes:
       - ./database:/data
+    env_file:
+      - .env
       
   api-gateway:
     build: ./services/api-gateway
@@ -19,6 +21,8 @@ services:
       - ./services/front:/app/front
       - ./services/api-gateway:/app
       # - ./database:/app/data/
+    env_file:
+      - .env
 
   auth-service:
     build: ./services/auth-service
@@ -28,11 +32,8 @@ services:
       - ./services/front:/app/front
       - database:/app/data
       - ./services/auth-service:/app
-    environment:
-      DB_HOST: db
-      DB_PORT: 2999
-      DB_NAME: management
-      DB_PATH: /app/data/management.db
+    env_file:
+      - .env
     depends_on:
       - db
   front:

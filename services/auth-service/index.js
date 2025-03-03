@@ -1,4 +1,6 @@
 // Inscription, login,...
+import dotenv from 'dotenv';
+dotenv.config();
 
 import Fastify    from 'fastify';
 import fastifyCors from '@fastify/cors';
@@ -7,11 +9,14 @@ import fs from 'fs/promises';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import db         from './db.js';
+import fastifyJwt from '@fastify/jwt';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const fastify = Fastify({ logger: true });
+
+await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET })
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
@@ -37,7 +42,7 @@ fastify.get('/register', async (request, reply) => {
     }
 });
 
-fastify.post('/auth/register', async (request, reply) => {
+fastify.post('/register', async (request, reply) => {
     const { username, email, password } = request.body;
     if (!username || !email || !password) {
         reply.code(400);
@@ -111,12 +116,12 @@ fastify.post('/login', async (request, reply) => {
         email: user.email
     });
 
-    reply.setCookie('token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'strict',
-        path: '/'
-    });
+    // reply.setCookie('token', token, {
+    //     httpOnly: true,
+    //     secure: process.env.NODE_ENV === 'production',
+    //     sameSite: 'strict',
+    //     path: '/'
+    // });
 
     reply.code(200);
     return { message: 'User logged in successfully', token };
@@ -124,9 +129,11 @@ fastify.post('/login', async (request, reply) => {
 
 //Logout
 fastify.get('/logout', async (request, reply) => {
-    reply.clearCookie('token')
-    reply.redirect('/')
-    reply.redirect('/home')
+    // reply.clearCookie('token') //not a function to check
+    // reply.redirect('/')
+    // reply.redirect('/home')
+    reply.code(200);
+    return { message: 'User successfully logged out' }; //clear le cookie ?
 });
 
 fastify.listen({ port: 3001, host: '0.0.0.0' }, (err, address) => {

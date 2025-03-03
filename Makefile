@@ -6,7 +6,7 @@ DOCKER_COMPOSE = docker compose
 DOCKER = docker
 
 # Services définis dans docker-compose.yml
-SERVICES = api-gateway auth-service game-service front
+SERVICES = api-gateway auth-service #game-service front
 
 # Chemins des dossiers des services
 SERVICE_DIRS = $(addprefix services/,$(SERVICES))
