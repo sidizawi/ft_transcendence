@@ -1,12 +1,19 @@
 function updateProfilePage() {
 
     const logoutContainer = document.getElementById("logout-container");
-    if (email !== "Not logged in") {
+    if (isLoggedIn()) {
         logoutContainer.innerHTML = '<button id="logout-btn">Logout</button>';
         //supprimer toutes les données de l'utilisateur
+        //clearToken();
+        //navigateTo(HOMEPATH);
+        logoutContainer.addEventListener("click", () => {
+            clearToken();
+            navigateTo(HOMEPATH);
+        });
     } else {
         logoutContainer.innerHTML = "";
     }
+
 }
 
 function getProfilePage() {
@@ -95,9 +102,16 @@ function getProfilePage() {
 // document.addEventListener("DOMContentLoaded", handleNavigation);
 
 function setupProfilePage() {
+    if (!isLoggedIn()) {
+        navigateTo(HOMEPATH);
+        return;
+    }
+
     const contentDiv = document.getElementById("content");
     const pageTitle = document.getElementById("page-title");
 
     pageTitle.textContent = "Profile";
     contentDiv.innerHTML = getProfilePage();
+    updateProfilePage();
+    console.log("Profile page loaded", isLoggedIn());
 }

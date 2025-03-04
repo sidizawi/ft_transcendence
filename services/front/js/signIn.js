@@ -46,8 +46,11 @@ function handleSignInForm() {
                 //ajout de la redirection ici
                 const token = data.token;
                 localStorage.setItem("token", token);
-                navigateTo(PROFILEPATH);
-                
+                console.log("sigin token = ", token);
+                setTimeout(() => {
+                    navigateTo(PROFILEPATH);
+                }, 2000);
+
             } else {
                 if (data.error.includes("username")) {
                     signInMessage.textContent = "❌ This username is incorrect. Please try again.";

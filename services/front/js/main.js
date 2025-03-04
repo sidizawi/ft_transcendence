@@ -47,8 +47,8 @@ document.addEventListener("DOMContentLoaded", () => {
             handleRoutes(null, true);
         }
     });
-    // window.loadPage = handleRoutes(null);
     // console.log(location)
     // location.reload = handleRoutes(null);
     window.handleRoutes = handleRoutes;
+    window.loadPage = handleRoutes(null);
 });
