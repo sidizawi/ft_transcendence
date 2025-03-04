@@ -19,7 +19,7 @@ build:
 
 # Lancer tous les services
 up:
-	$(DOCKER_COMPOSE) up -d
+	$(DOCKER_COMPOSE) up --watch
 
 # Arrêter tous les services
 down:

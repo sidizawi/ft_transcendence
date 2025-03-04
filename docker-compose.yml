@@ -1,4 +1,4 @@
-version: '3.8'
+#version: '3.8'
 
 services:
   db:
@@ -17,8 +17,14 @@ services:
       # - game-service
     volumes:
       - ./services/front:/app/front
-      - ./services/api-gateway:/app
       # - ./database:/app/data/
+    develop:
+      watch:
+        - action: sync
+          path: ./services/api-gateway
+          target: /app
+          ignore:
+            - node_modules/
 
   auth-service:
     build: ./services/auth-service
@@ -27,7 +33,13 @@ services:
     volumes:
       - ./services/front:/app/front
       - database:/app/data
-      - ./services/auth-service:/app
+    develop:
+      watch:
+        - action: sync
+          path: ./services/auth-service
+          target: /app
+          ignore:
+            - node_modules/
     environment:
       DB_HOST: db
       DB_PORT: 2999
@@ -42,8 +54,13 @@ services:
     depends_on:
       - api-gateway
       - auth-service
-    volumes:
-      - ./services/front:/app
+    develop:
+      watch:
+        - action: sync
+          path: ./services/front
+          target: /app
+          ignore:
+            - node_modules/
 
   # game-service:
   #   build: ./services/game-service
@@ -55,8 +72,8 @@ services:
 
 volumes:
   database:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: './database'
+    #driver: local
+    #driver_opts:
+    #  type: none
+    #  o: bind
+    #  device: './database'
