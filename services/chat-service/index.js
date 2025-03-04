@@ -5,7 +5,11 @@ dotenv.config();
 import Fastify    from 'fastify';
 import db         from './db.js';
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: false });
+fastify.addHook('onResponse', (request, reply, done) => {
+    console.log(`${request.method} ${request.url} ${reply.statusCode}${reply.message}`);
+    done();
+});
 
 fastify.decorate('db', db);
 

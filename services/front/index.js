@@ -6,7 +6,11 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: false });
+fastify.addHook('onResponse', (request, reply, done) => {
+	console.log(`${request.method} ${request.url} ${reply.statusCode}${reply.message}`);
+	done();
+});
 
 fastify.get('*', async (request, reply) => {
 	let url = __dirname + request.url

@@ -15,7 +15,11 @@ import fastifyCookie from '@fastify/cookie';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: false });
+fastify.addHook('onResponse', (request, reply, done) => {
+    console.log(`${request.method} ${request.url} ${reply.statusCode}`);
+    done();
+}); 
 
 await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET })
 await fastify.register(fastifyCookie, {});

@@ -8,7 +8,12 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const fastify = Fastify({ logger: true });
+const fastify = Fastify({ logger: false });
+fastify.addHook('onResponse', (request, reply, done) => {
+    let rep = JSON.stringify(reply);
+    console.log(`${request.method} ${request.url} ${reply.statusCode} ${rep}`);
+    done();
+});
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
