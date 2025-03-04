@@ -4,11 +4,11 @@ import { handleKeyDown, handleKeyUp, handleMouseMove, handleClick } from "./even
 import { drawMenu } from "./draw.js";
 
 const BALL_SIZE = 10;
-const BALL_SPEED_X = 5;
-const BALL_SPEED_Y = 5;
+const BALL_SPEED_X = 4;
+const BALL_SPEED_Y = 4;
 const PADDLE_WIDTH = 10;
 const PADDLE_HEIGHT = 100;
-const PADDLE_SPEED = 3;
+const PADDLE_SPEED = 5;
 
 const state = {
     canvas: null,
@@ -25,8 +25,11 @@ const state = {
     winner: null,
     hoverSinglePlayer: false,
     hoverTwoPlayers: false,
+    hoverPlayAgain: false,
+    hoverMainMenu: false,
     gameLoopId: null,
     aiInterval: null,
+    aiKeys: {}
 };
 
 document.addEventListener("DOMContentLoaded", () => {

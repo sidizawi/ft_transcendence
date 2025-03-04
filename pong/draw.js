@@ -18,8 +18,22 @@ export const TWO_PLAYER_BUTTON = {
     textY: 20
 };
 
+export const PLAY_AGAIN_BUTTON = {
+    x: 0,
+    y: -20,
+    text: "Play Again",
+    textY: 20
+};
+
+export const MAIN_MENU_BUTTON = {
+    x: 0,
+    y: 70,
+    text: "Main Menu",
+    textY: 110
+};
+
 export const drawMenu = (state) => {
-    const { ctx, canvas, hoverSinglePlayer, hoverTwoPlayers, winner, gamePlayed } = state;
+    const { ctx, canvas, hoverSinglePlayer, hoverTwoPlayers, winner, gamePlayed, hoverPlayAgain, hoverMainMenu } = state;
     
     // Calculate the center and button positions
     const centerX = canvas.width / 2;
@@ -31,9 +45,10 @@ export const drawMenu = (state) => {
     
     const twoPlayerX = centerX + TWO_PLAYER_BUTTON.x - BUTTON_WIDTH/2;
     const twoPlayerY = centerY + TWO_PLAYER_BUTTON.y;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     
     if (!gamePlayed) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = "30px Arial";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
@@ -61,13 +76,35 @@ export const drawMenu = (state) => {
     }
     else
     {
-        cancelAnimationFrame(state.gameLoopId);
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.font = "30px Arial";
         ctx.fillStyle = "white";
         ctx.textAlign = "center";
-        ctx.fillText(`${winner} Wins!`, canvas.width / 2, canvas.height / 2);
-        ctx.fillText("Press any key to restart", canvas.width / 2, canvas.height / 2 + 50);
+        ctx.fillText(`${winner} Wins!`, canvas.width / 2, 40);
+
+        const playAgainX = centerX + PLAY_AGAIN_BUTTON.x - BUTTON_WIDTH/2;
+        const playAgainY = centerY + PLAY_AGAIN_BUTTON.y;
+        
+        if (hoverPlayAgain) {
+            ctx.fillStyle = "yellow";
+        } else {
+            ctx.fillStyle = "white";
+        }
+        ctx.fillText(PLAY_AGAIN_BUTTON.text, centerX, centerY + PLAY_AGAIN_BUTTON.textY);
+        ctx.strokeStyle = "white";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(playAgainX, playAgainY, BUTTON_WIDTH, BUTTON_HEIGHT);
+        
+        // Main Menu button
+        const mainMenuX = centerX + MAIN_MENU_BUTTON.x - BUTTON_WIDTH/2;
+        const mainMenuY = centerY + MAIN_MENU_BUTTON.y;
+        
+        if (hoverMainMenu) {
+            ctx.fillStyle = "yellow";
+        } else {
+            ctx.fillStyle = "white";
+        }
+        ctx.fillText(MAIN_MENU_BUTTON.text, centerX, centerY + MAIN_MENU_BUTTON.textY);
+        ctx.strokeRect(mainMenuX, mainMenuY, BUTTON_WIDTH, BUTTON_HEIGHT);
     }
 };
 

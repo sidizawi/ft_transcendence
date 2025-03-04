@@ -2,7 +2,7 @@ import { aiMove } from "./ai.js";
 import { draw, drawMenu } from "./draw.js";
 
 const WINNING_SCORE = 2;
-const BALL_SPEED = 8;
+const BALL_SPEED = 4;
 
 export const startGame = (state) => {
     state.gameStarted = true;
@@ -20,15 +20,16 @@ export const stopGame = (win, state) => {
     state.leftPlayerScore = 0;
     state.rightPlayerScore = 0;
     state.winner = win;
-
-    if (state.aiInterval) {
-        clearInterval(state.aiInterval);
-    }
-    drawMenu(state);
+    resetBall(Math.random() > 0.5, state);
+    requestAnimationFrame(() => {
+        const { ctx, canvas } = state;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawMenu(state);
+    });
 };
 
 export const update = (state) => {
-    const { keys, leftPlayer, rightPlayer, ball, canvas, singlePlayer } = state;
+    const { keys, aiKeys, leftPlayer, rightPlayer, ball, canvas, singlePlayer } = state;
 
     if (keys["w"] && leftPlayer.y > 0) {
         leftPlayer.moveUp();
@@ -44,6 +45,14 @@ export const update = (state) => {
             rightPlayer.moveDown();
         }
     }
+    else {
+        if (aiKeys.up && rightPlayer.y > 0) {
+            rightPlayer.moveUp();
+        }
+        if (aiKeys.down && rightPlayer.y + rightPlayer.height < canvas.height) {
+            rightPlayer.moveDown();
+        }
+    }
 
     ball.move();
 
@@ -54,7 +63,7 @@ export const update = (state) => {
     if (ball.x - ball.size <= leftPlayer.x + leftPlayer.width) {
         if (ball.y >= leftPlayer.y && ball.y <= leftPlayer.y + leftPlayer.height) {
             let hitPos = (ball.y - leftPlayer.y) / leftPlayer.height;
-            ball.speedY = (hitPos - 0.5) * 8;
+            ball.speedY = (hitPos - 0.5) + BALL_SPEED + 2;
             let totalSpeed = Math.sqrt(ball.speedX * ball.speedX + ball.speedY * ball.speedY);
             ball.speedX = Math.sqrt(totalSpeed * totalSpeed - ball.speedY * ball.speedY);
             ball.speedX = Math.abs(ball.speedX);
@@ -72,7 +81,7 @@ export const update = (state) => {
     if (ball.x + ball.size >= rightPlayer.x) {
         if (ball.y >= rightPlayer.y && ball.y <= rightPlayer.y + rightPlayer.height) {
             let hitPos = (ball.y - rightPlayer.y) / rightPlayer.height;
-            ball.speedY = (hitPos - 0.5) * 8;
+            ball.speedY = (hitPos - 0.5) + BALL_SPEED + 2;
             let totalSpeed = Math.sqrt(ball.speedX * ball.speedX + ball.speedY * ball.speedY);
             ball.speedX = Math.sqrt(totalSpeed * totalSpeed - ball.speedY * ball.speedY);
             ball.speedX = -Math.abs(ball.speedX);
