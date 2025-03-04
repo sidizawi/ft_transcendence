@@ -6,7 +6,7 @@ services:
     ports:
       - "2999:2999"
     volumes:
-      - ./database:/data
+      - ./database:/app/data
     env_file:
       - .env
       
@@ -73,8 +73,8 @@ services:
 
 volumes:
   database:
-    #driver: local
-    #driver_opts:
-    #  type: none
-    #  o: bind
-    #  device: './database'
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: './database'

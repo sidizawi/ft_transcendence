@@ -10,24 +10,24 @@ const fastify = Fastify({ logger: true });
 
 fastify.get('*', async (request, reply) => {
 	let url = __dirname + request.url
+	console.log("url =", request.url, 'path', url);
 	const type = url.split('.')[[url.split('.').length - 1]];
-	if (type == "html") {
-		url =  __dirname + "/public" + request.url;
-		console.log(url);
-	}
 	try {
-		const file = await fs.readFile(url, 'utf-8');
+		if (type == 'html') {
+			throw new Error("only index.html file");
+		}
+		const file = await fs.readFile(url);
 		if (type == 'css') {
-			reply.type('text/css').send(file);
-		} else if (type == 'html') {
-			reply.type('text/file').send(file);
+			reply.type('text/css').send(file.toString('utf-8'));
 		} else if (type == 'js') {
-			reply.type('text/javascript').send(file);
+			reply.type('text/javascript').send(file.toString('utf-8'));
+		} else if (type == 'ico') {
+			reply.type('image/x-icon').send(file);
 		} else {
 			reply.type('image/' + type).send(file);
 		}
 	} catch (error) {
-		const html = await fs.readFile(path.join(__dirname, "public", "home.html"), 'utf-8');
+		const html = await fs.readFile(path.join(__dirname, "index.html"), 'utf-8');
 		reply.type('text/html').send(html);
 	}
 });

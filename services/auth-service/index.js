@@ -72,6 +72,7 @@ fastify.post('/register', async (request, reply) => {
     const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData));
     const userId = result.lastInsertRowid;
 
+    // todo: create a token and send it
     reply.code(201);
     return { message: 'User registered successfully' };
 });
@@ -100,6 +101,7 @@ fastify.post('/login', async (request, reply) => {
         return { error: 'Email et mot de passe requis' };
     }
 
+    // todo: check with the username
     const user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
     if (!user) {
         reply.code(401);
