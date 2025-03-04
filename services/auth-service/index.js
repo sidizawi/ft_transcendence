@@ -10,6 +10,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import db         from './db.js';
 import fastifyJwt from '@fastify/jwt';
+import fastifyCookie from '@fastify/cookie';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -17,6 +18,7 @@ const __dirname = path.dirname(__filename);
 const fastify = Fastify({ logger: true });
 
 await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET })
+await fastify.register(fastifyCookie, {});
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
@@ -116,12 +118,12 @@ fastify.post('/login', async (request, reply) => {
         email: user.email
     });
 
-    // reply.setCookie('token', token, {
-    //     httpOnly: true,
-    //     secure: process.env.NODE_ENV === 'production',
-    //     sameSite: 'strict',
-    //     path: '/'
-    // });
+    reply.setCookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/'
+    });
 
     reply.code(200);
     return { message: 'User logged in successfully', token };
@@ -129,7 +131,7 @@ fastify.post('/login', async (request, reply) => {
 
 //Logout
 fastify.get('/logout', async (request, reply) => {
-    // reply.clearCookie('token') //not a function to check
+    reply.clearCookie('token'); //not a function to check
     // reply.redirect('/')
     // reply.redirect('/home')
     reply.code(200);
