@@ -1,0 +1,158 @@
+.row-container {
+    display: flex;
+    margin-top: 3vh;
+}
+
+.top-row {
+    flex-direction: row;
+    /* height: 98vh; */
+}
+
+.column-container {
+    display: flex;
+    /* flex-wrap: wrap; */
+}
+
+.left-profile-page {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    width: 64vw;
+}
+
+.pic-area {
+    position: absolute;
+    height: 120px;
+    display: flex;
+    justify-content: left;
+    align-items: left;
+    border-radius: 50%;
+}
+
+.profile-pic {
+    width: 120px; /* Taille du cercle */
+    height: 120px; /* Taille du cercle */
+    border-radius: 50%;
+    overflow: hidden;
+    border: 1px solid var(--toggle-border);
+}
+
+.profile-pic img {
+    width: 100%; /* Adapte l'image à la div */
+    height: 100%; /* Adapte l'image à la div */
+    object-fit: cover; /* Coupe l'image pour remplir le cercle */
+}
+
+.profile-pic-edit {
+    position: absolute;
+    bottom: 0;
+    left: 100px;
+}
+
+.user-info {
+    text-align: left;
+    padding-left: 140px;
+    padding-top: 25px;
+    color: rgb(173, 33, 178);
+}
+
+#uploadPic {
+    display: none; /* Cache l'input de base */
+}
+
+
+/*Dashboard*/
+.dashboard-container {
+    display: flex;
+    margin-top: 60px;
+}
+
+.dashboard {
+    width: 100%;
+}
+
+.dashboard-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--bg-color);
+    color: var(--text-color);
+}
+
+.dashboard-table th, .dashboard-table td {
+    border: 1px solid var(--toggle-border);
+    padding: 10px;
+    text-align: center;
+}
+
+.dashboard-table th {
+    background-color: var(--toggle-bg);
+    color: var(--dark-text-color);
+}
+
+.dark-mode .dashboard-table th {
+    background-color: var(--toggle-bg);
+    color: var(--light-text-color);
+}
+
+#tournament button {
+    background: #397636;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+}
+
+/*invisible column*/
+.buffer-profile-page {
+    width: 4vw;
+}
+
+
+.right-profile-page {
+    display: flex;
+    flex-direction: column;
+    width: 32vw;
+    justify-content: right;
+}
+
+h3 {
+    text-align: center;
+}
+
+.friends-section {
+    padding: 5px;
+    text-align: left; /*pa autant de decalage a gauche et pas a droite?*/
+    background: var(--bg-color);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+#friend button {
+    background: rgb(204, 142, 36);
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+}
+
+.dark-mode .friends-section {
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+}
+
+.bottom-row {
+    flex-direction: row;
+    /* height: 2vh; */
+}
+
+.logout-container {
+    background: red;
+}

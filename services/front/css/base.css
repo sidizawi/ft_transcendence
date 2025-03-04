@@ -1,0 +1,36 @@
+/* General Page Styling */
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+}
+
+/* Content must appear below the header */
+#content {
+    position: relative;
+    /* top: 5vw; Push it below the header */
+    padding: 25px;
+    padding-top: 50px;
+    margin-top: 20px;
+    margin-bottom: 25px;
+    min-height: calc(100vh - 120px); /* Ensures it doesn’t go behind the footer */
+    overflow-y: auto; /* Enables scrolling if needed */
+
+}
+
+/* Utility Classes */
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}
+
+/*
+padding = distance entre l'element et sa bordure
+margin = distance entre l'element et les autres elements
+*/

@@ -1,0 +1,51 @@
+import Fastify from 'fastify';
+import fastifyHttpProxy from '@fastify/http-proxy';
+import fastifyCors from '@fastify/cors';
+import fs from 'fs/promises';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const fastify = Fastify({ logger: true });
+
+// Activer CORS pour permettre les requêtes du frontend
+fastify.register(fastifyCors, {
+  origin: "*", // Autorise toutes les origines (tu peux restreindre si besoin)
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+});
+
+// Proxy vers auth-service
+fastify.register(fastifyHttpProxy, {
+  upstream: 'http://auth-service:3001',
+  prefix: '/auth'
+});
+
+// Proxy vers game-service
+fastify.register(fastifyHttpProxy, {
+  upstream: 'http://game-service:3002',
+  prefix: '/game'
+});
+
+fastify.get('/', async (request, reply) => {
+  reply.redirect('/home');
+});
+
+fastify.get('/home', async (request, reply) => {
+  try {
+      const html = await fs.readFile(path.join(__dirname, 'front', 'public', 'home.html'), 'utf8');
+      reply.type('text/html').send(html);
+  } catch (error) {
+      reply.code(500).send('Internal error test');
+  }
+});
+
+fastify.listen({ port: 3000, host: '0.0.0.0' }, (err, address) => {
+  if (err) {
+    fastify.log.error(err);
+    process.exit(1);
+  }
+  console.log(`🚀 API Gateway running at ${address}`);
+});
