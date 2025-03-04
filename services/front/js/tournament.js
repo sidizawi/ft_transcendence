@@ -1,5 +1,9 @@
 function getTournamentPage() {
-	return `<p>Welcome to your Tournament!</p>`;
+	return `
+	    <div id="content">
+		<p>Welcome to your Tournament!</p>
+		</div>
+	`;
 }
 
 function setTournamentPage() {

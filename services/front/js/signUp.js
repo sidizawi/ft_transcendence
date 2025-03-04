@@ -43,11 +43,9 @@ function handleSignUpForm() {
             // Récupération et affichage de la réponse
             const data = await response.json();
             if (response.ok) {
-                // signMessage.textContent = `✅ ${data.message}`;
                 signMessage.textContent = "✅ Sign Up successful! Redirecting...";
                 signMessage.className = "success";
-                signMessage.classList.remove("hidden");                
-                // todo: redirect to profile
+                signMessage.classList.remove("hidden");
                 navigateTo(SIGNINPATH);
 
             } else {
@@ -68,38 +66,40 @@ function handleSignUpForm() {
             console.error(err);
         }
     });
-} // inclure document pour toggle
+}
 
 function getSignUpPage() {
     return `
+        <div id="content">
         <p class="switch">Already have an account? -> <a href="signIn" data-page="signIn">Sign In</a></p>
-
+        
         <form id="signUp-form">
-            <label for="username">Username:</label>
-            <input type="text" id="username" >
-            <span class="error-message" id="username-error"></span>
+        <label for="username">Username:</label>
+        <input type="text" id="username" >
+        <span class="error-message" id="username-error"></span>
 
-            <label for="email">Email:</label>
+        <label for="email">Email:</label>
             <input type="email" id="email" >
             <span class="error-message" id="email-error"></span>
-
+            
             <label for="password">Password:</label>
             <div class="password-container">
                 <input type="password" id="password" >
                 <span id="toggle-password" class="eye-icon">👁️</span>
-            </div>
-            <span class="error-message" id="password-error"></span>
-
-            <div id="sign-page">
-            <button type="submit">Sign Up</button>
-            </div>
-        </form>
-
+                </div>
+                <span class="error-message" id="password-error"></span>
+                
+                <div id="sign-page">
+                <button type="submit">Sign Up</button>
+                </div>
+                </form>
+                
         <p id="sign-message" class="hidden"></p>
-
+        
         <!-- External authentication link -->
         <!-- <p><a href="https://login.42.fr/oauth/authorize" id="auth-42" target="_blank">Login with 42</a></p> -->
         <p><a href="" id="auth-42" target="_blank">Login with 42</a></p>
+        </div>
     `
 }
 
@@ -108,10 +108,8 @@ function setupSingUpPage() {
 
     const contentDiv = document.getElementById("content");
     const pageTitle = document.getElementById("page-title");
-    // const pageSubtitle = document.getElementById("page-subtitle");
 
     pageTitle.textContent = "Sign Up";
-    // pageSubtitle.textContent = "Create your account";
     contentDiv.innerHTML = getSignUpPage();
 
     handleSignUpForm();

@@ -4,7 +4,9 @@
 }
 
 .top-row {
+    display: flex;
     flex-direction: row;
+    align-items: flex-start;
     /* height: 98vh; */
 }
 
@@ -149,10 +151,20 @@ h3 {
 }
 
 .bottom-row {
+    display: flex;
     flex-direction: row;
+    align-items: flex-end;
     /* height: 2vh; */
 }
 
-.logout-container {
+.logout-btn button {
     background: red;
+    color: rgb(255, 255, 255);
+    font-weight: bold;
+    border: none;
+    padding: 10px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
 }

@@ -38,18 +38,17 @@ function handleSignInForm() {
             // Récupération et affichage de la réponse
             const data = await response.json();
             if (response.ok) {
-            // signInMessage.textContent = `✅ ${data.message}`;
                 signInMessage.textContent = "✅ Sign In successful! Redirecting...";
                 signInMessage.className = "success";
                 signInMessage.classList.remove("hidden");
 
-                //ajout de la redirection ici
                 const token = data.token;
                 localStorage.setItem("token", token);
                 console.log("sigin token = ", token);
+                // updateAuthButton();
                 setTimeout(() => {
                     navigateTo(PROFILEPATH);
-                }, 2000);
+                }, 1500);
 
             } else {
                 if (data.error.includes("username")) {
@@ -73,28 +72,30 @@ function handleSignInForm() {
 
 function getSignInPage() {
     return `
+        <div id="content">
         <form id="signIn-form">
-            <label for="user-identifier">Username or Email</label>
-            <input type="text" id="user-identifier" required>
-            <span class="error-message" id="identifier-error"></span>
-            
-            <label for="password">Password</label>
-            <div class="password-container">
+        <label for="user-identifier">Username or Email</label>
+        <input type="text" id="user-identifier" required>
+        <span class="error-message" id="identifier-error"></span>
+        
+        <label for="password">Password</label>
+        <div class="password-container">
                 <input type="password" id="password" required>
                 <span id="toggle-password" class="eye-icon">👁️</span>
+                </div>
+                <span class="error-message" id="password-error"></span>
+                <div id="sign-page">
+                <button type="submit">Sign In</button>
             </div>
-            <span class="error-message" id="password-error"></span>
-            <div id="sign-page">
-            <button type="submit">Sign In</button>
-            </div>
-        </form>
-
-        <p id="sign-message" class="hidden"></p>
-
+            </form>
+            
+            <p id="sign-message" class="hidden"></p>
+            
         <!-- External authentication link -->
         <p><a href="" id="auth-42" target="_blank">Login with 42</a></p>
-
+        
         <p class="switch">New here? <a href="signUp" data-page="signUp">Create an account</a></p>
+        </div>
     `;
 }
 

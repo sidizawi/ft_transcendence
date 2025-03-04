@@ -1,7 +1,9 @@
 function getHomePage() {
 	return `
-		<p>Welcome to Home Page</p>
-        <p>This is the default home page content.</p>
+	    <div id="content">
+			<p>Welcome to Home Page</p>
+			<p>This is the default home page content.</p>
+		</div>
 	`;
 }
 

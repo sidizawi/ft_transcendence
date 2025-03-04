@@ -1,8 +1,31 @@
+function updateAuthButton() {
+    const authButton = document.querySelector('.menu-box a[data-page="signUp"]');
+
+    if (!authButton) return;
+
+    if (isLoggedIn()) {
+        authButton.textContent = "Log Out";
+        authButton.setAttribute("data-page", "logout");
+        authButton.setAttribute("href", "#");
+        authButton.addEventListener("click", (event) => {
+            event.preventDefault();
+            clearToken();
+            location.reload();
+        });
+    } else {
+        authButton.textContent = "Sign Up / Sign In";
+        authButton.setAttribute("data-page", "signUp");
+        authButton.setAttribute("href", "signUp");
+    }
+} //ne fonctionne qu'avec CTRL+R ++ doit rajouter le switch de couleur
+
 function initializeMenu() {
     const menuButton = document.getElementById("menu-button");
     const menuOverlay = document.getElementById("menu-overlay");
 
     if (!menuButton || !menuOverlay) return;
+
+    updateAuthButton();
 
     function toggleMenu() {
         menuOverlay.classList.toggle("active");
