@@ -14,7 +14,7 @@ fastify.addHook('onResponse', (request, reply, done) => {
 fastify.decorate('db', db);
 
 async function friendRoutes(fastify, options) {
-	//todo: check if user is blocked, if so cancel add request
+
 	fastify.post('/add', async (request, reply) => {
 		const { username } = request.body;
 		if (!username){
@@ -57,10 +57,12 @@ async function friendRoutes(fastify, options) {
 			}
 			else{
 				const friendlist = JSON.parse(friendRow.list);
-				// console.log(friendlist)
 				if (friendid in friendlist){
 					reply.code(400);
-					return { error: 'Username already in friendlist of friend'};
+					if (actualUserlist[friendid] == 'blocked')
+						return {error: 'Username is blocked'}
+					else
+						return { error: 'Username already in friendlist of actual user'};
 				}
 				friendlist[actualid] = 'receiving';
 	  
@@ -73,10 +75,12 @@ async function friendRoutes(fastify, options) {
 		}
 	
 		const actualUserlist = JSON.parse(actualUserRow.list);
-		// console.log(friendlist)
 		if (friendid in actualUserlist){
 			reply.code(400);
-			return { error: 'Username already in friendlist of actual user'};
+			if (actualUserlist[friendid] == 'blocked')
+				return {error: 'Username is blocked'}
+			else
+				return { error: 'Username already in friendlist of actual user'};
 		}
 	
 		actualUserlist[friendid] = 'sending';
@@ -93,7 +97,6 @@ async function friendRoutes(fastify, options) {
 		}
 		else{
 			const friendlist = JSON.parse(friendRow.list);
-			// console.log(friendlist)
 			if (friendid in friendlist){
 				reply.code(400);
 				return { error: 'Username already in friendlist of friend'};
