@@ -65,7 +65,7 @@ services:
             - node_modules/
 
   chat-service:
-    build: ./services/auth-service
+    build: ./services/chat-service
     ports:
       - "3003:3003"
     volumes:
@@ -74,7 +74,7 @@ services:
     develop:
       watch:
         - action: sync
-          path: ./services/auth-service
+          path: ./services/chat-service
           target: /app
           ignore:
             - node_modules/

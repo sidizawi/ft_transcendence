@@ -10,9 +10,9 @@ const __dirname = path.dirname(__filename);
 
 const fastify = Fastify({ logger: false });
 fastify.addHook('onResponse', (request, reply, done) => {
-    let rep = JSON.stringify(reply);
-    console.log(`${request.method} ${request.url} ${reply.statusCode} ${rep}`);
-    done();
+	let rep = JSON.stringify(reply);
+	console.log(`${request.method} ${request.url} ${reply.statusCode} ${rep}`);
+	done();
 });
 
 // Activer CORS pour permettre les requêtes du frontend
@@ -34,23 +34,15 @@ fastify.register(fastifyHttpProxy, {
   prefix: '/game'
 });
 
-fastify.get('/', async (request, reply) => {
-  reply.redirect('/home');
-});
-
-fastify.get('/home', async (request, reply) => {
-  try {
-      const html = await fs.readFile(path.join(__dirname, 'front', 'public', 'home.html'), 'utf8');
-      reply.type('text/html').send(html);
-  } catch (error) {
-      reply.code(500).send('Internal error test');
-  }
+fastify.register(fastifyHttpProxy, {
+	upstream: 'http://chat-service:3003',
+	prefix: '/chat'
 });
 
 fastify.listen({ port: 3000, host: '0.0.0.0' }, (err, address) => {
   if (err) {
-    fastify.log.error(err);
-    process.exit(1);
+	fastify.log.error(err);
+	process.exit(1);
   }
   console.log(`🚀 API Gateway running at ${address}`);
 });
