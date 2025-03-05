@@ -16,7 +16,6 @@ await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET })
 
 fastify.decorate('db', db);
 
-// todo: update friend list
 fastify.post('/add', async (request, reply) =>{
 	const { username } = request.body;
 	if (!username){
@@ -41,30 +40,72 @@ fastify.post('/add', async (request, reply) =>{
 
 	const friendid = userExists.id;
 
-	const friend = fastify.db.prepare("SELECT * FROM friend where id = ?").get(actualid);
-	
-	if (!friend) {
-		const newObj = { [friendid]: 'sending' };
+	const actualUserRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(actualid);
+	const friendRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(friendid);
+
+	if (!actualUserRow) {
+		const actualObj = { [friendid]: 'sending' };
 		db.prepare('INSERT INTO friend (id, list) VALUES (?, ?)').run(
 		  actualid,
-		  JSON.stringify(newObj)
+		  JSON.stringify(actualObj)
 		);
+		if (!friendRow){
+			const friendObj = { [actualid]: 'receiving' };
+			db.prepare('INSERT INTO friend (id, list) VALUES (?, ?)').run(
+				friendid,
+				JSON.stringify(friendObj)
+			);
+		}
+		else{
+			const friendlist = JSON.parse(friendRow.list);
+			// console.log(friendlist)
+			if (friendid in friendlist){
+				reply.code(400);
+				return { error: 'Username already in friendlist of friend'};
+			}
+			friendlist[actualid] = 'receiving';
+  
+  			db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
+				JSON.stringify(friendlist), 
+				friendid);
+		}
 		reply.code(201);
 		return { message: 'User successfully added'};
 	}
 
-	const friendlist = JSON.parse(friend.list);
-	console.log(friendlist)
-	if (friendid in friendlist){
+	const actualUserlist = JSON.parse(actualUserRow.list);
+	// console.log(friendlist)
+	if (friendid in actualUserlist){
 		reply.code(400);
-		return { error: 'Username already in friendlist'};
+		return { error: 'Username already in friendlist of actual user'};
 	}
 
-	friendlist[friendid] = 'sending';
-  
-  	const update = db.prepare("UPDATE friend SET list = ? WHERE id = ?");
-	update.run(JSON.stringify(friendlist), actualid);
-  
+	actualUserlist[friendid] = 'sending';
+	
+	db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
+		JSON.stringify(actualUserlist), 
+		actualid);
+	if (!friendRow){
+		const friendObj = { [actualid]: 'receiving' };
+		db.prepare('INSERT INTO friend (id, list) VALUES (?, ?)').run(
+			friendid,
+			JSON.stringify(friendObj)
+		);
+	}
+	else{
+		const friendlist = JSON.parse(friendRow.list);
+		// console.log(friendlist)
+		if (friendid in friendlist){
+			reply.code(400);
+			return { error: 'Username already in friendlist of friend'};
+		}
+		friendlist[actualid] = 'receiving';
+
+			db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
+			JSON.stringify(friendlist), 
+			friendid);
+	}
+		
 	reply.code(201);
 	return { message: 'User successfully added'};
 });
