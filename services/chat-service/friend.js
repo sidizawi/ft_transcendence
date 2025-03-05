@@ -264,6 +264,24 @@ async function friendRoutes(fastify, options) {
 		return { error: 'Friend request successfully blocked'};
 	});
   
+	fastify.get('/list', async (request, reply) => {
+		await request.jwtVerify();
+		const userId = request.user.id;
+
+		const userRow = fastify.db.prepare("SELECT * from friend where id = ?").get(userId);
+		if (!userRow){
+			reply.code(400);
+			return { error: `Failed to retrieve row where id=${userId}`};
+		}
+		
+		const friendList = JSON.parse(userRow.list);
+		if (!friendList){
+			reply.code(400);
+			return { error: "Failed to parse JSON friendlist"};
+		}
+
+		return {message: "Successfully retrieve friend list", friendList};
+	});
 }
   
 export default friendRoutes;
