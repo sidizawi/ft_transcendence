@@ -65,15 +65,9 @@ fastify.post('/register', async (request, reply) => {
         return { error: 'Cet email est déjà utilisé.' };
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const initialGameData = {
-        games_played: 0,
-        games_won: 0,
-        games_lost: 0,
-        total_points: 0
-    };
 
-    const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data) VALUES (?, ?, ?, ?)");
-    const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData));
+    const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, status) VALUES (?, ?, ?, ?)");
+    const result = stmt.run(username, email, hashedPassword, 0);
     const userId = result.lastInsertRowid;
 
     // todo: create a token and send it
