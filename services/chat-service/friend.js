@@ -38,78 +38,33 @@ async function friendRoutes(fastify, options) {
 		}
 	
 		const friendid = userExists.id;
-	
-		const actualUserRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(actualid);
-		const friendRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(friendid);
-	
-		if (!actualUserRow) {
-			const actualObj = { [friendid]: 'sending' };
-			db.prepare('INSERT INTO friend (id, list) VALUES (?, ?)').run(
-			  actualid,
-			  JSON.stringify(actualObj)
+
+		const actualUserRow = fastify.db.prepare("SELECT * FROM friend WHERE (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const friendRow = fastify.db.prepare("SELECT * FROM friend WHERE (userid1, userid2) = (?, ?)").get(friendid, actualid);
+
+		if (!actualUserRow && !friendRow){
+			fastify.db.prepare("INSERT INTO friend (userid1, userid2, username1, username2, status) VALUES (?, ?, ?, ?, ?)").run(
+				actualid,
+				friendid,
+				actualuser,
+				username,
+				'sending'
 			);
-			if (!friendRow){
-				const friendObj = { [actualid]: 'receiving' };
-				db.prepare('INSERT INTO friend (id, list) VALUES (?, ?)').run(
-					friendid,
-					JSON.stringify(friendObj)
-				);
-			}
-			else{
-				const friendlist = JSON.parse(friendRow.list);
-				if (friendid in friendlist){
-					reply.code(400);
-					if (actualUserlist[friendid] == 'blocked')
-						return {error: 'Username is blocked'}
-					else
-						return { error: 'Username already in friendlist of actual user'};
-				}
-				friendlist[actualid] = 'receiving';
-	  
-				db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-					JSON.stringify(friendlist), 
-					friendid);
-			}
+			fastify.db.prepare("INSERT INTO friend (userid1, userid2, username1, username2, status) VALUES (?, ?, ?, ?, ?)").run(
+				friendid,
+				actualid,
+				username,
+				actualuser,
+				'receiving'
+			);
 			reply.code(201);
 			return { message: 'User successfully added'};
 		}
-	
-		const actualUserlist = JSON.parse(actualUserRow.list);
-		if (friendid in actualUserlist){
-			reply.code(400);
-			if (actualUserlist[friendid] == 'blocked')
-				return {error: 'Username is blocked'}
-			else
-				return { error: 'Username already in friendlist of actual user'};
-		}
-	
-		actualUserlist[friendid] = 'sending';
-		
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(actualUserlist), 
-			actualid);
-		if (!friendRow){
-			const friendObj = { [actualid]: 'receiving' };
-			db.prepare('INSERT INTO friend (id, list) VALUES (?, ?)').run(
-				friendid,
-				JSON.stringify(friendObj)
-			);
-		}
 		else{
-			const friendlist = JSON.parse(friendRow.list);
-			if (friendid in friendlist){
-				reply.code(400);
-				return { error: 'Username already in friendlist of friend'};
-			}
-			friendlist[actualid] = 'receiving';
-	
-				db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-				JSON.stringify(friendlist), 
-				friendid);
+			reply.code(500);
+			return { error: 'Username already friendlist'};
 		}
-			
-		reply.code(201);
-		return { message: 'User successfully added'};
+
 	});
 	
 	fastify.patch('/accept', async (request, reply) => {
@@ -120,32 +75,28 @@ async function friendRoutes(fastify, options) {
 		}
 	
 		await request.jwtVerify();
-		const userid = request.user.id;
+		const actualid = request.user.id;
 	
 		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
 		const friendid = friendExists.id;
-	
-		const friendRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(friendid);
-		const userRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(userid);
 		
-		const friendlist = JSON.parse(friendRow.list);
-		const userlist = JSON.parse(userRow.list);
-	
-		if (friendlist[userid] !== 'receiving' || userlist[friendid] !== 'sending'){
+		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
+		
+		if (sendingRow.status !== 'sending' || receivRow.status !== 'receiving'){
 			reply.code(400);
 			return { error: 'Wrong relationship between friends'};
 		}
 	
-		friendlist[userid] = 'accepted';
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(friendlist), 
-			friendid);
-	
-		userlist[friendid] = 'accepted';
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(userlist), 
-			userid);
-	
+		fastify.db.prepare("UPDATE friend SET status='accepted' where (userid1, userid2)=(?, ?)").run(
+			actualid,
+			friendid
+		);
+		fastify.db.prepare("UPDATE friend SET status='accepted' where (userid1, userid2)=(?, ?)").run(
+			friendid,
+			actualid
+		);
+
 		reply.code(201);
 		return { error: 'Friend request successfully accepted'};
 	});
@@ -158,31 +109,27 @@ async function friendRoutes(fastify, options) {
 		}
 	
 		await request.jwtVerify();
-		const userid = request.user.id;
+		const actualid = request.user.id;
 	
 		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
 		const friendid = friendExists.id;
 	
-		const friendRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(friendid);
-		const userRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(userid);
-		
-		const friendlist = JSON.parse(friendRow.list);
-		const userlist = JSON.parse(userRow.list);
+		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
 	
-		if (friendlist[userid] !== 'receiving' || userlist[friendid] !== 'sending'){
+		if (sendingRow.status !== 'sending' || receivRow.status !== 'receiving'){
 			reply.code(400);
 			return { error: 'Wrong relationship between friends'};
 		}
 	
-		delete friendlist[userid];
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(friendlist), 
-			friendid);
-	
-		delete userlist[friendid];
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(userlist), 
-			userid);
+		fastify.db.prepare("DELETE FROM friend where (userid1, userid2)=(?, ?)").run(
+			actualid,
+			friendid
+		);
+		fastify.db.prepare("DELETE FROM friend where (userid1, userid2)=(?, ?)").run(
+			friendid,
+			actualid
+		);
 	
 		reply.code(201);
 		return { error: 'Friend request successfully rejected'};
@@ -196,31 +143,27 @@ async function friendRoutes(fastify, options) {
 		}
 	
 		await request.jwtVerify();
-		const userid = request.user.id;
+		const actualid = request.user.id;
 	
 		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
 		const friendid = friendExists.id;
 	
-		const friendRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(friendid);
-		const userRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(userid);
-		
-		const friendlist = JSON.parse(friendRow.list);
-		const userlist = JSON.parse(userRow.list);
+		const actualRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const friendRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
 	
-		if (friendlist[userid] !== 'accepted' || userlist[friendid] !== 'accepted'){
+		if (actualRow.status !== 'accepted' || friendRow.status !== 'accepted'){
 			reply.code(400);
 			return { error: 'Wrong relationship between friends'};
 		}
 	
-		delete friendlist[userid];
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(friendlist), 
-			friendid);
-	
-		delete userlist[friendid];
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(userlist), 
-			userid);
+		fastify.db.prepare("DELETE FROM friend where (userid1, userid2)=(?, ?)").run(
+			actualid,
+			friendid
+		);
+		fastify.db.prepare("DELETE FROM friend where (userid1, userid2)=(?, ?)").run(
+			friendid,
+			actualid
+		);
 	
 		reply.code(201);
 		return { error: 'Friend request successfully deleted'};
@@ -234,53 +177,76 @@ async function friendRoutes(fastify, options) {
 		}
 	
 		await request.jwtVerify();
-		const userid = request.user.id;
+		const actualid = request.user.id;
 	
 		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
 		const friendid = friendExists.id;
 	
-		const friendRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(friendid);
-		const userRow = fastify.db.prepare("SELECT * FROM friend where id = ?").get(userid);
-		
-		const friendlist = JSON.parse(friendRow.list);
-		const userlist = JSON.parse(userRow.list);
-	
-		if (friendlist[userid] !== 'accepted' || userlist[friendid] !== 'accepted'){
-			reply.code(400);
-			return { error: 'Wrong relationship between friends'};
-		}
-	
-		friendlist[userid] = 'blocked';
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(friendlist), 
-			friendid);
-	
-		userlist[friendid] = 'blocked';
-		db.prepare("UPDATE friend SET list = ? WHERE id = ?").run(
-			JSON.stringify(userlist), 
-			userid);
+		fastify.db.prepare("UPDATE friend SET status='blocked' where (userid1, userid2)=(?, ?)").run(
+			actualid,
+			friendid
+		);
+		fastify.db.prepare("DELETE FROM friend where (userid1, userid2)=(?, ?)").run(
+			friendid,
+			actualid
+		);
 	
 		reply.code(201);
 		return { error: 'Friend request successfully blocked'};
 	});
-  
+
+	fastify.patch('/unblock', async (request, reply) => {
+		const { friendusername } = request.body;
+		if (!friendusername){
+			reply.code(400);
+			return { error: 'Friendusername needed'};
+		}
+	
+		await request.jwtVerify();
+		const actualid = request.user.id;
+	
+		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
+
+		const friendid = friendExists.id;
+
+		const actualRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const blockedvRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
+
+		if (actualRow.status !== 'blocked' || blockedvRow){
+			reply.code(400);
+			return { error: 'Wrong relationship between friends'};
+		}
+
+		fastify.db.prepare(
+			"DELETE FROM friend where (userid1, userid2)=(?, ?)")
+			.run(actualid, friendid);
+
+		reply.code(201);
+		return { error: 'User successfully unblocked'};
+	});
+
 	fastify.get('/list', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 
-		const userRow = fastify.db.prepare("SELECT * from friend where id = ?").get(userId);
-		if (!userRow){
+		const userfriends = fastify.db.prepare(
+			"SELECT * from friend where userid1 = ?")
+			.all(userId);
+
+		if (!userfriends){
 			reply.code(400);
-			return { error: `Failed to retrieve row where id=${userId}`};
-		}
-		
-		const friendList = JSON.parse(userRow.list);
-		if (!friendList){
-			reply.code(400);
-			return { error: "Failed to parse JSON friendlist"};
+			return { error: `Failed to retrieve all friends where id=${userId}`};
 		}
 
-		return {message: "Successfully retrieve friend list", friendList};
+		const userids = userfriends.map(friend => friend.userid2);
+
+		const placeholders = userids.map(() => '?').join(', ');
+			
+		const friendData = fastify.db.prepare(`
+			SELECT username, status FROM users WHERE id IN (${placeholders})`)
+			.all(...userids);
+
+		return { message: 'Successfully retrieve friend list', friendData};
 	});
 }
   
