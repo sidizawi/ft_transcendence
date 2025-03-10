@@ -80,7 +80,7 @@ fastify.get('/register', async (request, reply) => {
     }
 });
 
-fastify.post('/auth/register', async (request, reply) => {
+fastify.post('/register', async (request, reply) => {
     const { username, email, password } = request.body;
     if (!username || !email || !password) {
         reply.code(400);
