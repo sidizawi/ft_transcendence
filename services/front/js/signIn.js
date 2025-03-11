@@ -20,19 +20,17 @@ function handleSignInForm() {
     signInForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        // const username = document.getElementById("username").value;
-        // const email = document.getElementById("email").value;
+        const login = document.getElementById("user-identifier").value;
         const password = document.getElementById("password").value;
-        const email = document.getElementById("user-identifier").value;
 
         try {
             // Envoie de la requête POST vers le backend
-            const response = await fetch("http://localhost:3000/auth/login", {
+            const response = await fetch("http://localhost:3001/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ login, password })
             });
             
             // Récupération et affichage de la réponse
@@ -44,7 +42,7 @@ function handleSignInForm() {
 
                 const token = data.token;
                 localStorage.setItem("token", token);
-                console.log("sigin token = ", token);
+                console.log("signin token = ", token);
                 setTimeout(() => {
                     updateAuthButton();
                     navigateTo(PROFILEPATH);

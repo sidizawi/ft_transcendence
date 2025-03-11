@@ -22,17 +22,13 @@ function handleSignUpForm() {
         console.log("✅ event.preventDefault() exécuté, la page ne devrait pas se recharger");
         
     
-        // const username = document.getElementById("username").value;
-        // const email = document.getElementById("email").value;
-        // const password = document.getElementById("password").value;
-        
-        // console.log("✅ username", username);
-        // console.log("✅ email", email);
-        // console.log("✅ password", password)
+        const username = document.getElementById("username").value;
+        const email = document.getElementById("email").value;
+        const password = document.getElementById("password").value;
 
         try {
             // Envoie de la requête POST vers le backend
-            const response = await fetch("http://localhost:3000/auth/register", {
+            const response = await fetch("http://localhost:3001/register", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
