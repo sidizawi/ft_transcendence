@@ -1,25 +1,11 @@
 .row-container {
     display: flex;
+    flex-direction: column;
     margin-top: 3vh;
 }
 
 .top-row {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    /* height: 98vh; */
-}
-
-.column-container {
-    display: flex;
-    /* flex-wrap: wrap; */
-}
-
-.left-profile-page {
-    display: flex;
-    flex-direction: column;
-    justify-content: left;
-    width: 64vw;
+    justify-content: center;
 }
 
 .pic-area {
@@ -62,6 +48,9 @@
     display: none; /* Cache l'input de base */
 }
 
+#uploadPicLabel {
+    cursor: pointer;
+}
 
 /*Dashboard*/
 .dashboard-container {
@@ -108,26 +97,13 @@
     width: 100%;
 }
 
-/*invisible column*/
-.buffer-profile-page {
-    width: 4vw;
-}
-
-
-.right-profile-page {
-    display: flex;
-    flex-direction: column;
-    width: 32vw;
-    justify-content: right;
-}
-
 h3 {
     text-align: center;
 }
 
-.friends-section {
+/* .friends-section {
     padding: 5px;
-    text-align: left; /*pa autant de decalage a gauche et pas a droite?*/
+    text-align: left;
     background: var(--bg-color);
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -144,21 +120,21 @@ h3 {
     cursor: pointer;
     border-radius: 5px;
     width: 100%;
-}
+} */
 
 .dark-mode .friends-section {
     box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
 }
 
 .bottom-row {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    /* height: 2vh; */
+    margin-top: 20vh;
+    justify-content: end;
 }
 
-.logout-btn button {
-    background: red;
+#disconnect {
+    margin-left: calc(85% / 2);
+    text-align: center; /*pq pas centre?*/
+    background: rgb(188, 31, 31);
     color: rgb(255, 255, 255);
     font-weight: bold;
     border: none;
@@ -166,5 +142,5 @@ h3 {
     margin-top: 10px;
     cursor: pointer;
     border-radius: 5px;
-    width: 100%;
+    width: 15%;
 }

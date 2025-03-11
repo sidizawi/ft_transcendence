@@ -45,8 +45,8 @@ function handleSignInForm() {
                 const token = data.token;
                 localStorage.setItem("token", token);
                 console.log("sigin token = ", token);
-                // updateAuthButton();
                 setTimeout(() => {
+                    updateAuthButton();
                     navigateTo(PROFILEPATH);
                 }, 1500);
 
