@@ -42,7 +42,15 @@ function handleSignUpForm() {
                 signMessage.textContent = "✅ Sign Up successful! Redirecting...";
                 signMessage.className = "success";
                 signMessage.classList.remove("hidden");
-                navigateTo(SIGNINPATH);
+                // navigateTo(SIGNINPATH);
+
+                const token = data.token; //RECUP TOKEN
+                localStorage.setItem("token", token);
+                console.log("signIn token = ", token);
+                setTimeout(() => {
+                    updateAuthButton();
+                    navigateTo(PROFILEPATH);
+                }, 750);
 
             } else {
                 if (data.error.includes("username")) {
@@ -93,7 +101,7 @@ function getSignUpPage() {
         <p id="sign-message" class="hidden"></p>
         
         <!-- External authentication link -->
-        <p><a href="" id="auth-google" target="_blank">Sign in with Google</a></p>
+        <p><a href="http://localhost:3001/google" id="auth-google" target="_blank">Sign in with Google</a></p>
         </div>
     `
 }

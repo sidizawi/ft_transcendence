@@ -40,13 +40,13 @@ function handleSignInForm() {
                 signInMessage.className = "success";
                 signInMessage.classList.remove("hidden");
 
-                const token = data.token;
+                const token = data.token; //RECUP TOKEN
                 localStorage.setItem("token", token);
-                console.log("signin token = ", token);
+                console.log("signIn token = ", token);
                 setTimeout(() => {
                     updateAuthButton();
                     navigateTo(PROFILEPATH);
-                }, 1500);
+                }, 750);
 
             } else {
                 if (data.error.includes("username")) {
@@ -71,6 +71,8 @@ function handleSignInForm() {
 function getSignInPage() {
     return `
         <div id="content">
+        <p class="switch">New here? <a href="signUp" data-page="signUp">Create an account</a></p>
+
         <form id="signIn-form">
         <label for="user-identifier">Username or Email</label>
         <input type="text" id="user-identifier" required>
@@ -90,9 +92,7 @@ function getSignInPage() {
             <p id="sign-message" class="hidden"></p>
             
         <!-- External authentication link -->
-        <p><a href="" id="auth-42" target="_blank">Login with 42</a></p>
-        
-        <p class="switch">New here? <a href="signUp" data-page="signUp">Create an account</a></p>
+        <p><a href="http://localhost:3001/google" id="auth-google" target="_blank">Sign in with Google</a></p>
         </div>
     `;
 }

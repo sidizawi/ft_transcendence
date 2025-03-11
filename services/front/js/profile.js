@@ -1,4 +1,35 @@
+function getToken() {
+    return localStorage.getItem('token');
+}
+
+function decodeToken(token) {
+    if (!token) return null;
+
+    const payload = token.split('.')[1];  // The playload is the 2nd part of JWT
+    const decodedPayload = atob(payload); // Decode in base64
+    return JSON.parse(decodedPayload);  // Convert in obj JSON
+}
+
+function updateUserInfo() {
+    const token = getToken();
+
+    if (token) {
+        const decoded = decodeToken(token);
+
+        if (decoded) {
+            document.getElementById('username').textContent = decoded.username || 'Username unavailable';
+            document.getElementById('email').textContent = decoded.email || 'Email unavailable';
+        } else {
+            console.log('Error : Invalid Token');
+        }
+    } else {
+        console.log('Token not found in localStorage');
+    }
+}
+
 function updateProfilePage() {
+    updateUserInfo();
+
     const logoutContainer = document.getElementById("disconnect");
     logoutContainer.addEventListener("click", () => {
         clearToken();
@@ -23,8 +54,8 @@ function getProfilePage() {
                             </div>
                         </div>
                         <div class="user-info">
-                            <h2 id="username">username</h2>
-                            <p id="email">email</p>
+                            <h2 id="username"></h2>
+                            <p id="email"></p>
                         </div>
                     </section>
 
