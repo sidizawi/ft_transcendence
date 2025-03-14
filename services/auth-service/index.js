@@ -101,8 +101,18 @@ fastify.post('/register', async (request, reply) => {
     const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData), 0);
     const userId = result.lastInsertRowid;
 
+    const user = fastify.db.prepare(
+      "SELECT * FROM users WHERE username = ?"
+    ).get(username);
+
+    const token = fastify.jwt.sign({
+      id: user.id,
+      username: user.username,
+      email: user.email
+    });
+
     reply.code(201);
-    return { message: 'User registered successfully' };
+    return { message: 'User registered successfully', token};
 });
 
 //Login
@@ -158,6 +168,7 @@ fastify.post('/login', async (request, reply) => {
 
 /// AUTHENTIFICATION GOOGLE ///
 
+// Bouton google
 fastify.get('/google', async (request, reply) => {
     const url = googleClient.generateAuthUrl({
         access_type: 'offline',
@@ -184,7 +195,7 @@ fastify.get('/google/callback', async (request, reply) => {
       const payload = ticket.getPayload();
       const { email, name } = payload;
 
-      let user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+      const user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
       if (!user) {
         const randomPassword = Math.random().toString(36).slice(-8);
         const hashedPassword = await bcrypt.hash(randomPassword, 10);
@@ -207,7 +218,6 @@ fastify.get('/google/callback', async (request, reply) => {
     });
 
         reply.code(200);
-        // return reply.redirect('http://localhost:3001/');
         return { message: 'Authentification Google réussie', token };
     } 
     catch (error) 

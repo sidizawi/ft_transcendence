@@ -62,11 +62,11 @@
 /* .menu-box > log { background: #9933ff; color: white; } */
 
 /* Button Colors for light mode */
-.dark-mode .menu-box a:nth-child(1) { background: #6b23b5; color: black; }  /* Rouge foncé */
-.dark-mode .menu-box a:nth-child(2) { background: #3575b9; color: black; }  /* Bleu foncé */
-.dark-mode .menu-box a:nth-child(3) { background: #248624; color: black; }  /* Vert foncé */
-.dark-mode .menu-box a:nth-child(4) { background: #b39500; color: black; }  /* Jaune foncé */
-.dark-mode .menu-box a:nth-child(5) { background: #b33636; color: black; }  /* Violet foncé */
+.dark-mode .menu-box a:nth-child(1) { background: #6b23b5; color: black; }
+.dark-mode .menu-box a:nth-child(2) { background: #3575b9; color: black; }
+.dark-mode .menu-box a:nth-child(3) { background: #248624; color: black; }
+.dark-mode .menu-box a:nth-child(4) { background: #b39500; color: black; }
+.dark-mode .menu-box a:nth-child(5) { background: #b33636; color: black; }
 /* .dark-mode .menu-box #log { background: #6b23b5; color: black; }  Violet foncé */
 
 /* Hover Effect */

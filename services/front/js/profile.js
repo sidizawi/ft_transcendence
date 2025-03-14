@@ -27,8 +27,49 @@ function updateUserInfo() {
     }
 }
 
+function checkDFA() {
+
+    const test = document.getElementById("checkDFA");
+    test.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        console.log("✅ event.preventDefault() exécuté, la page ne devrait pas se recharger");
+        
+        
+        try {
+            // Envoie de la requête POST vers le backend
+            const response = await fetch("http://localhost:3001/2fa/email/setup", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ })
+            });
+            
+            // Récupération et affichage de la réponse
+            const data = await response.json();
+            if (response.ok) {
+                
+                // const token = data.token; //RECUP TOKEN
+                // localStorage.setItem("token", token);
+                // console.log("signIn token = ", token);
+                // setTimeout(() => {
+                //     updateAuthButton();
+                //     navigateTo(PROFILEPATH);
+                // }, 750);
+                
+            } else {
+                    signMessage.textContent = `❌ ${data.error}`;
+            }
+        } catch (err) {
+            signMessage.textContent = `<p style="color:red;">Erreur lors de l'envoi de la requête.</p>`;
+            console.error(err);
+        }
+    });
+}
+
 function updateProfilePage() {
     updateUserInfo();
+    checkDFA();
 
     const logoutContainer = document.getElementById("disconnect");
     logoutContainer.addEventListener("click", () => {
@@ -57,6 +98,7 @@ function getProfilePage() {
                             <h2 id="username"></h2>
                             <p id="email"></p>
                         </div>
+                        <div id="dfa">Activate 2FA</div>
                     </section>
 
                     <!-- Dashboard & Friends Section -->

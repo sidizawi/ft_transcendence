@@ -70,6 +70,79 @@ function handleSignUpForm() {
             console.error(err);
         }
     });
+
+
+    // document.getElementById('auth-google').addEventListener("click", async (event) => {
+    //     event.preventDefault();
+
+    //     try {
+    //         // Envoie de la requête POST vers le backend
+    //         const response = await fetch("http://localhost:3001/google");
+
+    //         const data = await response.json();
+    //         if (data.status === 302) {
+
+    //             const data = await response.json();
+    //             if (data.response.ok) {
+    //                 const token = data.token; //RECUP TOKEN
+    //                 localStorage.setItem("token", token);
+    //                 console.log("signIn token = ", token);
+    //                 setTimeout(() => {
+    //                     updateAuthButton();
+    //                     navigateTo(PROFILEPATH);
+    //                 }, 750);
+    //             } else {
+    //                 signMessage.textContent = `❌ ${data.error}`;
+    //                 signMessage.className = "error";
+    //                 signMessage.classList.remove("hidden");
+    //             }
+    //         }
+    //     } catch (err) {
+    //         signMessage.textContent = `<p style="color:red;">Erreur lors de l'envoi de la requête.</p>`;
+    //         console.error(err);
+    //     }
+    // });
+    
+    // Handle the click event for the "Sign In with Google" button
+    document.getElementById('auth-google').addEventListener("click", (event) => {
+        event.preventDefault();
+
+        // Redirect the user to the Google OAuth page (handled by your backend)
+        window.location.href = "http://localhost:3001/google";  // Adjust this URL if needed
+    });
+
+    // Check if we're in the /google/callback route (after Google OAuth)
+    if (window.location.pathname === "/google/callback") {
+        // Make a request to the backend to get the token from the callback route
+        fetch("http://localhost:3001/google/callback", {
+            method: "GET",  // Adjust the method if needed
+            headers: {
+                // You may need to add any required headers, like cookies or authentication tokens
+            }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            // Check if the token is available in the response
+            const token = data.token;
+
+            if (token) {
+                console.log("\n\n");
+                console.log(token);
+                console.log("\n\n");
+                localStorage.setItem('token', token);
+                updateAuthButton();
+                navigateTo(PROFILEPATH);
+            } else {
+                console.error('No token found in the response.');
+                document.getElementById('signMessage').textContent = 'Error: No token found.';
+            }
+        })
+        .catch((error) => {
+            console.error('Error while fetching token:', error);
+            document.getElementById('signMessage').textContent = 'An error occurred while trying to log in with Google.';
+        });
+    }
+
 }
 
 function getSignUpPage() {
@@ -101,7 +174,7 @@ function getSignUpPage() {
         <p id="sign-message" class="hidden"></p>
         
         <!-- External authentication link -->
-        <p><a href="http://localhost:3001/google" id="auth-google" target="_blank">Sign in with Google</a></p>
+        <button id="auth-google">Sign in with Google</button>
         </div>
     `
 }
