@@ -1,0 +1,34 @@
+To Do:
+
+	Profile page:
+		- Being able to change user's info
+		- Being able to change the avatar
+		- Tabs' visual
+		- 2FA
+
+	Sign In/Up Page:
+		- Google's Button
+		- Google's Authentification
+
+	Footer:
+		- Names (?)
+
+	Header:
+		- Fixed or moving (?)
+
+	Other:
+		- Colour for black texts in light mode (?)
+		- Check browsers (old) compatibility
+		- Accessibility (?)
+		- SSR (?)
+		- Update package.json versions (?)
+
+	Routes:
+		- 300/auth/login and not 3001/login
+
+	Friends:
+		- Everything
+
+	Files:
+		- Clean up unused datas
+		- Changing colour names in files (?)

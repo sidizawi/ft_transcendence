@@ -12,7 +12,7 @@ const fastify = Fastify({ logger: true });
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
-  origin: "*", // Autorise toutes les origines (tu peux restreindre si besoin)
+  origin: "http://localhost:8000", // Autorise toutes les origines (tu peux restreindre si besoin)
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"]
 });
