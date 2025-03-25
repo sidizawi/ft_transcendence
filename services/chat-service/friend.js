@@ -225,7 +225,8 @@ async function friendRoutes(fastify, options) {
 		return { error: 'User successfully unblocked'};
 	});
 
-	fastify.get('/list', async (request, reply) => {
+	//todo: ne pas recup les demandes en cours dans la liste d amis
+	fastify.get('/friendlist', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 
@@ -247,6 +248,36 @@ async function friendRoutes(fastify, options) {
 			.all(...userids);
 
 		return { message: 'Successfully retrieve friend list', friendData};
+	});
+
+	fastify.get('/sendinglist', async (request, reply) => {
+		await request.jwtVerify();
+		const userId = request.user.id;
+		const status = 'sending';
+
+		const sendlist = fastify.db.prepare(`SELECT * FROM friend where (userid1, status) = (?, ?)`).all(
+			userId,
+			status
+		)
+
+		const onlyUsername = sendlist.map(item => ({ username2: item.username2 }));
+
+		return { message: 'Successfully retrieve request list', onlyUsername}
+	});
+
+	fastify.get('/receivinglist', async (request, reply) => {
+		await request.jwtVerify();
+		const userId = request.user.id;
+		const status = 'receiving';
+
+		const requestlist = fastify.db.prepare(`SELECT * FROM friend where (userid1, status) = (?, ?)`).all(
+			userId,
+			status
+		)
+
+		const onlyUsername = sendlist.map(item => ({ username2: item.username2 }));
+
+		return { message: 'Successfully retrieve request list', onlyUsername}
 	});
 }
   
