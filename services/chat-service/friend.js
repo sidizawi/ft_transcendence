@@ -225,20 +225,18 @@ async function friendRoutes(fastify, options) {
 		return { error: 'User successfully unblocked'};
 	});
 
-	//todo: ne pas recup les demandes en cours dans la liste d amis
 	fastify.get('/friendlist', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 
 		const userfriends = fastify.db.prepare(
-			"SELECT * from friend where userid1 = ?")
+			"SELECT * from friend where userid1 = ? AND status = 'accepted'")
 			.all(userId);
 
-		if (!userfriends){
-			reply.code(400);
-			return { error: `Failed to retrieve all friends where id=${userId}`};
+		if (!userfriends || userfriends.length === 0){
+			return { message: 'No friends found', friendData: [] };
 		}
-
+		
 		const userids = userfriends.map(friend => friend.userid2);
 
 		const placeholders = userids.map(() => '?').join(', ');
@@ -275,7 +273,7 @@ async function friendRoutes(fastify, options) {
 			status
 		)
 
-		const onlyUsername = sendlist.map(item => ({ username2: item.username2 }));
+		const onlyUsername = requestlist.map(item => ({ username2: item.username2 }));
 
 		return { message: 'Successfully retrieve request list', onlyUsername}
 	});
