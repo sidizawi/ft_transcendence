@@ -22,4 +22,14 @@ export default class Paddle {
 	moveDown() {
 		this.y += this.speed;
 	}
+
+	ToJSON() {
+		return {
+			x: this.x,
+			y: this.y,
+			width: this.width,
+			height: this.height,
+			speed: this.speed
+		};
+	}
 }

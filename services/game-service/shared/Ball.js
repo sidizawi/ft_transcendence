@@ -19,4 +19,14 @@ export default class Ball {
 		this.x += this.speedX;
 		this.y += this.speedY;
 	}
+
+	ToJSON() {
+		return {
+			x: this.x,
+			y: this.y,
+			size: this.size,
+			speedX: this.speedX,
+			speedY: this.speedY
+		};
+	}
 }

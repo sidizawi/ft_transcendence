@@ -108,10 +108,30 @@ export const drawMenu = (state) => {
     }
 };
 
-export const draw = (state) => {
-    const { ctx, canvas, ball, leftPlayer, rightPlayer, leftPlayerScore, rightPlayerScore } = state;
+export const gameLoop = (state) => {
+    const { ctx, canvas, ball, leftPlayer, rightPlayer, leftPlayerScore, rightPlayerScore, gameStarted, keys, singlePlayer } = state;
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    if (gameStarted) {
+        if (keys['w'] && leftPlayer.y > 0) {
+            leftPlayer.moveUp();
+            sendPaddlePosition(state, 'left');
+        }
+        if (keys['s'] && leftPlayer.y < canvas.height - leftPlayer.height) {
+            leftPlayer.moveDown();
+            sendPaddlePosition(state, 'left');
+        }
+        if (!singlePlayer) {
+            if (keys['ArrowUp'] && rightPlayer.y > 0) {
+                rightPlayer.moveUp();
+                sendPaddlePosition(state, 'right');
+            }
+            if (keys['ArrowDown'] && rightPlayer.y < canvas.height - rightPlayer.height) {
+                rightPlayer.moveDown();
+                sendPaddlePosition(state, 'right');
+            }
+        }
+    }
     ball.draw(ctx);
     leftPlayer.draw(ctx);
     rightPlayer.draw(ctx);
@@ -128,4 +148,18 @@ export const draw = (state) => {
         ctx.fill();
         ctx.closePath();
     }
+
+    state.gameLoopId = requestAnimationFrame(() => gameLoop(state));
 };
+
+function sendPaddlePosition(state, side) {
+    const { ws, leftPlayer, rightPlayer } = state;
+    if (ws && ws.readyState === ws.OPEN) {
+        const paddleY = side === 'left' ? leftPlayer.y : rightPlayer.y;
+        ws.send(JSON.stringify({
+            type: 'paddleMove',
+            side: side,
+            y: paddleY
+        }));
+    }
+}

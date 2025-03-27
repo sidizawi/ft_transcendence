@@ -1,5 +1,4 @@
 import { drawMenu } from "./draw.js";
-import { startGame } from "./game.js";
 import { BUTTON_WIDTH, BUTTON_HEIGHT, SINGLE_PLAYER_BUTTON, TWO_PLAYER_BUTTON, PLAY_AGAIN_BUTTON, MAIN_MENU_BUTTON } from "./draw.js";
 
 export const handleKeyDown = (event, state) => {
@@ -72,8 +71,10 @@ export const handleClick = (event, state) => {
                 x <= singlePlayerX + BUTTON_WIDTH &&
                 y >= singlePlayerY && 
                 y <= singlePlayerY + BUTTON_HEIGHT) {
-                state.singlePlayer = true;
-                startGame(state);
+                state.ws.send(JSON.stringify({
+                    type: 'startGame',
+                    mode: 'singlePlayer'
+                }))
             }
             
             const twoPlayerX = centerX + TWO_PLAYER_BUTTON.x - BUTTON_WIDTH/2;
@@ -82,8 +83,10 @@ export const handleClick = (event, state) => {
                 x <= twoPlayerX + BUTTON_WIDTH &&
                 y >= twoPlayerY && 
                 y <= twoPlayerY + BUTTON_HEIGHT) {
-                state.singlePlayer = false;
-                startGame(state);
+                state.ws.send(JSON.stringify({
+                    type: 'startGame',
+                    mode: 'twoPlayer'
+                }))
             }
         } else {
             const playAgainX = centerX + PLAY_AGAIN_BUTTON.x - BUTTON_WIDTH/2;
@@ -92,7 +95,11 @@ export const handleClick = (event, state) => {
                 x <= playAgainX + BUTTON_WIDTH &&
                 y >= playAgainY && 
                 y <= playAgainY + BUTTON_HEIGHT) {
-                startGame(state);
+                console.log(state.singlePlayer);
+                state.ws.send(JSON.stringify({
+                    type: 'startGame',
+                    mode: state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
+                }))
             }
             
             const mainMenuX = centerX + MAIN_MENU_BUTTON.x - BUTTON_WIDTH/2;
