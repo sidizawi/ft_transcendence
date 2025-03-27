@@ -20,34 +20,34 @@ function handleSignInForm() {
     signInForm.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        // const username = document.getElementById("username").value;
-        // const email = document.getElementById("email").value;
+        const login = document.getElementById("user-identifier").value;
         const password = document.getElementById("password").value;
-        const email = document.getElementById("user-identifier").value;
 
         try {
             // Envoie de la requête POST vers le backend
-            const response = await fetch("http://localhost:3000/auth/login", {
+            const response = await fetch("http://localhost:3001/login", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({ email, password })
+                body: JSON.stringify({ login, password })
             });
             
             // Récupération et affichage de la réponse
             const data = await response.json();
             if (response.ok) {
-            // signInMessage.textContent = `✅ ${data.message}`;
                 signInMessage.textContent = "✅ Sign In successful! Redirecting...";
                 signInMessage.className = "success";
                 signInMessage.classList.remove("hidden");
 
-                //ajout de la redirection ici
                 const token = data.token;
                 localStorage.setItem("token", token);
-                navigateTo(PROFILEPATH);
-                
+                console.log("signin token = ", token);
+                setTimeout(() => {
+                    updateAuthButton();
+                    navigateTo(PROFILEPATH);
+                }, 1500);
+
             } else {
                 if (data.error.includes("username")) {
                     signInMessage.textContent = "❌ This username is incorrect. Please try again.";
@@ -70,28 +70,30 @@ function handleSignInForm() {
 
 function getSignInPage() {
     return `
+        <div id="content">
         <form id="signIn-form">
-            <label for="user-identifier">Username or Email</label>
-            <input type="text" id="user-identifier" required>
-            <span class="error-message" id="identifier-error"></span>
-            
-            <label for="password">Password</label>
-            <div class="password-container">
+        <label for="user-identifier">Username or Email</label>
+        <input type="text" id="user-identifier" required>
+        <span class="error-message" id="identifier-error"></span>
+        
+        <label for="password">Password</label>
+        <div class="password-container">
                 <input type="password" id="password" required>
                 <span id="toggle-password" class="eye-icon">👁️</span>
+                </div>
+                <span class="error-message" id="password-error"></span>
+                <div id="sign-page">
+                <button type="submit">Sign In</button>
             </div>
-            <span class="error-message" id="password-error"></span>
-            <div id="sign-page">
-            <button type="submit">Sign In</button>
-            </div>
-        </form>
-
-        <p id="sign-message" class="hidden"></p>
-
+            </form>
+            
+            <p id="sign-message" class="hidden"></p>
+            
         <!-- External authentication link -->
         <p><a href="" id="auth-42" target="_blank">Login with 42</a></p>
-
+        
         <p class="switch">New here? <a href="signUp" data-page="signUp">Create an account</a></p>
+        </div>
     `;
 }
 

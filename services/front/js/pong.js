@@ -1,6 +1,8 @@
 function getPongPage() {
 	return `
-		<p>Game coming soon!</p>
+	    <div id="content">
+			<p>Game coming soon!</p>
+		</div>
 	`;
 }
 

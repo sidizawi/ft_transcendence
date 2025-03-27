@@ -1,5 +1,9 @@
 function getPower4Page() {
-	return `<p>Game coming soon!</p>`;
+	return `
+	    <div id="content">
+			<p>Game coming soon!</p>
+		</div>
+	`;
 }
 
 function setPower4Page() {

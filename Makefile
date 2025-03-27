@@ -40,6 +40,9 @@ clean:
 	$(DOCKER system prune -af)
 	$(DOCKER volume prune -f)
 
+prune :
+	$(DOCKER) system prune -a
+	
 # Installer les dépendances Node.js pour chaque service
 install:
 	@for dir in $(SERVICE_DIRS); do \
