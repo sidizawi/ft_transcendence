@@ -1,9 +1,11 @@
 import { i18n } from '../i18n';
 
 export class GoogleAuth {
-  private static clientId = 'CLIENT_ID.apps.googleusercontent.com';; // How do I get it?
+  private static clientId = '384843766911-jroec6gv4lgo54bpalfufa23va60jcc1.apps.googleusercontent.com';
   private static callback: ((response: any) => void) | null = null;
   private static initialized = false;
+  private static retryCount = 0;
+  private static maxRetries = 5;
 
   static initialize(callback: (response: any) => void) {
     this.callback = callback;
@@ -11,14 +13,21 @@ export class GoogleAuth {
     if (window.google) {
       this.initializeGoogleSignIn();
     } else {
-      // Wait for the script to load
-      window.onload = () => {
-        if (window.google) {
-          this.initializeGoogleSignIn();
-        } else {
-          console.error('Google Identity Services not loaded');
-        }
-      };
+      this.waitForGoogle();
+    }
+  }
+
+  private static waitForGoogle() {
+    if (this.retryCount >= this.maxRetries) {
+      console.error('Failed to load Google Identity Services after maximum retries');
+      return;
+    }
+
+    if (window.google) {
+      this.initializeGoogleSignIn();
+    } else {
+      this.retryCount++;
+      setTimeout(() => this.waitForGoogle(), 1000);
     }
   }
 
@@ -30,9 +39,13 @@ export class GoogleAuth {
         client_id: this.clientId,
         callback: this.handleCredentialResponse.bind(this),
         auto_select: false,
-        cancel_on_tap_outside: true
+        cancel_on_tap_outside: true,
+        ux_mode: 'popup',
+        allowed_parent_origin: ['http://localhost:8000', 'http://localhost:5173'],
+        context: 'signin'
       });
       this.initialized = true;
+      this.retryCount = 0;
     } catch (error) {
       console.error('Failed to initialize Google Sign-In:', error);
     }
@@ -46,8 +59,10 @@ export class GoogleAuth {
 
   static renderButton(elementId: string) {
     if (!window.google) {
-      console.warn('Google Identity Services not loaded, retrying...');
-      setTimeout(() => this.renderButton(elementId), 1000);
+      if (this.retryCount < this.maxRetries) {
+        this.retryCount++;
+        setTimeout(() => this.renderButton(elementId), 1000);
+      }
       return;
     }
 
@@ -55,45 +70,26 @@ export class GoogleAuth {
     if (!element) return;
 
     try {
-      // Add a wrapper div for centering
       element.className = 'flex justify-center';
       
-      // Get current language and map to Google's locale format
       const currentLang = i18n.language;
       const locale = this.mapLanguageToLocale(currentLang);
       
       window.google.accounts.id.renderButton(element, {
         type: 'standard',
-        theme: 'outline',
+        theme: 'filled_blue',
         size: 'large',
         shape: 'pill',
         text: 'continue_with',
         logo_alignment: 'center',
         width: 280,
-        locale // Add locale for button text translation
+        locale
       });
-
-      // Let Google's styles load first, then apply our overrides
-      setTimeout(() => {
-        const button = element.querySelector('div[role="button"]');
-        if (button) {
-          button.classList.add(
-            'bg-orange',
-            'dark:bg-nature',
-            'hover:bg-orange-darker',
-            'dark:hover:bg-nature/90',
-            'text-white',
-            'dark:text-nature-lightest',
-            'transition-colors'
-          );
-        }
-      }, 100);
     } catch (error) {
       console.error('Failed to render Google Sign-In button:', error);
     }
   }
 
-  // Map our language codes to Google's locale codes
   private static mapLanguageToLocale(lang: string): string {
     const localeMap: { [key: string]: string } = {
       'en': 'en_US',

@@ -61,10 +61,11 @@ export class TokenManager {
 
   static getAuthHeaders(): HeadersInit {
     const token = this.getToken();
-    return token ? {
+    if (!token) {
+      throw new Error('No authentication token found');
+    }
+    return {
       'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
-    } : {
       'Content-Type': 'application/json'
     };
   }

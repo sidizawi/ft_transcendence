@@ -12,6 +12,7 @@ import { Header } from '../shared/components/header';
 import { Footer } from '../shared/components/footer';
 import { i18n } from '../shared/i18n';
 import { TokenManager } from '../shared/utils/token';
+import { FriendsList } from '../shared/components/friends';
 
 export class TranscendenceApp {
   private state = {
@@ -24,6 +25,7 @@ export class TranscendenceApp {
   private router: Router;
   private header: Header;
   private footer: Footer;
+  private friendsList: FriendsList | null = null;
 
   constructor() {
     // Check if user is already logged in
@@ -32,6 +34,7 @@ export class TranscendenceApp {
       const user = TokenManager.getUserFromToken();
       if (user) {
         this.state.user = user;
+        this.friendsList = new FriendsList();
       }
     }
 
@@ -61,7 +64,8 @@ export class TranscendenceApp {
 
   private handleLogin(user: User) {
     this.state.user = user;
-    this.menu = new Menu(true, () => this.handleLogout()); // Create new menu instance with logged-in state
+    this.friendsList = new FriendsList();
+    this.menu = new Menu(true, () => this.handleLogout());
     this.initializeApp();
     this.router.navigateTo('/profile');
   }
@@ -69,7 +73,8 @@ export class TranscendenceApp {
   private handleLogout() {
     TokenManager.removeToken();
     this.state.user = null;
-    this.menu = new Menu(false, () => this.handleLogout()); // Create new menu instance with logged-out state
+    this.friendsList = null;
+    this.menu = new Menu(false, () => this.handleLogout());
     this.initializeApp();
     this.router.navigateTo('/signin');
   }
@@ -116,6 +121,7 @@ export class TranscendenceApp {
         </main>
 
         ${this.footer.render()}
+        ${this.friendsList ? this.friendsList.render() : ''}
       </div>
     `;
 
@@ -126,6 +132,7 @@ export class TranscendenceApp {
     this.header.setupEventListeners();
     this.footer.setupEventListeners();
     this.menu.setupEventListeners();
+    this.friendsList?.setupEventListeners();
   }
 
   private renderCurrentPage() {

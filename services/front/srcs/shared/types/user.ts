@@ -9,4 +9,5 @@ export interface User {
     totalGames: number;
   };
   twoFactorEnabled: boolean;
+  online?: boolean;
 }

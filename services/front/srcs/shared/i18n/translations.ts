@@ -53,6 +53,16 @@ export const translations = {
         description: 'Erstelle oder tritt einem Turnier bei, um mit anderen Spielern zu konkurrieren.',
         create: 'Turnier erstellen',
         join: 'Turnier beitreten'
+      },friends: 'Freunde',
+      typeMessage: 'Nachricht eingeben...',
+      addFriend: 'Freund hinzufügen',
+      enterUsername: 'Benutzername eingeben',
+      add: 'Hinzufügen',
+      friendStatus: {
+        sending: 'Anfrage gesendet',
+        receiving: 'Anfrage erhalten',
+        accepted: 'Akzeptiert',
+        blocked: 'Blockiert'
       }
     }
   },
@@ -110,6 +120,16 @@ export const translations = {
         description: 'Create or join tournaments to compete with other players.',
         create: 'Create Tournament',
         join: 'Join Tournament'
+      },friends: 'Friends',
+      typeMessage: 'Type a message...',
+      addFriend: 'Add Friend',
+      enterUsername: 'Enter username',
+      add: 'Add',
+      friendStatus: {
+        sending: 'Request sent',
+        receiving: 'Request received',
+        accepted: 'Accepted',
+        blocked: 'Blocked'
       }
     }
   },
@@ -167,6 +187,16 @@ export const translations = {
         description: 'Créez ou rejoignez des tournois pour affronter d\'autres joueurs.',
         create: 'Créer un tournoi',
         join: 'Rejoindre un tournoi'
+      },friends: 'Amis',
+      typeMessage: 'Tapez un message...',
+      addFriend: 'Ajouter un ami',
+      enterUsername: "Entrez le nom d'utilisateur",
+      add: 'Ajouter',
+      friendStatus: {
+        sending: 'Demande envoyée',
+        receiving: 'Demande reçue',
+        accepted: 'Accepté',
+        blocked: 'Bloqué'
       }
     }
   },
@@ -224,6 +254,16 @@ export const translations = {
         description: 'Maak of neem deel aan toernooien om tegen andere spelers te spelen.',
         create: 'Toernooi maken',
         join: 'Deelnemen aan toernooi'
+      },friends: 'Vrienden',
+      typeMessage: 'Typ een bericht...',
+      addFriend: 'Vriend toevoegen',
+      enterUsername: 'Voer gebruikersnaam in',
+      add: 'Toevoegen',
+      friendStatus: {
+        sending: 'Verzoek verzonden',
+        receiving: 'Verzoek ontvangen',
+        accepted: 'Geaccepteerd',
+        blocked: 'Geblokkeerd'
       }
     }
   }

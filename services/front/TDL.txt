@@ -4,7 +4,7 @@ To Do:
 		- Being able to change user's info
 		- Being able to change the avatar
 		- Tabs' visual
-		- 2FA
+		- 2FA -> s'active et se desactive MAIS pb  connexion + pb boutton + demander refresh token
 
 	Sign In/Up Page:
 		- Google's Button
@@ -21,7 +21,6 @@ To Do:
 		- Check browsers (old) compatibility
 		- Accessibility (?)
 		- SSR (?)
-		- Update package.json versions (?)
 
 	Routes:
 		- 300/auth/login and not 3001/login
@@ -32,3 +31,34 @@ To Do:
 	Files:
 		- Clean up unused datas
 		- Changing colour names in files (?)
+
+
+
+      let url = "http://localhost:3001/login";
+      url = url.replace("localhost", window.location.hostname);
+      console.log(url);
+
+      const response = await fetch('http://' + window.location.hostname + ':3001/login', {
+
+
+
+
+
+			const FRIEND_API_URL = 'http://localhost:3003/friend';
+	[...]	await fetch(`${FRIEND_API_URL}/accept`, {
+
+
+
+
+
+
+auth-service-1  | {"level":30,"time":1742905139337,"pid":42,"hostname":"8e81dd75173b","reqId":"req-u","req":{"method":"OPTIONS","url":"/2fa/email/setup","host":"localhost:3001","remoteAddress":"172.18.0.1","remotePort":47888},"msg":"incoming request"}
+auth-service-1  | {"level":30,"time":1742905139337,"pid":42,"hostname":"8e81dd75173b","reqId":"req-u","res":{"statusCode":204},"responseTime":0.5784139931201935,"msg":"request completed"}
+auth-service-1  | {"level":30,"time":1742905139346,"pid":42,"hostname":"8e81dd75173b","reqId":"req-v","req":{"method":"POST","url":"/2fa/email/setup","host":"localhost:3001","remoteAddress":"172.18.0.1","remotePort":47874},"msg":"incoming request"}
+auth-service-1  | undefined
+auth-service-1  | {"level":30,"time":1742905140790,"pid":42,"hostname":"8e81dd75173b","reqId":"req-v","res":{"statusCode":200},"responseTime":1443.480591982603,"msg":"request completed"}
+
+auth-service-1  | {"level":30,"time":1742905168548,"pid":42,"hostname":"8e81dd75173b","reqId":"req-w","req":{"method":"OPTIONS","url":"/2fa/email/verify","host":"localhost:3001","remoteAddress":"172.18.0.1","remotePort":47888},"msg":"incoming request"}
+auth-service-1  | {"level":30,"time":1742905168549,"pid":42,"hostname":"8e81dd75173b","reqId":"req-w","res":{"statusCode":204},"responseTime":0.5650530159473419,"msg":"request completed"}
+auth-service-1  | {"level":30,"time":1742905168552,"pid":42,"hostname":"8e81dd75173b","reqId":"req-x","req":{"method":"POST","url":"/2fa/email/verify","host":"localhost:3001","remoteAddress":"172.18.0.1","remotePort":47874},"msg":"incoming request"}
+auth-service-1  | {"level":30,"time":1742905168555,"pid":42,"hostname":"8e81dd75173b","reqId":"req-x","res":{"statusCode":200},"responseTime":2.623441994190216,"msg":"request completed"}

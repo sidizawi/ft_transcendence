@@ -29,7 +29,7 @@ export class Profile {
       formData.append('avatar', file);
 
       // Upload the file
-      const response = await fetch('http://localhost:3001/upload/avatar', { //ADDRESS NOT SET YET
+      const response = await fetch('http://localhost:3000/upload/avatar', {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -64,8 +64,27 @@ export class Profile {
         : TwoFactorAuth.enable(this.user.id));
 
       if (result.success) {
+        // Update the user's 2FA status
         this.user.twoFactorEnabled = !this.user.twoFactorEnabled;
-        this.render();
+        
+        // Get a new token with updated 2FA status
+        const response = await fetch('http://localhost:3000/auth/refresh', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          credentials: 'include'
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          localStorage.setItem('token', data.token);
+        }
+
+        // Re-render the profile
+        document.querySelector('main')!.innerHTML = this.render();
+        this.setupEventListeners();
       }
     } catch (error) {
       console.error('2FA error:', error);
