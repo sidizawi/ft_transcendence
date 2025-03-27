@@ -22,9 +22,6 @@ To Do:
 		- Accessibility (?)
 		- SSR (?)
 
-	Routes:
-		- 300/auth/login and not 3001/login
-
 	Friends:
 		- Everything
 

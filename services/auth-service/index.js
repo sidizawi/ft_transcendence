@@ -17,6 +17,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const otpCache = {};
 
+<<<<<<< HEAD
 const googleClient = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -39,6 +40,13 @@ const transporter = nodemailer.createTransport({
 //     done();
 // });
 const fastify = Fastify({ logger: true });
+=======
+const fastify = Fastify({ logger: false });
+fastify.addHook('onResponse', (request, reply, done) => {
+    console.log(`${request.method} ${request.url} ${reply.statusCode}`);
+    done();
+}); 
+>>>>>>> origin/chat
 
 
 dotenv.config();
@@ -98,6 +106,7 @@ fastify.post('/register', async (request, reply) => {
         return { error: 'Cet email est déjà utilisé.' };
     }
     const hashedPassword = await bcrypt.hash(password, 10);
+<<<<<<< HEAD
     const initialGameData = {
         games_played: 0,
         games_won: 0,
@@ -106,6 +115,11 @@ fastify.post('/register', async (request, reply) => {
     };
     const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data,is_two_factor_enabled) VALUES (?, ?, ?, ?, ?)");
     const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData), 0);
+=======
+
+    const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, status) VALUES (?, ?, ?, ?)");
+    const result = stmt.run(username, email, hashedPassword, 0);
+>>>>>>> origin/chat
     const userId = result.lastInsertRowid;
 
     const user = fastify.db.prepare(
