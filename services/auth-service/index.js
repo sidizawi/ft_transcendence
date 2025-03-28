@@ -17,6 +17,8 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const otpCache = {};
 
+dotenv.config();
+
 const googleClient = new OAuth2Client(
     process.env.GOOGLE_CLIENT_ID,
     process.env.GOOGLE_CLIENT_SECRET,
@@ -39,9 +41,6 @@ const transporter = nodemailer.createTransport({
 //     done();
 // });
 const fastify = Fastify({ logger: true });
-
-
-dotenv.config();
 
 await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 
@@ -175,64 +174,51 @@ fastify.post('/login', async (request, reply) => {
 
 /// AUTHENTIFICATION GOOGLE ///
 
-// Bouton google
-fastify.get('/google', async (request, reply) => {
-    const url = googleClient.generateAuthUrl({
-        access_type: 'offline',
-        scope: ['profile', 'email']
-    });
-    return reply.redirect(url);
-});
-
-
-fastify.get('/google/callback', async (request, reply) => {
-    try {
-      const { code } = request.query;
-      if (!code) {
-        reply.code(400);
-        return { error: 'Code non fourni par Google' };
-      }
-      const { tokens } = await googleClient.getToken(code);
-      googleClient.setCredentials(tokens);
-      // Vérifier l'id token pour obtenir les infos utilisateur
-      const ticket = await googleClient.verifyIdToken({
-        idToken: tokens.id_token,
-        audience: process.env.GOOGLE_CLIENT_ID
-      });
-      const payload = ticket.getPayload();
-      const { email, name } = payload;
-
-      const user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
-      if (!user) {
-        const randomPassword = Math.random().toString(36).slice(-8);
-        const hashedPassword = await bcrypt.hash(randomPassword, 10);
-        const initialGameData = {
-          games_played: 0,
-          games_won: 0,
-          games_lost: 0,
-          total_points: 0
-        };
-
-        const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data, is_two_factor_enabled) VALUES (?, ?, ?, ?, ?)");
-        const result = stmt.run(name, email, hashedPassword, JSON.stringify(initialGameData));
-        user = { id: result.lastInsertRowid, username: name, email };
-      }
-
-      const token = fastify.jwt.sign({
-        id: user.id,
-        username: user.username,
-        email: user.email
-    });
-
-        reply.code(200);
-        return { message: 'Authentification Google réussie', token };
-    } 
-    catch (error) 
-    {
-      fastify.log.error(error);
-      reply.code(500).send({ error: "Erreur lors de l'authentification Google" });
+fastify.post('/google/callback', async (request, reply) => {
+  try {
+    const { id_token } = request.body;
+    if (!id_token) {
+      reply.code(400);
+      return { error: 'id_token non fourni par Google' };
     }
+    const ticket = await googleClient.verifyIdToken({
+      idToken: id_token,
+      audience: process.env.GOOGLE_CLIENT_ID
+    });
+    const payload = ticket.getPayload();
+    const { email, name } = payload;
+
+    let user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+    if (!user) {
+      const randomPassword = Math.random().toString(36).slice(-8);
+      const hashedPassword = await bcrypt.hash(randomPassword, 10);
+      const initialGameData = {
+        games_played: 0,
+        games_won: 0,
+        games_lost: 0,
+        total_points: 0
+      };
+
+      const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data, is_two_factor_enabled) VALUES (?, ?, ?, ?, ?)");
+      const result = stmt.run(name, email, hashedPassword, JSON.stringify(initialGameData), 0);
+      user = { id: result.lastInsertRowid, username: name, email };
+    }
+
+    const token = fastify.jwt.sign({
+      id: user.id,
+      username: user.username,
+      email: user.email
   });
+
+      reply.code(200);
+      return { message: 'Authentification Google réussie', token };
+  } 
+  catch (error) 
+  {
+    fastify.log.error(error);
+    reply.code(500).send({ error: "Erreur lors de l'authentification Google" });
+  }
+});
 
  /// 2FA ///
 fastify.post('/2fa/email/send', { preValidation: [fastify.authenticate] }, async (request, reply) => {

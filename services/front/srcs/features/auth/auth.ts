@@ -16,12 +16,12 @@ export class Auth {
     try {
       const credential = response.credential;
       
-      const backendResponse = await fetch(`${AUTH_API_URL}/google`, {
+      const backendResponse = await fetch(`${AUTH_API_URL}/google/callback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ credential }),
+        body: JSON.stringify({ id_token: credential }),
         credentials: 'include'
       });
 

@@ -7,8 +7,7 @@ To Do:
 		- 2FA -> s'active et se desactive MAIS pb  connexion + pb boutton + demander refresh token
 
 	Sign In/Up Page:
-		- Google's Button
-		- Google's Authentification
+		- change db model
 
 	Footer:
 		- Names (?)
