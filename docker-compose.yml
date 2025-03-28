@@ -64,36 +64,55 @@ services:
           ignore:
             - node_modules/
 
-  chat-service:
-    build: ./services/chat-service
-    ports:
-      - "3003:3003"
-    volumes:
-      - ./services/front:/app/front
-      - database:/app/data
-    develop:
-      watch:
-        - action: sync
-          path: ./services/chat-service
-          target: /app
-          ignore:
-            - node_modules/
-    env_file:
-      - .env
-    depends_on:
-      - db
+  #game-service:
+  #  build: ./services/game-service
+  #  ports:
+  #    - "3002:3002"
+  #  volumes:
+  #    - ./services/front:/app/front
+  #    - database:/app/data
+  #  develop:
+  #    watch:
+  #      - action: sync
+  #        path: ./services/game-service
+  #        target: /app
+  #        ignore:
+  #          - node_modules/
+  #  env_file:
+  #    - .env
+  #  depends_on:
+  #    - db
 
-  game-service:
-    build: ./services/game-service
+  #chat-service:
+  #  build: ./services/chat-service
+  #  ports:
+  #    - "3003:3003"
+  #  volumes:
+  #    - ./services/front:/app/front
+  #    - database:/app/data
+  #  develop:
+  #    watch:
+  #      - action: sync
+  #        path: ./services/chat-service
+  #        target: /app
+  #        ignore:
+  #          - node_modules/
+  #  env_file:
+  #    - .env
+  #  depends_on:
+  #    - db
+
+  user-service:
+    build: ./services/user-service
     ports:
-      - "3002:3002"
+      - "3004:3004"
     volumes:
       - ./services/front:/app/front
       - database:/app/data
     develop:
       watch:
         - action: sync
-          path: ./services/game-service
+          path: ./services/user-service
           target: /app
           ignore:
             - node_modules/
