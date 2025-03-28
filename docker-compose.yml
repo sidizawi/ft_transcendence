@@ -83,13 +83,24 @@ services:
     depends_on:
       - db
 
-  # game-service:
-  #   build: ./services/game-service
-  #   ports:
-  #     - "3002:3002"
-  #     - "8080:8080"
-  #   # volumes:
-  #   #     - ./front/public:/app/front/public
+  game-service:
+    build: ./services/game-service
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./services/front:/app/front
+      - database:/app/data
+    develop:
+      watch:
+        - action: sync
+          path: ./services/game-service
+          target: /app
+          ignore:
+            - node_modules/
+    env_file:
+      - .env
+    depends_on:
+      - db
 
 volumes:
   database:

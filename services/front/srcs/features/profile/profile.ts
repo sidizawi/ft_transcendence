@@ -11,24 +11,20 @@ export class Profile {
 
     if (!file) return;
 
-    // Check file type
     if (!file.type.startsWith('image/')) {
       alert('Please select an image file');
       return;
     }
 
-    // Check file size (max 5MB)
     if (file.size > 5 * 1024 * 1024) {
       alert('Image size should be less than 5MB');
       return;
     }
 
     try {
-      // Create a FormData instance
       const formData = new FormData();
       formData.append('avatar', file);
 
-      // Upload the file
       const response = await fetch('http://localhost:3000/upload/avatar', {
         method: 'POST',
         headers: {
@@ -42,14 +38,8 @@ export class Profile {
       }
 
       const data = await response.json();
-      
-      // Update the user's avatar in the UI
       this.user.avatar = data.avatarUrl;
-      
-      // Re-render the profile to show the new avatar
       this.render();
-      
-      // Update event listeners
       this.setupEventListeners();
     } catch (error) {
       console.error('Avatar upload error:', error);
@@ -64,10 +54,8 @@ export class Profile {
         : TwoFactorAuth.enable(this.user.id));
 
       if (result.success) {
-        // Update the user's 2FA status
         this.user.twoFactorEnabled = !this.user.twoFactorEnabled;
         
-        // Get a new token with updated 2FA status
         const response = await fetch('http://localhost:3000/auth/refresh', {
           method: 'POST',
           headers: {
@@ -82,7 +70,6 @@ export class Profile {
           localStorage.setItem('token', data.token);
         }
 
-        // Re-render the profile
         document.querySelector('main')!.innerHTML = this.render();
         this.setupEventListeners();
       }
@@ -126,7 +113,7 @@ export class Profile {
                 <img 
                   src="${this.user.avatar}" 
                   alt="${i18n.t('profile')}" 
-                  class="w-32 h-32 rounded-full border-4 border-white dark:border-gray-800 object-cover"
+                  class="w-32 h-32 rounded-full object-cover"
                 >
                 <label 
                   for="avatar-upload" 
@@ -166,26 +153,33 @@ export class Profile {
           <div class="px-8 pb-8 mt-12">
             <!-- Stats Tabs -->
             <div class="mt-4">
-              <div class="border-b border-gray-300 dark:border-gray-600">
-                <nav class="flex -mb-px space-x-8">
+              <div class="relative">
+                <div class="flex -mb-px space-x-8">
                   <button 
-                    class="tab-button active border-orange dark:border-nature text-gray-900 dark:text-white border-b-2 py-4 px-1 text-lg font-medium"
+                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg font-medium transition-colors"
                     data-tab="pong"
                   >
-                    ${i18n.t('pong')}
+                    <span class="flex items-center space-x-2">
+                      <span>${i18n.t('pong')}</span>
+                    </span>
+                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-orange dark:bg-nature transform scale-x-0 transition-transform"></span>
                   </button>
                   <button 
-                    class="tab-button text-gray-600 dark:text-gray-400 border-b-2 border-transparent py-4 px-1 text-lg font-medium"
+                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg font-medium transition-colors"
                     data-tab="connect4"
                   >
-                    ${i18n.t('connect4')}
+                    <span class="flex items-center space-x-2">
+                      <span>${i18n.t('connect4')}</span>
+                    </span>
+                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-orange dark:bg-nature transform scale-x-0 transition-transform"></span>
                   </button>
-                </nav>
+                </div>
+                <div class="absolute bottom-0 left-0 w-full h-px bg-gray-300 dark:bg-gray-600"></div>
               </div>
 
               <!-- Pong Stats -->
               <div class="tab-content active" data-tab="pong">
-                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Dashboard</h3>
+                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Pong Dashboard</h3>
                 ${this.renderStats(this.user.stats.wins, this.user.stats.losses, this.user.stats.totalGames)}
 
                 <!-- Tournament Button - Only in Pong tab -->
@@ -198,8 +192,8 @@ export class Profile {
 
               <!-- Connect4 Stats -->
               <div class="tab-content hidden" data-tab="connect4">
-                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Dashboard</h3>
-                ${this.renderStats(this.user.stats.wins, this.user.stats.losses, this.user.stats.totalGames)}
+                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Connect4 Dashboard</h3>
+                ${this.renderStats(15, 8, 23)}
               </div>
             </div>
 
@@ -241,11 +235,17 @@ export class Profile {
         
         // Update button styles
         tabButtons.forEach(btn => {
-          btn.classList.remove('active', 'border-orange', 'dark:border-nature', 'text-gray-900', 'dark:text-white');
-          btn.classList.add('text-gray-600', 'dark:text-gray-400', 'border-transparent');
+          btn.classList.remove('text-orange', 'dark:text-nature');
+          btn.classList.add('text-gray-600', 'dark:text-gray-400');
+          btn.querySelector('.tab-indicator')?.classList.remove('scale-x-100');
+          btn.querySelector('.tab-indicator')?.classList.add('scale-x-0');
         });
-        button.classList.remove('text-gray-600', 'dark:text-gray-400', 'border-transparent');
-        button.classList.add('active', 'border-orange', 'dark:border-nature', 'text-gray-900', 'dark:text-white');
+
+        // Set active tab style
+        button.classList.remove('text-gray-600', 'dark:text-gray-400');
+        button.classList.add('text-orange', 'dark:text-nature');
+        button.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
+        button.querySelector('.tab-indicator')?.classList.add('scale-x-100');
 
         // Show corresponding content
         tabContents.forEach(content => {
@@ -257,5 +257,14 @@ export class Profile {
         });
       });
     });
+
+    // Set initial active tab
+    const initialTab = tabButtons[0];
+    if (initialTab) {
+      initialTab.classList.remove('text-gray-600', 'dark:text-gray-400');
+      initialTab.classList.add('text-orange', 'dark:text-nature');
+      initialTab.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
+      initialTab.querySelector('.tab-indicator')?.classList.add('scale-x-100');
+    }
   }
 }

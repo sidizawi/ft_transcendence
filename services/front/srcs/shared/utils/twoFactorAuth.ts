@@ -1,11 +1,14 @@
 import { i18n } from '../i18n';
 import { TokenManager } from './token';
 
+const host = window.location.hostname;
+const AUTH_API_URL = `http://${host}:3000/auth`;
+
 export class TwoFactorAuth {
   static async enable(userId: string): Promise<{ success: boolean }> {
     try {
       // Request 2FA setup
-      const setupResponse = await fetch('http://localhost:3000/auth/2fa/email/setup', {
+      const setupResponse = await fetch(`${AUTH_API_URL}/2fa/email/send`, {
         method: 'POST',
         headers: TokenManager.getAuthHeaders(),
         credentials: 'include',
@@ -29,7 +32,7 @@ export class TwoFactorAuth {
   static async disable(userId: string): Promise<{ success: boolean }> {
     try {
       // Request 2FA disable setup
-      const setupResponse = await fetch('http://localhost:3000/auth/2fa/email/setup', {
+      const setupResponse = await fetch(`${AUTH_API_URL}/2fa/email/send`, {
         method: 'POST',
         headers: TokenManager.getAuthHeaders(),
         credentials: 'include',
@@ -120,7 +123,7 @@ export class TwoFactorAuth {
           loadingSpinner?.classList.remove('hidden');
           verifyText?.classList.add('hidden');
 
-          const response = await fetch('http://localhost:3000/auth/2fa/email/verify', {
+          const response = await fetch(`${AUTH_API_URL}/2fa/email/verify`, {
             method: 'POST',
             headers: TokenManager.getAuthHeaders(),
             credentials: 'include',
