@@ -95,6 +95,48 @@ async function profileRoutes(fastify, options) {
 
 		reply.code(200).send(formattedGames);
   	});
+
+	fastify.get('/gamestats', async (request, reply) => {
+		await request.jwtVerify();
+		const userId = request.user.id;
+
+		const games = fastify.db.prepare('SELECT * FROM game WHERE playerid_1 = ? OR playerid_2 = ?').all(userId, userId);
+
+		if (games.length === 0 || !games) {
+			return reply.code(404).send({ error: 'No games found' });
+		}
+
+		const stats = {
+			totalGames: games.length,
+			wins: games.filter(game => game.player_win === (game.playerid_1 === userId ? game.username_1 : game.username_2)).length,
+			losses: games.filter(game => game.player_lost === (game.playerid_1 === userId ? game.username_1 : game.username_2)).length,
+			winrate: 0
+		};
+		stats.winrate = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
+		
+		reply.code(200).send(stats);
+	});
+
+	fastify.get('/gamestats/:game', async (request, reply) => {
+		await request.jwtVerify();
+		const userId = request.user.id;
+		const gameType = request.params.game;
+		const games = fastify.db.prepare('SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?) AND game_type = ?').all(userId, userId, gameType);
+
+		if (games.length === 0 || !games) {
+			return reply.code(404).send({ error: 'No games found' });
+		}
+
+		const stats = {
+			totalGames: games.length,
+			wins: games.filter(game => game.player_win === (game.playerid_1 === userId ? game.username_1 : game.username_2)).length,
+			losses: games.filter(game => game.player_lost === (game.playerid_1 === userId ? game.username_1 : game.username_2)).length,
+			winrate: 0
+		};
+		stats.winrate = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
+		
+		reply.code(200).send(stats);
+	});
 }
 
 export default profileRoutes;
