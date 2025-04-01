@@ -2,17 +2,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import Fastify    from 'fastify';
-import db         from '../db.js';
-
-const fastify = Fastify({ logger: false });
-fastify.addHook('onResponse', (request, reply, done) => {
-	console.log(`${request.method} ${request.url} ${reply.statusCode}`);
-	done();
-});
-
-fastify.decorate('db', db);
-
 async function profileRoutes(fastify, options) {
 
 	fastify.post('/savegamestat', async (request, reply) => {
@@ -50,6 +39,62 @@ async function profileRoutes(fastify, options) {
 		reply.code(201).send({ message: 'Game saved' });
   	});
 
+	fastify.get('/gameshistory', async (request, reply) => {
+		await request.jwtVerify();
+		const userId = request.user.id;
+
+		const games = fastify.db.prepare('SELECT * FROM game WHERE playerid_1 = ? OR playerid_2 = ? ORDER BY date DESC').all(userId, userId);
+
+		if (games.length === 0 || !games) {
+			return reply.code(404).send({ error: 'No games found' });
+		}
+		
+		if (games.length > 10){
+			games.splice(10);
+		}
+		
+		const formattedGames = games.map(game => {
+			return {
+				id: game.id,
+				opponent: game.playerid_1 === userId ? game.username_2 : game.username_1,
+				score: game.playerid_1 === userId ? `${game.score_1}-${game.score_2}` : `${game.score_2}-${game.score_1}`,
+				playerWin: game.playerid_1 === userId ? game.player_win : game.player_lost,
+				game: game.game_type,
+				date: game.date
+			};
+		});
+
+		reply.code(200).send(formattedGames);
+  	});
+
+	fastify.get('/gameshistory/:game', async (request, reply) => {
+		await request.jwtVerify();
+		const userId = request.user.id;
+		const gameType = request.params.game;
+
+		const games = fastify.db.prepare('SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?) AND game_type = ? ORDER BY date DESC').all(userId, userId, gameType);
+		
+		if (games.length === 0 || !games) {
+			return reply.code(404).send({ error: 'No games found' });
+		}
+
+		if (games.length > 10){
+			games.splice(10);
+		}
+
+		const formattedGames = games.map(game => {
+			return {
+				id: game.id,
+				opponent: game.playerid_1 === userId ? game.username_2 : game.username_1,
+				score: game.playerid_1 === userId ? `${game.score_1}-${game.score_2}` : `${game.score_2}-${game.score_1}`,
+				playerWin: game.playerid_1 === userId ? game.player_win : game.player_lost,
+				game: game.game_type,
+				date: game.date
+			};
+		});
+
+		reply.code(200).send(formattedGames);
+  	});
 }
 
 export default profileRoutes;
