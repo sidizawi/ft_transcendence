@@ -5,7 +5,7 @@ dotenv.config();
 import Fastify    from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import db         from './db.js';
-import friendRoutes from './friend.js';
+import friendRoutes from './routes/friend.js';
 
 const fastify = Fastify({ logger: false });
 fastify.addHook('onResponse', (request, reply, done) => {

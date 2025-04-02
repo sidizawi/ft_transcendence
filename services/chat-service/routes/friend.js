@@ -2,17 +2,6 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
-import Fastify    from 'fastify';
-import db         from './db.js';
-
-const fastify = Fastify({ logger: false });
-fastify.addHook('onResponse', (request, reply, done) => {
-	console.log(`${request.method} ${request.url} ${reply.statusCode}`);
-	done();
-});
-
-fastify.decorate('db', db);
-
 async function friendRoutes(fastify, options) {
 
 	fastify.post('/add', async (request, reply) => {
