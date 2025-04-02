@@ -56,7 +56,6 @@ fastify.decorate('db', db);
 
 fastify.decorate('authenticate', async (request, reply) => {
     try {
-      // Vérifier le token JWT depuis le header Authorization
       await request.jwtVerify();
     } catch (err) {
       reply.code(401).send({ error: 'Non autorisé' });
