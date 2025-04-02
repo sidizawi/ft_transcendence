@@ -1,7 +1,7 @@
 import { i18n } from '../i18n';
 
 export class GoogleAuth {
-  private static clientId = '384843766911-jroec6gv4lgo54bpalfufa23va60jcc1.apps.googleusercontent.com';
+  private static clientId = '7142370808-1m08nmob1rbm7puodpu61tr1itsbff90.apps.googleusercontent.com';
   private static callback: ((response: any) => void) | null = null;
   private static initialized = false;
   private static retryCount = 0;
@@ -41,7 +41,7 @@ export class GoogleAuth {
         auto_select: false,
         cancel_on_tap_outside: true,
         ux_mode: 'popup',
-        allowed_parent_origin: ['http://localhost:8000', 'http://localhost:5173'],
+        allowed_parent_origin: ['http://localhost:8000'],
         context: 'signin'
       });
       this.initialized = true;

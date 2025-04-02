@@ -1,7 +1,7 @@
 import { TokenManager } from '../utils/token';
 import { Friend } from '../types/friend';
 
-const FRIEND_API_URL = 'http://localhost:3003/friend';
+const FRIEND_API_URL = 'http://localhost:3000/chat/friend';
 
 export class FriendService {
   static async addFriend(username: string) {
@@ -150,7 +150,7 @@ export class FriendService {
 
   static async getFriendsList(): Promise<Friend[]> {
     try {
-      const response = await fetch(`${FRIEND_API_URL}/list`, {
+      const response = await fetch(`${FRIEND_API_URL}/friendlist`, {
         headers: {
           'Authorization': `Bearer ${TokenManager.getToken()}`
         },

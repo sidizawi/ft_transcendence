@@ -4,6 +4,9 @@ import { i18n } from '../../shared/i18n';
 import { TokenManager } from '../../shared/utils/token';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 
+const host = window.location.hostname;
+const AUTH_API_URL = `http://${host}:3000/auth`;
+
 export class Auth {
   constructor(private onLogin: (user: User) => void) {
     GoogleAuth.initialize(this.handleGoogleResponse.bind(this));
@@ -13,12 +16,12 @@ export class Auth {
     try {
       const credential = response.credential;
       
-      const backendResponse = await fetch('http://localhost:3000/auth/google', {
+      const backendResponse = await fetch(`${AUTH_API_URL}/google/callback`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ credential }),
+        body: JSON.stringify({ id_token: credential }),
         credentials: 'include'
       });
 
@@ -52,7 +55,7 @@ export class Auth {
   private async handle2FAVerification(userId: string): Promise<boolean> {
     try {
       // Request OTP to be sent
-      const sendResponse = await fetch('http://localhost:3000/auth/2fa/email/send', {
+      const sendResponse = await fetch(`${AUTH_API_URL}/2fa/email/send`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -82,7 +85,7 @@ export class Auth {
           }
 
           try {
-            const verifyResponse = await fetch('http://localhost:3000/auth/2fa/connection/verify', {
+            const verifyResponse = await fetch(`${AUTH_API_URL}/2fa/connection/verify`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -125,7 +128,7 @@ export class Auth {
         throw new Error('Login (email or username) and password are required');
       }
 
-      const response = await fetch('http://localhost:3000/auth/login', {
+      const response = await fetch(`${AUTH_API_URL}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -181,7 +184,7 @@ export class Auth {
         throw new Error('Username, email, and password are required');
       }
 
-      const response = await fetch('http://localhost:3000/auth/register', {
+      const response = await fetch(`${AUTH_API_URL}/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

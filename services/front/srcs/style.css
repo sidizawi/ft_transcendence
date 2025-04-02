@@ -85,72 +85,14 @@
   }
 }
 
-/* Chrome-like Tabs */
-.chrome-tabs {
-  @apply relative border-b border-gray-300 dark:border-gray-600;
-}
-
-.chrome-tabs::before {
-  content: '';
-  @apply absolute bottom-0 left-0 right-0 h-[1px] bg-gray-300 dark:bg-gray-600;
-}
-
-.chrome-tabs nav {
-  @apply relative flex items-end gap-1;
+/* Tab Transitions */
+.tab-indicator {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left;
 }
 
 .tab-button {
-  @apply relative px-6 py-3 text-base font-medium transition-all duration-200 outline-none;
-  height: 2.75rem;
-  margin-bottom: -1px;
-}
-
-.tab-button::before,
-.tab-button::after {
-  content: '';
-  @apply absolute bottom-0 w-[8px] h-[8px] transition-all duration-200;
-}
-
-.tab-button::before {
-  @apply left-[-8px];
-}
-
-.tab-button::after {
-  @apply right-[-8px];
-}
-
-.tab-button.active {
-  @apply bg-white dark:bg-gray-800 text-orange dark:text-nature border-b-2 border-orange dark:border-nature z-10;
-}
-
-.tab-button.active::before {
-  @apply bg-white dark:bg-gray-800;
-  border-bottom-right-radius: 8px;
-  box-shadow: 2px 2px 0 #fff;
-  .dark & {
-    box-shadow: 2px 2px 0 theme('colors.gray.800');
-  }
-}
-
-.tab-button.active::after {
-  @apply bg-white dark:bg-gray-800;
-  border-bottom-left-radius: 8px;
-  box-shadow: -2px 2px 0 #fff;
-  .dark & {
-    box-shadow: -2px 2px 0 theme('colors.gray.800');
-  }
-}
-
-.tab-button:not(.active) {
-  @apply text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300;
-}
-
-.tab-content {
-  @apply transition-all duration-300 ease-in-out opacity-0 scale-95;
-}
-
-.tab-content.active {
-  @apply opacity-100 scale-100;
+  transition: color 0.3s ease;
 }
 
 /* Google Sign-In Button Override */
