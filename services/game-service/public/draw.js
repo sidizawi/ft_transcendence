@@ -1,20 +1,18 @@
-// Add these constants at the top of the file
 export const BUTTON_WIDTH = 300;
 export const BUTTON_HEIGHT = 60;
-export const BUTTON_MARGIN = 30;  // Space between buttons
+export const BUTTON_MARGIN = 30;
 
-// Button positions
 export const SINGLE_PLAYER_BUTTON = {
-    x: 0,  // Will be calculated relative to canvas center
+    x: 0,
     y: -110,
-    text: "(1) Single Player",
+    text: "Single Player",
     textY: -70
 };
 
 export const TWO_PLAYER_BUTTON = {
-    x: 0,  // Will be calculated relative to canvas center
+    x: 0,
     y: -20,
-    text: "(2) Two Players",
+    text: "Two Players",
     textY: 20
 };
 
@@ -32,19 +30,27 @@ export const MAIN_MENU_BUTTON = {
     textY: 110
 };
 
+export const ONLINE_BUTTON = {
+    x: 0,
+    y: 70,
+    text: "Online",
+    textY: 110
+};
+
 export const drawMenu = (state) => {
-    const { ctx, canvas, hoverSinglePlayer, hoverTwoPlayers, winner, gamePlayed, hoverPlayAgain, hoverMainMenu } = state;
+    const { ctx, canvas, hoverSinglePlayer, hoverTwoPlayers, winner, gamePlayed, hoverPlayAgain, hoverMainMenu, hoverOnline } = state;
     
-    // Calculate the center and button positions
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
     
-    // Set actual button positions relative to center
     const singlePlayerX = centerX + SINGLE_PLAYER_BUTTON.x - BUTTON_WIDTH/2;
     const singlePlayerY = centerY + SINGLE_PLAYER_BUTTON.y;
     
     const twoPlayerX = centerX + TWO_PLAYER_BUTTON.x - BUTTON_WIDTH/2;
     const twoPlayerY = centerY + TWO_PLAYER_BUTTON.y;
+
+    const onlineX = centerX + ONLINE_BUTTON.x - BUTTON_WIDTH/2;
+    const onlineY = centerY + ONLINE_BUTTON.y;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     
@@ -54,7 +60,6 @@ export const drawMenu = (state) => {
         ctx.textAlign = "center";
         ctx.fillText("Pong Game", centerX, centerY - 200);
 
-        // Single player button
         if (hoverSinglePlayer) {
             ctx.fillStyle = "yellow";
         } else {
@@ -65,7 +70,6 @@ export const drawMenu = (state) => {
         ctx.lineWidth = 2;
         ctx.strokeRect(singlePlayerX, singlePlayerY, BUTTON_WIDTH, BUTTON_HEIGHT);
 
-        // Two player button
         if (hoverTwoPlayers) {
             ctx.fillStyle = "yellow";
         } else {
@@ -73,6 +77,14 @@ export const drawMenu = (state) => {
         }
         ctx.fillText(TWO_PLAYER_BUTTON.text, centerX, centerY + TWO_PLAYER_BUTTON.textY);
         ctx.strokeRect(twoPlayerX, twoPlayerY, BUTTON_WIDTH, BUTTON_HEIGHT);
+        
+        if (hoverOnline) {
+            ctx.fillStyle = "yellow";
+        } else {
+            ctx.fillStyle = "white";
+        }
+        ctx.fillText(ONLINE_BUTTON.text, centerX, centerY + ONLINE_BUTTON.textY);
+        ctx.strokeRect(onlineX, onlineY, BUTTON_WIDTH, BUTTON_HEIGHT);
     }
     else
     {
@@ -94,7 +106,6 @@ export const drawMenu = (state) => {
         ctx.lineWidth = 2;
         ctx.strokeRect(playAgainX, playAgainY, BUTTON_WIDTH, BUTTON_HEIGHT);
         
-        // Main Menu button
         const mainMenuX = centerX + MAIN_MENU_BUTTON.x - BUTTON_WIDTH/2;
         const mainMenuY = centerY + MAIN_MENU_BUTTON.y;
         
@@ -163,3 +174,40 @@ function sendPaddlePosition(state, side) {
         }));
     }
 }
+
+export function drawWaitingScreen(state) {
+    const { ctx, canvas } = state;
+    
+    // Clear canvas
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw waiting message
+    ctx.font = "30px Arial";
+    ctx.fillStyle = "white";
+    ctx.textAlign = "center";
+    ctx.fillText("Waiting for an opponent...", canvas.width/2, canvas.height/2 - 50);
+    
+    // Draw animated spinner
+    const now = Date.now();
+    const angle = (now % 2000) / 2000 * Math.PI * 2;
+    
+    // Draw spinner circle
+    ctx.beginPath();
+    ctx.arc(canvas.width/2, canvas.height/2 + 30, 25, 0, Math.PI * 2);
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.lineWidth = 3;
+    ctx.stroke();
+    
+    // Draw spinner indicator
+    ctx.beginPath();
+    ctx.arc(canvas.width/2, canvas.height/2 + 30, 25, angle, angle + Math.PI/4);
+    ctx.strokeStyle = 'white';
+    ctx.lineWidth = 4;
+    ctx.stroke();
+    
+    // Continue animation
+    if (state.waitingOpponent) {
+      state.gameLoopId = requestAnimationFrame(() => drawWaitingScreen(state));
+    }
+  }

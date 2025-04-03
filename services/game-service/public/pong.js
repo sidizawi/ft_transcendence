@@ -1,7 +1,7 @@
 import Ball from "../shared/Ball.js";
 import Paddle from "../shared/Paddle.js";
 import { handleKeyDown, handleKeyUp, handleMouseMove, handleClick } from "./events.js";
-import { drawMenu, gameLoop } from "./draw.js";
+import { drawMenu, gameLoop, drawWaitingScreen } from "./draw.js";
 
 
 const BALL_SIZE = 10;
@@ -28,10 +28,12 @@ const state = {
     hoverTwoPlayers: false,
     hoverPlayAgain: false,
     hoverMainMenu: false,
+    hoverOnline: false,
     gameLoopId: null,
     aiInterval: null,
     aiKeys: {},
-    ws: null
+    ws: null,
+    waitingOpponent: false,
 };
 
 function stopGame(winner, state) {
@@ -86,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
         if (data.type === 'gameStarted') {
             state.gameStarted = true;
             state.singlePlayer = data.mode === 'singlePlayer';
-            // Reset scores on client-side (server will reset them too)
             state.leftPlayerScore = 0;
             state.rightPlayerScore = 0;
             if (!state.animationRunning) {
@@ -114,6 +115,13 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         else if (data.type === 'gameOver') {
             stopGame(data.winner, state);
+        }
+        else if (data.type === 'waitingOpponent') {
+            cancelAnimationFrame(state.gameLoopId);
+            state.waitingOpponent = true;
+            state.gameStarted = false;
+            state.gamePlayed = false;
+            drawWaitingScreen(state);
         }
     }
     document.addEventListener("keydown", (event) => handleKeyDown(event, state));
