@@ -3,6 +3,9 @@ import { GameStats } from '../../shared/types/game';
 import { i18n } from '../../shared/i18n';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 
+const host = window.location.hostname;
+const API_URL = `http://${host}:3000`;
+
 export class Profile {
   constructor(private user: User, private onLogout: () => void) {}
 
@@ -26,7 +29,7 @@ export class Profile {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await fetch('http://localhost:3000/upload/avatar', {
+      const response = await fetch(`${API_URL}/upload/avatar`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -57,7 +60,7 @@ export class Profile {
       if (result.success) {
         this.user.twoFactorEnabled = !this.user.twoFactorEnabled;
         
-        const response = await fetch('http://localhost:3000/auth/refresh', {
+        const response = await fetch(`${API_URL}/auth/refresh`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
