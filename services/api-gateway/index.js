@@ -35,14 +35,11 @@ fastify.register(fastifyHttpProxy, {
   prefix: '/game'
 });
 
-<<<<<<< HEAD
 fastify.register(fastifyHttpProxy, {
 	upstream: 'http://chat-service:3003',
 	prefix: '/chat'
 });
 
-=======
->>>>>>> dd4be25 (JWT token for login/register works)
 fastify.listen({ port: 3000, host: '0.0.0.0' }, (err, address) => {
   if (err) {
 	fastify.log.error(err);
