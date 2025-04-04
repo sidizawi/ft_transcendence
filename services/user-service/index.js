@@ -4,6 +4,7 @@ import db         	from './db.js';
 import fastifyJwt 	from '@fastify/jwt';
 import fastifyCors 	from '@fastify/cors';
 import profileRoutes from './routes/profile.js';
+import statsRoutes from './routes/stats.js';
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ fastify.register(fastifyCors, {
 fastify.decorate('db', db);
 
 fastify.register(profileRoutes, { prefix: '/profile' });
+fastify.register(statsRoutes, { prefix: '/stats' });
 
 /// SERVER ///
 fastify.listen({ port: 3004, host: '0.0.0.0' }, (err, address) => {
