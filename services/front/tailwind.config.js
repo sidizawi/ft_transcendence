@@ -14,7 +14,7 @@ export default {
         'orange-light': '#F4A582',
         'orange-lighter': '#FCDBC7',
         'orange-lightest': '#FEF0E8',
-        'cream': '#FFFAF6',
+        'cream': '#F5F5DC',
         // Dark mode nature palette
         'nature-lightest': '#DAD7CD',
         'nature-light': '#A3B18A',
