@@ -7,6 +7,7 @@ WORKDIR /app/data
 VOLUME /app/data
 
 COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+COPY init.sh /init.sh
+RUN chmod +x /entrypoint.sh /init.sh
 
 ENTRYPOINT ["/entrypoint.sh"]
