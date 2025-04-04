@@ -1,4 +1,5 @@
 import { User } from '../../shared/types/user';
+import { GameStats } from '../../shared/types/game';
 import { i18n } from '../../shared/i18n';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 
@@ -78,21 +79,84 @@ export class Profile {
     }
   }
 
-  private renderStats(wins: number, losses: number, totalGames: number): string {
+  private renderGameStats(stats: GameStats): string {
+    const winRate = ((stats.wins / (stats.wins + stats.losses)) * 100) || 0;
+    
     return `
-      <div class="grid grid-cols-3 gap-4 mt-6">
-        <div class="bg-green-100 dark:bg-green-800/30 p-4 rounded-lg text-center">
-          <p class="text-2xl font-bold text-green-600 dark:text-green-400">${wins}</p>
-          <p class="text-sm text-green-800 dark:text-green-200">${i18n.t('stats.wins')}</p>
+      <div class="space-y-6">
+        <!-- Main Stats -->
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-green-100 dark:bg-green-800/30 p-4 rounded-lg text-center">
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400">${stats.wins}</p>
+            <p class="text-sm text-green-800 dark:text-green-200">${i18n.t('stats.wins')}</p>
+          </div>
+          <div class="bg-red-100 dark:bg-red-800/30 p-4 rounded-lg text-center">
+            <p class="text-2xl font-bold text-red-600 dark:text-red-400">${stats.losses}</p>
+            <p class="text-sm text-red-800 dark:text-red-200">${i18n.t('stats.losses')}</p>
+          </div>
+          <div class="bg-blue-100 dark:bg-blue-800/30 p-4 rounded-lg text-center">
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${stats.totalGames}</p>
+            <p class="text-sm text-blue-800 dark:text-blue-200">${i18n.t('stats.totalGames')}</p>
+          </div>
+          <div class="bg-purple-100 dark:bg-purple-800/30 p-4 rounded-lg text-center">
+            <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">${winRate.toFixed(1)}%</p>
+            <p class="text-sm text-purple-800 dark:text-purple-200">${i18n.t('stats.winRate')}</p>
+          </div>
         </div>
-        <div class="bg-red-100 dark:bg-red-800/30 p-4 rounded-lg text-center">
-          <p class="text-2xl font-bold text-red-600 dark:text-red-400">${losses}</p>
-          <p class="text-sm text-red-800 dark:text-red-200">${i18n.t('stats.losses')}</p>
+
+        <!-- Additional Stats -->
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Rank & ELO -->
+          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.rank')}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">#${stats.rank || '-'}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.elo')}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.elo || '-'}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Streak -->
+          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.currentStreak')}</p>
+                <p class="text-xl font-bold ${stats.streak?.type === 'win' ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}">
+                  ${stats.streak?.current || 0}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.bestStreak')}</p>
+                <p class="text-xl font-bold text-orange dark:text-nature">${stats.streak?.best || 0}</p>
+              </div>
+            </div>
+          </div>
         </div>
-        <div class="bg-blue-100 dark:bg-blue-800/30 p-4 rounded-lg text-center">
-          <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${totalGames}</p>
-          <p class="text-sm text-blue-800 dark:text-blue-200">${i18n.t('stats.totalGames')}</p>
-        </div>
+
+        <!-- Recent Games -->
+        ${stats.history ? `
+          <div class="mt-6">
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">${i18n.t('stats.recentGames')}</h4>
+            <div class="space-y-2">
+              ${stats.history.slice(0, 5).map(game => `
+                <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <span class="w-2 h-2 rounded-full ${game.result === 'win' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                    <span class="text-gray-900 dark:text-white">${game.opponent}</span>
+                  </div>
+                  <div class="flex items-center space-x-4">
+                    ${game.score ? `<span class="text-gray-600 dark:text-gray-400">${game.score}</span>` : ''}
+                    <span class="text-sm text-gray-500 dark:text-gray-400">${game.date}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }
@@ -102,6 +166,48 @@ export class Profile {
       console.error('No user data available');
       return '<div class="text-center text-red-600">Error: No user data available</div>';
     }
+
+    const mockPongStats: GameStats = {
+      wins: 42,
+      losses: 28,
+      totalGames: 70,
+      winRate: 60,
+      rank: 123,
+      elo: 1850,
+      streak: {
+        current: 3,
+        best: 8,
+        type: 'win'
+      },
+      history: [
+        { date: '2025-03-15', result: 'win', opponent: 'Player1', score: '11-8' },
+        { date: '2025-03-14', result: 'win', opponent: 'Player2', score: '11-6' },
+        { date: '2025-03-14', result: 'win', opponent: 'Player3', score: '11-9' },
+        { date: '2025-03-13', result: 'loss', opponent: 'Player4', score: '9-11' },
+        { date: '2025-03-13', result: 'win', opponent: 'Player5', score: '11-7' }
+      ]
+    };
+
+    const mockConnect4Stats: GameStats = {
+      wins: 35,
+      losses: 25,
+      totalGames: 60,
+      winRate: 58.3,
+      rank: 89,
+      elo: 1720,
+      streak: {
+        current: 2,
+        best: 6,
+        type: 'win'
+      },
+      history: [
+        { date: '2025-03-15', result: 'win', opponent: 'Player6' },
+        { date: '2025-03-14', result: 'win', opponent: 'Player7' },
+        { date: '2025-03-14', result: 'loss', opponent: 'Player8' },
+        { date: '2025-03-13', result: 'win', opponent: 'Player9' },
+        { date: '2025-03-13', result: 'loss', opponent: 'Player10' }
+      ]
+    };
 
     return `
       <div class="max-w-4xl mx-auto">
@@ -180,7 +286,7 @@ export class Profile {
               <!-- Pong Stats -->
               <div class="tab-content active" data-tab="pong">
                 <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Pong Dashboard</h3>
-                ${this.renderStats(this.user.stats.wins, this.user.stats.losses, this.user.stats.totalGames)}
+                ${this.renderGameStats(mockPongStats)}
 
                 <!-- Tournament Button - Only in Pong tab -->
                 <div class="mt-8">
@@ -192,8 +298,8 @@ export class Profile {
 
               <!-- Connect4 Stats -->
               <div class="tab-content hidden" data-tab="connect4">
-                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Connect4 Dashboard</h3>
-                ${this.renderStats(15, 8, 23)}
+                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Connect 4 Dashboard</h3>
+                ${this.renderGameStats(mockConnect4Stats)}
               </div>
             </div>
 

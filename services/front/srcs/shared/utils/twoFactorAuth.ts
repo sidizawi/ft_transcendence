@@ -123,7 +123,7 @@ export class TwoFactorAuth {
           loadingSpinner?.classList.remove('hidden');
           verifyText?.classList.add('hidden');
 
-          const response = await fetch(`${AUTH_API_URL}/2fa/email/verify`, {
+          const response = await fetch(`${AUTH_API_URL}/2fa/switch/verify`, {
             method: 'POST',
             headers: TokenManager.getAuthHeaders(),
             credentials: 'include',
