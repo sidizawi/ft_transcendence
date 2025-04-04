@@ -40,6 +40,11 @@ fastify.register(fastifyHttpProxy, {
 	prefix: '/chat'
 });
 
+fastify.register(fastifyHttpProxy, {
+	upstream: 'http://user-service:3004',
+	prefix: '/user'
+});
+
 fastify.listen({ port: 3000, host: '0.0.0.0' }, (err, address) => {
   if (err) {
 	fastify.log.error(err);

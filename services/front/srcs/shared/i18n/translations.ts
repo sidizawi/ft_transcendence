@@ -15,7 +15,13 @@ export const translations = {
       stats: {
         wins: 'Siege',
         losses: 'Niederlagen',
-        totalGames: 'Spiele Gesamt'
+        totalGames: 'Spiele Gesamt',
+        winRate: 'Gewinnrate',
+        rank: 'Rang',
+        elo: 'ELO',
+        currentStreak: 'Aktuelle Serie',
+        bestStreak: 'Beste Serie',
+        recentGames: 'Letzte Spiele'
       },
       enable2FA: '2FA aktivieren',
       disable2FA: '2FA deaktivieren',
@@ -82,7 +88,13 @@ export const translations = {
       stats: {
         wins: 'Wins',
         losses: 'Losses',
-        totalGames: 'Total Games'
+        totalGames: 'Total Games',
+        winRate: 'Win Rate',
+        rank: 'Rank',
+        elo: 'ELO',
+        currentStreak: 'Current Streak',
+        bestStreak: 'Best Streak',
+        recentGames: 'Recent Games'
       },
       enable2FA: 'Enable 2FA',
       disable2FA: 'Disable 2FA',
@@ -149,7 +161,13 @@ export const translations = {
       stats: {
         wins: 'Victoires',
         losses: 'Défaites',
-        totalGames: 'Total des parties'
+        totalGames: 'Total des parties',
+        winRate: 'Taux de victoire',
+        rank: 'Rang',
+        elo: 'ELO',
+        currentStreak: 'Série actuelle',
+        bestStreak: 'Meilleure série',
+        recentGames: 'Parties récentes'
       },
       enable2FA: 'Activer 2FA',
       disable2FA: 'Désactiver 2FA',
@@ -216,7 +234,13 @@ export const translations = {
       stats: {
         wins: 'Overwinningen',
         losses: 'Nederlagen',
-        totalGames: 'Totaal gespeeld'
+        totalGames: 'Totaal gespeeld',
+        winRate: 'Winstpercentage',
+        rank: 'Rang',
+        elo: 'ELO',
+        currentStreak: 'Huidige Reeks',
+        bestStreak: 'Beste Reeks',
+        recentGames: 'Recente Spellen'
       },
       enable2FA: '2FA inschakelen',
       disable2FA: '2FA uitschakelen',

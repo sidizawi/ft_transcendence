@@ -221,3 +221,4 @@ fastify.listen({ port: 3002, host: '0.0.0.0' }, (err, address) => {
   }
   console.log(`🎮 Game Service running at ${address}`);
 });
+

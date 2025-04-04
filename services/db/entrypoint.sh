@@ -19,10 +19,50 @@ CREATE TABLE IF NOT EXISTS friend (
     username2 TEXT NOT NULL,
     status TEXT NOT NULL,
     PRIMARY KEY (userid1, userid2),
-    FOREIGN KEY (userid1) REFERENCES users(id),
-    FOREIGN KEY (userid2) REFERENCES users(id),
-    FOREIGN KEY (username1) REFERENCES users(username),
-    FOREIGN KEY (username2) REFERENCES users(username)
+    FOREIGN KEY (userid1) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (userid2) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (username1) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (username2) REFERENCES users(username) ON DELETE CASCADE 
+);
+CREATE TABLE IF NOT EXISTS game (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    playerid_1 INTEGER NOT NULL,
+    playerid_2 INTEGER NOT NULL,
+    username_1 TEXT NOT NULL,
+    username_2 TEXT NOT NULL,
+    game_type TEXT NOT NULL,
+    score_1 INTEGER NOT NULL,
+    score_2 INTEGER NOT NULL,
+    player_win TEXT NOT NULL,
+    player_lost TEXT NOT NULL,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (playerid_1) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (playerid_2) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (username_1) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (username_2) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (player_win) REFERENCES users(username) ON DELETE CASCADE,
+    FOREIGN KEY (player_lost) REFERENCES users(username) ON DELETE CASCADE
+);
+CREATE TABLE IF NOT EXISTS messages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    sender_id INTEGER NOT NULL,
+    recipient_id INTEGER NOT NULL,
+    content TEXT NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_read BOOLEAN DEFAULT 0,
+    FOREIGN KEY (sender_id) REFERENCES users(id),
+    FOREIGN KEY (recipient_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS conversations (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user1_id INTEGER NOT NULL,
+    user2_id INTEGER NOT NULL,
+    last_message_id INTEGER,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user1_id) REFERENCES users(id),
+    FOREIGN KEY (user2_id) REFERENCES users(id),
+    FOREIGN KEY (last_message_id) REFERENCES messages(id)
 );
 EOF
 
@@ -38,4 +78,6 @@ EOF
 
 
 # Pour garder le conteneur en vie:
-exec tail -f /dev/null
+#exec tail -f /dev/null
+
+sh /init.sh
