@@ -5,6 +5,9 @@ import fastifyJwt 	from '@fastify/jwt';
 import fastifyCors 	from '@fastify/cors';
 import profileRoutes from './routes/profile.js';
 import statsRoutes from './routes/stats.js';
+import fastifyStatic from '@fastify/static';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 dotenv.config();
 
@@ -13,6 +16,9 @@ fastify.addHook('onResponse', (request, reply, done) => {
 	console.log(`${request.method} ${request.url} ${reply.statusCode}`);
 	done();
 });
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 
@@ -23,6 +29,12 @@ fastify.register(fastifyCors, {
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 });
+
+await fastify.register(fastifyStatic, {
+	root: path.join(__dirname, '../../uploads/avatars'),
+	prefix: '/avatars/'					 // URL prefix (e.g., http://localhost:3000/avatars/)
+});
+
 
 fastify.decorate('db', db);
 

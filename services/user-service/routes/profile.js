@@ -31,11 +31,8 @@ async function profileRoutes(fastify, options) {
 		await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET });
 	}
 
-	// Servir les fichiers statiques pour les avatars
-	fastify.register(require('@fastify/static'), {
-		root: path.join(__dirname, '../../uploads/avatars'),
-		prefix: '/avatars/'					 // URL prefix (e.g., http://localhost:3000/avatars/)
-	});
+	// // Servir les fichiers statiques pour les avatars
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
