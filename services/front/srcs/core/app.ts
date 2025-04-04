@@ -3,6 +3,7 @@ import { BrowserCompatibility } from '../shared/utils/browserCheck';
 import { Menu } from '../shared/components/menu';
 import { Auth } from '../features/auth/auth';
 import { Profile } from '../features/profile/profile';
+import { Settings } from '../features/profile/settings';
 import { Router } from '../shared/utils/routing';
 import { User } from '../shared/types/user';
 import { Tournament } from '../features/tournament/tournament';
@@ -85,6 +86,8 @@ export class TranscendenceApp {
         return 'Home';
       case '/profile':
         return i18n.t('profile');
+      case '/profile/settings':
+        return i18n.t('settings');
       case '/tournament':
         return i18n.t('tournament');
       case '/pong':
@@ -149,6 +152,13 @@ export class TranscendenceApp {
           const profile = new Profile(this.state.user, () => this.handleLogout());
           main.innerHTML = profile.render();
           profile.setupEventListeners();
+        }
+        break;
+      case '/profile/settings':
+        if (this.state.user) {
+          const settings = new Settings(this.state.user);
+          main.innerHTML = settings.render();
+          settings.setupEventListeners();
         }
         break;
       case '/tournament':
