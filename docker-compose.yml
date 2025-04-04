@@ -83,24 +83,24 @@ services:
   #  depends_on:
   #    - db
 
-  #chat-service:
-  #  build: ./services/chat-service
-  #  ports:
-  #    - "3003:3003"
-  #  volumes:
-  #    - ./services/front:/app/front
-  #    - database:/app/data
-  #  develop:
-  #    watch:
-  #      - action: sync
-  #        path: ./services/chat-service
-  #        target: /app
-  #        ignore:
-  #          - node_modules/
-  #  env_file:
-  #    - .env
-  #  depends_on:
-  #    - db
+  chat-service:
+   build: ./services/chat-service
+   ports:
+     - "3003:3003"
+   volumes:
+     - ./services/front:/app/front
+     - database:/app/data
+   develop:
+     watch:
+       - action: sync
+         path: ./services/chat-service
+         target: /app
+         ignore:
+           - node_modules/
+   env_file:
+     - .env
+   depends_on:
+     - db
 
   user-service:
     build: ./services/user-service

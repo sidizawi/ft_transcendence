@@ -34,14 +34,12 @@ export class FriendsList {
   private updateView() {
     if (this.container) {
       this.container.innerHTML = this.render();
-      requestAnimationFrame(() => {
-        this.setupEventListeners();
-      });
+      this.setupEventListeners();
     }
   }
 
   private getFilteredFriends() {
-    return this.friends.filter(friend =>
+    return this.friends.filter(friend => 
       friend.username2.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
   }
@@ -54,17 +52,28 @@ export class FriendsList {
     return `
       <div class="fixed bottom-4 right-4 flex flex-col items-end z-50">
         <!-- Friends Tab -->
-        <div 
+        <button 
           id="friends-tab" 
-          class="w-40 h-10 bg-orange-light dark:bg-nature text-white dark:text-nature-lightest rounded-t-md cursor-pointer flex items-center justify-center hover:bg-orange-light/90 dark:hover:bg-nature/90 transition-colors"
+          class="w-40 h-10 bg-gray-800 rounded-t-md cursor-pointer flex items-center justify-center hover:bg-gray-700 transition-colors text-white"
+          aria-expanded="${this.isOpen ? 'true' : 'false'}"
+          aria-controls="friends-panel"
         >
-          <span>${i18n.t('friends')} (${acceptedFriends.length})</span>
-        </div>
+          <span class="flex items-center gap-2">
+            <span>${i18n.t('friends')}</span>
+            ${receivingRequests.length > 0 ? `
+              <span class="bg-red-600 px-2 py-0.5 rounded-full text-xs">
+                ${receivingRequests.length}
+              </span>
+            ` : ''}
+          </span>
+        </button>
 
         <!-- Friends Panel -->
         <div 
           id="friends-panel" 
-          class="w-80 bg-orange-lightest dark:bg-forest-darker rounded-md shadow-lg p-4 ${this.isOpen ? '' : 'hidden'}"
+          class="w-80 bg-gray-800 rounded-md shadow-lg p-4 ${this.isOpen ? '' : 'hidden'}"
+          role="region"
+          aria-labelledby="friends-tab"
         >
           <!-- Search -->
           <input
@@ -72,26 +81,26 @@ export class FriendsList {
             id="friends-search"
             placeholder="${i18n.t('searchFriends')}"
             value="${this.searchQuery}"
-            class="w-full p-2 mb-3 rounded bg-orange-lighter dark:bg-forest text-orange-darker dark:text-nature-lightest placeholder-orange-light/70 dark:placeholder-nature/50 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
+            class="w-full p-2 mb-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
           ${receivingRequests.length > 0 ? `
             <!-- Requests -->
             <div class="mb-4">
-              <h3 class="text-sm text-orange-darker/70 dark:text-nature/70 mb-1">— ${i18n.t('requests')} —</h3>
+              <h3 class="text-sm text-gray-400 mb-1">— ${i18n.t('requests')} —</h3>
               ${receivingRequests.map(friend => `
                 <div class="flex items-center justify-between mb-2">
-                  <span class="text-orange-darker dark:text-nature-lightest">${friend.username2}</span>
+                  <span class="text-white">${friend.username2}</span>
                   <div class="space-x-2">
                     <button 
-                      class="bg-orange dark:bg-nature hover:bg-orange-darker dark:hover:bg-nature/90 px-2 py-1 rounded text-sm text-white dark:text-nature-lightest transition-colors"
+                      class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-sm text-white transition-colors"
                       data-action="accept"
                       data-username="${friend.username2}"
                     >
                       ${i18n.t('accept')}
                     </button>
                     <button 
-                      class="bg-red-500 dark:bg-red-600/80 hover:bg-red-600 dark:hover:bg-red-600 px-2 py-1 rounded text-sm text-white transition-colors"
+                      class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-sm text-white transition-colors"
                       data-action="reject"
                       data-username="${friend.username2}"
                     >
@@ -105,31 +114,30 @@ export class FriendsList {
 
           <!-- Friends List -->
           <div class="mb-4">
-            <h3 class="text-sm text-orange-darker/70 dark:text-nature/70 mb-1">— ${i18n.t('friendsList')} —</h3>
+            <h3 class="text-sm text-gray-400 mb-1">— ${i18n.t('friendsList')} —</h3>
             ${acceptedFriends.map(friend => `
               <div class="flex items-center justify-between mb-2 group">
-                <span class="text-orange-darker dark:text-nature-lightest">${friend.username2}</span>
+                <span class="text-white flex items-center">
+                  <span class="mr-2">●</span> <!-- Online indicator -->
+                  ${friend.username2}
+                </span>
                 <div class="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button 
-                    class="text-orange dark:text-nature hover:text-orange-darker dark:hover:text-nature/90 transition-colors"
+                    class="text-gray-400 hover:text-white transition-colors"
                     data-action="chat"
                     data-username="${friend.username2}"
                     data-userid="${friend.userid2}"
                     title="${i18n.t('chat')}"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
+                    <span class="text-xl">💬</span>
                   </button>
                   <button 
-                    class="text-red-500 hover:text-red-600 transition-colors"
+                    class="text-gray-400 hover:text-white transition-colors"
                     data-action="block"
                     data-username="${friend.username2}"
                     title="${i18n.t('block')}"
                   >
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                    </svg>
+                    <span class="text-xl">🚫</span>
                   </button>
                 </div>
               </div>
@@ -140,7 +148,7 @@ export class FriendsList {
           <div class="text-center">
             <button 
               id="add-friend-button"
-              class="text-orange dark:text-nature hover:text-orange-darker dark:hover:text-nature/90 transition-colors"
+              class="text-blue-400 hover:underline transition-colors"
             >
               [+] ${i18n.t('addFriend')}
             </button>
@@ -158,37 +166,37 @@ export class FriendsList {
 
     return `
       <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-          <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+        <div class="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold mb-4 text-white">
             ${i18n.t('addFriend')}
           </h3>
           <form id="add-friend-form" class="space-y-4">
             <div>
-              <label for="friend-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+              <label for="friend-username" class="block text-sm font-medium text-gray-300 mb-1">
                 ${i18n.t('enterUsername')}
               </label>
               <input 
                 type="text" 
                 id="friend-username"
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange dark:focus:ring-nature focus:border-transparent"
+                class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="${i18n.t('enterUsername')}"
                 required
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
             </div>
-            <div id="add-friend-error" class="text-red-500 dark:text-red-400 text-sm hidden"></div>
+            <div id="add-friend-error" class="text-red-400 text-sm hidden"></div>
             <div class="flex justify-end space-x-3">
               <button 
                 type="button"
                 id="cancel-add-friend"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                class="px-4 py-2 text-gray-400 hover:text-white"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 ${i18n.t('cancel')}
               </button>
               <button 
                 type="submit"
-                class="px-4 py-2 bg-orange dark:bg-nature text-white dark:text-nature-lightest rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 relative"
+                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 relative"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 <span class="add-friend-text ${this.isAddingFriend ? 'invisible' : ''}">${i18n.t('add')}</span>
@@ -217,10 +225,10 @@ export class FriendsList {
     return `
       <div 
         id="chat-window" 
-        class="fixed bottom-4 right-72 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden"
+        class="fixed bottom-4 right-72 w-80 bg-gray-800 rounded-lg shadow-lg overflow-hidden"
       >
         <!-- Chat Header -->
-        <div class="bg-orange dark:bg-nature p-3 flex items-center justify-between">
+        <div class="bg-gray-700 p-3 flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <img 
               src="https://ui-avatars.com/api/?name=${encodeURIComponent(friend.username2)}&background=random" 
@@ -230,7 +238,7 @@ export class FriendsList {
             <span class="text-white font-semibold">${friend.username2}</span>
           </div>
           <button 
-            class="text-white hover:text-gray-200 close-chat"
+            class="text-gray-400 hover:text-white close-chat"
             data-username="${friend.username2}"
           >
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -302,7 +310,6 @@ export class FriendsList {
             this.chatOpen = true;
             this.updateView();
             
-            // Initialize chat after rendering
             const chatContent = document.getElementById(`chat-content-${userId}`);
             if (chatContent) {
               if (this.activeChat) {
@@ -331,6 +338,21 @@ export class FriendsList {
     friendsTab?.addEventListener('click', () => {
       this.isOpen = !this.isOpen;
       this.updateView();
+    });
+
+    // Close panel when clicking outside
+    document.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      const friendsPanel = document.getElementById('friends-panel');
+      const friendsTabButton = document.getElementById('friends-tab');
+
+      if (this.isOpen && 
+          friendsPanel && 
+          !friendsPanel.contains(target) && 
+          !friendsTabButton?.contains(target)) {
+        this.isOpen = false;
+        this.updateView();
+      }
     });
 
     addFriendButton?.addEventListener('click', () => {

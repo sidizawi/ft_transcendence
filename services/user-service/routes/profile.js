@@ -19,7 +19,7 @@ const transporter = nodemailer.createTransport({
 	}
 });
 
-const upload = multer({ dest: './uploads/avatars/' });
+// const upload = multer({ dest: './uploads/avatars/' });
 
 const verificationCodes = {};
 
@@ -197,31 +197,31 @@ async function profileRoutes(fastify, options) {
 	  });
 
 	
-	// Route pour uploader un avatar
-	fastify.post('/profile/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
-		await request.jwtVerify();
-		const userId = request.user.id;
-		const userName = request.user.username;
-		if (!request.file) {
-			return reply.code(400).send({ error: 'No file uploaded' });
-		}
+	// // Route pour uploader un avatar
+	// fastify.post('/profile/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
+	// 	await request.jwtVerify();
+	// 	const userId = request.user.id;
+	// 	const userName = request.user.username;
+	// 	if (!request.file) {
+	// 		return reply.code(400).send({ error: 'No file uploaded' });
+	// 	}
 
-		const validMimeTypes = ['image/jpeg', 'image/png'];
-		if (!validMimeTypes.includes(request.file.mimetype)) {
-			fs.unlinkSync(request.file.path);
-			return reply.code(400).send({ error: 'Invalid file type' });
-		}
+	// 	const validMimeTypes = ['image/jpeg', 'image/png'];
+	// 	if (!validMimeTypes.includes(request.file.mimetype)) {
+	// 		fs.unlinkSync(request.file.path);
+	// 		return reply.code(400).send({ error: 'Invalid file type' });
+	// 	}
 
-		const fileExtension = path.extname(request.file.originalname);
-		const newFileName = `${userId}-${userName}${fileExtension}`;
-		const newFilePath = path.join('uploads/avatars', newFileName);
+	// 	const fileExtension = path.extname(request.file.originalname);
+	// 	const newFileName = `${userId}-${userName}${fileExtension}`;
+	// 	const newFilePath = path.join('uploads/avatars', newFileName);
 
-		fs.renameSync(request.file.path, newFilePath);
+	// 	fs.renameSync(request.file.path, newFilePath);
 
-		fastify.db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(newFilePath, userId);
+	// 	fastify.db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(newFilePath, userId);
 
-		reply.code(200).send({ message: 'Avatar uploaded successfully', avatarPath: newFilePath });
-	});
+	// 	reply.code(200).send({ message: 'Avatar uploaded successfully', avatarPath: newFilePath });
+	// });
 
 	// Inclure l'URL de l'avatar dans les réponses utilisateur
 	fastify.get('/profile', async (request, reply) => {
