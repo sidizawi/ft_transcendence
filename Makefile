@@ -2,7 +2,7 @@
 PROJECT_NAME = ft_transcendence
 
 # Commandes Docker
-DOCKER_COMPOSE = docker compose
+DOCKER_COMPOSE = docker-compose
 DOCKER = docker
 
 # Services définis dans docker-compose.yml

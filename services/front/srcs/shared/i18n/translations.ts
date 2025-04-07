@@ -38,6 +38,8 @@ export const translations = {
       continueWith: 'Weiter mit Google',
       games: {
         playVsAI: 'Gegen KI spielen',
+        playLocal: 'Gegen lokalen Spieler spielen',
+        playTournament: 'Gegen Turnier spielen',
         playVsFriend: 'Gegen Freund spielen',
         pong: {
           title: 'Pong',
@@ -105,6 +107,8 @@ export const translations = {
       continueWith: 'Continue with Google',
       games: {
         playVsAI: 'Play vs AI',
+        playLocal: 'Play Local',
+        playTournament: 'Play Tournament',
         playVsFriend: 'Play vs Friend',
         pong: {
           title: 'Pong',
@@ -173,6 +177,8 @@ export const translations = {
       games: {
         playVsAI: 'Jouer contre l\'IA',
         playVsFriend: 'Jouer contre un ami',
+        playLocal: 'Jouer localement',
+        playTournament: 'Jouer dans un tournoi',
         pong: {
           title: 'Pong',
           description: 'Jeu Pong classique - Défiez vos amis ou jouez contre l\'IA.'
@@ -240,6 +246,8 @@ export const translations = {
       games: {
         playVsAI: 'Speel tegen AI',
         playVsFriend: 'Speel tegen vriend',
+        playLocal: 'Speel lokaal',
+        playTournament: 'Speel toernooi',
         pong: {
           title: 'Pong',
           description: 'Klassiek Pong spel - Daag je vrienden uit of speel tegen AI.'

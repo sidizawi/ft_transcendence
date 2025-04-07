@@ -25,6 +25,7 @@ export class TranscendenceApp {
   private router: Router;
   private header: Header;
   private footer: Footer;
+  private connect4: Connect4;
   private friendsList: FriendsList | null = null;
 
   constructor() {
@@ -40,6 +41,7 @@ export class TranscendenceApp {
 
     this.menu = new Menu(this.isLoggedIn(), () => this.handleLogout());
     this.auth = new Auth((user) => this.handleLogin(user));
+    this.connect4 = new Connect4();
     this.router = new Router(
       () => this.renderCurrentPage(),
       () => this.isLoggedIn()
@@ -160,8 +162,8 @@ export class TranscendenceApp {
         main.innerHTML = pong.render();
         break;
       case '/connect4':
-        const connect4 = new Connect4();
-        main.innerHTML = connect4.render();
+        main.innerHTML = this.connect4.render();
+        this.connect4.setupConnect4FirstPageEventListener();
         break;
       case '/signin':
         main.innerHTML = this.auth.renderSignIn();

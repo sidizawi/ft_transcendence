@@ -20,6 +20,7 @@ To Do:
 		- Check browsers (old) compatibility
 		- Accessibility (?)
 		- SSR (?)
+		- when reload on page it should load that page: /profile and reload => go to profile, not home
 
 	Friends:
 		- Everything

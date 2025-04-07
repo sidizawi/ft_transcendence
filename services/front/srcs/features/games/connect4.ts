@@ -1,6 +1,57 @@
 import { i18n } from '../../shared/i18n';
 
 export class Connect4 {
+
+  private cols = 7;
+  private rows = 6;
+  private cellSize = 100;
+  private coinPadding = 10;
+  private coinRadius = (this.cellSize - this.coinPadding * 2) / 2;
+  private canvas = null as HTMLCanvasElement | null;
+  private ctx = null as CanvasRenderingContext2D | null;
+
+  setupCanvasEventListener() {
+    this.canvas = document.getElementById('connect4Canvas') as HTMLCanvasElement;
+    this.ctx = this.canvas!.getContext('2d');
+    this.canvas!.addEventListener('click', (event) => {
+      const rect = this.canvas!.getBoundingClientRect();
+      const x = event.clientX - rect.left;
+      const col = Math.floor(x / this.cellSize);
+      console.log(`Column clicked: ${col}`);
+    });
+  }
+
+  drawBoard() {
+    this.ctx!.fillStyle = '#0077b6';
+    this.ctx!.fillRect(0, 0, this.canvas!.width, this.canvas!.height);
+    
+    // Draw empty slots as white circles
+    for (let row = 0; row < this.rows; row++) {
+      for (let col = 0; col < this.cols; col++) {
+        const x = col * this.cellSize + this.cellSize / 2;
+        const y = row * this.cellSize + this.cellSize / 2;
+        
+        this.ctx!.beginPath();
+        this.ctx!.arc(x, y, this.coinRadius, 0, Math.PI * 2);
+        this.ctx!.fillStyle = '#f4f4f4';
+        this.ctx!.fill();
+        this.ctx!.closePath();
+      }
+    }
+  }
+  
+  setupConnect4FirstPageEventListener() {
+    const playLocal = document.getElementById('playLocal') as HTMLInputElement;
+    
+    playLocal.addEventListener('click', () => {
+      console.log('Play Local clicked');
+      const main = document.querySelector('main');
+      main!.innerHTML = `<canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>`;
+      this.setupCanvasEventListener();
+      this.drawBoard();
+    });
+  }
+
   render(): string {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
@@ -12,11 +63,17 @@ export class Connect4 {
             ${i18n.t('games.connect4.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            <button id="playLocal" class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              ${i18n.t('games.playLocal')}
+            </button>
+            <button id="playVsFriend" class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
+              ${i18n.t('games.playVsFriend')}
+            </button>
+            <button id="playVsAI" class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
               ${i18n.t('games.playVsAI')}
             </button>
-            <button class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
-              ${i18n.t('games.playVsFriend')}
+            <button id="playTournament" class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
+              ${i18n.t('games.playTournament')}
             </button>
           </div>
         </div>
