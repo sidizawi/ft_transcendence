@@ -10,6 +10,35 @@ export class Connect4 {
   private canvas = null as HTMLCanvasElement | null;
   private ctx = null as CanvasRenderingContext2D | null;
 
+  drop(x: number, y: number, coinColor: string, targetY: number, speed: number) {
+    // Redraw the board on each frame
+    this.drawBoard();
+    
+    // Draw the coin at its current position
+    this.ctx!.beginPath();
+    this.ctx!.arc(x, y, this.coinRadius, 0, Math.PI * 2);
+    this.ctx!.fillStyle = coinColor;
+    this.ctx!.fill();
+    this.ctx!.closePath();
+    
+    // Continue animating until the coin reaches the target y-coordinate
+    if (y < targetY) {
+      y += speed;
+      if (y > targetY) y = targetY;
+      requestAnimationFrame(() => this.drop(x, y, coinColor, targetY, speed));
+    }
+  }
+
+  animateCoin(column: number, targetRow: number, coinColor = 'red') {
+    // Calculate fixed x position based on the column and initial y (starting above the board)
+    const x = column * this.cellSize + this.cellSize / 2;
+    let y = -this.coinRadius;  // Start above the canvas
+    const targetY = targetRow * this.cellSize + this.cellSize / 2;
+    const speed = 5; // pixels per frame
+
+    requestAnimationFrame(() => this.drop(x, y, coinColor, targetY, speed));
+  }
+
   setupCanvasEventListener() {
     this.canvas = document.getElementById('connect4Canvas') as HTMLCanvasElement;
     this.ctx = this.canvas!.getContext('2d');
@@ -17,7 +46,7 @@ export class Connect4 {
       const rect = this.canvas!.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const col = Math.floor(x / this.cellSize);
-      console.log(`Column clicked: ${col}`);
+      this.animateCoin(col, 5, 'red');
     });
   }
 
