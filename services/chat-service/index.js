@@ -1,10 +1,10 @@
-// Inscription, login,...
 import dotenv from 'dotenv';
 dotenv.config();
 
 import Fastify from 'fastify';
-import fastifyIO from 'fastify-socket.io'; // Corrected import
+import fastifyIO from 'fastify-socket.io';
 import fastifyJwt from '@fastify/jwt';
+import cors from '@fastify/cors'; // Import the CORS plugin
 import db from './db.js';
 import friendRoutes from './routes/friend.js';
 import messageRoutes from './routes/message.js';
@@ -18,24 +18,28 @@ fastify.addHook('onResponse', (request, reply, done) => {
 // const fastify = Fastify({ logger: true });
 
 await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET });
+
+await fastify.register(cors, {
+    origin: "http://localhost:8000",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true
+});
+
 await fastify.register(fastifyIO, {
     cors: {
-        origin: "*",
-        methods: ["GET", "POST"],
+        origin: "http://localhost:8000",
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization"],
         credentials: true
     }
 });
 
 fastify.decorate('db', db);
-
-// Initialize users online map
 fastify.decorate('usersOnline', new Map());
-
-// Register routes
 fastify.register(friendRoutes, { prefix: '/friend' });
 fastify.register(messageRoutes, { prefix: '/message' });
 
-// Set up Socket.IO handlers
 fastify.ready().then(() => {
     setupSocketHandlers(fastify);
     console.log('Socket.IO is ready');

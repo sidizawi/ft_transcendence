@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS users (
     username TEXT NOT NULL UNIQUE,
     email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
+    avatar TEXT DEFAULT NULL,
     game_data TEXT DEFAULT '{}',
     is_two_factor_enabled INTEGER DEFAULT 0,
     status BOOLEAN NOT NULL CHECK (status IN (0, 1)) DEFAULT 0

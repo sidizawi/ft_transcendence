@@ -4,6 +4,7 @@ import { Menu } from '../shared/components/menu';
 import { Auth } from '../features/auth/auth';
 import { Profile } from '../features/profile/profile';
 import { Settings } from '../features/profile/settings';
+import { Friends } from '../features/friends/friends';
 import { Router } from '../shared/utils/routing';
 import { User } from '../shared/types/user';
 import { Tournament } from '../features/tournament/tournament';
@@ -13,7 +14,6 @@ import { Header } from '../shared/components/header';
 import { Footer } from '../shared/components/footer';
 import { i18n } from '../shared/i18n';
 import { TokenManager } from '../shared/utils/token';
-import { FriendsList } from '../shared/components/friends';
 
 export class TranscendenceApp {
   private state = {
@@ -26,7 +26,6 @@ export class TranscendenceApp {
   private router: Router;
   private header: Header;
   private footer: Footer;
-  private friendsList: FriendsList | null = null;
 
   constructor() {
     // Check if user is already logged in
@@ -35,7 +34,6 @@ export class TranscendenceApp {
       const user = TokenManager.getUserFromToken();
       if (user) {
         this.state.user = user;
-        this.friendsList = new FriendsList();
       }
     }
 
@@ -65,7 +63,6 @@ export class TranscendenceApp {
 
   private handleLogin(user: User) {
     this.state.user = user;
-    this.friendsList = new FriendsList();
     this.menu = new Menu(true, () => this.handleLogout());
     this.initializeApp();
     this.router.navigateTo('/profile');
@@ -74,7 +71,6 @@ export class TranscendenceApp {
   private handleLogout() {
     TokenManager.removeToken();
     this.state.user = null;
-    this.friendsList = null;
     this.menu = new Menu(false, () => this.handleLogout());
     this.initializeApp();
     this.router.navigateTo('/signin');
@@ -87,7 +83,9 @@ export class TranscendenceApp {
       case '/profile':
         return i18n.t('profile');
       case '/profile/settings':
-        return i18n.t('settings');
+        return i18n.t('editProfile');
+      case '/friends':
+        return i18n.t('friends');
       case '/tournament':
         return i18n.t('tournament');
       case '/pong':
@@ -104,16 +102,13 @@ export class TranscendenceApp {
   }
 
   private initializeApp() {
-    const menuOverlay = document.getElementById('menu-overlay');
-    const wasMenuOpen = menuOverlay?.classList.contains('active');
-
     document.body.innerHTML = `
       <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         ${this.header.render(this.getPageTitle(window.location.pathname))}
 
         <div 
           id="menu-overlay" 
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm ${wasMenuOpen ? 'active' : ''}"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm"
         >
           <div class="menu-box bg-transparent rounded-lg">
             ${this.menu.getMenuItems()}
@@ -124,7 +119,6 @@ export class TranscendenceApp {
         </main>
 
         ${this.footer.render()}
-        ${this.friendsList ? this.friendsList.render() : ''}
       </div>
     `;
 
@@ -135,7 +129,6 @@ export class TranscendenceApp {
     this.header.setupEventListeners();
     this.footer.setupEventListeners();
     this.menu.setupEventListeners();
-    this.friendsList?.setupEventListeners();
   }
 
   private renderCurrentPage() {
@@ -159,6 +152,13 @@ export class TranscendenceApp {
           const settings = new Settings(this.state.user);
           main.innerHTML = settings.render();
           settings.setupEventListeners();
+        }
+        break;
+      case '/friends':
+        if (this.state.user) {
+          const friends = new Friends();
+          main.innerHTML = friends.render();
+          friends.setupEventListeners();
         }
         break;
       case '/tournament':

@@ -65,7 +65,7 @@ async function statsRoutes(fastify, options) {
 		const games = fastify.db.prepare(query).all(...params);
 		
 		if (games.length === 0 || !games) {
-			return reply.code(404).send({ error: 'No games found' });
+			return reply.code(204).send({ msg: 'No content' });
 		}
 
 		if (games.length > 10){
@@ -106,7 +106,7 @@ async function statsRoutes(fastify, options) {
 		const games = fastify.db.prepare(query).all(...params);
 
 		if (games.length === 0 || !games) {
-			return reply.code(404).send({ error: 'No games found' });
+			return reply.code(204).send({ msg: 'No content' });
 		}
 
 		const stats = {

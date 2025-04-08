@@ -10,13 +10,26 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import refreshRoutes from './routes/refresh.js';
 
+
+import multipart from '@fastify/multipart';
+
+
 dotenv.config();
 
-const fastify = Fastify({ logger: false });
-fastify.addHook('onResponse', (request, reply, done) => {
-	console.log(`${request.method} ${request.url} ${reply.statusCode}`);
-	done();
+// const fastify = Fastify({ logger: false });
+// fastify.addHook('onResponse', (request, reply, done) => {
+	// 	console.log(`${request.method} ${request.url} ${reply.statusCode}`);
+	// 	done();
+	// });
+const fastify = Fastify({ logger: true });
+
+
+// Enregistrer le plugin pour gérer multipart/form-data
+await fastify.register(multipart, {
+limits: { fileSize: 5 * 1024 * 1024 } // optionnel, ici 5MB max
 });
+
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

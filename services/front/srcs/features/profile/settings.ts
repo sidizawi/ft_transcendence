@@ -1,9 +1,10 @@
 import { User } from '../../shared/types/user';
 import { i18n } from '../../shared/i18n';
 import { Router } from '../../shared/utils/routing';
+import { AvatarService } from '../../shared/services/avatarService';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user`;
+const USER_API_URL = `http://${host}:3000/user/profile/profile`;
 
 export class Settings {
   constructor(private user: User) {}
@@ -14,45 +15,20 @@ export class Settings {
 
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert('Please select an image file');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Image size should be less than 5MB');
-      return;
-    }
-
     try {
-      const formData = new FormData();
-      formData.append('avatar', file);
-
-      const response = await fetch(`${USER_API_URL}/profile/avatar`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: formData
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to upload avatar');
-      }
-
-      const data = await response.json();
+      const data = await AvatarService.uploadAvatar(file);
       this.user.avatar = data.avatarPath;
       this.render();
       this.setupEventListeners();
     } catch (error) {
       console.error('Avatar upload error:', error);
-      alert('Failed to upload avatar');
+      alert(error instanceof Error ? error.message : 'Failed to upload avatar');
     }
   }
 
   private async handleUsernameUpdate(username: string) {
     try {
-      const response = await fetch(`${USER_API_URL}/profile/username`, {
+      const response = await fetch(`${USER_API_URL}/username`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -75,10 +51,69 @@ export class Settings {
     }
   }
 
-  private async handleEmailUpdate(email: string) {
+  private createVerificationModal(title: string): HTMLDivElement {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+      <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+          ${title}
+        </h3>
+        <p class="text-gray-600 dark:text-gray-400 mb-6">
+          ${i18n.t('checkEmailForCode')}
+        </p>
+        <div class="mb-4">
+          <input 
+            type="text" 
+            id="verification-code"
+            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange dark:focus:ring-nature focus:border-transparent"
+            placeholder="000000"
+            maxlength="6"
+            pattern="[0-9]*"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+          >
+        </div>
+        <div class="flex justify-end space-x-4">
+          <button 
+            id="cancel-verification"
+            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+          >
+            ${i18n.t('cancel')}
+          </button>
+          <button 
+            id="verify-code"
+            class="px-4 py-2 bg-orange dark:bg-nature text-white dark:text-nature-lightest rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 relative"
+            disabled
+          >
+            <span class="verify-text">${i18n.t('verify')}</span>
+            <span class="loading-spinner hidden">
+              <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            </span>
+          </button>
+        </div>
+        <div id="verification-message" class="mt-4 hidden"></div>
+      </div>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+  }
+
+  private showVerificationError(message: string) {
+    const messageDiv = document.getElementById('verification-message');
+    if (messageDiv) {
+      messageDiv.textContent = message;
+      messageDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400';
+      messageDiv.classList.remove('hidden');
+    }
+  }
+
+  private async handleEmailUpdate(email: string): Promise<boolean> {
     try {
-      // Request verification code
-      const requestResponse = await fetch(`${USER_API_URL}/profile/email/request`, {
+      const requestResponse = await fetch(`${USER_API_URL}/email/request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -92,43 +127,94 @@ export class Settings {
         throw new Error(data.error || 'Failed to request email verification');
       }
 
-      // Prompt for verification code
-      const code = prompt('Please enter the verification code sent to your email:');
-      if (!code) return;
+      return new Promise((resolve) => {
+        const modal = this.createVerificationModal(i18n.t('emailVerification'));
+        const verifyButton = document.getElementById('verify-code') as HTMLButtonElement;
+        const cancelButton = document.getElementById('cancel-verification');
+        const codeInput = document.getElementById('verification-code') as HTMLInputElement;
+        const loadingSpinner = modal.querySelector('.loading-spinner');
+        const verifyText = modal.querySelector('.verify-text');
 
-      // Verify code
-      const verifyResponse = await fetch(`${USER_API_URL}/profile/email/verify`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({ verificationCode: code })
+        const updateVerifyButton = () => {
+          const code = codeInput.value.trim();
+          verifyButton.disabled = !code || code.length !== 6 || !/^\d+$/.test(code);
+        };
+
+        const handleVerify = async () => {
+          const code = codeInput.value.trim();
+          if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
+            this.showVerificationError(i18n.t('invalid2FACode'));
+            return;
+          }
+
+          try {
+            verifyButton.disabled = true;
+            loadingSpinner?.classList.remove('hidden');
+            verifyText?.classList.add('hidden');
+
+            const verifyResponse = await fetch(`${USER_API_URL}/email/verify`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({ verificationCode: code })
+            });
+
+            if (verifyResponse.ok) {
+              const data = await verifyResponse.json();
+              localStorage.setItem('token', data.token);
+              modal.remove();
+              resolve(true);
+              window.location.href = '/profile';
+            } else {
+              const data = await verifyResponse.json();
+              this.showVerificationError(data.error || i18n.t('invalid2FACode'));
+              codeInput.value = '';
+              codeInput.focus();
+            }
+          } catch (error) {
+            console.error('Email verification error:', error);
+            this.showVerificationError(i18n.t('verificationError'));
+          } finally {
+            verifyButton.disabled = false;
+            loadingSpinner?.classList.add('hidden');
+            verifyText?.classList.remove('hidden');
+          }
+        };
+
+        codeInput?.addEventListener('input', updateVerifyButton);
+        verifyButton?.addEventListener('click', handleVerify);
+        codeInput?.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && !verifyButton.disabled) {
+            e.preventDefault();
+            handleVerify();
+          }
+        });
+
+        cancelButton?.addEventListener('click', () => {
+          modal.remove();
+          resolve(false);
+        });
+
+        setTimeout(() => codeInput?.focus(), 100);
       });
-
-      if (!verifyResponse.ok) {
-        const data = await verifyResponse.json();
-        throw new Error(data.error || 'Failed to verify email');
-      }
-
-      const data = await verifyResponse.json();
-      localStorage.setItem('token', data.token);
-      window.location.href = '/profile';
     } catch (error) {
       console.error('Email update error:', error);
       alert(error instanceof Error ? error.message : 'Failed to update email');
+      return false;
     }
   }
 
-  private async handlePasswordUpdate(password: string) {
+  private async handlePasswordUpdate(password: string): Promise<boolean> {
     try {
-      // Request verification code
-      const requestResponse = await fetch(`${USER_API_URL}/profile/password/request`, {
+      const requestResponse = await fetch(`${USER_API_URL}/password/request`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
+        },
+        body: JSON.stringify({ newPassword: password })
       });
 
       if (!requestResponse.ok) {
@@ -136,32 +222,83 @@ export class Settings {
         throw new Error(data.error || 'Failed to request password verification');
       }
 
-      // Prompt for verification code
-      const code = prompt('Please enter the verification code sent to your email:');
-      if (!code) return;
+      return new Promise((resolve) => {
+        const modal = this.createVerificationModal(i18n.t('passwordVerification'));
+        const verifyButton = document.getElementById('verify-code') as HTMLButtonElement;
+        const cancelButton = document.getElementById('cancel-verification');
+        const codeInput = document.getElementById('verification-code') as HTMLInputElement;
+        const loadingSpinner = modal.querySelector('.loading-spinner');
+        const verifyText = modal.querySelector('.verify-text');
 
-      // Verify code and update password
-      const verifyResponse = await fetch(`${USER_API_URL}/profile/password/verify`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
-        },
-        body: JSON.stringify({
-          verificationCode: code,
-          newPassword: password
-        })
+        const updateVerifyButton = () => {
+          const code = codeInput.value.trim();
+          verifyButton.disabled = !code || code.length !== 6 || !/^\d+$/.test(code);
+        };
+
+        const handleVerify = async () => {
+          const code = codeInput.value.trim();
+          if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
+            this.showVerificationError(i18n.t('invalid2FACode'));
+            return;
+          }
+
+          try {
+            verifyButton.disabled = true;
+            loadingSpinner?.classList.remove('hidden');
+            verifyText?.classList.add('hidden');
+
+            const verifyResponse = await fetch(`${USER_API_URL}/password/verify`, {
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+              },
+              body: JSON.stringify({
+                verificationCode: code,
+                newPassword: password
+              })
+            });
+
+            if (verifyResponse.ok) {
+              modal.remove();
+              resolve(true);
+              window.location.href = '/profile';
+            } else {
+              const data = await verifyResponse.json();
+              this.showVerificationError(data.error || i18n.t('invalid2FACode'));
+              codeInput.value = '';
+              codeInput.focus();
+            }
+          } catch (error) {
+            console.error('Password verification error:', error);
+            this.showVerificationError(i18n.t('verificationError'));
+          } finally {
+            verifyButton.disabled = false;
+            loadingSpinner?.classList.add('hidden');
+            verifyText?.classList.remove('hidden');
+          }
+        };
+
+        codeInput?.addEventListener('input', updateVerifyButton);
+        verifyButton?.addEventListener('click', handleVerify);
+        codeInput?.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter' && !verifyButton.disabled) {
+            e.preventDefault();
+            handleVerify();
+          }
+        });
+
+        cancelButton?.addEventListener('click', () => {
+          modal.remove();
+          resolve(false);
+        });
+
+        setTimeout(() => codeInput?.focus(), 100);
       });
-
-      if (!verifyResponse.ok) {
-        const data = await verifyResponse.json();
-        throw new Error(data.error || 'Failed to verify and update password');
-      }
-
-      window.location.href = '/profile';
     } catch (error) {
       console.error('Password update error:', error);
       alert(error instanceof Error ? error.message : 'Failed to update password');
+      return false;
     }
   }
 
@@ -174,15 +311,21 @@ export class Settings {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
+    let changesCount = 0;
+    if (username !== this.user.username) changesCount++;
+    if (email !== this.user.email) changesCount++;
+    if (password) changesCount++;
+
+    if (changesCount > 1) {
+      alert('Please update only one field at a time: username, email, or password');
+      return;
+    }
+
     if (username !== this.user.username) {
       await this.handleUsernameUpdate(username);
-    }
-
-    if (email !== this.user.email) {
+    } else if (email !== this.user.email) {
       await this.handleEmailUpdate(email);
-    }
-
-    if (password) {
+    } else if (password) {
       await this.handlePasswordUpdate(password);
     }
   }
@@ -260,6 +403,10 @@ export class Settings {
                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
+
+                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                  Note: You can only update one field at a time (username, email, or password)
+                </p>
 
                 <div class="flex justify-center space-x-4 pt-6">
                   <a

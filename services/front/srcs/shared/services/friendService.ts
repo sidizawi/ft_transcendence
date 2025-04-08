@@ -1,7 +1,8 @@
 import { TokenManager } from '../utils/token';
 import { Friend } from '../types/friend';
 
-const FRIEND_API_URL = 'http://localhost:3000/chat/friend';
+const host = window.location.hostname;
+const FRIEND_API_URL = `http://${host}:3000/chat/friend`;
 
 export class FriendService {
   static async addFriend(username: string) {
@@ -76,30 +77,6 @@ export class FriendService {
     }
   }
 
-  static async deleteFriend(friendUsername: string) {
-    try {
-      const response = await fetch(`${FRIEND_API_URL}/delete`, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
-        body: JSON.stringify({ friendusername: friendUsername }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error);
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Delete friend error:', error);
-      throw error;
-    }
-  }
-
   static async blockFriend(friendUsername: string) {
     try {
       const response = await fetch(`${FRIEND_API_URL}/block`, {
@@ -150,66 +127,62 @@ export class FriendService {
 
   static async getFriendsList(): Promise<Friend[]> {
     try {
-      const response = await fetch(`${FRIEND_API_URL}/friendlist`, {
-        headers: {
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
-        credentials: 'include'
-      });
+      const [friendsResponse, receivingResponse] = await Promise.all([
+        fetch(`${FRIEND_API_URL}/friendlist`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
+        }),
+        fetch(`${FRIEND_API_URL}/receivinglist`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
+        })
+      ]);
 
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error);
+      if (!friendsResponse.ok || !receivingResponse.ok) {
+        throw new Error('Failed to fetch friends list');
       }
 
-      const data = await response.json();
-      return data.friendData || [];
+      const friendsData = await friendsResponse.json();
+      const receivingData = await receivingResponse.json();
+
+      // Convert the backend data format to our Friend type
+      const friends: Friend[] = [];
+
+      // Add accepted friends
+      if (friendsData.friendData) {
+        friendsData.friendData.forEach((friend: any) => {
+          friends.push({
+            userid1: TokenManager.getUserFromToken()?.id || '',
+            userid2: friend.id,
+            username1: TokenManager.getUserFromToken()?.username || '',
+            username2: friend.username,
+            status: 'accepted'
+          });
+        });
+      }
+
+      // Add receiving requests
+      if (receivingData.onlyUsername) {
+        receivingData.onlyUsername.forEach((friend: any) => {
+          friends.push({
+            userid1: TokenManager.getUserFromToken()?.id || '',
+            userid2: '',
+            username1: TokenManager.getUserFromToken()?.username || '',
+            username2: friend.username2,
+            status: 'receiving'
+          });
+        });
+      }
+
+      return friends;
     } catch (error) {
       console.error('Get friends list error:', error);
-      throw error;
-    }
-  }
-
-  static async getSendingList(): Promise<{ username2: string }[]> {
-    try {
-      const response = await fetch(`${FRIEND_API_URL}/sendinglist`, {
-        headers: {
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error);
-      }
-
-      const data = await response.json();
-      return data.onlyUsername || [];
-    } catch (error) {
-      console.error('Get sending list error:', error);
-      throw error;
-    }
-  }
-
-  static async getReceivingList(): Promise<{ username2: string }[]> {
-    try {
-      const response = await fetch(`${FRIEND_API_URL}/receivinglist`, {
-        headers: {
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error);
-      }
-
-      const data = await response.json();
-      return data.onlyUsername || [];
-    } catch (error) {
-      console.error('Get receiving list error:', error);
       throw error;
     }
   }

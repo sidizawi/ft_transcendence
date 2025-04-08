@@ -1,0 +1,118 @@
+import { TokenManager } from '../utils/token';
+import { GameStats } from '../types/game';
+
+const host = window.location.hostname;
+const STATS_API_URL = `http://${host}:3000/user/stats`;
+
+export class StatsService {
+  static async getGameStats(gameType: 'pong' | 'p4'): Promise<GameStats> {
+    try {
+      const [statsResponse, historyResponse] = await Promise.all([
+        fetch(`${STATS_API_URL}/gamestats/${gameType}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
+        }),
+        fetch(`${STATS_API_URL}/gameshistory/${gameType}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
+        })
+      ]);
+
+      // Default stats when no data is available (204) or error occurs
+      const defaultStats: GameStats = {
+        wins: 0,
+        losses: 0,
+        totalGames: 0,
+        winRate: 0,
+        rank: undefined,
+        elo: undefined,
+        streak: {
+          current: 0,
+          best: 0,
+          type: 'none'
+        },
+        history: []
+      };
+
+      // If either request returns 204 No Content, return default stats
+      if (statsResponse.status === 204 || historyResponse.status === 204) {
+        return defaultStats;
+      }
+
+      if (!statsResponse.ok || !historyResponse.ok) {
+        throw new Error('Failed to fetch game stats');
+      }
+
+      const stats = await statsResponse.json();
+      const history = await historyResponse.json();
+
+      // Calculate streak from history
+      let currentStreak = 0;
+      let bestStreak = 0;
+      let streakType: 'win' | 'loss' | 'none' = 'none';
+
+      if (history.length > 0) {
+        const firstResult = history[0].playerWin === history[0].opponent ? 'loss' : 'win';
+        streakType = firstResult;
+        currentStreak = 1;
+        bestStreak = 1;
+
+        for (let i = 1; i < history.length; i++) {
+          const result = history[i].playerWin === history[i].opponent ? 'loss' : 'win';
+          if (result === streakType) {
+            currentStreak++;
+            bestStreak = Math.max(bestStreak, currentStreak);
+          } else {
+            currentStreak = 1;
+            streakType = result;
+          }
+        }
+      }
+
+      return {
+        wins: stats.wins || 0,
+        losses: stats.losses || 0,
+        totalGames: stats.totalGames || 0,
+        winRate: stats.winrate || 0,
+        rank: stats.rank,
+        elo: stats.elo,
+        streak: {
+          current: currentStreak,
+          best: bestStreak,
+          type: streakType
+        },
+        history: history.map((game: any) => ({
+          date: new Date(game.date).toLocaleDateString(),
+          result: game.playerWin === game.opponent ? 'loss' : 'win',
+          opponent: game.opponent,
+          score: game.score || ''
+        }))
+      };
+    } catch (error) {
+      console.error('Error fetching game stats:', error);
+      // Return default stats on error
+      return {
+        wins: 0,
+        losses: 0,
+        totalGames: 0,
+        winRate: 0,
+        rank: undefined,
+        elo: undefined,
+        streak: {
+          current: 0,
+          best: 0,
+          type: 'none'
+        },
+        history: []
+      };
+    }
+  }
+}
