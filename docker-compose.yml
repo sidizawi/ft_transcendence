@@ -53,6 +53,8 @@ services:
     build: ./services/front
     ports:
       - 8000:8000
+    volumes:
+      -./services/user-service/uploads/avatars:/app/uploads/avatars
     depends_on:
       - api-gateway
       - auth-service
