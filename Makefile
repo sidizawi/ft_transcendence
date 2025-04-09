@@ -15,6 +15,8 @@ all: build up
 
 # Construire les images Docker
 build:
+	mkdir -p shared/avatars
+	chmod 777 shared/avatars
 	$(DOCKER_COMPOSE) build --no-cache
 
 # Lancer tous les services

@@ -54,7 +54,7 @@ services:
     ports:
       - 8000:8000
     volumes:
-      -./services/user-service/uploads/avatars:/app/uploads/avatars
+      - shared-avatars:/app/uploads/avatars
     depends_on:
       - api-gateway
       - auth-service
@@ -111,7 +111,7 @@ services:
     volumes:
       - ./services/front:/app/front
       - database:/app/data
-      - ./services/user-service/uploads/avatars:/app/uploads/avatars
+      - shared-avatars:/app/uploads/avatars
     develop:
       watch:
         - action: sync
@@ -131,3 +131,9 @@ volumes:
       type: none
       o: bind
       device: './database'
+  shared-avatars:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/shared/avatars
