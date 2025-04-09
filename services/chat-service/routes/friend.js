@@ -56,6 +56,40 @@ async function friendRoutes(fastify, options) {
 
 	});
 	
+	fastify.delete('/cancel', async (request, reply) => {
+		const { friendusername } = request.body;
+		if (!friendusername){
+			reply.code(400);
+			return { error: 'Friendusername needed'};
+		}
+	
+		await request.jwtVerify();
+		const actualid = request.user.id;
+	
+		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
+		const friendid = friendExists.id;
+	
+		const actualRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const friendRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
+	
+		if (actualRow.status !== 'sending' || friendRow.status !== 'receiving'){
+			reply.code(400);
+			return { error: 'Wrong relationship between friends'};
+		}
+	
+		fastify.db.prepare("DELETE FROM friend where (userid1, userid2)=(?, ?)").run(
+			actualid,
+			friendid
+		);
+		fastify.db.prepare("DELETE FROM friend where (userid1, userid2)=(?, ?)").run(
+			friendid,
+			actualid
+		);
+	
+		reply.code(201);
+		return { message: 'Friend request successfully cancelled'};
+	});
+
 	fastify.patch('/accept', async (request, reply) => {
 		const { friendusername } = request.body;
 		if (!friendusername){

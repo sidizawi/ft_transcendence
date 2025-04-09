@@ -94,7 +94,7 @@ async function statsRoutes(fastify, options) {
 		let query = 'SELECT * FROM game WHERE playerid_1 = ? OR playerid_2 = ?';
 		let params = [userId, userId];
 
-		if (gameType !== 'pong' && gameType !== 'p4') {
+		if (gameType && gameType !== 'pong' && gameType !== 'p4') {
 			return reply.code(400).send({ error: 'Invalid game type' });
 		}
 
