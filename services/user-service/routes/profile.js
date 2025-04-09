@@ -234,7 +234,8 @@ async function profileRoutes(fastify, options) {
 		user.avatarUrl = user.avatar ? `${request.protocol}://${request.hostname}/avatars/${path.basename(user.avatar)}` : null;
 
 		reply.code(200).send(user);
-
+		//FRONT END : <img src="http://localhost:3000/avatars/1-john_doe.png" alt="Profile avatar" />
+		//			  <img src={user.avatarUrl} alt={`Avatar de ${user.username}`} />
 
 		/*
 		user ressemble a :
