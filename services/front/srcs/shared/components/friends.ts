@@ -1,5 +1,5 @@
 import { User } from '../types/user';
-import { Friend, FriendStatus } from '../types/friend';
+import { FriendConnection } from '../types/friend';
 import { FriendService } from '../services/friendService';
 import { Chat } from './chat';
 import { i18n } from '../i18n';
@@ -8,7 +8,7 @@ export class FriendsList {
   private isOpen = false;
   private selectedFriend: string | null = null;
   private chatOpen = false;
-  private friends: Friend[] = [];
+  private friends: FriendConnection[] = [];
   private addFriendOpen = false;
   private activeChat: Chat | null = null;
   private isAddingFriend = false;
@@ -39,15 +39,25 @@ export class FriendsList {
   }
 
   private getFilteredFriends() {
-    return this.friends.filter(friend => 
-      friend.username2.toLowerCase().includes(this.searchQuery.toLowerCase())
+    return this.friends.filter(connection => 
+      connection.friend.username.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
   }
 
-  private renderFriendsList(): string {
+  private getAvatarUrl(username: string): string {
+    // Generate a random background color for each user based on their username
+    const colors = ['FF6B6B', '4ECDC4', 'FFD93D', '95E1D3', 'A8E6CF', 'DCD6F7'];
+    const colorIndex = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
+    const bgColor = colors[colorIndex];
+    
+    return `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=${bgColor}&color=fff&size=128`;
+  }
+
+  render(): string {
     const filteredFriends = this.getFilteredFriends();
-    const receivingRequests = filteredFriends.filter(f => f.status === 'receiving');
-    const acceptedFriends = filteredFriends.filter(f => f.status === 'accepted');
+    const incomingRequests = filteredFriends.filter(f => f.relationshipStatus === 'pending_incoming');
+    const outgoingRequests = filteredFriends.filter(f => f.relationshipStatus === 'pending_outgoing');
+    const acceptedFriends = filteredFriends.filter(f => f.relationshipStatus === 'accepted');
 
     return `
       <div class="fixed bottom-4 right-4 flex flex-col items-end z-50">
@@ -60,9 +70,9 @@ export class FriendsList {
         >
           <span class="flex items-center gap-2">
             <span>${i18n.t('friends')}</span>
-            ${receivingRequests.length > 0 ? `
+            ${incomingRequests.length > 0 ? `
               <span class="bg-red-600 px-2 py-0.5 rounded-full text-xs">
-                ${receivingRequests.length}
+                ${incomingRequests.length}
               </span>
             ` : ''}
           </span>
@@ -84,25 +94,32 @@ export class FriendsList {
             class="w-full p-2 mb-3 rounded bg-gray-700 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
 
-          ${receivingRequests.length > 0 ? `
-            <!-- Requests -->
+          ${incomingRequests.length > 0 ? `
+            <!-- Incoming Requests -->
             <div class="mb-4">
-              <h3 class="text-sm text-gray-400 mb-1">— ${i18n.t('requests')} —</h3>
-              ${receivingRequests.map(friend => `
-                <div class="flex items-center justify-between mb-2">
-                  <span class="text-white">${friend.username2}</span>
+              <h3 class="text-sm text-gray-400 mb-1">— ${i18n.t('incomingRequests')} —</h3>
+              ${incomingRequests.map(connection => `
+                <div class="flex items-center justify-between mb-2 p-2 hover:bg-gray-700/50 rounded-lg">
+                  <div class="flex items-center space-x-2">
+                    <img 
+                      src="${connection.friend.avatar || this.getAvatarUrl(connection.friend.username)}" 
+                      alt="${connection.friend.username}"
+                      class="w-8 h-8 rounded-full object-cover"
+                    >
+                    <span class="text-white">${connection.friend.username}</span>
+                  </div>
                   <div class="space-x-2">
                     <button 
                       class="bg-green-600 hover:bg-green-700 px-2 py-1 rounded text-sm text-white transition-colors"
                       data-action="accept"
-                      data-username="${friend.username2}"
+                      data-username="${connection.friend.username}"
                     >
                       ${i18n.t('accept')}
                     </button>
                     <button 
                       class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-sm text-white transition-colors"
                       data-action="reject"
-                      data-username="${friend.username2}"
+                      data-username="${connection.friend.username}"
                     >
                       ${i18n.t('reject')}
                     </button>
@@ -112,40 +129,83 @@ export class FriendsList {
             </div>
           ` : ''}
 
-          <!-- Friends List -->
-          <div class="mb-4">
-            <h3 class="text-sm text-gray-400 mb-1">— ${i18n.t('friendsList')} —</h3>
-            ${acceptedFriends.map(friend => `
-              <div class="flex items-center justify-between mb-2 group">
-                <span class="text-white flex items-center">
-                  <span class="mr-2">●</span> <!-- Online indicator -->
-                  ${friend.username2}
-                </span>
-                <div class="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          ${outgoingRequests.length > 0 ? `
+            <!-- Outgoing Requests -->
+            <div class="mb-4">
+              <h3 class="text-sm text-gray-400 mb-1">— ${i18n.t('outgoingRequests')} —</h3>
+              ${outgoingRequests.map(connection => `
+                <div class="flex items-center justify-between mb-2 p-2 hover:bg-gray-700/50 rounded-lg">
+                  <div class="flex items-center space-x-2">
+                    <img 
+                      src="${connection.friend.avatar || this.getAvatarUrl(connection.friend.username)}" 
+                      alt="${connection.friend.username}"
+                      class="w-8 h-8 rounded-full object-cover"
+                    >
+                    <span class="text-white">${connection.friend.username}</span>
+                  </div>
                   <button 
-                    class="text-gray-400 hover:text-white transition-colors"
-                    data-action="chat"
-                    data-username="${friend.username2}"
-                    data-userid="${friend.userid2}"
-                    title="${i18n.t('chat')}"
+                    class="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-sm text-white transition-colors"
+                    data-action="cancel"
+                    data-username="${connection.friend.username}"
                   >
-                    <span class="text-xl">💬</span>
-                  </button>
-                  <button 
-                    class="text-gray-400 hover:text-white transition-colors"
-                    data-action="block"
-                    data-username="${friend.username2}"
-                    title="${i18n.t('block')}"
-                  >
-                    <span class="text-xl">🚫</span>
+                    ${i18n.t('cancel')}
                   </button>
                 </div>
+              `).join('')}
+            </div>
+          ` : ''}
+
+          <!-- Friends List -->
+          <div>
+            <h3 class="text-sm text-gray-400 mb-1">— ${i18n.t('friendsList')} —</h3>
+            ${acceptedFriends.length > 0 ? `
+              <div class="space-y-2">
+                ${acceptedFriends.map(connection => `
+                  <div class="flex items-center justify-between p-2 hover:bg-gray-700/50 rounded-lg group">
+                    <div class="flex items-center space-x-3">
+                      <div class="relative">
+                        <img 
+                          src="${connection.friend.avatar || this.getAvatarUrl(connection.friend.username)}" 
+                          alt="${connection.friend.username}"
+                          class="w-8 h-8 rounded-full object-cover"
+                        >
+                        <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-gray-800 ${
+                          connection.friend.status === 'online' ? 'bg-green-500' : 
+                          connection.friend.status === 'away' ? 'bg-yellow-500' : 
+                          'bg-gray-500'
+                        }"></span>
+                      </div>
+                      <span class="text-white">${connection.friend.username}</span>
+                    </div>
+                    <div class="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <a 
+                        href="/chat/${connection.friend.id}"
+                        class="text-gray-400 hover:text-white transition-colors"
+                        title="${i18n.t('chat')}"
+                      >
+                        <span class="text-xl">💬</span>
+                      </a>
+                      <button 
+                        class="text-gray-400 hover:text-white transition-colors"
+                        data-action="block"
+                        data-username="${connection.friend.username}"
+                        title="${i18n.t('block')}"
+                      >
+                        <span class="text-xl">🚫</span>
+                      </button>
+                    </div>
+                  </div>
+                `).join('')}
               </div>
-            `).join('')}
+            ` : `
+              <p class="text-gray-400 text-center py-4">
+                ${i18n.t('noFriendsYet')}
+              </p>
+            `}
           </div>
 
           <!-- Add Friend Button -->
-          <div class="text-center">
+          <div class="text-center mt-4">
             <button 
               id="add-friend-button"
               class="text-blue-400 hover:underline transition-colors"
@@ -157,7 +217,6 @@ export class FriendsList {
       </div>
 
       ${this.renderAddFriendModal()}
-      ${this.renderChatWindow()}
     `;
   }
 
@@ -216,47 +275,6 @@ export class FriendsList {
     `;
   }
 
-  private renderChatWindow(): string {
-    if (!this.selectedFriend || !this.chatOpen) return '';
-
-    const friend = this.friends.find(f => f.username2 === this.selectedFriend);
-    if (!friend) return '';
-
-    return `
-      <div 
-        id="chat-window" 
-        class="fixed bottom-4 right-72 w-80 bg-gray-800 rounded-lg shadow-lg overflow-hidden"
-      >
-        <!-- Chat Header -->
-        <div class="bg-gray-700 p-3 flex items-center justify-between">
-          <div class="flex items-center space-x-3">
-            <img 
-              src="https://ui-avatars.com/api/?name=${encodeURIComponent(friend.username2)}&background=random" 
-              alt="${friend.username2}" 
-              class="w-8 h-8 rounded-full object-cover"
-            >
-            <span class="text-white font-semibold">${friend.username2}</span>
-          </div>
-          <button 
-            class="text-gray-400 hover:text-white close-chat"
-            data-username="${friend.username2}"
-          >
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Chat Content -->
-        <div class="h-96" id="chat-content-${friend.userid2}"></div>
-      </div>
-    `;
-  }
-
-  render(): string {
-    return this.renderFriendsList();
-  }
-
   private showAddFriendError(message: string) {
     const errorDiv = document.getElementById('add-friend-error');
     if (errorDiv) {
@@ -289,7 +307,7 @@ export class FriendsList {
     }
   }
 
-  private async handleFriendAction(action: string, username: string, userId?: string) {
+  private async handleFriendAction(action: string, username: string) {
     try {
       switch (action) {
         case 'accept':
@@ -298,33 +316,14 @@ export class FriendsList {
         case 'reject':
           await FriendService.rejectFriend(username);
           break;
+        case 'cancel':
+          await FriendService.cancelRequest(username);
+          break;
         case 'block':
           await FriendService.blockFriend(username);
           break;
-        case 'unblock':
-          await FriendService.unblockFriend(username);
-          break;
-        case 'chat':
-          if (userId) {
-            this.selectedFriend = username;
-            this.chatOpen = true;
-            this.updateView();
-            
-            const chatContent = document.getElementById(`chat-content-${userId}`);
-            if (chatContent) {
-              if (this.activeChat) {
-                this.activeChat.destroy();
-              }
-              this.activeChat = new Chat(userId, username);
-              chatContent.innerHTML = this.activeChat.render();
-              this.activeChat.setupEventListeners();
-            }
-          }
-          break;
       }
-      if (action !== 'chat') {
-        await this.loadFriends();
-      }
+      await this.loadFriends();
     } catch (error) {
       console.error(`Error handling friend action ${action}:`, error);
     }
@@ -340,7 +339,6 @@ export class FriendsList {
       this.updateView();
     });
 
-    // Close panel when clicking outside
     document.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const friendsPanel = document.getElementById('friends-panel');
@@ -365,7 +363,6 @@ export class FriendsList {
       this.updateView();
     });
 
-    // Add friend form handling
     const addFriendForm = document.getElementById('add-friend-form') as HTMLFormElement;
     const usernameInput = document.getElementById('friend-username') as HTMLInputElement;
 
@@ -389,30 +386,14 @@ export class FriendsList {
       this.updateView();
     });
 
-    // Action buttons
     document.querySelectorAll('[data-action]').forEach(button => {
       button.addEventListener('click', async (e) => {
         e.stopPropagation();
         const action = button.getAttribute('data-action');
         const username = button.getAttribute('data-username');
-        const userId = button.getAttribute('data-userid');
         if (action && username) {
-          await this.handleFriendAction(action, username, userId || undefined);
+          await this.handleFriendAction(action, username);
         }
-      });
-    });
-
-    // Close chat button
-    document.querySelectorAll('.close-chat').forEach(button => {
-      button.addEventListener('click', (e) => {
-        e.stopPropagation();
-        if (this.activeChat) {
-          this.activeChat.destroy();
-          this.activeChat = null;
-        }
-        this.chatOpen = false;
-        this.selectedFriend = null;
-        this.updateView();
       });
     });
   }

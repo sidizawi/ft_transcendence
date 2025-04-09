@@ -87,6 +87,12 @@ export class Profile {
     }
   }
 
+  private get2FAButtonClasses(): string {
+    return this.user.twoFactorEnabled
+      ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600/80 dark:hover:bg-red-600'
+      : 'bg-green-500 hover:bg-green-600 dark:bg-green-600/80 dark:hover:bg-green-600';
+  }
+
   private renderGameStats(stats: GameStats | null): string {
     if (!stats) {
       return `
@@ -162,7 +168,15 @@ export class Profile {
                 <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg">
                   <div class="flex items-center space-x-3">
                     <span class="w-2 h-2 rounded-full ${game.result === 'win' ? 'bg-green-500' : 'bg-red-500'}"></span>
-                    <span class="text-gray-900 dark:text-white">${game.opponent}</span>
+                    <div class="flex items-center space-x-2">
+                      <img 
+                        src="${game.avatar || '/img/default-avatar.jpg'}" 
+                        alt="${game.opponent}"
+                        class="w-8 h-8 rounded-full object-cover"
+                        onerror="this.src='/img/default-avatar.jpg'"
+                      >
+                      <span class="text-gray-900 dark:text-white">${game.opponent}</span>
+                    </div>
                   </div>
                   <div class="flex items-center space-x-4">
                     ${game.score ? `<span class="text-gray-600 dark:text-gray-400">${game.score}</span>` : ''}
@@ -191,9 +205,10 @@ export class Profile {
             <div class="flex items-center px-8 pt-6">
               <div class="relative">
                 <img 
-                  src="${this.user.avatar}" 
+                  src="${this.user.avatar || '/img/default-avatar.jpg'}" 
                   alt="${i18n.t('profile')}" 
                   class="w-32 h-32 rounded-full object-cover"
+                  onerror="this.src='/img/default-avatar.jpg'"
                 >
                 <label 
                   for="avatar-upload" 
@@ -228,9 +243,7 @@ export class Profile {
                 </a>
                 <button 
                   id="toggle2FA"
-                  class="${this.user.twoFactorEnabled 
-                    ? 'bg-red-500 dark:bg-red-600/80 hover:bg-red-600 dark:hover:bg-red-600' 
-                    : 'bg-green-500 dark:bg-green-600/80 hover:bg-green-600 dark:hover:bg-green-600'} text-white dark:text-white/90 px-4 py-2 rounded-lg transition-colors"
+                  class="${this.get2FAButtonClasses()} text-white dark:text-white/90 px-4 py-2 rounded-lg transition-colors"
                 >
                   ${this.user.twoFactorEnabled ? i18n.t('disable2FA') : i18n.t('enable2FA')}
                 </button>

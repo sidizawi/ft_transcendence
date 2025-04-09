@@ -59,7 +59,8 @@ export const translations = {
         description: 'Erstelle oder tritt einem Turnier bei, um mit anderen Spielern zu konkurrieren.',
         create: 'Turnier erstellen',
         join: 'Turnier beitreten'
-      },friends: 'Freunde',
+      },
+      friends: 'Freunde',
       typeMessage: 'Nachricht eingeben...',
       addFriend: 'Freund hinzufügen',
       enterUsername: 'Benutzername eingeben',
@@ -69,7 +70,14 @@ export const translations = {
         receiving: 'Anfrage erhalten',
         accepted: 'Akzeptiert',
         blocked: 'Blockiert'
-      }
+      },
+      noGamesPlayed: 'Noch keine Spiele gespielt',
+      noFriendsYet: 'Du hast noch keine Freunde',
+      sentRequests: 'Gesendete Anfragen',
+      requests: 'Eingehende Anfragen',
+      accept: 'Akzeptieren',
+      reject: 'Ablehnen',
+      block: 'Blockieren'
     }
   },
   en: {
@@ -132,7 +140,8 @@ export const translations = {
         description: 'Create or join tournaments to compete with other players.',
         create: 'Create Tournament',
         join: 'Join Tournament'
-      },friends: 'Friends',
+      },
+      friends: 'Friends',
       typeMessage: 'Type a message...',
       addFriend: 'Add Friend',
       enterUsername: 'Enter username',
@@ -142,7 +151,14 @@ export const translations = {
         receiving: 'Request received',
         accepted: 'Accepted',
         blocked: 'Blocked'
-      }
+      },
+      noGamesPlayed: 'No games played yet',
+      noFriendsYet: "You don't have any friends yet",
+      sentRequests: 'Sent Requests',
+      requests: 'Incoming Requests',
+      accept: 'Accept',
+      reject: 'Reject',
+      block: 'Block'
     }
   },
   fr: {
@@ -205,7 +221,8 @@ export const translations = {
         description: 'Créez ou rejoignez des tournois pour affronter d\'autres joueurs.',
         create: 'Créer un tournoi',
         join: 'Rejoindre un tournoi'
-      },friends: 'Amis',
+      },
+      friends: 'Amis',
       typeMessage: 'Tapez un message...',
       addFriend: 'Ajouter un ami',
       enterUsername: "Entrez le nom d'utilisateur",
@@ -215,7 +232,14 @@ export const translations = {
         receiving: 'Demande reçue',
         accepted: 'Accepté',
         blocked: 'Bloqué'
-      }
+      },
+      noGamesPlayed: 'Aucune partie jouée',
+      noFriendsYet: "Vous n'avez pas encore d'amis",
+      sentRequests: 'Demandes envoyées',
+      requests: 'Demandes reçues',
+      accept: 'Accepter',
+      reject: 'Refuser',
+      block: 'Bloquer'
     }
   },
   nl: {
@@ -278,7 +302,8 @@ export const translations = {
         description: 'Maak of neem deel aan toernooien om tegen andere spelers te spelen.',
         create: 'Toernooi maken',
         join: 'Deelnemen aan toernooi'
-      },friends: 'Vrienden',
+      },
+      friends: 'Vrienden',
       typeMessage: 'Typ een bericht...',
       addFriend: 'Vriend toevoegen',
       enterUsername: 'Voer gebruikersnaam in',
@@ -288,7 +313,14 @@ export const translations = {
         receiving: 'Verzoek ontvangen',
         accepted: 'Geaccepteerd',
         blocked: 'Geblokkeerd'
-      }
+      },
+      noGamesPlayed: 'Nog geen spellen gespeeld',
+      noFriendsYet: 'Je hebt nog geen vrienden',
+      sentRequests: 'Verzonden verzoeken',
+      requests: 'Ontvangen verzoeken',
+      accept: 'Accepteren',
+      reject: 'Weigeren',
+      block: 'Blokkeren'
     }
   }
 };

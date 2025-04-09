@@ -47,19 +47,19 @@ export class Friends {
 
     return `
       <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-          <h3 class="text-xl font-bold mb-4 text-white">
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
             ${i18n.t('addFriend')}
           </h3>
           <form id="add-friend-form" class="space-y-4">
             <div>
-              <label for="friend-username" class="block text-sm font-medium text-gray-300 mb-1">
+              <label for="friend-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 ${i18n.t('enterUsername')}
               </label>
               <input 
                 type="text" 
                 id="friend-username"
-                class="w-full px-4 py-2 rounded-lg bg-gray-700 text-white border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange dark:focus:ring-nature focus:border-transparent"
                 placeholder="${i18n.t('enterUsername')}"
                 required
                 ${this.isAddingFriend ? 'disabled' : ''}
@@ -70,14 +70,14 @@ export class Friends {
               <button 
                 type="button"
                 id="cancel-add-friend"
-                class="px-4 py-2 text-gray-400 hover:text-white"
+                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 ${i18n.t('cancel')}
               </button>
               <button 
                 type="submit"
-                class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 relative"
+                class="px-4 py-2 bg-orange dark:bg-nature text-white dark:text-nature-lightest rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 relative"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 <span class="add-friend-text ${this.isAddingFriend ? 'invisible' : ''}">${i18n.t('add')}</span>
@@ -112,6 +112,7 @@ export class Friends {
 
     const filteredFriends = this.getFilteredFriends();
     const receivingRequests = filteredFriends.filter(f => f.status === 'receiving');
+    const sendingRequests = filteredFriends.filter(f => f.status === 'sending');
     const acceptedFriends = filteredFriends.filter(f => f.status === 'accepted');
 
     return `
@@ -127,7 +128,6 @@ export class Friends {
             </button>
           </div>
 
-          <!-- Search -->
           <input
             type="text"
             id="friends-search"
@@ -137,13 +137,19 @@ export class Friends {
           />
 
           ${receivingRequests.length > 0 ? `
-            <!-- Requests -->
             <div class="mb-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('requests')}</h3>
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('incomingRequests')}</h3>
               <div class="space-y-3">
                 ${receivingRequests.map(friend => `
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                    <div class="flex items-center space-x-3">
+                      <img 
+                        src="${friend.avatar}" 
+                        alt="${friend.username2}" 
+                        class="w-10 h-10 rounded-full object-cover"
+                      >
+                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                    </div>
                     <div class="space-x-2">
                       <button 
                         class="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-white transition-colors"
@@ -166,7 +172,33 @@ export class Friends {
             </div>
           ` : ''}
 
-          <!-- Friends List -->
+          ${sendingRequests.length > 0 ? `
+            <div class="mb-8">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('outgoingRequests')}</h3>
+              <div class="space-y-3">
+                ${sendingRequests.map(friend => `
+                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                      <img 
+                        src="${friend.avatar}" 
+                        alt="${friend.username2}" 
+                        class="w-10 h-10 rounded-full object-cover"
+                      >
+                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                    </div>
+                    <button 
+                      class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-white transition-colors"
+                      data-action="cancel"
+                      data-username="${friend.username2}"
+                    >
+                      ${i18n.t('cancel')}
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+
           <div>
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
             ${acceptedFriends.length > 0 ? `
@@ -174,7 +206,14 @@ export class Friends {
                 ${acceptedFriends.map(friend => `
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg group">
                     <div class="flex items-center space-x-3">
-                      <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                      <div class="relative">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover"
+                        >
+                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                      </div>
                       <span class="text-gray-900 dark:text-white">${friend.username2}</span>
                     </div>
                     <div class="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -253,6 +292,9 @@ export class Friends {
         case 'reject':
           await FriendService.rejectFriend(username);
           break;
+        case 'cancel':
+          await FriendService.cancelRequest(username);
+          break;
         case 'block':
           await FriendService.blockFriend(username);
           break;
@@ -277,7 +319,6 @@ export class Friends {
       this.updateView();
     });
 
-    // Add friend form handling
     const addFriendForm = document.getElementById('add-friend-form') as HTMLFormElement;
     const usernameInput = document.getElementById('friend-username') as HTMLInputElement;
 
@@ -301,7 +342,6 @@ export class Friends {
       this.updateView();
     });
 
-    // Action buttons
     document.querySelectorAll('[data-action]').forEach(button => {
       button.addEventListener('click', async (e) => {
         e.stopPropagation();

@@ -28,6 +28,9 @@ export class AvatarService {
       throw new Error('Failed to upload avatar');
     }
 
-    return response.json();
+    const data = await response.json();
+    return {
+      avatarPath: `/avatars/${data.avatarPath.split('/').pop()}`
+    };
   }
 }

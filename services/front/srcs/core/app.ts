@@ -14,6 +14,7 @@ import { Header } from '../shared/components/header';
 import { Footer } from '../shared/components/footer';
 import { i18n } from '../shared/i18n';
 import { TokenManager } from '../shared/utils/token';
+import { Chat } from '../shared/components/chat';
 
 export class TranscendenceApp {
   private state = {
@@ -77,6 +78,11 @@ export class TranscendenceApp {
   }
 
   private getPageTitle(path: string): string {
+    const chatMatch = path.match(/^\/chat\/(.+)$/);
+    if (chatMatch) {
+      return i18n.t('chat');
+    }
+
     switch (path) {
       case '/':
         return 'Home';
@@ -135,6 +141,15 @@ export class TranscendenceApp {
     const path = this.router.checkAuthAndRedirect(window.location.pathname);
     const main = document.querySelector('main');
     if (!main) return;
+
+    const chatMatch = path.match(/^\/chat\/(.+)$/);
+    if (chatMatch && this.state.user) {
+      const userId = chatMatch[1];
+      const chat = new Chat(userId);
+      main.innerHTML = chat.render();
+      chat.setupEventListeners();
+      return;
+    }
 
     switch (path) {
       case '/':

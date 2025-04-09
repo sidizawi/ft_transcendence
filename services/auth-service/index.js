@@ -35,12 +35,12 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-const fastify = Fastify({ logger: false });
-fastify.addHook('onResponse', (request, reply, done) => {
-    console.log(`${request.method} ${request.url} ${reply.statusCode}`);
-    done();
-});
-// const fastify = Fastify({ logger: true });
+// const fastify = Fastify({ logger: false });
+// fastify.addHook('onResponse', (request, reply, done) => {
+//     console.log(`${request.method} ${request.url} ${reply.statusCode}`);
+//     done();
+// });
+const fastify = Fastify({ logger: true });
 
 await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 

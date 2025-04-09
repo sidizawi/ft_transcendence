@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS users (
 );
 CREATE TABLE IF NOT EXISTS friend (
     userid1 INTEGER,
-    userid2 INTEGER,
     username1 TEXT NOT NULL,
+    userid2 INTEGER,
     username2 TEXT NOT NULL,
     status TEXT NOT NULL,
     PRIMARY KEY (userid1, userid2),
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS friend (
 CREATE TABLE IF NOT EXISTS game (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     playerid_1 INTEGER NOT NULL,
-    playerid_2 INTEGER NOT NULL,
     username_1 TEXT NOT NULL,
+    playerid_2 INTEGER NOT NULL,
     username_2 TEXT NOT NULL,
     game_type TEXT NOT NULL,
     score_1 INTEGER NOT NULL,

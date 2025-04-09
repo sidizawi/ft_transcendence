@@ -5,6 +5,99 @@ const host = window.location.hostname;
 const FRIEND_API_URL = `http://${host}:3000/chat/friend`;
 
 export class FriendService {
+  static async getFriendsList(): Promise<Friend[]> {
+    try {
+      const [friendsResponse, receivingResponse, sendingResponse] = await Promise.all([
+        fetch(`${FRIEND_API_URL}/friendlist`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
+        }),
+        fetch(`${FRIEND_API_URL}/receivinglist`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
+        }),
+        fetch(`${FRIEND_API_URL}/sendinglist`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
+        })
+      ]);
+
+      if (!friendsResponse.ok || !receivingResponse.ok || !sendingResponse.ok) {
+        throw new Error('Failed to fetch friends list');
+      }
+
+      const friendsData = await friendsResponse.json();
+      const receivingData = await receivingResponse.json();
+      const sendingData = await sendingResponse.json();
+
+      const friends: Friend[] = [];
+      const currentUser = TokenManager.getUserFromToken();
+
+      // Add accepted friends
+      if (friendsData.friendData) {
+        friendsData.friendData.forEach((friend: any) => {
+          friends.push({
+            userid1: currentUser?.id || '',
+            username1: currentUser?.username || '',
+            userid2: friend.id || '',
+            username2: friend.username,
+            status: 'accepted',
+            avatar: friend.avatar // Include the avatar from the API response
+          });
+        });
+      }
+
+      // Add receiving requests
+      if (receivingData.onlyUsername) {
+        receivingData.onlyUsername.forEach((request: any) => {
+          friends.push({
+            userid1: currentUser?.id || '',
+            userid2: '',
+            username1: currentUser?.username || '',
+            username2: request.username2,
+            status: 'receiving',
+            avatar: request.avatar // Include the avatar from the API response
+          });
+        });
+      }
+
+      // Add sending requests
+      if (sendingData.onlyUsername) {
+        sendingData.onlyUsername.forEach((request: any) => {
+          friends.push({
+            userid1: currentUser?.id || '',
+            userid2: '',
+            username1: currentUser?.username || '',
+            username2: request.username2,
+            status: 'sending',
+            avatar: request.avatar // Include the avatar from the API response
+          });
+          // console.log('sendingData');
+          // console.log('userid1', currentUser?.id);
+          // console.log('usesername1', currentUser?.username);
+          // console.log('userid2', friendsData.friendData[0].id);
+          // console.log('username2', friendsData.friendData[0].username);
+          // console.log('avatar', friendsData.friendData[0].avatar);
+          // console.log('friends', friends);
+        });
+      }
+
+      return friends;
+    } catch (error) {
+      console.error('Get friends list error:', error);
+      throw error;
+    }
+  }
+
   static async addFriend(username: string) {
     try {
       const response = await fetch(`${FRIEND_API_URL}/add`, {
@@ -125,64 +218,26 @@ export class FriendService {
     }
   }
 
-  static async getFriendsList(): Promise<Friend[]> {
+  static async deleteFriend(friendUsername: string) {
     try {
-      const [friendsResponse, receivingResponse] = await Promise.all([
-        fetch(`${FRIEND_API_URL}/friendlist`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${TokenManager.getToken()}`
-          },
-          credentials: 'include'
-        }),
-        fetch(`${FRIEND_API_URL}/receivinglist`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${TokenManager.getToken()}`
-          },
-          credentials: 'include'
-        })
-      ]);
+      const response = await fetch(`${FRIEND_API_URL}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${TokenManager.getToken()}`
+        },
+        body: JSON.stringify({ friendusername: friendUsername }),
+        credentials: 'include'
+      });
 
-      if (!friendsResponse.ok || !receivingResponse.ok) {
-        throw new Error('Failed to fetch friends list');
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error);
       }
 
-      const friendsData = await friendsResponse.json();
-      const receivingData = await receivingResponse.json();
-
-      // Convert the backend data format to our Friend type
-      const friends: Friend[] = [];
-
-      // Add accepted friends
-      if (friendsData.friendData) {
-        friendsData.friendData.forEach((friend: any) => {
-          friends.push({
-            userid1: TokenManager.getUserFromToken()?.id || '',
-            userid2: friend.id,
-            username1: TokenManager.getUserFromToken()?.username || '',
-            username2: friend.username,
-            status: 'accepted'
-          });
-        });
-      }
-
-      // Add receiving requests
-      if (receivingData.onlyUsername) {
-        receivingData.onlyUsername.forEach((friend: any) => {
-          friends.push({
-            userid1: TokenManager.getUserFromToken()?.id || '',
-            userid2: '',
-            username1: TokenManager.getUserFromToken()?.username || '',
-            username2: friend.username2,
-            status: 'receiving'
-          });
-        });
-      }
-
-      return friends;
+      return await response.json();
     } catch (error) {
-      console.error('Get friends list error:', error);
+      console.error('Delete friend error:', error);
       throw error;
     }
   }
