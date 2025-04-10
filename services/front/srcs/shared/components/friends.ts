@@ -44,13 +44,12 @@ export class FriendsList {
     );
   }
 
-  private getAvatarUrl(username: string): string {
-    // Generate a random background color for each user based on their username
-    const colors = ['FF6B6B', '4ECDC4', 'FFD93D', '95E1D3', 'A8E6CF', 'DCD6F7'];
-    const colorIndex = username.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % colors.length;
-    const bgColor = colors[colorIndex];
-    
-    return `https://ui-avatars.com/api/?name=${encodeURIComponent(username)}&background=${bgColor}&color=fff&size=128`;
+  private openChatInNewTab(friendId: string, friendUsername: string) {
+    const chatUrl = `/chat/${friendId}`;
+    const chatWindow = window.open(chatUrl, `chat-${friendId}`, 'width=800,height=600');
+    if (chatWindow) {
+      chatWindow.focus();
+    }
   }
 
   render(): string {
@@ -102,7 +101,7 @@ export class FriendsList {
                 <div class="flex items-center justify-between mb-2 p-2 hover:bg-gray-700/50 rounded-lg">
                   <div class="flex items-center space-x-2">
                     <img 
-                      src="${connection.friend.avatar || this.getAvatarUrl(connection.friend.username)}" 
+                      src="${connection.friend.avatar}" 
                       alt="${connection.friend.username}"
                       class="w-8 h-8 rounded-full object-cover"
                     >
@@ -137,7 +136,7 @@ export class FriendsList {
                 <div class="flex items-center justify-between mb-2 p-2 hover:bg-gray-700/50 rounded-lg">
                   <div class="flex items-center space-x-2">
                     <img 
-                      src="${connection.friend.avatar || this.getAvatarUrl(connection.friend.username)}" 
+                      src="${connection.friend.avatar}" 
                       alt="${connection.friend.username}"
                       class="w-8 h-8 rounded-full object-cover"
                     >
@@ -161,11 +160,14 @@ export class FriendsList {
             ${acceptedFriends.length > 0 ? `
               <div class="space-y-2">
                 ${acceptedFriends.map(connection => `
-                  <div class="flex items-center justify-between p-2 hover:bg-gray-700/50 rounded-lg group">
+                  <div class="flex items-center justify-between p-2 hover:bg-gray-700/50 rounded-lg group cursor-pointer"
+                       data-friend-id="${connection.friend.id}"
+                       data-friend-username="${connection.friend.username}"
+                       onclick="window.open('/chat/${connection.friend.id}', 'chat-${connection.friend.id}', 'width=800,height=600')">
                     <div class="flex items-center space-x-3">
                       <div class="relative">
                         <img 
-                          src="${connection.friend.avatar || this.getAvatarUrl(connection.friend.username)}" 
+                          src="${connection.friend.avatar}" 
                           alt="${connection.friend.username}"
                           class="w-8 h-8 rounded-full object-cover"
                         >
@@ -178,18 +180,12 @@ export class FriendsList {
                       <span class="text-white">${connection.friend.username}</span>
                     </div>
                     <div class="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <a 
-                        href="/chat/${connection.friend.id}"
-                        class="text-gray-400 hover:text-white transition-colors"
-                        title="${i18n.t('chat')}"
-                      >
-                        <span class="text-xl">💬</span>
-                      </a>
                       <button 
                         class="text-gray-400 hover:text-white transition-colors"
                         data-action="block"
                         data-username="${connection.friend.username}"
                         title="${i18n.t('block')}"
+                        onclick="event.stopPropagation()"
                       >
                         <span class="text-xl">🚫</span>
                       </button>

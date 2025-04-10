@@ -77,7 +77,10 @@ export const translations = {
       requests: 'Eingehende Anfragen',
       accept: 'Akzeptieren',
       reject: 'Ablehnen',
-      block: 'Blockieren'
+      block: 'Blockieren',
+      pageNotFound: 'Seite nicht gefunden',
+      pageNotFoundDesc: 'Die angeforderte Seite existiert nicht.',
+      backToHome: 'Zurück zur Startseite'
     }
   },
   en: {
@@ -158,7 +161,10 @@ export const translations = {
       requests: 'Incoming Requests',
       accept: 'Accept',
       reject: 'Reject',
-      block: 'Block'
+      block: 'Block',
+      pageNotFound: 'Page Not Found',
+      pageNotFoundDesc: 'The page you are looking for does not exist.',
+      backToHome: 'Back to Home'
     }
   },
   fr: {
@@ -239,7 +245,10 @@ export const translations = {
       requests: 'Demandes reçues',
       accept: 'Accepter',
       reject: 'Refuser',
-      block: 'Bloquer'
+      block: 'Bloquer',
+      pageNotFound: 'Page Non Trouvée',
+      pageNotFoundDesc: 'La page que vous recherchez n\'existe pas.',
+      backToHome: 'Retour à l\'Accueil'
     }
   },
   nl: {
@@ -320,7 +329,10 @@ export const translations = {
       requests: 'Ontvangen verzoeken',
       accept: 'Accepteren',
       reject: 'Weigeren',
-      block: 'Blokkeren'
+      block: 'Blokkeren',
+      pageNotFound: 'Pagina Niet Gevonden',
+      pageNotFoundDesc: 'De pagina die u zoekt bestaat niet.',
+      backToHome: 'Terug naar Home'
     }
   }
 };

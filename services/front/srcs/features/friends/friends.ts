@@ -1,3 +1,4 @@
+import { User } from '../../shared/types/user';
 import { Friend } from '../../shared/types/friend';
 import { FriendService } from '../../shared/services/friendService';
 import { i18n } from '../../shared/i18n';
@@ -40,6 +41,14 @@ export class Friends {
     return this.friends.filter(friend => 
       friend.username2.toLowerCase().includes(this.searchQuery.toLowerCase())
     );
+  }
+
+  private openChatInNewTab(userId: string) {
+    const chatUrl = `/chat/${userId}`;
+    const chatWindow = window.open(chatUrl, `chat-${userId}`, 'width=800,height=600');
+    if (chatWindow) {
+      chatWindow.focus();
+    }
   }
 
   private renderAddFriendModal(): string {
@@ -180,7 +189,7 @@ export class Friends {
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div class="flex items-center space-x-3">
                       <img 
-                        src="${friend.avatar}" 
+                        src="${friend.avatar || '/img/default-avatar.jpg'}" 
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover"
                       >
@@ -204,13 +213,14 @@ export class Friends {
             ${acceptedFriends.length > 0 ? `
               <div class="space-y-3">
                 ${acceptedFriends.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg group">
+                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg group cursor-pointer"
+                       data-userid="${friend.userid2}">
                     <div class="flex items-center space-x-3">
                       <div class="relative">
                         <img 
-                          src="${friend.avatar}" 
+                          src="${friend.avatar || '/img/default-avatar.jpg'}" 
                           alt="${friend.username2}" 
-                          class="w-10 h-10 rounded-full object-cover"
+                          class="w-10 h-10 rounded-full object-cover""
                         >
                         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
                       </div>
@@ -222,6 +232,7 @@ export class Friends {
                         data-action="block"
                         data-username="${friend.username2}"
                         title="${i18n.t('block')}"
+                        onclick="event.stopPropagation()"
                       >
                         <span class="text-xl">🚫</span>
                       </button>
@@ -340,6 +351,16 @@ export class Friends {
     cancelAddFriend?.addEventListener('click', () => {
       this.addFriendOpen = false;
       this.updateView();
+    });
+
+    // Add click event listeners for friend items
+    document.querySelectorAll('[data-userid]').forEach(element => {
+      element.addEventListener('click', (e) => {
+        const userId = element.getAttribute('data-userid');
+        if (userId) {
+          this.openChatInNewTab(userId);
+        }
+      });
     });
 
     document.querySelectorAll('[data-action]').forEach(button => {

@@ -38,7 +38,7 @@ async function profileRoutes(fastify, options) {
 
 	/// USER MODIFICATIONS ///
 	// Modify username without check
-	fastify.put('/profile/username', async (request, reply) => {
+	fastify.put('/username', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const { newUsername } = request.body;
@@ -52,7 +52,7 @@ async function profileRoutes(fastify, options) {
 		  return reply.code(400).send({ error: 'Username already taken' });
 		}
 		
-		fastify.db.prepare('UPDATE users SET username = ? WHERE id = ?').run(newUsername, userId);
+		fastify.db.prepare('UPDATE users WHERE id = ? SET username = ?').run(newUsername, userId);
 		
 		const user = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
 		const token = fastify.jwt.sign({ id: user.id, username: user.username, email: user.email });
@@ -63,7 +63,7 @@ async function profileRoutes(fastify, options) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Post email then check if already user, if not, send verification code
-	fastify.post('/profile/email/request', async (request, reply) => {
+	fastify.post('/email/request', async (request, reply) => {
 	await request.jwtVerify();
 	const userId = request.user.id;
 	const { newEmail } = request.body;
@@ -104,7 +104,7 @@ async function profileRoutes(fastify, options) {
 
 	// Verify email with code
 	// Check if code is correct and not expired 
-	fastify.put('/profile/email/verify', async (request, reply) => {
+	fastify.put('/email/verify', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const { verificationCode } = request.body;
@@ -136,7 +136,7 @@ async function profileRoutes(fastify, options) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Post new password and send code by mail
-	fastify.post('/profile/password/request', async (request, reply) => {
+	fastify.post('/password/request', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const userEmail = request.user.email;
@@ -166,7 +166,7 @@ async function profileRoutes(fastify, options) {
 	});
 
 	// Check if code is correct and not expired
-	fastify.put('/profile/password/verify', async (request, reply) => {
+	fastify.put('/password/verify', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const { verificationCode, newPassword } = request.body;
@@ -195,7 +195,7 @@ async function profileRoutes(fastify, options) {
 
 	
 	// Route pour uploader un avatar
-	fastify.post('/profile/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
+	fastify.post('/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const userName = request.user.username;

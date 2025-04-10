@@ -15,6 +15,7 @@ import { Footer } from '../shared/components/footer';
 import { i18n } from '../shared/i18n';
 import { TokenManager } from '../shared/utils/token';
 import { Chat } from '../shared/components/chat';
+import { NotFound } from '../shared/components/notFound';
 
 export class TranscendenceApp {
   private state = {
@@ -102,6 +103,8 @@ export class TranscendenceApp {
         return i18n.t('signIn');
       case '/signup':
         return i18n.t('signUp');
+      case '/404':
+        return i18n.t('pageNotFound');
       default:
         return 'Transcendence';
     }
@@ -197,7 +200,9 @@ export class TranscendenceApp {
         this.auth.setupAuthEventListeners(true);
         break;
       default:
-        this.renderHomePage(main);
+        const notFound = new NotFound();
+        main.innerHTML = notFound.render();
+        break;
     }
 
     const pageTitle = document.getElementById('page-title');

@@ -163,7 +163,8 @@ fastify.post('/login', async (request, reply) => {
     const token = fastify.jwt.sign({
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar
     });
     
     reply.code(200);

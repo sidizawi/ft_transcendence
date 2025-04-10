@@ -5,8 +5,8 @@ import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 import { AvatarService } from '../../shared/services/avatarService';
 import { StatsService } from '../../shared/services/statsService';
 
-const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user/profile/profile`;
+// const host = window.location.hostname;
+// const USER_API_URL = `http://${host}:3000/user/profile`;
 
 export class Profile {
   private pongStats: GameStats | null = null;
@@ -46,10 +46,9 @@ export class Profile {
     if (!file) return;
 
     try {
-      const data = await AvatarService.uploadAvatar(file);
-      this.user.avatar = data.avatarPath;
-      this.render();
-      this.setupEventListeners();
+      const response = await AvatarService.uploadAvatar(file);
+      this.user.avatar = response.avatarPath;
+      this.updateView();
     } catch (error) {
       console.error('Avatar upload error:', error);
       alert(error instanceof Error ? error.message : 'Failed to upload avatar');
@@ -64,22 +63,7 @@ export class Profile {
 
       if (result.success) {
         this.user.twoFactorEnabled = !this.user.twoFactorEnabled;
-        
-        const response = await fetch(`${USER_API_URL}/auth/refresh`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          credentials: 'include'
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          localStorage.setItem('token', data.token);
-        }
-
-        document.querySelector('main')!.innerHTML = this.render();
+        this.render();
         this.setupEventListeners();
       }
     } catch (error) {
@@ -91,104 +75,6 @@ export class Profile {
     return this.user.twoFactorEnabled
       ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600/80 dark:hover:bg-red-600'
       : 'bg-green-500 hover:bg-green-600 dark:bg-green-600/80 dark:hover:bg-green-600';
-  }
-
-  private renderGameStats(stats: GameStats | null): string {
-    if (!stats) {
-      return `
-        <div class="text-center text-gray-600 dark:text-gray-400 py-8">
-          ${i18n.t('noGamesPlayed')}
-        </div>
-      `;
-    }
-
-    return `
-      <div class="space-y-6">
-        <!-- Main Stats -->
-        <div class="grid grid-cols-4 gap-4">
-          <div class="bg-green-100 dark:bg-green-800/30 p-4 rounded-lg text-center">
-            <p class="text-2xl font-bold text-green-600 dark:text-green-400">${stats.wins}</p>
-            <p class="text-sm text-green-800 dark:text-green-200">${i18n.t('stats.wins')}</p>
-          </div>
-          <div class="bg-red-100 dark:bg-red-800/30 p-4 rounded-lg text-center">
-            <p class="text-2xl font-bold text-red-600 dark:text-red-400">${stats.losses}</p>
-            <p class="text-sm text-red-800 dark:text-red-200">${i18n.t('stats.losses')}</p>
-          </div>
-          <div class="bg-blue-100 dark:bg-blue-800/30 p-4 rounded-lg text-center">
-            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${stats.totalGames}</p>
-            <p class="text-sm text-blue-800 dark:text-blue-200">${i18n.t('stats.totalGames')}</p>
-          </div>
-          <div class="bg-purple-100 dark:bg-purple-800/30 p-4 rounded-lg text-center">
-            <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">${stats.winRate}%</p>
-            <p class="text-sm text-purple-800 dark:text-purple-200">${i18n.t('stats.winRate')}</p>
-          </div>
-        </div>
-
-        <!-- Additional Stats -->
-        <div class="grid grid-cols-2 gap-4">
-          <!-- Rank & ELO -->
-          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.rank')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">#${stats.rank || '-'}</p>
-              </div>
-              <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.elo')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.elo || '-'}</p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Streak -->
-          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
-            <div class="flex items-center justify-between">
-              <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.currentStreak')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">
-                  ${stats.totalGames === 0 ? '-' : stats.streak?.current || '0'}
-                </p>
-              </div>
-              <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.bestStreak')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">
-                  ${stats.totalGames === 0 ? '-' : stats.streak?.best || '0'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        ${stats.history && stats.history.length > 0 ? `
-          <!-- Recent Games -->
-          <div class="mt-6">
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">${i18n.t('stats.recentGames')}</h4>
-            <div class="space-y-2">
-              ${stats.history.map(game => `
-                <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg">
-                  <div class="flex items-center space-x-3">
-                    <span class="w-2 h-2 rounded-full ${game.result === 'win' ? 'bg-green-500' : 'bg-red-500'}"></span>
-                    <div class="flex items-center space-x-2">
-                      <img 
-                        src="${game.avatar || '/img/default-avatar.jpg'}" 
-                        alt="${game.opponent}"
-                        class="w-8 h-8 rounded-full object-cover"
-                        onerror="this.src='/img/default-avatar.jpg'"
-                      >
-                      <span class="text-gray-900 dark:text-white">${game.opponent}</span>
-                    </div>
-                  </div>
-                  <div class="flex items-center space-x-4">
-                    ${game.score ? `<span class="text-gray-600 dark:text-gray-400">${game.score}</span>` : ''}
-                    <span class="text-sm text-gray-500 dark:text-gray-400">${game.date}</span>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        ` : ''}
-      </div>
-    `;
   }
 
   render(): string {
@@ -205,10 +91,9 @@ export class Profile {
             <div class="flex items-center px-8 pt-6">
               <div class="relative">
                 <img 
-                  src="${this.user.avatar || '/img/default-avatar.jpg'}" 
+                  src="${this.user.avatar}" 
                   alt="${i18n.t('profile')}" 
                   class="w-32 h-32 rounded-full object-cover"
-                  onerror="this.src='/img/default-avatar.jpg'"
                 >
                 <label 
                   for="avatar-upload" 
@@ -316,6 +201,104 @@ export class Profile {
             </div>
           </div>
         </div>
+      </div>
+    `;
+  }
+
+  private renderGameStats(stats: GameStats | null): string {
+    if (!stats) {
+      return `
+        <div class="text-center text-gray-600 dark:text-gray-400 py-8">
+          ${i18n.t('noGamesPlayed')}
+        </div>
+      `;
+    }
+
+    return `
+      <div class="space-y-6">
+        <!-- Main Stats -->
+        <div class="grid grid-cols-4 gap-4">
+          <div class="bg-green-100 dark:bg-green-800/30 p-4 rounded-lg text-center">
+            <p class="text-2xl font-bold text-green-600 dark:text-green-400">${stats.wins}</p>
+            <p class="text-sm text-green-800 dark:text-green-200">${i18n.t('stats.wins')}</p>
+          </div>
+          <div class="bg-red-100 dark:bg-red-800/30 p-4 rounded-lg text-center">
+            <p class="text-2xl font-bold text-red-600 dark:text-red-400">${stats.losses}</p>
+            <p class="text-sm text-red-800 dark:text-red-200">${i18n.t('stats.losses')}</p>
+          </div>
+          <div class="bg-blue-100 dark:bg-blue-800/30 p-4 rounded-lg text-center">
+            <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${stats.totalGames}</p>
+            <p class="text-sm text-blue-800 dark:text-blue-200">${i18n.t('stats.totalGames')}</p>
+          </div>
+          <div class="bg-purple-100 dark:bg-purple-800/30 p-4 rounded-lg text-center">
+            <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">${stats.winRate}%</p>
+            <p class="text-sm text-purple-800 dark:text-purple-200">${i18n.t('stats.winRate')}</p>
+          </div>
+        </div>
+
+        <!-- Additional Stats -->
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Rank & ELO -->
+          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.rank')}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">#${stats.rank || '-'}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.elo')}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.elo || '-'}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Streak -->
+          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.currentStreak')}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">
+                  ${stats.totalGames === 0 ? '-' : stats.streak?.current || '0'}
+                </p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.bestStreak')}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">
+                  ${stats.totalGames === 0 ? '-' : stats.streak?.best || '0'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        ${stats.history && stats.history.length > 0 ? `
+          <!-- Recent Games -->
+          <div class="mt-6">
+            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">${i18n.t('stats.recentGames')}</h4>
+            <div class="space-y-2">
+              ${stats.history.map(game => `
+                <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg">
+                  <div class="flex items-center space-x-3">
+                    <span class="w-2 h-2 rounded-full ${game.result === 'win' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                    <div class="flex items-center space-x-2">
+                      <img 
+                        src="${game.avatar}" 
+                        alt="${game.opponent}"
+                        class="w-8 h-8 rounded-full object-cover"
+                        onerror="this.src='/img/default-avatar.jpg'"
+                      >
+                      <span class="text-gray-900 dark:text-white">${game.opponent}</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-4">
+                    ${game.score ? `<span class="text-gray-600 dark:text-gray-400">${game.score}</span>` : ''}
+                    <span class="text-sm text-gray-500 dark:text-gray-400">${game.date}</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
       </div>
     `;
   }

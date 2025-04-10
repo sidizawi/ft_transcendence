@@ -4,7 +4,7 @@ import { Router } from '../../shared/utils/routing';
 import { AvatarService } from '../../shared/services/avatarService';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user/profile/profile`;
+const USER_API_URL = `http://${host}:3000/user/profile`;
 
 export class Settings {
   constructor(private user: User) {}
@@ -18,6 +18,7 @@ export class Settings {
     try {
       const data = await AvatarService.uploadAvatar(file);
       this.user.avatar = data.avatarPath;
+      console.log('settingd.21.avatar', this.user.avatar); /////////
       this.render();
       this.setupEventListeners();
     } catch (error) {
@@ -331,6 +332,7 @@ export class Settings {
   }
 
   render(): string {
+    console.log('settings.334.avatar:', this.user.avatar);
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-2xl">

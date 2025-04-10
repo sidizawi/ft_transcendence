@@ -1,7 +1,7 @@
 import { TokenManager } from '../utils/token';
 
 const host = window.location.hostname;
-const AVATAR_API_URL = `http://${host}:3000/user/profile/profile/avatar`;
+const AVATAR_API_URL = `http://${host}:3000/user/profile/avatar`;
 
 export class AvatarService {
   static async uploadAvatar(file: File): Promise<{ avatarPath: string }> {
@@ -30,7 +30,7 @@ export class AvatarService {
 
     const data = await response.json();
     return {
-      avatarPath: `/avatars/${data.avatarPath.split('/').pop()}`
+      avatarPath: `${data.avatarPath}`
     };
   }
 }

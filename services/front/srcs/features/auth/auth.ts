@@ -45,10 +45,92 @@ export class Auth {
         throw new Error('Invalid user data in token');
       }
 
-      this.onLogin(user as User);
+      this.onLogin(user);
     } catch (error) {
       console.error('Error handling Google response:', error);
       this.showError(i18n.t('authError'));
+    }
+  }
+
+  private async handleLogin(identifier: string, password: string) {
+    try {
+      if (!identifier || !password) {
+        throw new Error('Login (email or username) and password are required');
+      }
+
+      const response = await fetch(`${AUTH_API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          login: identifier,
+          password 
+        }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Login failed');
+      }
+
+      const data = await response.json();
+      TokenManager.setToken(data.token);
+      
+      const user = TokenManager.getUserFromToken();
+      if (!user) {
+        throw new Error('Invalid user data in token');
+      }
+
+      // Check if user has 2FA enabled
+      if (user.twoFactorEnabled) {
+        const validated = await this.handle2FAVerification(user.id);
+        if (!validated) {
+          TokenManager.removeToken();
+          throw new Error('2FA validation failed');
+        }
+      }
+
+      this.onLogin(user);
+    } catch (error) {
+      console.error('Login error:', error);
+      this.showError(error instanceof Error ? error.message : i18n.t('loginError'));
+    }
+  }
+
+  private async handleSignUp(username: string, email: string, password: string) {
+    try {
+      if (!username || !email || !password) {
+        throw new Error('Username, email, and password are required');
+      }
+
+      const response = await fetch(`${AUTH_API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      const data = await response.json();
+      TokenManager.setToken(data.token);
+      
+      const user = TokenManager.getUserFromToken();
+      if (!user) {
+        throw new Error('Invalid user data in token');
+      }
+
+      this.onLogin(user);
+    } catch (error) {
+      console.error('Signup error:', error);
+      this.showError(error instanceof Error ? error.message : i18n.t('signupError'));
     }
   }
 
@@ -119,98 +201,6 @@ export class Auth {
     } catch (error) {
       console.error('2FA verification error:', error);
       return false;
-    }
-  }
-
-  private async handleLogin(identifier: string, password: string) {
-    try {
-      if (!identifier || !password) {
-        throw new Error('Login (email or username) and password are required');
-      }
-
-      const response = await fetch(`${AUTH_API_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          login: identifier,
-          password 
-        }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Login failed');
-      }
-
-      const data = await response.json();
-      
-      // Store the token temporarily for 2FA verification
-      if (data.token) {
-        TokenManager.setToken(data.token);
-      }
-
-      // Check if user has 2FA enabled
-      if (data.user?.twoFactorEnabled === 1) {
-        const validated = await this.handle2FAVerification(data.user.id);
-        if (!validated) {
-          TokenManager.removeToken();
-          throw new Error('2FA validation failed');
-        }
-      }
-
-      // Get the final token after 2FA if necessary
-      if (data.finalToken) {
-        TokenManager.setToken(data.finalToken);
-      }
-
-      const user = TokenManager.getUserFromToken();
-      if (!user) {
-        throw new Error('Invalid user data in token');
-      }
-
-      this.onLogin(user as User);
-    } catch (error) {
-      console.error('Login error:', error);
-      this.showError(error instanceof Error ? error.message : i18n.t('loginError'));
-    }
-  }
-
-  private async handleSignUp(username: string, email: string, password: string) {
-    try {
-      if (!username || !email || !password) {
-        throw new Error('Username, email, and password are required');
-      }
-
-      const response = await fetch(`${AUTH_API_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Signup failed');
-      }
-
-      const data = await response.json();
-      
-      TokenManager.setToken(data.token);
-      const user = TokenManager.getUserFromToken();
-
-      if (!user) {
-        throw new Error('Invalid user data in token');
-      }
-
-      this.onLogin(user as User);
-    } catch (error) {
-      console.error('Signup error:', error);
-      this.showError(error instanceof Error ? error.message : i18n.t('signupError'));
     }
   }
 
