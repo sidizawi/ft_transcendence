@@ -52,7 +52,7 @@ async function profileRoutes(fastify, options) {
 		  return reply.code(400).send({ error: 'Username already taken' });
 		}
 		
-		fastify.db.prepare('UPDATE users WHERE id = ? SET username = ?').run(newUsername, userId);
+		fastify.db.prepare('UPDATE users SET username = ? WHERE id = ?').run(newUsername, userId);
 		
 		const user = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
 		const token = fastify.jwt.sign({ id: user.id, username: user.username, email: user.email });

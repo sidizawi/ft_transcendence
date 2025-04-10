@@ -4,7 +4,7 @@ import { Router } from '../../shared/utils/routing';
 import { AvatarService } from '../../shared/services/avatarService';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user/profile`;
+const USER_API_URL = `http://${host}:3000/user/profile/profile`;
 
 export class Settings {
   constructor(private user: User) {}
@@ -16,14 +16,14 @@ export class Settings {
     if (!file) return;
 
     try {
-      const data = await AvatarService.uploadAvatar(file);
-      this.user.avatar = data.avatarPath;
-      console.log('settingd.21.avatar', this.user.avatar); /////////
-      this.render();
-      this.setupEventListeners();
+      const { avatarPath } = await AvatarService.uploadAvatar(file);
+      // Update the user's avatar in memory
+      this.user.avatar = avatarPath;
+      // Update the view to show the new avatar
+      this.updateView();
     } catch (error) {
       console.error('Avatar upload error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to upload avatar');
+      alert(error instanceof Error ? error.message : i18n.t('updateError'));
     }
   }
 
@@ -40,7 +40,7 @@ export class Settings {
 
       if (!response.ok) {
         const data = await response.json();
-        throw new Error(data.error || 'Failed to update username');
+        throw new Error(data.error || i18n.t('updateError'));
       }
 
       const data = await response.json();
@@ -48,7 +48,7 @@ export class Settings {
       window.location.href = '/profile';
     } catch (error) {
       console.error('Username update error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update username');
+      alert(error instanceof Error ? error.message : i18n.t('updateError'));
     }
   }
 
@@ -125,7 +125,7 @@ export class Settings {
 
       if (!requestResponse.ok) {
         const data = await requestResponse.json();
-        throw new Error(data.error || 'Failed to request email verification');
+        throw new Error(data.error || i18n.t('updateError'));
       }
 
       return new Promise((resolve) => {
@@ -202,7 +202,7 @@ export class Settings {
       });
     } catch (error) {
       console.error('Email update error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update email');
+      alert(error instanceof Error ? error.message : i18n.t('updateError'));
       return false;
     }
   }
@@ -220,7 +220,7 @@ export class Settings {
 
       if (!requestResponse.ok) {
         const data = await requestResponse.json();
-        throw new Error(data.error || 'Failed to request password verification');
+        throw new Error(data.error || i18n.t('updateError'));
       }
 
       return new Promise((resolve) => {
@@ -298,7 +298,7 @@ export class Settings {
       });
     } catch (error) {
       console.error('Password update error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to update password');
+      alert(error instanceof Error ? error.message : i18n.t('updateError'));
       return false;
     }
   }
@@ -318,7 +318,7 @@ export class Settings {
     if (password) changesCount++;
 
     if (changesCount > 1) {
-      alert('Please update only one field at a time: username, email, or password');
+      alert(i18n.t('updateOneAtTime'));
       return;
     }
 
@@ -331,8 +331,15 @@ export class Settings {
     }
   }
 
+  private updateView() {
+    const main = document.querySelector('main');
+    if (main) {
+      main.innerHTML = this.render();
+      this.setupEventListeners();
+    }
+  }
+
   render(): string {
-    console.log('settings.334.avatar:', this.user.avatar);
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-2xl">
@@ -407,7 +414,7 @@ export class Settings {
                 </div>
 
                 <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  Note: You can only update one field at a time (username, email, or password)
+                  ${i18n.t('updateOneAtTime')}
                 </p>
 
                 <div class="flex justify-center space-x-4 pt-6">

@@ -80,7 +80,49 @@ export const translations = {
       block: 'Blockieren',
       pageNotFound: 'Seite nicht gefunden',
       pageNotFoundDesc: 'Die angeforderte Seite existiert nicht.',
+      backToHome: 'Zurück zur Startseite',
+      settings : {
+        // Auth & General
+      signIn: 'Anmelden',
+      signUp: 'Registrieren',
+      signOut: 'Abmelden',
+      username: 'Benutzername',
+      email: 'E-Mail',
+      password: 'Passwort',
+      newPassword: 'Neues Passwort',
+      confirmPassword: 'Passwort bestätigen',
+      profile: 'Profil',
+      editProfile: 'Profil bearbeiten',
+      settings: 'Einstellungen',
+      save: 'Speichern',
+      cancel: 'Abbrechen',
+      saveChanges: 'Änderungen speichern',
+      back: 'Zurück',
+      
+      // Profile & Settings
+      changePhoto: 'Foto ändern',
+      uploadAvatar: 'Avatar hochladen',
+      personalInfo: 'Persönliche Informationen',
+      accountSettings: 'Kontoeinstellungen',
+      enable2FA: '2FA aktivieren',
+      disable2FA: '2FA deaktivieren',
+      twoFactorAuth: 'Zwei-Faktor-Authentifizierung',
+      
+      // Validation & Messages
+      required: 'Erforderlich',
+      invalidEmail: 'Ungültige E-Mail-Adresse',
+      passwordMismatch: 'Passwörter stimmen nicht überein',
+      updateSuccess: 'Erfolgreich aktualisiert',
+      updateError: 'Aktualisierung fehlgeschlagen',
+      
+      // Notes & Descriptions
+      updateOneAtTime: 'Sie können nur ein Feld gleichzeitig aktualisieren (Benutzername, E-Mail oder Passwort)',
+      
+      // 404 Page
+      pageNotFound: 'Seite nicht gefunden',
+      pageNotFoundDesc: 'Die angeforderte Seite existiert nicht.',
       backToHome: 'Zurück zur Startseite'
+      }
     }
   },
   en: {
@@ -164,7 +206,47 @@ export const translations = {
       block: 'Block',
       pageNotFound: 'Page Not Found',
       pageNotFoundDesc: 'The page you are looking for does not exist.',
-      backToHome: 'Back to Home'
+      backToHome: 'Back to Home',
+      settings : {signIn: 'Sign In',
+        signUp: 'Sign Up',
+        signOut: 'Sign Out',
+        username: 'Username',
+        email: 'Email',
+        password: 'Password',
+        newPassword: 'New Password',
+        confirmPassword: 'Confirm Password',
+        profile: 'Profile',
+        editProfile: 'Edit Profile',
+        settings: 'Settings',
+        save: 'Save',
+        cancel: 'Cancel',
+        saveChanges: 'Save Changes',
+        back: 'Back',
+        
+        // Profile & Settings
+        changePhoto: 'Change Photo',
+        uploadAvatar: 'Upload Avatar',
+        personalInfo: 'Personal Information',
+        accountSettings: 'Account Settings',
+        enable2FA: 'Enable 2FA',
+        disable2FA: 'Disable 2FA',
+        twoFactorAuth: 'Two-Factor Authentication',
+        
+        // Validation & Messages
+        required: 'Required',
+        invalidEmail: 'Invalid email address',
+        passwordMismatch: 'Passwords do not match',
+        updateSuccess: 'Successfully updated',
+        updateError: 'Update failed',
+        
+        // Notes & Descriptions
+        updateOneAtTime: 'You can only update one field at a time (username, email, or password)',
+        
+        // 404 Page
+        pageNotFound: 'Page Not Found',
+        pageNotFoundDesc: 'The page you are looking for does not exist.',
+        backToHome: 'Back to Home'
+      }
     }
   },
   fr: {
@@ -248,7 +330,49 @@ export const translations = {
       block: 'Bloquer',
       pageNotFound: 'Page Non Trouvée',
       pageNotFoundDesc: 'La page que vous recherchez n\'existe pas.',
-      backToHome: 'Retour à l\'Accueil'
+      backToHome: 'Retour à l\'Accueil',
+      settings : {
+        // Auth & General
+        signIn: 'Se connecter',
+        signUp: 'S\'inscrire',
+        signOut: 'Se déconnecter',
+        username: 'Nom d\'utilisateur',
+        email: 'Email',
+        password: 'Mot de passe',
+        newPassword: 'Nouveau mot de passe',
+        confirmPassword: 'Confirmer le mot de passe',
+        profile: 'Profil',
+        editProfile: 'Modifier le profil',
+        settings: 'Paramètres',
+        save: 'Enregistrer',
+        cancel: 'Annuler',
+        saveChanges: 'Enregistrer les modifications',
+        back: 'Retour',
+
+        // Profile & Settings
+        changePhoto: 'Changer la photo',
+        uploadAvatar: 'Télécharger l\'avatar',
+        personalInfo: 'Informations personnelles',
+        accountSettings: 'Paramètres du compte',
+        enable2FA: 'Activer 2FA',
+        disable2FA: 'Désactiver 2FA',
+        twoFactorAuth: 'Authentification à deux facteurs',
+
+        // Validation & Messages
+        required: 'Requis',
+        invalidEmail: 'Adresse email invalide',
+        passwordMismatch: 'Les mots de passe ne correspondent pas',
+        updateSuccess: 'Mise à jour réussie',
+        updateError: 'Échec de la mise à jour',
+
+        // Notes & Descriptions
+        updateOneAtTime: 'Vous ne pouvez mettre à jour qu\'un seul champ à la fois (nom d\'utilisateur, email ou mot de passe)',
+
+        // 404 Page
+        pageNotFound: 'Page Non Trouvée',
+        pageNotFoundDesc: 'La page que vous recherchez n\'existe pas.',
+        backToHome: 'Retour à l\'Accueil'
+      }
     }
   },
   nl: {
@@ -332,7 +456,49 @@ export const translations = {
       block: 'Blokkeren',
       pageNotFound: 'Pagina Niet Gevonden',
       pageNotFoundDesc: 'De pagina die u zoekt bestaat niet.',
+      backToHome: 'Terug naar Home',
+      settings : {
+      // Auth & General
+      signIn: 'Inloggen',
+      signUp: 'Registreren',
+      signOut: 'Uitloggen',
+      username: 'Gebruikersnaam',
+      email: 'E-mail',
+      password: 'Wachtwoord',
+      newPassword: 'Nieuw wachtwoord',
+      confirmPassword: 'Wachtwoord bevestigen',
+      profile: 'Profiel',
+      editProfile: 'Profiel bewerken',
+      settings: 'Instellingen',
+      save: 'Opslaan',
+      cancel: 'Annuleren',
+      saveChanges: 'Wijzigingen opslaan',
+      back: 'Terug',
+      
+      // Profile & Settings
+      changePhoto: 'Foto wijzigen',
+      uploadAvatar: 'Avatar uploaden',
+      personalInfo: 'Persoonlijke informatie',
+      accountSettings: 'Account instellingen',
+      enable2FA: '2FA inschakelen',
+      disable2FA: '2FA uitschakelen',
+      twoFactorAuth: 'Twee-factor authenticatie',
+      
+      // Validation & Messages
+      required: 'Verplicht',
+      invalidEmail: 'Ongeldig e-mailadres',
+      passwordMismatch: 'Wachtwoorden komen niet overeen',
+      updateSuccess: 'Succesvol bijgewerkt',
+      updateError: 'Update mislukt',
+      
+      // Notes & Descriptions
+      updateOneAtTime: 'U kunt slechts één veld tegelijk bijwerken (gebruikersnaam, e-mail of wachtwoord)',
+      
+      // 404 Page
+      pageNotFound: 'Pagina Niet Gevonden',
+      pageNotFoundDesc: 'De pagina die u zoekt bestaat niet.',
       backToHome: 'Terug naar Home'
+    }
     }
   }
 };
