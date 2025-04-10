@@ -168,6 +168,11 @@ const updateGame = (gameId) => {
   // Get players
   const leftPlayer = Object.values(players).find(p => p.side === 'left');
   const rightPlayer = Object.values(players).find(p => p.side === 'right');
+  const aiPlayer = Object.values(players).find(p => p.ws === null);
+
+  if (aiPlayer) {
+    aiMove(ball, aiPlayer, dimensions);
+  }
   
   if (!leftPlayer || !rightPlayer) return;
   
@@ -225,6 +230,8 @@ const updateGame = (gameId) => {
       stopGame(gameId);
     }
   }
+  // AI move for single player mode
+  
   
   // Send game state to all connected players
   broadcastGameState(gameId);
