@@ -29,7 +29,11 @@ To Do:
 		- Clean up unused datas
 		- Changing colour names in files (?)
 
-
+	connect 4:
+		- add a pop on winning
+		- add websocket
+		- create AI algo
+		- add timer
 
       let url = "http://localhost:3001/login";
       url = url.replace("localhost", window.location.hostname);

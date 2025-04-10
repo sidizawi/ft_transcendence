@@ -9,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const fastify = Fastify({ logger: false });
+
 fastify.addHook('onResponse', (request, reply, done) => {
 	let rep = JSON.stringify(reply);
 	console.log(`${request.method} ${request.url} ${reply.statusCode} ${rep}`);
@@ -32,7 +33,8 @@ fastify.register(fastifyHttpProxy, {
 // Proxy vers game-service
 fastify.register(fastifyHttpProxy, {
   upstream: 'http://game-service:3002',
-  prefix: '/game'
+  prefix: '/game',
+  websocket: true
 });
 
 fastify.register(fastifyHttpProxy, {

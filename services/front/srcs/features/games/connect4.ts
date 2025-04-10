@@ -2,22 +2,22 @@ import { i18n } from '../../shared/i18n';
 
 export class Connect4 {
 
-  private red = '#f53b3b';
-  private yellow = 'yellow';
   private cols = 7;
   private rows = 6;
+  private won = false;
+  private canPlay = true;
   private cellSize = 100;
+  private red = '#f53b3b';
   private coinPadding = 10;
-  private coinRadius = (this.cellSize - this.coinPadding * 2) / 2;
+  private yellow = 'yellow';
+  private player = this.yellow;
+  private data = new Array(42).fill('X');
+  private columns = new Array(7).fill(5);
   private canvas = null as HTMLCanvasElement | null;
   private ctx = null as CanvasRenderingContext2D | null;
-  private player = this.yellow;
-  private columns = new Array(7).fill(5);
-  private data = new Array(42).fill('X');
-  private lastCol = -1;
-  private won = false;
+  private coinRadius = (this.cellSize - this.coinPadding * 2) / 2;
 
-  drop(x: number, y: number, targetY: number, speed: number) {
+  drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {
     // Redraw the board on each frame
     this.drawBoard();
     
@@ -32,7 +32,16 @@ export class Connect4 {
     if (y < targetY) {
       y += speed;
       if (y > targetY) y = targetY;
-      requestAnimationFrame(() => this.drop(x, y, targetY, speed));
+      requestAnimationFrame(() => this.drop(x, y, targetY, speed, col, row));
+    } else {
+      this.canPlay = true;
+      this.data[row * this.cols + col] = this.player == this.red ? 'R' : 'Y';
+      if (this.checkWin()) {
+        // todo open a pop up
+        console.log(`player ${this.player == this.red ? "red" : "yellow"} won`);
+        this.won = true;
+      }
+      this.player = this.player == this.red ? this.yellow : this.red;
     }
   }
 
@@ -43,7 +52,7 @@ export class Connect4 {
     const targetY = targetRow * this.cellSize + this.cellSize / 2;
     const speed = 5; // pixels per frame
 
-    requestAnimationFrame(() => this.drop(x, y, targetY, speed));
+    requestAnimationFrame(() => this.drop(x, y, targetY, speed, column, targetRow));
   }
 
   checkWin() : boolean {
@@ -52,33 +61,30 @@ export class Connect4 {
       for (let j = 0; j < this.cols; j++ ) {
         coin = this.data[i * this.cols + j];
         if (i < 3 && coin != 'X') {
-          // rows from 0 to 2
+          // rows from top to bottom
           count = 0;
           for (let k = i; k < i + 4; k++) {
             idx = k * this.cols + j;
-            if (idx != this.lastCol && (this.data[idx] == 'X' || this.data[idx] != coin)) { // to fix
+            if (this.data[idx] != coin) {
               break ;
             }
-            console.log(k, idx, this.data[idx], coin);
             count++;
           }
           if (count == 4) {
-            console.log("1) i =", i, "j =", j);
             return (true);
           }
         }
         if (j < 4 && coin != 'X') {
-          // cols from 0 to 3
+          // cols from left to right 
           count = 0;
           for (let k = j; k < j + 4; k++) {
             idx = i * this.cols + k;
-            if (idx != this.lastCol && (this.data[idx] == 'X' || this.data[idx] != coin)) {
+            if (this.data[idx] != coin) {
               break;
             }
             count++;
           }
           if (count == 4) {
-            console.log("2) i =", i, "j =", j);
             return (true);
           }
         }
@@ -87,13 +93,12 @@ export class Connect4 {
           count = 0;
           for (let k = 0; k < 4; k++) {
             idx = (i + k) * this.cols + j + k;
-            if (idx != this.lastCol && (this.data[idx] == 'X' || this.data[idx] != coin)) {
+            if (this.data[idx] != coin) {
               break;
             }
             count++;
           }
           if (count == 4) {
-            console.log("3) i =", i, "j =", j);
             return (true);
           }
         }
@@ -102,13 +107,12 @@ export class Connect4 {
           count = 0;
           for (let k = 0; k < 4; k++) {
             idx = (i - k) * this.cols + j + k;
-            if (idx != this.lastCol && (this.data[idx] == 'X' || this.data[idx] != coin)) {
+            if (this.data[idx] != coin) {
               break;
             }
             count++;
           }
           if (count == 4) {
-            console.log("4) i =", i, "j =", j);
             return (true);
           }
         }
@@ -121,24 +125,18 @@ export class Connect4 {
     this.canvas = document.getElementById('connect4Canvas') as HTMLCanvasElement;
     this.ctx = this.canvas!.getContext('2d');
     this.canvas!.addEventListener('click', (event) => {
-      if (this.won) {
+      if (this.won || !this.canPlay) {
         return ;
       }
-      if (this.lastCol != -1) {
-        this.data[(this.columns[this.lastCol] + 1) * this.cols + this.lastCol] = this.player == this.red ? 'R' : 'Y';
-      }
-      this.player = this.player == this.red ? this.yellow : this.red;
       const rect = this.canvas!.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const col = Math.floor(x / this.cellSize);
+      if (this.columns[col] < 0) {
+        return ;
+      }
+      this.canPlay = false;
       this.animateCoin(col, this.columns[col]);
       this.columns[col]--;
-      this.lastCol = col;
-
-      if (this.checkWin()) {
-        console.log(`this player ${this.player} won`);
-        this.won = true;
-      }
     });
   }
 
@@ -180,7 +178,7 @@ export class Connect4 {
 
   renderCanvas(): string {
     return `
-      <div>
+      <div class="flex items-center justify-center">
         <canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>
       </div>
     `;
