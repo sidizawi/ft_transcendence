@@ -36,6 +36,11 @@ export class TranscendenceApp {
       const user = TokenManager.getUserFromToken();
       if (user) {
         this.state.user = user;
+        // Restore user data from localStorage if available
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          this.state.user = JSON.parse(storedUser);
+        }
       }
     }
 
@@ -72,6 +77,7 @@ export class TranscendenceApp {
 
   private handleLogout() {
     TokenManager.removeToken();
+    localStorage.removeItem('user'); // Remove user data from localStorage
     this.state.user = null;
     this.menu = new Menu(false, () => this.handleLogout());
     this.initializeApp();

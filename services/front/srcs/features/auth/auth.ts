@@ -45,6 +45,9 @@ export class Auth {
         throw new Error('Invalid user data in token');
       }
 
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+
       this.onLogin(user);
     } catch (error) {
       console.error('Error handling Google response:', error);
@@ -92,6 +95,9 @@ export class Auth {
         }
       }
 
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+
       this.onLogin(user);
     } catch (error) {
       console.error('Login error:', error);
@@ -126,6 +132,9 @@ export class Auth {
       if (!user) {
         throw new Error('Invalid user data in token');
       }
+
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(user));
 
       this.onLogin(user);
     } catch (error) {

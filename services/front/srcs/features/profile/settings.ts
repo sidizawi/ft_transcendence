@@ -4,10 +4,18 @@ import { Router } from '../../shared/utils/routing';
 import { AvatarService } from '../../shared/services/avatarService';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user/profile/profile`;
+const USER_API_URL = `http://${host}:3000/user/profile`;
 
 export class Settings {
   constructor(private user: User) {}
+
+  private updateView() {
+    const main = document.querySelector('main');
+    if (main) {
+      main.innerHTML = this.render();
+      this.setupEventListeners();
+    }
+  }
 
   private async handleAvatarChange(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -17,9 +25,14 @@ export class Settings {
 
     try {
       const { avatarPath } = await AvatarService.uploadAvatar(file);
-      // Update the user's avatar in memory
+      // Update the user's avatar in memory and localStorage
       this.user.avatar = avatarPath;
-      // Update the view to show the new avatar
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        userData.avatar = avatarPath;
+        localStorage.setItem('user', JSON.stringify(userData));
+      }
       this.updateView();
     } catch (error) {
       console.error('Avatar upload error:', error);
@@ -45,10 +58,19 @@ export class Settings {
 
       const data = await response.json();
       localStorage.setItem('token', data.token);
-      window.location.href = '/profile';
+      
+      // Update username in localStorage
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        userData.username = username;
+        localStorage.setItem('user', JSON.stringify(userData));
+      }
+      
+      return true;
     } catch (error) {
       console.error('Username update error:', error);
-      alert(error instanceof Error ? error.message : i18n.t('updateError'));
+      throw error;
     }
   }
 
@@ -165,9 +187,17 @@ export class Settings {
             if (verifyResponse.ok) {
               const data = await verifyResponse.json();
               localStorage.setItem('token', data.token);
+              
+              // Update email in localStorage
+              const storedUser = localStorage.getItem('user');
+              if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                userData.email = email;
+                localStorage.setItem('user', JSON.stringify(userData));
+              }
+              
               modal.remove();
               resolve(true);
-              window.location.href = '/profile';
             } else {
               const data = await verifyResponse.json();
               this.showVerificationError(data.error || i18n.t('invalid2FACode'));
@@ -202,8 +232,7 @@ export class Settings {
       });
     } catch (error) {
       console.error('Email update error:', error);
-      alert(error instanceof Error ? error.message : i18n.t('updateError'));
-      return false;
+      throw error;
     }
   }
 
@@ -263,7 +292,6 @@ export class Settings {
             if (verifyResponse.ok) {
               modal.remove();
               resolve(true);
-              window.location.href = '/profile';
             } else {
               const data = await verifyResponse.json();
               this.showVerificationError(data.error || i18n.t('invalid2FACode'));
@@ -298,8 +326,7 @@ export class Settings {
       });
     } catch (error) {
       console.error('Password update error:', error);
-      alert(error instanceof Error ? error.message : i18n.t('updateError'));
-      return false;
+      throw error;
     }
   }
 
@@ -312,30 +339,30 @@ export class Settings {
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
 
-    let changesCount = 0;
-    if (username !== this.user.username) changesCount++;
-    if (email !== this.user.email) changesCount++;
-    if (password) changesCount++;
+    try {
+      const updates: Promise<boolean>[] = [];
 
-    if (changesCount > 1) {
-      alert(i18n.t('updateOneAtTime'));
-      return;
-    }
+      if (username !== this.user.username) {
+        updates.push(this.handleUsernameUpdate(username));
+      }
+      
+      if (email !== this.user.email) {
+        updates.push(this.handleEmailUpdate(email));
+      }
+      
+      if (password) {
+        updates.push(this.handlePasswordUpdate(password));
+      }
 
-    if (username !== this.user.username) {
-      await this.handleUsernameUpdate(username);
-    } else if (email !== this.user.email) {
-      await this.handleEmailUpdate(email);
-    } else if (password) {
-      await this.handlePasswordUpdate(password);
-    }
-  }
-
-  private updateView() {
-    const main = document.querySelector('main');
-    if (main) {
-      main.innerHTML = this.render();
-      this.setupEventListeners();
+      if (updates.length > 0) {
+        const results = await Promise.all(updates);
+        if (results.every(result => result)) {
+          window.location.href = '/profile';
+        }
+      }
+    } catch (error) {
+      console.error('Update error:', error);
+      alert(error instanceof Error ? error.message : i18n.t('updateError'));
     }
   }
 
@@ -412,10 +439,6 @@ export class Settings {
                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
-
-                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                  ${i18n.t('updateOneAtTime')}
-                </p>
 
                 <div class="flex justify-center space-x-4 pt-6">
                   <a

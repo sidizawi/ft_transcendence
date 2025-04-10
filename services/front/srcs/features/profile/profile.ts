@@ -5,8 +5,8 @@ import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 import { AvatarService } from '../../shared/services/avatarService';
 import { StatsService } from '../../shared/services/statsService';
 
-// const host = window.location.hostname;
-// const USER_API_URL = `http://${host}:3000/user/profile`;
+const host = window.location.hostname;
+const USER_API_URL = `http://${host}:3000/user/profile/profile`;
 
 export class Profile {
   private pongStats: GameStats | null = null;
@@ -46,12 +46,19 @@ export class Profile {
     if (!file) return;
 
     try {
-      const response = await AvatarService.uploadAvatar(file);
-      this.user.avatar = response.avatarPath;
+      const { avatarPath } = await AvatarService.uploadAvatar(file);
+      // Update the user's avatar in memory and localStorage
+      this.user.avatar = avatarPath;
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        const userData = JSON.parse(storedUser);
+        userData.avatar = avatarPath;
+        localStorage.setItem('user', JSON.stringify(userData));
+      }
       this.updateView();
     } catch (error) {
       console.error('Avatar upload error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to upload avatar');
+      alert(error instanceof Error ? error.message : i18n.t('updateError'));
     }
   }
 
@@ -62,9 +69,15 @@ export class Profile {
         : TwoFactorAuth.enable(this.user.id));
 
       if (result.success) {
+        // Update 2FA status in memory and localStorage
         this.user.twoFactorEnabled = !this.user.twoFactorEnabled;
-        this.render();
-        this.setupEventListeners();
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          userData.twoFactorEnabled = this.user.twoFactorEnabled;
+          localStorage.setItem('user', JSON.stringify(userData));
+        }
+        this.updateView();
       }
     } catch (error) {
       console.error('2FA error:', error);
@@ -285,7 +298,6 @@ export class Profile {
                         src="${game.avatar}" 
                         alt="${game.opponent}"
                         class="w-8 h-8 rounded-full object-cover"
-                        onerror="this.src='/img/default-avatar.jpg'"
                       >
                       <span class="text-gray-900 dark:text-white">${game.opponent}</span>
                     </div>
