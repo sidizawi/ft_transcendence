@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
     state.rightPlayer = new Paddle(state.canvas.width - 20, state.canvas.height / 2 - PADDLE_HEIGHT / 2, PADDLE_WIDTH, PADDLE_HEIGHT, PADDLE_SPEED);
     
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-    state.ws = new WebSocket(`${protocol}://${window.location.hostname}:8080`);
+    state.ws = new WebSocket(`${protocol}://${window.location.hostname}:3002/ws`);
 
     state.ws.onopen = () => {
         console.log("Connected to server");

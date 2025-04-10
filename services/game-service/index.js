@@ -1,5 +1,5 @@
 import Fastify from 'fastify';
-import { WebSocketServer, WebSocket } from 'ws';
+import fastifyWebsocket from '@fastify/websocket';
 import { fileURLToPath } from 'url';
 import path from 'path';
 import fastifyStatic from '@fastify/static';
@@ -10,31 +10,29 @@ import {createGame, addPlayer, updatePlayerPosition, handleDisconnect, startGame
 // import Ball from './shared/Ball.js';
 // import Paddle from './public/Paddle.js';
 // import { type } from 'os';
-// import { startGame } from './pong/game.js';
-
 
 dotenv.config();
+
+const fastify = Fastify({ logger: true });
 
 fastify.register(fastifyJwt, {
   secret: process.env.JWT_SECRET,
 });
 
+fastify.register(fastifyWebsocket);
+
 fastify.decorate('db', db);
-
-fastify.decorate('authenticate', async (request, reply) => {
-  try {
-    await request.jwtVerify();
-  }
-  catch (err) {
-    reply.code(401).send({ error: 'Unauthorized' });
-  }
-});
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const fastify = Fastify({ logger: true });
+fastify.decorate('authenticate', async (request, reply) => {
+  try {
+    await request.jwtVerify();
+  } catch (err) {
+    reply.code(401).send({ error: 'Unauthorized' });
+  }
+});
 
 // Register static file serving
 fastify.register(fastifyStatic, {
@@ -52,14 +50,12 @@ fastify.register(fastifyStatic, {
 let canvasDimensions;
 const waitingPlayers = [];
 
-const wss = new WebSocketServer({ port: 8080 });
-
 // Helper function for creating games
 function setupNewGame(ws, mode, opponent = null) {
   // Generate a unique game ID
   const gameId = `game-${Date.now()}`;
   // Create a new game with the client dimensions
-  createGame(gameId, wss, canvasDimensions);
+  createGame(gameId, ws, canvasDimensions);
   
   // Generate a unique player ID if not already set
   if (!ws.playerId) {
@@ -124,69 +120,71 @@ function setupNewGame(ws, mode, opponent = null) {
   return gameId;
 }
 
-wss.on('connection', (ws) => {
-  console.log('Player connected');
+fastify.register(async function (fastify) {
+  fastify.get('/ws', { websocket: true }, (connection, req) => {
+    console.log('Player connected');
+    const ws = connection.socket;
 
-  ws.on('message', (message) => {
-    try {
-      const data = JSON.parse(message);
-      console.log('Received:', data);
+    ws.on('message', (message) => {
+      try {
+        const data = JSON.parse(message.toString());
+        console.log('Received:', data);
 
-      if (data.type === 'dimensions') {
-        canvasDimensions = {
-          width: data.width,
-          height: data.height,
-          paddleWidth: data.paddleWidth,
-          paddleHeight: data.paddleHeight,
-          ballSize: data.ballSize
-        };
-      }
-      else if (data.type === 'startGame') {
-        console.log(`Starting new game in ${data.mode} mode`);
-        
-        if (data.mode === 'online') {
-          // For online mode, check waiting players first
-          if (waitingPlayers.length > 0) {
-            // Match with a waiting player
-            const opponent = waitingPlayers.shift();
-            console.log(`Matching with waiting player: ${opponent.playerId}`);
-            
-            // Create game with both players
-            setupNewGame(ws, 'online', opponent);
-          } else {
-            // No waiting players, add to queue
-            if (!ws.playerId) {
-              ws.playerId = `player-${Date.now()}`;
+        if (data.type === 'dimensions') {
+          canvasDimensions = {
+            width: data.width,
+            height: data.height,
+            paddleWidth: data.paddleWidth,
+            paddleHeight: data.paddleHeight,
+            ballSize: data.ballSize
+          };
+        }
+        else if (data.type === 'startGame') {
+          console.log(`Starting new game in ${data.mode} mode`);
+          
+          if (data.mode === 'online') {
+            // For online mode, check waiting players first
+            if (waitingPlayers.length > 0) {
+              // Match with a waiting player
+              const opponent = waitingPlayers.shift();
+              console.log(`Matching with waiting player: ${opponent.playerId}`);
+              
+              // Create game with both players
+              setupNewGame(ws, 'online', opponent);
+            } else {
+              // No waiting players, add to queue
+              if (!ws.playerId) {
+                ws.playerId = `player-${Date.now()}`;
+              }
+              waitingPlayers.push(ws);
+              console.log(`Added to waiting queue. Players waiting: ${waitingPlayers.length}`);
+              
+              // Tell client they're waiting
+              ws.send(JSON.stringify({
+                type: 'waitingOpponent'
+              }));
             }
-            waitingPlayers.push(ws);
-            console.log(`Added to waiting queue. Players waiting: ${waitingPlayers.length}`);
-            
-            // Tell client they're waiting
-            ws.send(JSON.stringify({
-              type: 'waitingOpponent'
-            }));
+          } else {
+            // Single player or two player modes
+            setupNewGame(ws, data.mode);
           }
-        } else {
-          // Single player or two player modes
-          setupNewGame(ws, data.mode);
         }
-      }
-      else if (data.type === 'paddleMove') {
-        if (ws.gameId && ws.playerId) {
-          updatePlayerPosition(ws.gameId, ws.playerId, data);
+        else if (data.type === 'paddleMove') {
+          if (ws.gameId && ws.playerId) {
+            updatePlayerPosition(ws.gameId, ws.playerId, data);
+          }
         }
+      } catch (error) {
+        console.error('Error parsing message', error);
       }
-    } catch (error) {
-      console.error('Error parsing message', error);
-    }
-  });
-
-  // Handle disconnections
-  ws.on('close', () => {
-    console.log('Player disconnected');
-    if (ws.gameId && ws.playerId) {
-      handleDisconnect(ws.gameId, ws.playerId);
-    }
+    });
+    // Handle disconnections
+    ws.on('close', () => {
+      console.log('Player disconnected');
+      if (ws.gameId && ws.playerId) {
+        handleDisconnect(ws.gameId, ws.playerId);
+      }
+    });
   });
 });
 
@@ -221,4 +219,3 @@ fastify.listen({ port: 3002, host: '0.0.0.0' }, (err, address) => {
   }
   console.log(`🎮 Game Service running at ${address}`);
 });
-
