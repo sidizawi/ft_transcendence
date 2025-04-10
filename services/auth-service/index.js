@@ -11,7 +11,6 @@ import fastifyJwt from '@fastify/jwt';
 import dotenv from 'dotenv';
 import { OAuth2Client } from 'google-auth-library';
 import nodemailer from 'nodemailer';
-import speakeasy from 'speakeasy';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -240,7 +239,7 @@ fastify.post('/2fa/email/send', { preValidation: [fastify.authenticate] }, async
       };
       console.log(user.mail);
       const mailOptions = {
-          from: process.env.EMAIL_MAIL,
+          from: `"Transcendence" <${process.env.EMAIL_MAIL}>`,
           to: user.email,
           subject: 'Votre code de vérification 2FA',
           text: `Bonjour ${user.username},\n\nVotre code de vérification est : ${otp}\nIl expirera dans 10 minutes.\n\nCordialement,\nL'équipe Transcendence`

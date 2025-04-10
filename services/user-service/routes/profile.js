@@ -6,6 +6,7 @@ import fastifyJwt from '@fastify/jwt';
 import fs from 'fs';
 import path from 'path';
 import multer from 'fastify-multer';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -184,7 +185,7 @@ async function profileRoutes(fastify, options) {
 		  return reply.code(400).send({ error: 'Incorrect verification code' });
 		}
 		
-		const hashedPassword = await fastify.bcrypt.hash(newPassword);
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
 		
 		fastify.db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, userId);
 		
@@ -198,26 +199,34 @@ async function profileRoutes(fastify, options) {
 	fastify.post('/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
-		const userName = request.user.username;
+		
 		if (!request.file) {
 			return reply.code(400).send({ error: 'No file uploaded' });
 		}
-
+	
 		const validMimeTypes = ['image/jpeg', 'image/png'];
 		if (!validMimeTypes.includes(request.file.mimetype)) {
 			fs.unlinkSync(request.file.path);
 			return reply.code(400).send({ error: 'Invalid file type' });
 		}
-
-		const fileExtension = path.extname(request.file.originalname);
-		const newFileName = `${userId}-${userName}${fileExtension}`;
-		const newFilePath = path.join('uploads/avatars', newFileName);
-
+	
+		// Utilise le nom d'origine du fichier au lieu de le renommer
+		const originalFileName = request.file.originalname;
+		const newFilePath = path.join('uploads/avatars', originalFileName);
+	
+		// Si un fichier du même nom existe déjà, le supprimer d'abord
+		if (fs.existsSync(newFilePath)) {
+			fs.unlinkSync(newFilePath);
+		}
+	
 		fs.renameSync(request.file.path, newFilePath);
-
+	
 		fastify.db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(newFilePath, userId);
-
-		reply.code(200).send({ message: 'Avatar uploaded successfully', avatarPath: newFilePath });
+	
+		reply.code(200).send({ 
+			message: 'Avatar uploaded successfully', 
+			avatarPath: newFilePath 
+		});
 	});
 
 	// Inclure l'URL de l'avatar dans les réponses utilisateur
