@@ -38,8 +38,16 @@ export class Friends {
 
   private getFilteredFriends() {
     if (this.isLoading || !this.friends) return [];
+    
+    // If there's no search query, return all friends sorted by status
+    if (!this.searchQuery) {
+      return this.friends;
+    }
+
+    // Filter all friends (including blocked) based on the search query
+    const searchTerm = this.searchQuery.toLowerCase();
     return this.friends.filter(friend => 
-      friend.username2.toLowerCase().includes(this.searchQuery.toLowerCase())
+      friend.username2.toLowerCase().includes(searchTerm)
     );
   }
 
@@ -123,6 +131,7 @@ export class Friends {
     const receivingRequests = filteredFriends.filter(f => f.status === 'receiving');
     const sendingRequests = filteredFriends.filter(f => f.status === 'sending');
     const acceptedFriends = filteredFriends.filter(f => f.status === 'accepted');
+    const blockedFriends = filteredFriends.filter(f => f.status === 'blocked');
 
     return `
       <div class="max-w-4xl mx-auto px-4 py-8">
@@ -189,7 +198,7 @@ export class Friends {
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                     <div class="flex items-center space-x-3">
                       <img 
-                        src="${friend.avatar || '/img/default-avatar.jpg'}" 
+                        src="${friend.avatar}" 
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover"
                       >
@@ -208,19 +217,21 @@ export class Friends {
             </div>
           ` : ''}
 
-          <div>
+          <div class="mb-8">
             <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
             ${acceptedFriends.length > 0 ? `
               <div class="space-y-3">
                 ${acceptedFriends.map(friend => `
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg group cursor-pointer"
-                       data-userid="${friend.userid2}">
+                       data-userid="${friend.userid2}"
+                       data-friend-username="${friend.username2}"
+                       onclick="window.open('/chat/${friend.userid2}', 'chat-${friend.userid2}', 'width=800,height=600')">
                     <div class="flex items-center space-x-3">
                       <div class="relative">
                         <img 
-                          src="${friend.avatar || '/img/default-avatar.jpg'}" 
+                          src="${friend.avatar}" 
                           alt="${friend.username2}" 
-                          class="w-10 h-10 rounded-full object-cover""
+                          class="w-10 h-10 rounded-full object-cover"
                         >
                         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
                       </div>
@@ -229,12 +240,25 @@ export class Friends {
                     <div class="space-x-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button 
                         class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        data-action="delete"
+                        data-username="${friend.username2}"
+                        title="${i18n.t('delete')}"
+                        onclick="event.stopPropagation()"
+                      >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                      </button>
+                      <button 
+                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         data-action="block"
                         data-username="${friend.username2}"
                         title="${i18n.t('block')}"
                         onclick="event.stopPropagation()"
                       >
-                        <span class="text-xl">🚫</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                        </svg>
                       </button>
                     </div>
                   </div>
@@ -246,6 +270,33 @@ export class Friends {
               </p>
             `}
           </div>
+
+          ${blockedFriends.length > 0 ? `
+            <div class="mt-8">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('blockedUsers')}</h3>
+              <div class="space-y-3">
+                ${blockedFriends.map(friend => `
+                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center space-x-3">
+                      <img 
+                        src="${friend.avatar}" 
+                        alt="${friend.username2}" 
+                        class="w-10 h-10 rounded-full object-cover grayscale"
+                      >
+                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                    </div>
+                    <button 
+                      class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600"
+                      data-action="unblock"
+                      data-username="${friend.username2}"
+                    >
+                      ${i18n.t('unblock')}
+                    </button>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
         </div>
 
         <div class="mt-8 flex justify-center">
@@ -309,6 +360,12 @@ export class Friends {
         case 'block':
           await FriendService.blockFriend(username);
           break;
+        case 'unblock':
+          await FriendService.unblockFriend(username);
+          break;
+        case 'delete':
+          await FriendService.deleteFriend(username);
+          break;
       }
       await this.loadFriends();
     } catch (error) {
@@ -317,6 +374,7 @@ export class Friends {
   }
 
   setupEventListeners() {
+    const friendsTab = document.getElementById('friends-tab');
     const addFriendButton = document.getElementById('add-friend-button');
     const searchInput = document.getElementById('friends-search') as HTMLInputElement;
 
@@ -351,16 +409,6 @@ export class Friends {
     cancelAddFriend?.addEventListener('click', () => {
       this.addFriendOpen = false;
       this.updateView();
-    });
-
-    // Add click event listeners for friend items
-    document.querySelectorAll('[data-userid]').forEach(element => {
-      element.addEventListener('click', (e) => {
-        const userId = element.getAttribute('data-userid');
-        if (userId) {
-          this.openChatInNewTab(userId);
-        }
-      });
     });
 
     document.querySelectorAll('[data-action]').forEach(button => {

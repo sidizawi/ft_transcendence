@@ -338,6 +338,7 @@ export class Settings {
     const username = formData.get('username') as string;
     const email = formData.get('email') as string;
     const password = formData.get('password') as string;
+    const confirmPassword = formData.get('confirmPassword') as string;
 
     try {
       const updates: Promise<boolean>[] = [];
@@ -351,6 +352,9 @@ export class Settings {
       }
       
       if (password) {
+        if (password !== confirmPassword) {
+          throw new Error(i18n.t('passwordMismatch'));
+        }
         updates.push(this.handlePasswordUpdate(password));
       }
 
@@ -440,6 +444,19 @@ export class Settings {
                   />
                 </div>
 
+                <div>
+                  <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    ${i18n.t('confirmPassword')}
+                  </label>
+                  <input
+                    type="password"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="••••••••"
+                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                  />
+                </div>
+
                 <div class="flex justify-center space-x-4 pt-6">
                   <a
                     href="/profile"
@@ -465,8 +482,26 @@ export class Settings {
   setupEventListeners() {
     const avatarUpload = document.getElementById('settings-avatar-upload') as HTMLInputElement;
     const updateForm = document.getElementById('update-info-form');
+    const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
 
     avatarUpload?.addEventListener('change', (e) => this.handleAvatarChange(e));
     updateForm?.addEventListener('submit', (e) => this.handleInfoUpdate(e));
+
+    // Add password confirmation validation
+    const validatePasswords = () => {
+      if (passwordInput.value && confirmPasswordInput.value) {
+        if (passwordInput.value !== confirmPasswordInput.value) {
+          confirmPasswordInput.setCustomValidity(i18n.t('passwordMismatch'));
+        } else {
+          confirmPasswordInput.setCustomValidity('');
+        }
+      } else {
+        confirmPasswordInput.setCustomValidity('');
+      }
+    };
+
+    passwordInput?.addEventListener('input', validatePasswords);
+    confirmPasswordInput?.addEventListener('input', validatePasswords);
   }
 }

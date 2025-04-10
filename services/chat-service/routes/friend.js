@@ -103,8 +103,8 @@ async function friendRoutes(fastify, options) {
 		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
 		const friendid = friendExists.id;
 		
-		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
-		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
+		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
 		
 		if (sendingRow.status !== 'sending' || receivRow.status !== 'receiving'){
 			reply.code(400);
@@ -137,8 +137,8 @@ async function friendRoutes(fastify, options) {
 		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
 		const friendid = friendExists.id;
 	
-		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
-		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
+		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
 	
 		if (sendingRow.status !== 'sending' || receivRow.status !== 'receiving'){
 			reply.code(400);
@@ -363,6 +363,20 @@ async function friendRoutes(fastify, options) {
 
 	// 	return { message: 'Successfully retrieve request list', onlyUsername}
 	// });
+
+	fastify.get('/blockedlist', async (request, reply) => {
+        await request.jwtVerify();
+        const userId = request.user.id;        const blockedlist = fastify.db.prepare(`
+            SELECT f.*, u.id, u.username, u.avatar
+            FROM friend f
+            JOIN users u ON f.userid2 = u.id
+            WHERE f.userid1 = ? AND f.status = 'blocked'`)
+            .all(userId);        const onlyUsername = blockedlist.map(item => ({
+            username2: item.username,
+            id: item.id,
+            avatar: item.avatar || '/img/default-avatar.jpg',
+        }));        return { message: 'Successfully retrieve blocked list', onlyUsername };
+    });
 }
   
 export default friendRoutes;
