@@ -311,23 +311,6 @@ async function friendRoutes(fastify, options) {
 	});
 
 	fastify.get('/blockedlist', async (request, reply) => {
-		await request.jwtVerify();
-		const userId = request.user.id;
-
-		const blockedlist = fastify.db.prepare(`
-			SELECT f.*, u.id, u.username, u.avatar 
-			FROM friend f 
-			JOIN users u ON f.userid2 = u.id 
-			WHERE f.userid1 = ? AND f.status = 'blocked'`)
-			.all(userId);
-
-		const onlyUsername = blockedlist.map(item => ({
-			username2: item.username,
-			id: item.id,
-			avatar: item.avatar || '/img/default-avatar.jpg',}));
-	});
-
-	fastify.get('/blockedlist', async (request, reply) => {
         await request.jwtVerify();
         const userId = request.user.id; 
 
