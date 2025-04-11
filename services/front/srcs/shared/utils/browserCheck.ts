@@ -3,16 +3,16 @@ import Bowser from 'bowser';
 interface BrowserRequirements {
   chrome: string;
   firefox: string;
-  safari: string;
-  edge: string;
+  chromium: string;
+  brave: string;
 }
 
 export class BrowserCompatibility {
   private static minVersions: BrowserRequirements = {
-    chrome: '90',
-    firefox: '90',
-    safari: '14',
-    edge: '90'
+    chrome: '122',    // Latest stable Chrome
+    firefox: '123',   // Latest stable Firefox
+    chromium: '122',  // Latest stable Chromium
+    brave: '1.62'     // Latest stable Brave
   };
 
   static check(): boolean {
@@ -29,10 +29,12 @@ export class BrowserCompatibility {
         return majorVersion >= parseInt(this.minVersions.chrome);
       case 'firefox':
         return majorVersion >= parseInt(this.minVersions.firefox);
-      case 'safari':
-        return majorVersion >= parseInt(this.minVersions.safari);
-      case 'microsoft edge':
-        return majorVersion >= parseInt(this.minVersions.edge);
+      case 'chromium':
+        return majorVersion >= parseInt(this.minVersions.chromium);
+      case 'brave':
+        // Brave's user agent includes Chrome version, need to check for Brave specifically
+        const isBrave = navigator.brave !== undefined;
+        return isBrave && majorVersion >= parseInt(this.minVersions.chrome);
       default:
         return false;
     }
@@ -50,7 +52,7 @@ export class BrowserCompatibility {
         <div class="flex-1">
           <p class="font-medium">
             ⚠️ Your browser (${browserName} ${browserVersion}) might not be fully supported.
-            For the best experience, please use the latest version of Chrome, Firefox, Safari, or Edge.
+            For the best experience, please use the latest version of Chrome (122+), Firefox (123+), Brave (1.62+), or Chromium (122+).
           </p>
         </div>
         <button class="ml-4 text-yellow-900 dark:text-yellow-100 hover:text-yellow-700 dark:hover:text-yellow-300">

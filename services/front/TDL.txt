@@ -1,7 +1,6 @@
 To Do:
 
 	Profile page:
-		- Being able to change user's info
 		- Being able to change the avatar
 		- Tabs' visual
 		- 2FA -> s'active et se desactive MAIS pb  connexion + pb boutton + demander refresh token

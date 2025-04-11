@@ -31,7 +31,7 @@ export class Router {
     }
 
     // Redirect to signin if trying to access protected pages while logged out
-    if (path === '/profile' && !this.isLoggedIn()) {
+    if ((path === '/profile' || path === '/profile/settings') && !this.isLoggedIn()) {
       this.navigateTo('/signin');
       return '/signin';
     }

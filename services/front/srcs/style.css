@@ -96,12 +96,32 @@
 }
 
 /* Google Sign-In Button Override */
+#google-signin-button {
+  @apply flex justify-center items-center w-full;
+}
+
+#google-signin-button > div {
+  @apply !w-full sm:!w-[280px] md:!w-[280px] !mx-auto max-w-[90%];
+}
+
 #google-signin-button div[role="button"] {
-  @apply !bg-orange dark:!bg-nature !text-white dark:!text-nature-lightest transition-colors !border-0 !shadow-none;
+  @apply !bg-orange dark:!bg-nature !text-white dark:!text-nature-lightest transition-colors !border-2 !border-orange/20 dark:!border-nature/20 !shadow-none !rounded-full !h-11;
 }
 
 #google-signin-button div[role="button"]:hover {
   @apply !bg-orange-darker dark:!bg-nature/90;
+}
+
+#google-signin-button div[role="button"] > div {
+  @apply !px-4;
+}
+
+#google-signin-button div[role="button"] > div > span {
+  @apply !font-sans !text-base !font-medium;
+}
+
+#google-signin-button div[role="button"] > div > div {
+  @apply !mr-3;
 }
 
 /* Menu Overlay */

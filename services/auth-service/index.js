@@ -11,7 +11,6 @@ import fastifyJwt from '@fastify/jwt';
 import dotenv from 'dotenv';
 import { OAuth2Client } from 'google-auth-library';
 import nodemailer from 'nodemailer';
-import speakeasy from 'speakeasy';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -47,7 +46,7 @@ await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
   origin: "http://localhost:8000", // Autorise toutes les origines (tu peux restreindre si besoin)
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 });
@@ -56,7 +55,6 @@ fastify.decorate('db', db);
 
 fastify.decorate('authenticate', async (request, reply) => {
     try {
-      // Vérifier le token JWT depuis le header Authorization
       await request.jwtVerify();
     } catch (err) {
       reply.code(401).send({ error: 'Non autorisé' });
@@ -104,7 +102,7 @@ fastify.post('/register', async (request, reply) => {
         total_points: 0
     };
     const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data,is_two_factor_enabled) VALUES (?, ?, ?, ?, ?)");
-    const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData), 0);
+    const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData), 1);
     const userId = result.lastInsertRowid;
 
     const user = fastify.db.prepare(
@@ -164,7 +162,8 @@ fastify.post('/login', async (request, reply) => {
     const token = fastify.jwt.sign({
         id: user.id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        avatar: user.avatar
     });
     
     reply.code(200);
@@ -240,7 +239,7 @@ fastify.post('/2fa/email/send', { preValidation: [fastify.authenticate] }, async
       };
       console.log(user.mail);
       const mailOptions = {
-          from: process.env.EMAIL_MAIL,
+          from: `"Transcendence" <${process.env.EMAIL_MAIL}>`,
           to: user.email,
           subject: 'Votre code de vérification 2FA',
           text: `Bonjour ${user.username},\n\nVotre code de vérification est : ${otp}\nIl expirera dans 10 minutes.\n\nCordialement,\nL'équipe Transcendence`

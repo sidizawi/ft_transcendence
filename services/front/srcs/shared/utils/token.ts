@@ -2,7 +2,6 @@ import { User } from '../types/user';
 
 export class TokenManager {
   private static readonly TOKEN_KEY = 'token';
-  private static readonly DEFAULT_AVATAR = '/img/default-avatar.jpg';
 
   static getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
@@ -40,23 +39,27 @@ export class TokenManager {
     const decoded = this.decodeToken();
     if (!decoded) return null;
 
-    try {
-      return {
-        id: decoded.sub || decoded.id || decoded.userId,
-        username: decoded.username || decoded.name || '',
-        email: decoded.email || '',
-        avatar: decoded.picture || decoded.avatar || this.DEFAULT_AVATAR,
-        stats: {
-          wins: decoded.stats?.wins || 0,
-          losses: decoded.stats?.losses || 0,
-          totalGames: decoded.stats?.totalGames || 0
+    return {
+      id: decoded.id,
+      username: decoded.username,
+      email: decoded.email,
+      avatar: decoded.avatar || '/img/default-avatar.jpg',
+      twoFactorEnabled: decoded.twoFactorEnabled,
+      stats: {
+        pong: {
+          wins: 0,
+          losses: 0,
+          totalGames: 0,
+          winRate: 0
         },
-        twoFactorEnabled: decoded.twoFactorEnabled || false
-      };
-    } catch (error) {
-      console.error('Error extracting user from token:', error);
-      return null;
-    }
+        connect4: {
+          wins: 0,
+          losses: 0,
+          totalGames: 0,
+          winRate: 0
+        }
+      }
+    };
   }
 
   static getAuthHeaders(): HeadersInit {

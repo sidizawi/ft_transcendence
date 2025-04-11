@@ -30,29 +30,82 @@ export class Auth {
       }
 
       const data = await backendResponse.json();
-      
-      if (data.requires2FA) {
-        const validated = await this.handle2FAVerification(data.user.id);
-        if (!validated) {
-          throw new Error('2FA validation failed');
-        }
-      }
-
       TokenManager.setToken(data.token);
+      
       const user = TokenManager.getUserFromToken();
-
       if (!user) {
         throw new Error('Invalid user data in token');
       }
 
-      this.onLogin(user as User);
+      if (user.twoFactorEnabled) {
+        const validated = await this.handle2FAVerification();
+        if (!validated) {
+          TokenManager.removeToken();
+          throw new Error('2FA validation failed');
+        }
+      }
+
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+
+      this.onLogin(user);
     } catch (error) {
       console.error('Error handling Google response:', error);
       this.showError(i18n.t('authError'));
     }
   }
 
-  private async handle2FAVerification(userId: string): Promise<boolean> {
+  private async handleLogin(identifier: string, password: string) {
+    try {
+      if (!identifier || !password) {
+        throw new Error('Login (email or username) and password are required');
+      }
+
+      const response = await fetch(`${AUTH_API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          login: identifier,
+          password 
+        }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Login failed');
+      }
+
+      const data = await response.json();
+      TokenManager.setToken(data.token);
+      
+      const user = TokenManager.getUserFromToken();
+      if (!user) {
+        throw new Error('Invalid user data in token');
+      }
+
+      // Check if user has 2FA enabled
+      if (user.twoFactorEnabled) {
+        const validated = await this.handle2FAVerification();
+        if (!validated) {
+          TokenManager.removeToken();
+          throw new Error('2FA validation failed');
+        }
+      }
+
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+
+      this.onLogin(user);
+    } catch (error) {
+      console.error('Login error:', error);
+      this.showError(error instanceof Error ? error.message : i18n.t('loginError'));
+    }
+  }
+
+  private async handle2FAVerification(): Promise<boolean> {
     try {
       // Request OTP to be sent
       const sendResponse = await fetch(`${AUTH_API_URL}/2fa/email/send`, {
@@ -61,6 +114,7 @@ export class Auth {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${TokenManager.getToken()}`
         },
+        body: JSON.stringify({ action: 'enable' }),
         credentials: 'include'
       });
 
@@ -119,98 +173,6 @@ export class Auth {
     } catch (error) {
       console.error('2FA verification error:', error);
       return false;
-    }
-  }
-
-  private async handleLogin(identifier: string, password: string) {
-    try {
-      if (!identifier || !password) {
-        throw new Error('Login (email or username) and password are required');
-      }
-
-      const response = await fetch(`${AUTH_API_URL}/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          login: identifier,
-          password 
-        }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Login failed');
-      }
-
-      const data = await response.json();
-      
-      // Store the token temporarily for 2FA verification
-      if (data.token) {
-        TokenManager.setToken(data.token);
-      }
-
-      // Check if user has 2FA enabled
-      if (data.user?.twoFactorEnabled === 1) {
-        const validated = await this.handle2FAVerification(data.user.id);
-        if (!validated) {
-          TokenManager.removeToken();
-          throw new Error('2FA validation failed');
-        }
-      }
-
-      // Get the final token after 2FA if necessary
-      if (data.finalToken) {
-        TokenManager.setToken(data.finalToken);
-      }
-
-      const user = TokenManager.getUserFromToken();
-      if (!user) {
-        throw new Error('Invalid user data in token');
-      }
-
-      this.onLogin(user as User);
-    } catch (error) {
-      console.error('Login error:', error);
-      this.showError(error instanceof Error ? error.message : i18n.t('loginError'));
-    }
-  }
-
-  private async handleSignUp(username: string, email: string, password: string) {
-    try {
-      if (!username || !email || !password) {
-        throw new Error('Username, email, and password are required');
-      }
-
-      const response = await fetch(`${AUTH_API_URL}/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ username, email, password }),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Signup failed');
-      }
-
-      const data = await response.json();
-      
-      TokenManager.setToken(data.token);
-      const user = TokenManager.getUserFromToken();
-
-      if (!user) {
-        throw new Error('Invalid user data in token');
-      }
-
-      this.onLogin(user as User);
-    } catch (error) {
-      console.error('Signup error:', error);
-      this.showError(error instanceof Error ? error.message : i18n.t('signupError'));
     }
   }
 
@@ -289,6 +251,44 @@ export class Auth {
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
       </svg>
     `;
+  }
+
+  private async handleSignUp(username: string, email: string, password: string) {
+    try {
+      if (!username || !email || !password) {
+        throw new Error('Username, email, and password are required');
+      }
+
+      const response = await fetch(`${AUTH_API_URL}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, email, password }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Signup failed');
+      }
+
+      const data = await response.json();
+      TokenManager.setToken(data.token);
+      
+      const user = TokenManager.getUserFromToken();
+      if (!user) {
+        throw new Error('Invalid user data in token');
+      }
+
+      // Store user data in localStorage
+      localStorage.setItem('user', JSON.stringify(user));
+
+      this.onLogin(user);
+    } catch (error) {
+      console.error('Signup error:', error);
+      this.showError(error instanceof Error ? error.message : i18n.t('signupError'));
+    }
   }
 
   renderSignIn(): string {

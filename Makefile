@@ -6,7 +6,7 @@ DOCKER_COMPOSE = docker-compose
 DOCKER = docker
 
 # Services définis dans docker-compose.yml
-SERVICES = api-gateway auth-service chat-service front #game-service 
+SERVICES = front api-gateway auth-service user-service #chat-service #game-service 
 
 # Chemins des dossiers des services
 SERVICE_DIRS = $(addprefix services/,$(SERVICES))
@@ -15,6 +15,8 @@ all: build up
 
 # Construire les images Docker
 build:
+	mkdir -p shared/avatars
+	chmod 777 shared/avatars
 	$(DOCKER_COMPOSE) build --no-cache
 
 # Lancer tous les services
