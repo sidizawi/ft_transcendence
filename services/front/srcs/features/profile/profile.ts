@@ -250,7 +250,7 @@ export class Profile {
         </div>
 
         <!-- Additional Stats -->
-        <div class="grid grid-cols-2 gap-4">
+        <div class="grid grid-cols-3 gap-4">
           <!-- Rank & ELO -->
           <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
             <div class="flex items-center justify-between">
@@ -261,6 +261,20 @@ export class Profile {
               <div class="text-right">
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.elo')}</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.elo || '-'}</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tournaments -->
+          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.wonTournaments')}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.won || 0}</p>
+              </div>
+              <div class="text-right">
+                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.playedTournaments')}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.total || 0}</p>
               </div>
             </div>
           </div>

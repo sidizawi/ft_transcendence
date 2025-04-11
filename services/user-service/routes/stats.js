@@ -81,7 +81,6 @@ async function statsRoutes(fastify, options) {
 		}
 	  
 		const formattedGames = games.map(game => {
-		  console.log("game avatar", game.playerid_2, game.username_2, game.avatar);
 		  return {
 			id: game.id,
 			// Determine the opponent's username:
@@ -143,39 +142,92 @@ async function statsRoutes(fastify, options) {
 	// 	reply.code(200).send(formattedGames);
   	// });
 
+
 	fastify.get('/gamestats/:game?', async (request, reply) => {
-		await request.jwtVerify();
-		const userId = request.user.id;
-		const gameType = request.params.game;
-
-		let query = 'SELECT * FROM game WHERE playerid_1 = ? OR playerid_2 = ?';
-		let params = [userId, userId];
-
-		if (gameType && gameType !== 'pong' && gameType !== 'p4') {
-			return reply.code(400).send({ error: 'Invalid game type' });
-		}
-
-		if (gameType) {
-			query += ' AND game_type = ?';
-			params.push(gameType);
-		}
-
-		const games = fastify.db.prepare(query).all(...params);
-
-		if (games.length === 0 || !games) {
-			return reply.code(204).send({ msg: 'No content' });
-		}
-
-		const stats = {
-			totalGames: games.length,
-			wins: games.filter(game => game.player_win === (game.playerid_1 === userId ? game.username_1 : game.username_2)).length,
-			losses: games.filter(game => game.player_lost === (game.playerid_1 === userId ? game.username_1 : game.username_2)).length,
-			winrate: 0
-		};
-		stats.winrate = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
-		
-		reply.code(200).send(stats);
+	// Verify the JWT and get the logged-in user's id.
+	await request.jwtVerify();
+	const userId = request.user.id;
+	const gameType = request.params.game;
+	
+	// Base query: only games where the user is either player 1 or player 2.
+	let query = 'SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?)';
+	let params = [userId, userId];
+	
+	// Validate game type if provided.
+	if (gameType && gameType !== 'pong' && gameType !== 'p4') {
+		return reply.code(400).send({ error: 'Invalid game type' });
+	}
+	if (gameType) {
+		query += ' AND game_type = ?';
+		params.push(gameType);
+	}
+	
+	// Query the games.
+	const games = fastify.db.prepare(query).all(...params);
+	if (!games || games.length === 0) {
+		return reply.code(204).send({ msg: 'No content' });
+	}
+	
+	// Calculate stats from the games.
+	const stats = {
+		totalGames: games.length,
+		wins: games.filter(game => {
+		// Determine the current user's username based on which player they are.
+		const currentUserName = game.playerid_1 === userId ? game.username_1 : game.username_2;
+		return game.player_win === currentUserName;
+		}).length,
+		losses: games.filter(game => {
+		const currentUserName = game.playerid_1 === userId ? game.username_1 : game.username_2;
+		return game.player_lost === currentUserName;
+		}).length,
+		winrate: 0
+	};
+	
+	stats.winrate = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
+	
+	// Optionally limit the results to the first 10 games if that's needed for other endpoints,
+	// but for stats it's common to aggregate over all games played by the user.
+	// If needed, you could add something like:
+	if (games.length > 10) games.splice(10);
+	
+	reply.code(200).send(stats);
 	});
+	  
+
+
+	// fastify.get('/gamestats/:game?', async (request, reply) => {
+	// 	await request.jwtVerify();
+	// 	const userId = request.user.id;
+	// 	const gameType = request.params.game;
+
+	// 	let query = 'SELECT * FROM game WHERE playerid_1 = ? OR playerid_2 = ?';
+	// 	let params = [userId, userId];
+
+	// 	if (gameType && gameType !== 'pong' && gameType !== 'p4') {
+	// 		return reply.code(400).send({ error: 'Invalid game type' });
+	// 	}
+
+	// 	if (gameType) {
+	// 		query += ' AND game_type = ?';
+	// 		params.push(gameType);
+	// 	}
+
+	// 	const games = fastify.db.prepare(query).all(...params);
+
+	// 	if (games.length === 0 || !games) {
+	// 		return reply.code(204).send({ msg: 'No content' });
+	// 	}
+
+	// 	const stats = {
+	// 		totalGames: games.length,
+	// 		wins: games.filter(game => game.player_win === (game.playerid_1 === userId ? game.username_1 : game.username_2)).length,
+	// 		losses: games.filter(game => game.player_lost === (game.playerid_1 === userId ? game.username_1 : game.username_2)).length,
+	// 		winrate: 0
+	// 	};
+	// 	stats.winrate = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
+		
+	// 	reply.code(200).send(stats);
+	// });
 }
 
 export default statsRoutes;

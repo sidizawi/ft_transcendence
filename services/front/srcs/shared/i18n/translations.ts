@@ -21,7 +21,9 @@ export const translations = {
         elo: 'ELO',
         currentStreak: 'Aktuelle Serie',
         bestStreak: 'Beste Serie',
-        recentGames: 'Letzte Spiele'
+        recentGames: 'Letzte Spiele',
+        wonTournaments: 'Gewonnene Turniere',
+        playedTournaments: 'Gespielte Turniere'
       },
       enable2FA: '2FA aktivieren',
       disable2FA: '2FA deaktivieren',
@@ -147,7 +149,9 @@ export const translations = {
         elo: 'ELO',
         currentStreak: 'Current Streak',
         bestStreak: 'Best Streak',
-        recentGames: 'Recent Games'
+        recentGames: 'Recent Games',
+        wonTournaments: 'Won Tournaments',
+        playedTournaments: 'Played Tournaments'
       },
       enable2FA: 'Enable 2FA',
       disable2FA: 'Disable 2FA',
@@ -271,7 +275,9 @@ export const translations = {
         elo: 'ELO',
         currentStreak: 'Série actuelle',
         bestStreak: 'Meilleure série',
-        recentGames: 'Parties récentes'
+        recentGames: 'Parties récentes',
+        wonTournaments: 'Tournois Gagnés',
+        playedTournaments: 'Tournois Joués'
       },
       enable2FA: 'Activer 2FA',
       disable2FA: 'Désactiver 2FA',
@@ -397,7 +403,9 @@ export const translations = {
         elo: 'ELO',
         currentStreak: 'Huidige Reeks',
         bestStreak: 'Beste Reeks',
-        recentGames: 'Recente Spellen'
+        recentGames: 'Recente Spellen',
+        wonTournaments: 'Toernooien Winnen',
+        playedTournaments: 'Toernooien Gespeeld'
       },
       enable2FA: '2FA inschakelen',
       disable2FA: '2FA uitschakelen',

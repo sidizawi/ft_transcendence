@@ -34,6 +34,11 @@ export class StatsService {
         winRate: 0,
         rank: undefined,
         elo: undefined,
+        tournaments: {
+          won: 0,
+          total: 0,
+          winRate: 0
+        },
         streak: {
           current: 0,
           best: 0,
@@ -84,13 +89,22 @@ export class StatsService {
         winRate: stats.winrate || 0,
         rank: stats.rank,
         elo: stats.elo,
+        tournaments: {
+          won: stats.tournamentsWon || 0,
+          total: stats.tournamentsTotal || 0,
+          winRate: stats.tournamentsTotal ? ((stats.tournamentsWon || 0) / stats.tournamentsTotal) * 100 : 0
+        },
         streak: {
           current: currentStreak,
           best: bestStreak,
           type: streakType
         },
         history: history.map((game: any) => ({
-          date: new Date(game.date).toLocaleDateString(),
+          date: new Date(game.date).toLocaleDateString('fr-FR', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit'
+          }),
           result: game.playerWin === game.opponent ? 'loss' : 'win',
           opponent: game.opponent,
           score: game.score || '',
@@ -107,6 +121,11 @@ export class StatsService {
         winRate: 0,
         rank: undefined,
         elo: undefined,
+        tournaments: {
+          won: 0,
+          total: 0,
+          winRate: 0
+        },
         streak: {
           current: 0,
           best: 0,

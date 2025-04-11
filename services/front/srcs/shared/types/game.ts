@@ -5,6 +5,11 @@ export interface GameStats {
   winRate: number;
   rank?: number;
   elo?: number;
+  tournaments?: {
+    won: number;
+    total: number;
+    winRate: number;
+  };
   streak?: {
     current: number;
     best: number;
