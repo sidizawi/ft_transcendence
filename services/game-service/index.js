@@ -50,7 +50,7 @@ function setupNewGame(ws, mode, opponent = null) {
   if (mode === 'singlePlayer') {
     // Add AI player
     const aiPlayerId = `ai-${Date.now()}`;
-    addPlayer(gameId, aiPlayerId, null); // null ws for AI
+    addPlayer(gameId, aiPlayerId, null);
   } 
   else if (mode === 'twoPlayer') {
     // Add second local player

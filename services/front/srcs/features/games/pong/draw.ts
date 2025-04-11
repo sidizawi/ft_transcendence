@@ -101,11 +101,11 @@ export const gameLoop = (state: PongState): void => {
             sendPaddlePosition(state, 'left');
         }
         if (!singlePlayer) {
-            if (keys['ArrowUp'] && rightPlayer.y > 0) {
+            if (keys['o'] && rightPlayer.y > 0) {
                 rightPlayer.moveUp();
                 sendPaddlePosition(state, 'right');
             }
-            if (keys['ArrowDown'] && rightPlayer.y < canvas.height - rightPlayer.height) {
+            if (keys['l'] && rightPlayer.y < canvas.height - rightPlayer.height) {
                 rightPlayer.moveDown();
                 sendPaddlePosition(state, 'right');
             }
@@ -128,8 +128,9 @@ export const gameLoop = (state: PongState): void => {
         ctx.closePath();
     }
 
-    state.gameLoopId = requestAnimationFrame(() => gameLoop(state));
-};
+    if (state.gameStarted && state.animationRunning) {
+        state.gameLoopId = requestAnimationFrame(() => gameLoop(state));
+    }};
 
 function sendPaddlePosition(state: PongState, side: 'left' | 'right'): void {
     const { ws, leftPlayer, rightPlayer } = state;
