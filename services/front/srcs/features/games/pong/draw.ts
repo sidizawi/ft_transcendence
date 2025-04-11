@@ -1,5 +1,5 @@
 import { PongState, BUTTON_WIDTH, BUTTON_HEIGHT, SINGLE_PLAYER_BUTTON, 
-    TWO_PLAYER_BUTTON, PLAY_AGAIN_BUTTON, MAIN_MENU_BUTTON, ONLINE_BUTTON } from "../../../shared/types/pong";
+    TWO_PLAYER_BUTTON, PLAY_AGAIN_BUTTON, MAIN_MENU_BUTTON, ONLINE_BUTTON } from "../../../shared/types/pong.ts";
 
 
 export const drawMenu = (state: PongState): void => {

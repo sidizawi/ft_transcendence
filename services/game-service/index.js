@@ -83,10 +83,9 @@ function setupNewGame(ws, mode, opponent = null) {
 }
 
 fastify.register(async function (wsRoutes) {
-  wsRoutes.get('/ws', { websocket: true }, (connection, req) => {
+  wsRoutes.get('/ws', { websocket: true }, (socket, req) => {
     console.log('Player connected');
-    const ws = connection.socket;
-
+    const ws = socket;
     ws.on('message', (message) => {
       try {
         const data = JSON.parse(message.toString());

@@ -1,5 +1,5 @@
 import { PongState, BUTTON_WIDTH, Button, BUTTON_HEIGHT, SINGLE_PLAYER_BUTTON, 
-    TWO_PLAYER_BUTTON, PLAY_AGAIN_BUTTON, MAIN_MENU_BUTTON, ONLINE_BUTTON } from "../../../shared/types/pong";
+    TWO_PLAYER_BUTTON, PLAY_AGAIN_BUTTON, MAIN_MENU_BUTTON, ONLINE_BUTTON } from "../../../shared/types/pong.ts";
 import { drawMenu } from "./draw";
 
 function isMouseOverButton(x: number, y: number, button: Button, centerX: number, centerY: number): boolean {

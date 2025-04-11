@@ -1,5 +1,5 @@
 import { i18n } from '../../shared/i18n';
-import { GameMessage, PongState } from '../../shared/types/pong';
+import { GameMessage, PongState } from '../../shared/types/pong.ts';
 import { TokenManager } from '../../shared/utils/token';
 import Ball from './pong/Ball';
 import { drawMenu, drawWaitingScreen, gameLoop } from './pong/draw';
@@ -114,7 +114,7 @@ export class Pong {
                 this.state.gameLoopId = requestAnimationFrame(() => gameLoop(this.state));
             }
         }
-        else if (data.type === 'gamethis.State') {
+        else if (data.type === 'gameState') {
             if (data.scores) {
                 this.state.leftPlayerScore = data.scores.left;
                 this.state.rightPlayerScore = data.scores.right;

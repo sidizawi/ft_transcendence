@@ -180,7 +180,6 @@ const updateGame = (gameId) => {
   if (ball.y <= ball.size || ball.y >= height - ball.size) {
     ball.speedY = -ball.speedY;
   }
-  console.log('ball.x:', ball.x, 'ball.y:', ball.y, 'ball.size:', ball.size, 'paddleWidth:', paddleWidth, 'leftPlayer.y:', leftPlayer.y, 'leftPlayer.y + paddleHeight:', leftPlayer.y + paddleHeight, 'ball.speedX:', ball.speedX);
   // Paddle collision (left)
   if (ball.x - ball.size <= paddleWidth && 
       ball.y >= leftPlayer.y && 
