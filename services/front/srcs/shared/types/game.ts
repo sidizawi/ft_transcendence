@@ -15,5 +15,6 @@ export interface GameStats {
     result: 'win' | 'loss';
     opponent: string;
     score: string;
+    avatar: string;
   }[];
 }

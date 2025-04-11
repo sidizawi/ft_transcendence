@@ -5,6 +5,9 @@ import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 import { AvatarService } from '../../shared/services/avatarService';
 import { StatsService } from '../../shared/services/statsService';
 
+const host = window.location.hostname;
+const USER_API_URL = `http://${host}:3000/user/profile`;
+
 export class Profile {
   private pongStats: GameStats | null = null;
   private connect4Stats: GameStats | null = null;
@@ -92,8 +95,6 @@ export class Profile {
       console.error('No user data available');
       return '<div class="text-center text-red-600">Error: No user data available</div>';
     }
-
-console.log('2fa', this.user.twoFactorEnabled);
 
     return `
       <div class="max-w-4xl mx-auto">

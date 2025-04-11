@@ -93,7 +93,8 @@ export class StatsService {
           date: new Date(game.date).toLocaleDateString(),
           result: game.playerWin === game.opponent ? 'loss' : 'win',
           opponent: game.opponent,
-          score: game.score || ''
+          score: game.score || '',
+          avatar: game.avatar || '/img/default-avatar.jpg'
         }))
       };
     } catch (error) {
