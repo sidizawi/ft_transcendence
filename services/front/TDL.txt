@@ -34,6 +34,10 @@ To Do:
 		- create AI algo
 		- add timer
 		- check match null
+		- vusu coin derriere le front
+
+	pong:
+		- check if the websocket is closed
 
       let url = "http://localhost:3001/login";
       url = url.replace("localhost", window.location.hostname);

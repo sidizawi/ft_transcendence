@@ -2,8 +2,8 @@ import { i18n } from '../../shared/i18n';
 import { GameMessage, PongState } from '../../shared/types/pong.ts';
 import { TokenManager } from '../../shared/utils/token';
 import Ball from './pong/Ball';
-import { drawMenu, drawWaitingScreen, gameLoop } from './pong/draw';
-import { handleClick, handleKeyDown, handleKeyUp, handleMouseMove } from './pong/event';
+import { drawWaitingScreen, gameLoop } from './pong/draw';
+import { handleKeyDown, handleKeyUp } from './pong/event';
 import Paddle from './pong/Paddle';
 
 export class Pong {
@@ -66,10 +66,11 @@ export class Pong {
     }
     
     // Draw the end game menu
-    drawMenu(this.state);
+    //drawMenu(this.state);
+    this.rerender();
   }
 
-  canvasEventListener() {
+  canvasEventListener(type: string | null) {
     this.state.canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
     this.state.ctx = this.state.canvas.getContext("2d");
     
@@ -77,13 +78,15 @@ export class Pong {
     this.state.leftPlayer = new Paddle(10, this.state.canvas.height / 2 - this.PADDLE_HEIGHT / 2, this.PADDLE_WIDTH, this.PADDLE_HEIGHT, this.PADDLE_SPEED);
     this.state.rightPlayer = new Paddle(this.state.canvas.width - 20, this.state.canvas.height / 2 - this.PADDLE_HEIGHT / 2, this.PADDLE_WIDTH, this.PADDLE_HEIGHT, this.PADDLE_SPEED);
     
-    const token = TokenManager.getToken();    
-    if (!token) {
-        console.error("No token found");
-        return;
-    }
+    const token = TokenManager.getToken();
     const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
-    this.state.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/ws${token ? `?token=${token}` : ''}`);
+    this.state.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/ws/pong?${token ? `token=${token}` : ''}`);
+
+    this.state.ws.onclose = () => {
+      console.log("Disconnected from server");
+      this.rerender();
+      return ;
+    }
 
     this.state.ws.onopen = (): void => {
         console.log("Connected to server");
@@ -104,7 +107,30 @@ export class Pong {
         const data: GameMessage = JSON.parse(event.data);
         console.log("Received from server:", data);
         
-        if (data.type === 'gameStarted') {
+        if (data.type === 'starting') {
+          if (type == "singlePlayer") {
+            this.state.ws!.send(JSON.stringify({
+              type: 'startGame',
+              mode: 'singlePlayer'
+            }));
+          } else if (type == "twoPlayer") {
+            this.state.ws!.send(JSON.stringify({
+              type: 'startGame',
+              mode: 'twoPlayer'
+            }));
+          } else if (type == "online") {
+            this.state.ws!.send(JSON.stringify({
+              type: 'startGame',
+              mode: 'online'
+            }));
+          } else if (type == "playAgain") {
+            this.state.ws!.send(JSON.stringify({
+              type: 'startGame',
+              mode: this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
+            }));
+          }
+        }
+        else if (data.type === 'gameStarted') {
             this.state.gameStarted = true;
             this.state.singlePlayer = data.mode === 'singlePlayer';
             this.state.leftPlayerScore = 0;
@@ -148,21 +174,48 @@ export class Pong {
     
     document.addEventListener("keydown", (event: KeyboardEvent) => handleKeyDown(event, this.state));
     document.addEventListener("keyup", (event: KeyboardEvent) => handleKeyUp(event, this.state));
-
-    this.state.canvas.addEventListener("mousemove", (event: MouseEvent) => handleMouseMove(event, this.state));
-    this.state.canvas.addEventListener("click", (event: MouseEvent) => handleClick(event, this.state));
-
-    drawMenu(this.state);
   }
 
   pongEventListener() {
-    const playLocal = document.getElementById("pongPlayLocal") as HTMLElement;
 
-    playLocal.addEventListener('click', () => {
-      const main = document.querySelector("main");
-      main!.innerHTML = this.renderCanvas();
-      this.canvasEventListener();
+    const playBtn = document.querySelectorAll(".pongPlayBtn");
+
+    playBtn.forEach((btn) => {
+      if (btn.classList.contains("not-connected")) {
+        return;
+      }
+      btn.addEventListener('click', (event) => {
+        const id = (event.target as HTMLElement).getAttribute("id")
+        const main = document.querySelector("main");
+        main!.innerHTML = this.renderCanvas();
+        this.canvasEventListener(id);
+      });
     });
+  }
+
+  className() : string {
+    const token = TokenManager.getToken();
+    if (!token) {
+      return "not-connected w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors";
+    }
+    return "w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors";
+  }
+
+  playAgain() : string {
+    if (!this.state.gamePlayed) {
+      return "";
+    }
+    this.state.gamePlayed = false;
+    let id = this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
+    let name = i18n.t('games.playVsAI');
+    if (!this.state.singlePlayer) {
+      name = i18n.t('games.playLocal');
+    }
+    return `
+        <button id="${id}" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+          ${name}
+        </button>
+    `;
   }
 
   renderCanvas(): string {
@@ -171,6 +224,12 @@ export class Pong {
         <canvas id="pongCanvas" width="800" height="600" class="bg-black block mx-auto">
       </div>
     `;
+  }
+
+  rerender() {
+    const main = document.querySelector("main");
+    main!.innerHTML = this.render();
+    this.pongEventListener();
   }
 
   render(): string {
@@ -184,12 +243,19 @@ export class Pong {
             ${i18n.t('games.pong.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button id="pongPlayVsAI" class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              ${i18n.t('games.playVsAI')}
-            </button>
-            <button id="pongPlayLocal" class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
+            <button id="twoPlayer" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
               ${i18n.t('games.playLocal')}
             </button>
+            <button id="online" class="pongPlayBtn ${this.className()}">
+              ${i18n.t('games.playVsFriend')}
+            </button>
+            <button id="singlePlayer" class="pongPlayBtn ${this.className()}">
+              ${i18n.t('games.playVsAI')}
+            </button>
+            <button id="online" class="pongPlayBtn ${this.className()}">
+              ${i18n.t('games.playTournament')}
+            </button>
+            ${this.playAgain()}
           </div>
         </div>
       </div>

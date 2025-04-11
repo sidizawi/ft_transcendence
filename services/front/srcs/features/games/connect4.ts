@@ -178,7 +178,7 @@ export class Connect4 {
 
   renderCanvas(): string {
     return `
-      <div class="flex items-center justify-center">
+      <div class="flex items-center justify-center h-screen">
         <canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>
       </div>
     `;

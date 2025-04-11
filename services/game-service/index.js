@@ -83,10 +83,16 @@ function setupNewGame(ws, mode, opponent = null) {
 }
 
 fastify.register(async function (wsRoutes) {
-  wsRoutes.get('/ws', { websocket: true }, (socket, req) => {
+  wsRoutes.get('/ws/pong', { websocket: true }, (socket, req) => {
     console.log('Player connected');
+    const { token } = req.query;
+    if (!token) {
+      socket.close();
+      return;
+    }
+
     const ws = socket;
-    ws.on('message', (message) => {
+     ws.on('message', (message) => {
       try {
         const data = JSON.parse(message.toString());
         console.log('Received:', data);
@@ -99,6 +105,9 @@ fastify.register(async function (wsRoutes) {
             paddleHeight: data.paddleHeight,
             ballSize: data.ballSize
           };
+          ws.send(JSON.stringify({
+            type: 'starting',
+          }));
         }
         else if (data.type === 'startGame') {
           console.log(`Starting new game in ${data.mode} mode`);
