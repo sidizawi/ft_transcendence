@@ -524,7 +524,7 @@ export class Settings {
                 <div class="relative mb-4">
                   <img 
                     src="${this.user.avatar}" 
-                    alt="${i18n.t('profile')}" 
+                    alt="${i18n.t('avatar')}" 
                     class="w-32 h-32 rounded-full object-cover"
                   >
                   <label 
@@ -556,7 +556,7 @@ export class Settings {
                     type="text"
                     id="username"
                     name="username"
-                    value="${this.user.username}"
+                    placeholder="${this.user.username}"
                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
@@ -569,7 +569,7 @@ export class Settings {
                     type="email"
                     id="email"
                     name="email"
-                    value="${this.user.email}"
+                    placeholder="${this.user.email}"
                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
@@ -612,13 +612,13 @@ export class Settings {
                   <div class="flex justify-center space-x-4">
                     <a
                       href="/profile"
-                      class="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      class="px-6 py-2 bg-orange-lighter dark:bg-forest text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
                     >
                       ${i18n.t('back')}
                     </a>
                     <button
                       type="submit"
-                      class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange dark:bg-nature hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+                      class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange dark:bg-nature hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
                     >
                       ${i18n.t('saveChanges')}
                     </button>
