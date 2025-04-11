@@ -11,6 +11,7 @@ async function friendRoutes(fastify, options) {
 			return { error: 'Username needed'};
 		}
 	
+		//TODO: update with new jwt containing only ID
 		await request.jwtVerify();
 		const actualuser = request.user.username;
 		const actualid = request.user.id;

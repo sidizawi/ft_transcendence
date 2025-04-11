@@ -110,9 +110,7 @@ fastify.post('/register', async (request, reply) => {
     ).get(username);
 
     const token = fastify.jwt.sign({
-      id: user.id,
-      username: user.username,
-      email: user.email
+      id: user.id
     });
 
     reply.code(201);
@@ -160,10 +158,7 @@ fastify.post('/login', async (request, reply) => {
     }
     
     const token = fastify.jwt.sign({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatar: user.avatar
+        id: user.id
     });
     
     reply.code(200);
@@ -204,9 +199,7 @@ fastify.post('/google/callback', async (request, reply) => {
     }
 
     const token = fastify.jwt.sign({
-      id: user.id,
-      username: user.username,
-      email: user.email
+      id: user.id
   });
 
       reply.code(200);
