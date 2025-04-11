@@ -102,7 +102,7 @@ fastify.post('/register', async (request, reply) => {
         total_points: 0
     };
     const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data,is_two_factor_enabled) VALUES (?, ?, ?, ?, ?)");
-    const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData), 0);
+    const result = stmt.run(username, email, hashedPassword, JSON.stringify(initialGameData), 1);
     const userId = result.lastInsertRowid;
 
     const user = fastify.db.prepare(
