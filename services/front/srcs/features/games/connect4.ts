@@ -166,7 +166,7 @@ export class Connect4 {
   }
   
   setupConnect4FirstPageEventListener() {
-    const playLocal = document.getElementById('playLocal') as HTMLInputElement;
+    const playLocal = document.getElementById('playLocal') as HTMLElement;
     
     playLocal.addEventListener('click', () => {
       const main = document.querySelector('main');

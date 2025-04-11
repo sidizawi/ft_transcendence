@@ -1,51 +1,13 @@
 import Fastify from 'fastify';
-import fastifyWebsocket from '@fastify/websocket';
-import { fileURLToPath } from 'url';
-import path from 'path';
-import fastifyStatic from '@fastify/static';
-import db from './db.js';
+import websocket from '@fastify/websocket';
 import dotenv from 'dotenv';
-import fastifyJwt from '@fastify/jwt';
 import {createGame, addPlayer, updatePlayerPosition, handleDisconnect, startGame } from './pong/game.js';
-// import Ball from './shared/Ball.js';
-// import Paddle from './public/Paddle.js';
-// import { type } from 'os';
 
 dotenv.config();
 
 const fastify = Fastify({ logger: true });
 
-fastify.register(fastifyJwt, {
-  secret: process.env.JWT_SECRET,
-});
-
-fastify.register(fastifyWebsocket);
-
-fastify.decorate('db', db);
-
-// const __filename = fileURLToPath(import.meta.url);
-// const __dirname = path.dirname(__filename);
-
-fastify.decorate('authenticate', async (request, reply) => {
-  try {
-    await request.jwtVerify();
-  } catch (err) {
-    reply.code(401).send({ error: 'Unauthorized' });
-  }
-});
-
-// Register static file serving
-// fastify.register(fastifyStatic, {
-//   root: path.join(__dirname, 'public'),
-//   prefix: '/',
-//   index: 'pong.html'
-// });
-
-// fastify.register(fastifyStatic, {
-//   root: path.join(__dirname, 'shared'),
-//   prefix: '/shared/',
-//   decorateReply: false
-// });
+fastify.register(websocket);
 
 let canvasDimensions;
 const waitingPlayers = [];
@@ -120,8 +82,8 @@ function setupNewGame(ws, mode, opponent = null) {
   return gameId;
 }
 
-fastify.register(async function (fastify) {
-  fastify.get('/ws', { websocket: true }, (connection, req) => {
+fastify.register(async function (wsRoutes) {
+  wsRoutes.get('/ws', { websocket: true }, (connection, req) => {
     console.log('Player connected');
     const ws = connection.socket;
 
@@ -188,29 +150,6 @@ fastify.register(async function (fastify) {
   });
 });
 
-fastify.get('/status', { preValidation: [fastify.authenticate] }, async (request, reply) => {
-  return {  message: "Game service is running!",
-            user: request.user.id
-   };
-});
-
-fastify.get('/user/stats', { preValidation: [fastify.authenticate] }, async (request, reply) => {
-  const userId = request.user.id;
-
-  try {
-    const userStats = db.prepare("SELECT game_data FROM users WHERE id = ?").get(userId);
-    return { stats: JSON.parse(userStats.game_data || '{}') };
-  }
-  catch (err) {
-    reply.code(500).send({ error: 'Failed to retrieve user stats' });
-  }
-}
-);
-
-// Add a route to serve your pong HTML
-fastify.get('/play', async (request, reply) => {
-  return reply.sendFile('pong.html');
-});
 
 fastify.listen({ port: 3002, host: '0.0.0.0' }, (err, address) => {
   if (err) {

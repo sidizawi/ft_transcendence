@@ -1,44 +1,10 @@
-export const BUTTON_WIDTH = 300;
-export const BUTTON_HEIGHT = 60;
-export const BUTTON_MARGIN = 30;
+import { PongState, BUTTON_WIDTH, BUTTON_HEIGHT, SINGLE_PLAYER_BUTTON, 
+    TWO_PLAYER_BUTTON, PLAY_AGAIN_BUTTON, MAIN_MENU_BUTTON, ONLINE_BUTTON } from "../../../shared/types/pong";
 
-export const SINGLE_PLAYER_BUTTON = {
-    x: 0,
-    y: -110,
-    text: "Single Player",
-    textY: -70
-};
 
-export const TWO_PLAYER_BUTTON = {
-    x: 0,
-    y: -20,
-    text: "Two Players",
-    textY: 20
-};
-
-export const PLAY_AGAIN_BUTTON = {
-    x: 0,
-    y: -20,
-    text: "Play Again",
-    textY: 20
-};
-
-export const MAIN_MENU_BUTTON = {
-    x: 0,
-    y: 70,
-    text: "Main Menu",
-    textY: 110
-};
-
-export const ONLINE_BUTTON = {
-    x: 0,
-    y: 70,
-    text: "Online",
-    textY: 110
-};
-
-export const drawMenu = (state) => {
+export const drawMenu = (state: PongState): void => {
     const { ctx, canvas, hoverSinglePlayer, hoverTwoPlayers, winner, gamePlayed, hoverPlayAgain, hoverMainMenu, hoverOnline } = state;
+    if (!ctx || !canvas) return;
     
     const centerX = canvas.width / 2;
     const centerY = canvas.height / 2;
@@ -119,8 +85,10 @@ export const drawMenu = (state) => {
     }
 };
 
-export const gameLoop = (state) => {
+export const gameLoop = (state: PongState): void => {
     const { ctx, canvas, ball, leftPlayer, rightPlayer, leftPlayerScore, rightPlayerScore, gameStarted, keys, singlePlayer } = state;
+    if (!ctx || !canvas || !ball || !leftPlayer || !rightPlayer) return;
+
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     if (gameStarted) {
@@ -149,8 +117,8 @@ export const gameLoop = (state) => {
 
     ctx.font = "30px Arial";
     ctx.fillStyle = "white";
-    ctx.fillText(leftPlayerScore, canvas.width / 2 + 50, 50);
-    ctx.fillText(rightPlayerScore, (canvas.width / 2) - 50, 50);
+    ctx.fillText(leftPlayerScore.toString(), canvas.width / 2 + 50, 50);
+    ctx.fillText(rightPlayerScore.toString(), (canvas.width / 2) - 50, 50);
 
     for (let i = 0; i < canvas.height; i += 20) {
         ctx.beginPath();
@@ -163,9 +131,9 @@ export const gameLoop = (state) => {
     state.gameLoopId = requestAnimationFrame(() => gameLoop(state));
 };
 
-function sendPaddlePosition(state, side) {
+function sendPaddlePosition(state: PongState, side: 'left' | 'right'): void {
     const { ws, leftPlayer, rightPlayer } = state;
-    if (ws && ws.readyState === ws.OPEN) {
+    if (ws && ws.readyState === ws.OPEN && leftPlayer && rightPlayer) {
         const paddleY = side === 'left' ? leftPlayer.y : rightPlayer.y;
         ws.send(JSON.stringify({
             type: 'paddleMove',
@@ -175,8 +143,9 @@ function sendPaddlePosition(state, side) {
     }
 }
 
-export function drawWaitingScreen(state) {
+export function drawWaitingScreen(state: PongState): void {
     const { ctx, canvas } = state;
+    if (!ctx || !canvas) return;
     
     // Clear canvas
     ctx.fillStyle = 'black';
@@ -210,4 +179,4 @@ export function drawWaitingScreen(state) {
     if (state.waitingOpponent) {
       state.gameLoopId = requestAnimationFrame(() => drawWaitingScreen(state));
     }
-  }
+}

@@ -33,6 +33,7 @@ To Do:
 		- add websocket
 		- create AI algo
 		- add timer
+		- check match null
 
       let url = "http://localhost:3001/login";
       url = url.replace("localhost", window.location.hostname);

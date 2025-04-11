@@ -1,5 +1,5 @@
 import { aiMove } from "./ai.js";
-import Ball from '../shared/Ball.js';
+import Ball from './Ball.js';
 
 // Game constants
 const WINNING_SCORE = 2;
