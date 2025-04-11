@@ -2,8 +2,8 @@ import { aiMove } from "./ai.js";
 import Ball from './Ball.js';
 
 // Game constants
-const WINNING_SCORE = 2;
-const BALL_SPEED = 6;
+const WINNING_SCORE = 4;
+const BALL_SPEED = 5;
 const PADDLE_SPEED = 5;
 
 // Game store - will hold all active games

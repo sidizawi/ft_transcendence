@@ -86,10 +86,11 @@ fastify.register(async function (wsRoutes) {
   wsRoutes.get('/ws/pong', { websocket: true }, (socket, req) => {
     console.log('Player connected');
     const { token } = req.query;
-    if (!token) {
-      socket.close();
-      return;
-    }
+    //if (!token) {
+    //  socket.close();
+    //  return;
+    //}
+    // todo: check for local
 
     const ws = socket;
      ws.on('message', (message) => {

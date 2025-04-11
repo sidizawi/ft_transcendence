@@ -44,6 +44,7 @@ export const translations = {
       continueWith: 'Weiter mit Google',
       games: {
         playVsAI: 'Gegen KI spielen',
+        playAgain: 'Nochmal spielen',
         playLocal: 'Gegen lokalen Spieler spielen',
         playTournament: 'Gegen Turnier spielen',
         playVsFriend: 'Gegen Freund spielen',
@@ -172,6 +173,7 @@ export const translations = {
       continueWith: 'Continue with Google',
       games: {
         playVsAI: 'Play vs AI',
+        playAgain: 'Play again',
         playLocal: 'Play Local',
         playTournament: 'Play Tournament',
         playVsFriend: 'Play vs Friend',
@@ -298,6 +300,7 @@ export const translations = {
       continueWith: 'Continuer avec Google',
       games: {
         playVsAI: 'Jouer contre l\'IA',
+        playAgain: 'Jouer à nouveau',
         playVsFriend: 'Jouer contre un ami',
         playLocal: 'Jouer localement',
         playTournament: 'Jouer dans un tournoi',
@@ -426,6 +429,7 @@ export const translations = {
       continueWith: 'Doorgaan met Google',
       games: {
         playVsAI: 'Speel tegen AI',
+        playAgain: 'Speel opnieuw',
         playVsFriend: 'Speel tegen vriend',
         playLocal: 'Speel lokaal',
         playTournament: 'Speel toernooi',

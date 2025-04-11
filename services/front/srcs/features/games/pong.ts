@@ -66,7 +66,6 @@ export class Pong {
     }
     
     // Draw the end game menu
-    //drawMenu(this.state);
     this.rerender();
   }
 
@@ -207,13 +206,9 @@ export class Pong {
     }
     this.state.gamePlayed = false;
     let id = this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
-    let name = i18n.t('games.playVsAI');
-    if (!this.state.singlePlayer) {
-      name = i18n.t('games.playLocal');
-    }
     return `
         <button id="${id}" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-          ${name}
+          ${i18n.t('games.playAgain')}
         </button>
     `;
   }
