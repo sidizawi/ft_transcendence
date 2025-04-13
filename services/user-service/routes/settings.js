@@ -265,20 +265,18 @@ async function settingsRoutes(fastify, options) {
 // Cette route check le mot de passe entre puis envois un code 2FA s'il est correct
 	fastify.post('/delete/request', async (request, reply) => {
 	try {
-	//TODO: update with new jwt containing only ID
 	  await request.jwtVerify();
 	  const userId = request.user.id;
-	  const userEmail = request.user.email;
 	  const { password } = request.body;
 	  
+		const user = fastify.db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+		if (!user) {
+		  return reply.code(404).send({ error: 'User not found' });
+		}
+		const userEmail = user.email;
+
 	  if (!password) {
 		return reply.code(400).send({ error: 'Password is required' });
-	  }
-	  
-	  const user = fastify.db.prepare('SELECT password FROM users WHERE id = ?').get(userId);
-	  
-	  if (!user) {
-		return reply.code(404).send({ error: 'User not found' });
 	  }
 	  
 	  const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -387,20 +385,17 @@ async function settingsRoutes(fastify, options) {
     ////Route permettant a un user de telecharger toutes ses donnees
 	fastify.get('/gdpr/data-export', async (request, reply) => {
 		try {
-		//TODO: update with new jwt containing only ID
 		await request.jwtVerify();
 		const userId = request.user.id;
-	    const userName = request.user.username;
 
-		const userData = fastify.db.prepare(`
-			SELECT id, username, email, avatar, game_data, is_two_factor_enabled, status
-			FROM users WHERE id = ?
-		`).get(userId);
+		const userData = fastify.db.prepare(`SELECT * FROM users WHERE id = ?`).get(userId);
 	
 		if (!userData) {
 			return reply.code(404).send({ error: 'User not found' });
 		}
-	
+		
+		const userName = userData.username;
+
 		const friendships = fastify.db.prepare(`
 			SELECT * FROM friend 
 			WHERE userid1 = ? OR userid2 = ?
@@ -596,16 +591,20 @@ async function settingsRoutes(fastify, options) {
 	  //// Route pour faire une demande speciale 
 	fastify.post('/gdpr/request', async (request, reply) => {
 	try {
-		//TODO: update with new jwt containing only ID
 		await request.jwtVerify();
 		const userId = request.user.id;
-		const userEmail = request.user.email;
 		const { requestType, details } = request.body;
 		
 		if (!requestType) {
 		return reply.code(400).send({ error: 'Request type is required' });
 		}
 		
+		const user = fastify.db.prepare('SELECT id FROM users WHERE id = ?').get(userId);
+		if (!user) {
+		return reply.code(404).send({ error: 'User not found' });
+		}
+		const userEmail = user.email;
+
 		fastify.db.prepare(`
 		INSERT INTO gdpr_requests (user_id, email, request_type, details, status, created_at)
 		VALUES (?, ?, ?, ?, 'pending', CURRENT_TIMESTAMP)
