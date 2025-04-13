@@ -184,7 +184,7 @@ export class Pong {
         return;
       }
       btn.addEventListener('click', (event) => {
-        const id = (event.target as HTMLElement).getAttribute("id")
+        const id = (event.target as HTMLElement).getAttribute("data")
         const main = document.querySelector("main");
         main!.innerHTML = this.renderCanvas();
         this.canvasEventListener(id);
@@ -205,9 +205,9 @@ export class Pong {
       return "";
     }
     this.state.gamePlayed = false;
-    let id = this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
+    let data = this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
     return `
-        <button id="${id}" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+        <button data="${data}" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
           ${i18n.t('games.playAgain')}
         </button>
     `;
@@ -238,16 +238,16 @@ export class Pong {
             ${i18n.t('games.pong.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button id="twoPlayer" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            <button data="twoPlayer" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
               ${i18n.t('games.playLocal')}
             </button>
-            <button id="online" class="pongPlayBtn ${this.className()}">
+            <button data="online" class="pongPlayBtn ${this.className()}">
               ${i18n.t('games.playVsFriend')}
             </button>
-            <button id="singlePlayer" class="pongPlayBtn ${this.className()}">
+            <button data="singlePlayer" class="pongPlayBtn ${this.className()}">
               ${i18n.t('games.playVsAI')}
             </button>
-            <button id="online" class="pongPlayBtn ${this.className()}">
+            <button data="online" class="pongPlayBtn ${this.className()}">
               ${i18n.t('games.playTournament')}
             </button>
             ${this.playAgain()}

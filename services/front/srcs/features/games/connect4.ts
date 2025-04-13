@@ -1,21 +1,31 @@
 import { i18n } from '../../shared/i18n';
+import { TokenManager } from '../../shared/utils/token';
 
 export class Connect4 {
 
   private cols = 7;
   private rows = 6;
   private won = false;
+  private online = false;
   private canPlay = true;
   private cellSize = 100;
   private red = '#f53b3b';
   private coinPadding = 10;
   private yellow = 'yellow';
+  private room: string | null;
   private player = this.yellow;
+  private ws : WebSocket | null;
   private data = new Array(42).fill('X');
   private columns = new Array(7).fill(5);
   private canvas = null as HTMLCanvasElement | null;
   private ctx = null as CanvasRenderingContext2D | null;
   private coinRadius = (this.cellSize - this.coinPadding * 2) / 2;
+
+  constructor() {
+    const urlParams = new URLSearchParams(window.location.search);
+    this.room = urlParams.get("room");
+    this.ws = null;
+  }
 
   drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {
     // Redraw the board on each frame
@@ -50,7 +60,7 @@ export class Connect4 {
     const x = column * this.cellSize + this.cellSize / 2;
     let y = -this.coinRadius;  // Start above the canvas
     const targetY = targetRow * this.cellSize + this.cellSize / 2;
-    const speed = 5; // pixels per frame
+    const speed = 10; // pixels per frame
 
     requestAnimationFrame(() => this.drop(x, y, targetY, speed, column, targetRow));
   }
@@ -138,6 +148,7 @@ export class Connect4 {
       this.animateCoin(col, this.columns[col]);
       this.columns[col]--;
     });
+    this.drawBoard();
   }
 
   drawBoard() {
@@ -166,14 +177,58 @@ export class Connect4 {
   }
   
   setupConnect4FirstPageEventListener() {
-    const playLocal = document.getElementById('playLocal') as HTMLElement;
-    
-    playLocal.addEventListener('click', () => {
-      const main = document.querySelector('main');
-      main!.innerHTML = this.renderCanvas();
-      this.setupCanvasEventListener();
-      this.drawBoard();
+    const playBtn = document.querySelectorAll(".connect4Btn");
+
+    playBtn.forEach((btn) => {
+      if (btn.classList.contains("not-connected")) {
+        return;
+      }
+      btn.addEventListener('click', (event) => {
+        const type = (event.target as HTMLElement).getAttribute("data");
+
+        const main = document.querySelector('main');
+        if (type == "playLocal") {
+          main!.innerHTML = this.renderCanvas();
+          this.setupCanvasEventListener();
+        } else {
+          this.online = true;
+          this.setupWebSocket(type);
+          main!.innerHTML = this.renderWaitingRoom();
+        }
+      });
     });
+  }
+
+  setupWebSocket(type : string | null) {
+    this.ws = new WebSocket(`ws://localhost:3000/game/connect4`);
+
+    this.ws.onopen = () => {
+      this.ws?.send(JSON.stringify({
+        mode: "new",
+        type,
+      }))
+    }
+
+    this.ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+
+      console.log("message:", message);
+    }
+  }
+
+  renderWaitingRoom() : string {
+    return `
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+            ${i18n.t('games.connect4.title')}
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+            waiting for your friend
+          </p>
+        </div>
+      </div>
+    `
   }
 
   renderCanvas(): string {
@@ -181,6 +236,23 @@ export class Connect4 {
       <div class="flex items-center justify-center h-screen">
         <canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>
       </div>
+    `;
+  }
+
+  renderWaiting() :string {
+    return ``;
+  }
+
+  renderBtnConn(data: string, name: string): string {
+    const token = TokenManager.getToken();
+    let className = "connect4Btn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors";
+    if (!token) {
+      className = "connect4Btn not-connected w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors";
+    }
+    return `
+      <button data="${data}" class="${className}">
+        ${name}
+      </button>
     `;
   }
 
@@ -195,18 +267,12 @@ export class Connect4 {
             ${i18n.t('games.connect4.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button id="playLocal" class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            <button data="playLocal" class="connect4Btn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
               ${i18n.t('games.playLocal')}
             </button>
-            <button id="playVsFriend" class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
-              ${i18n.t('games.playVsFriend')}
-            </button>
-            <button id="playVsAI" class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
-              ${i18n.t('games.playVsAI')}
-            </button>
-            <button id="playTournament" class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
-              ${i18n.t('games.playTournament')}
-            </button>
+            ${this.renderBtnConn("playVsFriend", i18n.t('games.playVsFriend'))}
+            ${this.renderBtnConn("playVsAI", i18n.t('games.playVsAI'))}
+            ${this.renderBtnConn("playTournament", i18n.t('games.playTournament'))}
           </div>
         </div>
       </div>
