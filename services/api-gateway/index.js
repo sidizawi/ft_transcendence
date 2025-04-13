@@ -37,7 +37,8 @@ fastify.register(fastifyHttpProxy, {
 
 fastify.register(fastifyHttpProxy, {
 	upstream: 'http://chat-service:3003',
-	prefix: '/chat'
+	prefix: '/chat',
+  websocket: true
 });
 
 fastify.register(fastifyHttpProxy, {

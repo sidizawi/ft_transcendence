@@ -2,12 +2,37 @@ import { User } from '../types/user';
 import { TokenManager } from '../utils/token';
 
 export class Chat {
-  private userId: string;
+  private friendUserName: string;
   private currentUser: User | null;
+  private ws: WebSocket | null;
 
-  constructor(userId: string) {
-    this.userId = userId;
+  constructor(friendUserName: string) {
+    this.friendUserName = friendUserName;
     this.currentUser = TokenManager.getUserFromToken();
+
+    const token = TokenManager.getToken();
+
+    this.ws = new WebSocket(`ws://localhost:3000/chat/message${token ? '?token=' + token : ''}`);
+
+    this.ws.onopen = () => {
+      this.ws!.send(JSON.stringify({
+        type: "new",
+        user: this.currentUser?.username,
+        friend: this.friendUserName
+      }));
+    };
+
+    this.ws.onmessage = (event: MessageEvent) => {
+      let data = JSON.parse(event.data.toString());
+
+      if (data.type == "message") {
+        this.addMessage({
+          text: data.text,
+          sender: data.sender,
+          timestamp: new Date(data.timestamp)
+        });
+      }
+    };
   }
 
   public render(): string {
@@ -49,14 +74,31 @@ export class Chat {
       e.preventDefault();
       if (!input?.value.trim()) return;
 
-      // TODO: Implement actual message sending logic
+      const timestamp = new Date();
       this.addMessage({
         text: input.value,
-        sender: this.currentUser?.id || 'unknown',
-        timestamp: new Date()
+        sender: this.currentUser?.username || 'unknown',
+        timestamp: timestamp
       });
 
+      this.ws?.send(JSON.stringify({
+        type: "message",
+        text: input.value,
+        user: this.currentUser?.username,
+        friend: this.friendUserName,
+        timestamp
+      }));
+
       input.value = '';
+    });
+
+    window.addEventListener("beforeunload", () => {
+      this.ws?.send(JSON.stringify({
+        type: 'close',
+        user: this.currentUser?.username,
+        friend: this.friendUserName
+      }));
+      this.ws?.close();
     });
   }
 
@@ -65,7 +107,7 @@ export class Chat {
     if (!messagesContainer) return;
 
     const messageElement = document.createElement('div');
-    const isOwnMessage = message.sender === this.currentUser?.id;
+    const isOwnMessage = message.sender === this.currentUser?.username;
 
     messageElement.className = `flex ${isOwnMessage ? 'justify-end' : 'justify-start'}`;
     messageElement.innerHTML = `

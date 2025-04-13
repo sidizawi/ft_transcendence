@@ -153,8 +153,8 @@ export class TranscendenceApp {
 
     const chatMatch = path.match(/^\/chat\/(.+)$/);
     if (chatMatch && this.state.user) {
-      const userId = chatMatch[1];
-      const chat = new Chat(userId);
+      const username = chatMatch[1];
+      const chat = new Chat(username);
       main.innerHTML = chat.render();
       chat.setupEventListeners();
       return;

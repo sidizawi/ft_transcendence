@@ -1,3 +1,97 @@
+let chatRooms = new Map();
+
+function handleNewConn(data, socket) {
+    let id, chatRoom;
+    let id1 = `${data.user}-${data.friend}`;
+    let id2 = `${data.friend}-${data.user}`;
+
+    if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
+        id = id1;
+    } else if (chatRooms.get(id1)) {
+        id = id1;
+    } else {
+        id = id2;
+    }
+
+    // todo: send all conversations
+
+    chatRoom = chatRooms.get(id);
+    if (!chatRoom) {
+        chatRooms.set(id, {
+            "user1": data.user,
+            "user2": data.friend,
+            "user1ws": socket,
+            "user2ws": null
+        });
+    } else {
+        if (chatRoom.user1 == data.user) {
+            chatRoom.user1ws = socket;
+        } else {
+            chatRoom.user2ws = socket;
+        }
+    }
+}
+
+function handleClose(data) {
+    let id, chatRoom;
+    let id1 = `${data.user}-${data.friend}`;
+    let id2 = `${data.friend}-${data.user}`;
+
+    if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
+        id = id1;
+    } else if (chatRooms.get(id1)) {
+        id = id1;
+    } else {
+        id = id2;
+    }
+
+    chatRoom = chatRooms.get(id);
+    if (!chatRoom) {
+        return ;
+    }
+    if (id == id1) {
+        chatRoom.user1ws = null
+    } else {
+        chatRoom.user2ws = null;
+    }
+}
+
+function handleNewMessage(data) {
+    let id, chatRoom;
+    let id1 = `${data.user}-${data.friend}`;
+    let id2 = `${data.friend}-${data.user}`;
+
+    if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
+        id = id1;
+    } else if (chatRooms.get(id1)) {
+        id = id1;
+    } else {
+        id = id2;
+    }
+
+    chatRoom = chatRooms.get(id);
+    if (!chatRoom) {
+        return ;
+    }
+
+    // todo: save the message to db
+    if (chatRoom.user1 == data.user && chatRoom.user2ws) {
+        chatRoom.user2ws.send(JSON.stringify({
+            type: "message",
+            sender: data.user,
+            text: data.text,
+            timestamp: data.timestamp
+        }));
+    } else if (chatRoom.user2 == data.user && chatRoom.user1ws) {
+        chatRoom.user1ws.send(JSON.stringify({
+            type: "message",
+            sender: data.user,
+            text: data.text,
+            timestamp: data.timestamp
+        }));
+    }
+}
+
 export default async function messageRoutes(fastify, options) {
     // Get conversations
     fastify.get('/conversations', async (request, reply) => {
@@ -76,5 +170,28 @@ export default async function messageRoutes(fastify, options) {
         
         reply.code(201);
         return { messages };
+    });
+
+    fastify.register(async function (fastify) {
+        fastify.get('/', {websocket: true}, (socket, req) => {
+            const { token } = req.query;
+            
+            if (!token) {
+                socket.close();
+            }
+
+            socket.on('message', (message) => {
+                let data = JSON.parse(message.toString());
+                console.log("received", data);
+
+                if (data.type == "new") {
+                    handleNewConn(data, socket);
+                } else if (data.type == "close") {
+                    handleClose(data);
+                } else {
+                    handleNewMessage(data);
+                }
+            });
+        });
     });
 }

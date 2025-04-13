@@ -225,7 +225,7 @@ export class Friends {
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg group cursor-pointer"
                        data-userid="${friend.userid2}"
                        data-friend-username="${friend.username2}"
-                       onclick="window.open('/chat/${friend.userid2}', 'chat-${friend.userid2}', 'width=800,height=600')">
+                       onclick="window.open('/chat/${friend.username2}', 'chat-${friend.username2}', 'width=800,height=600')">
                     <div class="flex items-center space-x-3">
                       <div class="relative">
                         <img 
