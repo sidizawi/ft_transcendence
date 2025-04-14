@@ -41,7 +41,7 @@ const transporter = nodemailer.createTransport({
 // });
 const fastify = Fastify({ logger: true });
 
-await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
+await fastify.register(fastifyJwt, {secret: process.env.JWT_SECRET, sign: {expiresIn: '1d'}});
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
