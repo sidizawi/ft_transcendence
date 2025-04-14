@@ -44,6 +44,9 @@ export const translations = {
       continueWith: 'Weiter mit Google',
       games: {
         playVsAI: 'Gegen KI spielen',
+        playAgain: 'Nochmal spielen',
+        playLocal: 'Gegen lokalen Spieler spielen',
+        playTournament: 'Gegen Turnier spielen',
         playVsFriend: 'Gegen Freund spielen',
         pong: {
           title: 'Pong',
@@ -59,7 +62,8 @@ export const translations = {
         description: 'Erstelle oder tritt einem Turnier bei, um mit anderen Spielern zu konkurrieren.',
         create: 'Turnier erstellen',
         join: 'Turnier beitreten'
-      },friends: 'Freunde',
+      },
+      friends: 'Freunde',
       typeMessage: 'Nachricht eingeben...',
       addFriend: 'Freund hinzufügen',
       enterUsername: 'Benutzername eingeben',
@@ -69,6 +73,58 @@ export const translations = {
         receiving: 'Anfrage erhalten',
         accepted: 'Akzeptiert',
         blocked: 'Blockiert'
+      },
+      noGamesPlayed: 'Noch keine Spiele gespielt',
+      noFriendsYet: 'Du hast noch keine Freunde',
+      sentRequests: 'Gesendete Anfragen',
+      requests: 'Eingehende Anfragen',
+      accept: 'Akzeptieren',
+      reject: 'Ablehnen',
+      block: 'Blockieren',
+      pageNotFound: 'Seite nicht gefunden',
+      pageNotFoundDesc: 'Die angeforderte Seite existiert nicht.',
+      backToHome: 'Zurück zur Startseite',
+      settings : {
+        // Auth & General
+      signIn: 'Anmelden',
+      signUp: 'Registrieren',
+      signOut: 'Abmelden',
+      username: 'Benutzername',
+      email: 'E-Mail',
+      password: 'Passwort',
+      newPassword: 'Neues Passwort',
+      confirmPassword: 'Passwort bestätigen',
+      profile: 'Profil',
+      editProfile: 'Profil bearbeiten',
+      settings: 'Einstellungen',
+      save: 'Speichern',
+      cancel: 'Abbrechen',
+      saveChanges: 'Änderungen speichern',
+      back: 'Zurück',
+      
+      // Profile & Settings
+      changePhoto: 'Foto ändern',
+      uploadAvatar: 'Avatar hochladen',
+      personalInfo: 'Persönliche Informationen',
+      accountSettings: 'Kontoeinstellungen',
+      enable2FA: '2FA aktivieren',
+      disable2FA: '2FA deaktivieren',
+      twoFactorAuth: 'Zwei-Faktor-Authentifizierung',
+      
+      // Validation & Messages
+      required: 'Erforderlich',
+      invalidEmail: 'Ungültige E-Mail-Adresse',
+      passwordMismatch: 'Passwörter stimmen nicht überein',
+      updateSuccess: 'Erfolgreich aktualisiert',
+      updateError: 'Aktualisierung fehlgeschlagen',
+      
+      // Notes & Descriptions
+      updateOneAtTime: 'Sie können nur ein Feld gleichzeitig aktualisieren (Benutzername, E-Mail oder Passwort)',
+      
+      // 404 Page
+      pageNotFound: 'Seite nicht gefunden',
+      pageNotFoundDesc: 'Die angeforderte Seite existiert nicht.',
+      backToHome: 'Zurück zur Startseite'
       }
     }
   },
@@ -117,6 +173,9 @@ export const translations = {
       continueWith: 'Continue with Google',
       games: {
         playVsAI: 'Play vs AI',
+        playAgain: 'Play again',
+        playLocal: 'Play Local',
+        playTournament: 'Play Tournament',
         playVsFriend: 'Play vs Friend',
         pong: {
           title: 'Pong',
@@ -132,7 +191,8 @@ export const translations = {
         description: 'Create or join tournaments to compete with other players.',
         create: 'Create Tournament',
         join: 'Join Tournament'
-      },friends: 'Friends',
+      },
+      friends: 'Friends',
       typeMessage: 'Type a message...',
       addFriend: 'Add Friend',
       enterUsername: 'Enter username',
@@ -142,6 +202,56 @@ export const translations = {
         receiving: 'Request received',
         accepted: 'Accepted',
         blocked: 'Blocked'
+      },
+      noGamesPlayed: 'No games played yet',
+      noFriendsYet: "You don't have any friends yet",
+      sentRequests: 'Sent Requests',
+      requests: 'Incoming Requests',
+      accept: 'Accept',
+      reject: 'Reject',
+      block: 'Block',
+      pageNotFound: 'Page Not Found',
+      pageNotFoundDesc: 'The page you are looking for does not exist.',
+      backToHome: 'Back to Home',
+      settings : {signIn: 'Sign In',
+        signUp: 'Sign Up',
+        signOut: 'Sign Out',
+        username: 'Username',
+        email: 'Email',
+        password: 'Password',
+        newPassword: 'New Password',
+        confirmPassword: 'Confirm Password',
+        profile: 'Profile',
+        editProfile: 'Edit Profile',
+        settings: 'Settings',
+        save: 'Save',
+        cancel: 'Cancel',
+        saveChanges: 'Save Changes',
+        back: 'Back',
+        
+        // Profile & Settings
+        changePhoto: 'Change Photo',
+        uploadAvatar: 'Upload Avatar',
+        personalInfo: 'Personal Information',
+        accountSettings: 'Account Settings',
+        enable2FA: 'Enable 2FA',
+        disable2FA: 'Disable 2FA',
+        twoFactorAuth: 'Two-Factor Authentication',
+        
+        // Validation & Messages
+        required: 'Required',
+        invalidEmail: 'Invalid email address',
+        passwordMismatch: 'Passwords do not match',
+        updateSuccess: 'Successfully updated',
+        updateError: 'Update failed',
+        
+        // Notes & Descriptions
+        updateOneAtTime: 'You can only update one field at a time (username, email, or password)',
+        
+        // 404 Page
+        pageNotFound: 'Page Not Found',
+        pageNotFoundDesc: 'The page you are looking for does not exist.',
+        backToHome: 'Back to Home'
       }
     }
   },
@@ -190,7 +300,10 @@ export const translations = {
       continueWith: 'Continuer avec Google',
       games: {
         playVsAI: 'Jouer contre l\'IA',
+        playAgain: 'Jouer à nouveau',
         playVsFriend: 'Jouer contre un ami',
+        playLocal: 'Jouer localement',
+        playTournament: 'Jouer dans un tournoi',
         pong: {
           title: 'Pong',
           description: 'Jeu Pong classique - Défiez vos amis ou jouez contre l\'IA.'
@@ -205,7 +318,8 @@ export const translations = {
         description: 'Créez ou rejoignez des tournois pour affronter d\'autres joueurs.',
         create: 'Créer un tournoi',
         join: 'Rejoindre un tournoi'
-      },friends: 'Amis',
+      },
+      friends: 'Amis',
       typeMessage: 'Tapez un message...',
       addFriend: 'Ajouter un ami',
       enterUsername: "Entrez le nom d'utilisateur",
@@ -215,6 +329,58 @@ export const translations = {
         receiving: 'Demande reçue',
         accepted: 'Accepté',
         blocked: 'Bloqué'
+      },
+      noGamesPlayed: 'Aucune partie jouée',
+      noFriendsYet: "Vous n'avez pas encore d'amis",
+      sentRequests: 'Demandes envoyées',
+      requests: 'Demandes reçues',
+      accept: 'Accepter',
+      reject: 'Refuser',
+      block: 'Bloquer',
+      pageNotFound: 'Page Non Trouvée',
+      pageNotFoundDesc: 'La page que vous recherchez n\'existe pas.',
+      backToHome: 'Retour à l\'Accueil',
+      settings : {
+        // Auth & General
+        signIn: 'Se connecter',
+        signUp: 'S\'inscrire',
+        signOut: 'Se déconnecter',
+        username: 'Nom d\'utilisateur',
+        email: 'Email',
+        password: 'Mot de passe',
+        newPassword: 'Nouveau mot de passe',
+        confirmPassword: 'Confirmer le mot de passe',
+        profile: 'Profil',
+        editProfile: 'Modifier le profil',
+        settings: 'Paramètres',
+        save: 'Enregistrer',
+        cancel: 'Annuler',
+        saveChanges: 'Enregistrer les modifications',
+        back: 'Retour',
+
+        // Profile & Settings
+        changePhoto: 'Changer la photo',
+        uploadAvatar: 'Télécharger l\'avatar',
+        personalInfo: 'Informations personnelles',
+        accountSettings: 'Paramètres du compte',
+        enable2FA: 'Activer 2FA',
+        disable2FA: 'Désactiver 2FA',
+        twoFactorAuth: 'Authentification à deux facteurs',
+
+        // Validation & Messages
+        required: 'Requis',
+        invalidEmail: 'Adresse email invalide',
+        passwordMismatch: 'Les mots de passe ne correspondent pas',
+        updateSuccess: 'Mise à jour réussie',
+        updateError: 'Échec de la mise à jour',
+
+        // Notes & Descriptions
+        updateOneAtTime: 'Vous ne pouvez mettre à jour qu\'un seul champ à la fois (nom d\'utilisateur, email ou mot de passe)',
+
+        // 404 Page
+        pageNotFound: 'Page Non Trouvée',
+        pageNotFoundDesc: 'La page que vous recherchez n\'existe pas.',
+        backToHome: 'Retour à l\'Accueil'
       }
     }
   },
@@ -263,7 +429,10 @@ export const translations = {
       continueWith: 'Doorgaan met Google',
       games: {
         playVsAI: 'Speel tegen AI',
+        playAgain: 'Speel opnieuw',
         playVsFriend: 'Speel tegen vriend',
+        playLocal: 'Speel lokaal',
+        playTournament: 'Speel toernooi',
         pong: {
           title: 'Pong',
           description: 'Klassiek Pong spel - Daag je vrienden uit of speel tegen AI.'
@@ -278,7 +447,8 @@ export const translations = {
         description: 'Maak of neem deel aan toernooien om tegen andere spelers te spelen.',
         create: 'Toernooi maken',
         join: 'Deelnemen aan toernooi'
-      },friends: 'Vrienden',
+      },
+      friends: 'Vrienden',
       typeMessage: 'Typ een bericht...',
       addFriend: 'Vriend toevoegen',
       enterUsername: 'Voer gebruikersnaam in',
@@ -288,7 +458,59 @@ export const translations = {
         receiving: 'Verzoek ontvangen',
         accepted: 'Geaccepteerd',
         blocked: 'Geblokkeerd'
-      }
+      },
+      noGamesPlayed: 'Nog geen spellen gespeeld',
+      noFriendsYet: 'Je hebt nog geen vrienden',
+      sentRequests: 'Verzonden verzoeken',
+      requests: 'Ontvangen verzoeken',
+      accept: 'Accepteren',
+      reject: 'Weigeren',
+      block: 'Blokkeren',
+      pageNotFound: 'Pagina Niet Gevonden',
+      pageNotFoundDesc: 'De pagina die u zoekt bestaat niet.',
+      backToHome: 'Terug naar Home',
+      settings : {
+      // Auth & General
+      signIn: 'Inloggen',
+      signUp: 'Registreren',
+      signOut: 'Uitloggen',
+      username: 'Gebruikersnaam',
+      email: 'E-mail',
+      password: 'Wachtwoord',
+      newPassword: 'Nieuw wachtwoord',
+      confirmPassword: 'Wachtwoord bevestigen',
+      profile: 'Profiel',
+      editProfile: 'Profiel bewerken',
+      settings: 'Instellingen',
+      save: 'Opslaan',
+      cancel: 'Annuleren',
+      saveChanges: 'Wijzigingen opslaan',
+      back: 'Terug',
+      
+      // Profile & Settings
+      changePhoto: 'Foto wijzigen',
+      uploadAvatar: 'Avatar uploaden',
+      personalInfo: 'Persoonlijke informatie',
+      accountSettings: 'Account instellingen',
+      enable2FA: '2FA inschakelen',
+      disable2FA: '2FA uitschakelen',
+      twoFactorAuth: 'Twee-factor authenticatie',
+      
+      // Validation & Messages
+      required: 'Verplicht',
+      invalidEmail: 'Ongeldig e-mailadres',
+      passwordMismatch: 'Wachtwoorden komen niet overeen',
+      updateSuccess: 'Succesvol bijgewerkt',
+      updateError: 'Update mislukt',
+      
+      // Notes & Descriptions
+      updateOneAtTime: 'U kunt slechts één veld tegelijk bijwerken (gebruikersnaam, e-mail of wachtwoord)',
+      
+      // 404 Page
+      pageNotFound: 'Pagina Niet Gevonden',
+      pageNotFoundDesc: 'De pagina die u zoekt bestaat niet.',
+      backToHome: 'Terug naar Home'
+    }
     }
   }
 };

@@ -1,9 +1,9 @@
 import { aiMove } from "./ai.js";
-import Ball from '../shared/Ball.js';
+import Ball from './Ball.js';
 
 // Game constants
-const WINNING_SCORE = 2;
-const BALL_SPEED = 4;
+const WINNING_SCORE = 4;
+const BALL_SPEED = 5;
 const PADDLE_SPEED = 5;
 
 // Game store - will hold all active games
@@ -56,6 +56,7 @@ export const addPlayer = (gameId, playerId, ws) => {
     id: playerId,
     side: side,
     y: game.dimensions.height / 2 - game.dimensions.paddleHeight / 2,
+    targetY: game.dimensions.height / 2 - game.dimensions.paddleHeight / 2, // Add this
     ws: ws
   };
   
@@ -91,6 +92,17 @@ export const startGame = (gameId) => {
   resetBall(gameId, Math.random() > 0.5);
   
   game.status = 'playing';
+
+  // Find AI player if exists
+  const aiPlayer = Object.values(game.players).find(p => p.id.startsWith('ai-'));
+  
+  // Set up AI movement interval
+  if (aiPlayer) {
+    // Create AI movement interval - once per second
+    game.aiInterval = setInterval(() => {
+      aiMove(game.ball, aiPlayer, game.dimensions);
+    }, 1000); // 1000ms = 1 second
+  }
   
   // Start game loop with setInterval
   game.intervalId = setInterval(() => updateGame(gameId), 1000/60); // 60fps
@@ -180,7 +192,6 @@ const updateGame = (gameId) => {
   if (ball.y <= ball.size || ball.y >= height - ball.size) {
     ball.speedY = -ball.speedY;
   }
-  console.log('ball.x:', ball.x, 'ball.y:', ball.y, 'ball.size:', ball.size, 'paddleWidth:', paddleWidth, 'leftPlayer.y:', leftPlayer.y, 'leftPlayer.y + paddleHeight:', leftPlayer.y + paddleHeight, 'ball.speedX:', ball.speedX);
   // Paddle collision (left)
   if (ball.x - ball.size <= paddleWidth && 
       ball.y >= leftPlayer.y && 
@@ -188,6 +199,7 @@ const updateGame = (gameId) => {
       ball.speedX < 0) {
     
     ball.speedX = -ball.speedX;
+    ball.x = paddleWidth + ball.size;
     
     // Add angle based on where ball hits paddle
     const hitPosition = (ball.y - leftPlayer.y) / paddleHeight;
@@ -201,7 +213,8 @@ const updateGame = (gameId) => {
       ball.speedX > 0) {
     
     ball.speedX = -ball.speedX;
-    
+    ball.x = width - paddleWidth - ball.size;
+
     // Add angle based on where ball hits paddle
     const hitPosition = (ball.y - rightPlayer.y) / paddleHeight;
     ball.speedY += 5 * (hitPosition - 0.5);
@@ -231,7 +244,19 @@ const updateGame = (gameId) => {
     }
   }
   // AI move for single player mode
-  
+  // Move AI smoothly toward target
+  Object.values(game.players).forEach(player => {
+    if (player.id.startsWith('ai-') && player.targetY !== undefined) {
+      // Move toward target position at normal paddle speed
+      if (Math.abs(player.y - player.targetY) < PADDLE_SPEED) {
+        player.y = player.targetY; // Arrived at target
+      } else if (player.y < player.targetY) {
+        player.y += PADDLE_SPEED; // Move down
+      } else if (player.y > player.targetY) {
+        player.y -= PADDLE_SPEED; // Move up
+      }
+    }
+  });
   
   // Send game state to all connected players
   broadcastGameState(gameId);
@@ -283,6 +308,9 @@ export const handleDisconnect = (gameId, playerId) => {
   if (Object.keys(game.players).length === 0) {
     if (game.intervalId) {
       clearInterval(game.intervalId);
+    }
+    if (game.aiInterval) {
+      clearInterval(game.aiInterval);
     }
     delete games[gameId];
   }

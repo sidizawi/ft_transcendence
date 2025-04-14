@@ -3,8 +3,6 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
-const verificationCodes = {};
-
 async function statsRoutes(fastify, options) {
 	/*
 	 * Oppement: The opponent's username
@@ -50,10 +48,10 @@ async function statsRoutes(fastify, options) {
 		const userId = request.user.id;
 		const gameType = request.params.game;
 
-		let query = 'SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?)';
+		let query = 'SELECT g.*, u.avatar FROM game g JOIN users u WHERE (playerid_1 = ? OR playerid_2 = ?)';
 		let params = [userId, userId];
 
-		if (gameType !== 'pong' && gameType !== 'p4') {
+		if (gameType && gameType !== 'pong' && gameType !== 'p4') {
 			return reply.code(400).send({ error: 'Invalid game type' });
 		}
 
@@ -65,7 +63,7 @@ async function statsRoutes(fastify, options) {
 		const games = fastify.db.prepare(query).all(...params);
 		
 		if (games.length === 0 || !games) {
-			return reply.code(404).send({ error: 'No games found' });
+			return reply.code(204).send({ msg: 'No content' });
 		}
 
 		if (games.length > 10){
@@ -79,7 +77,8 @@ async function statsRoutes(fastify, options) {
 				score: game.playerid_1 === userId ? `${game.score_1}-${game.score_2}` : `${game.score_2}-${game.score_1}`,
 				playerWin: game.playerid_1 === userId ? game.player_win : game.player_lost,
 				game: game.game_type,
-				date: game.date
+				date: game.date,
+				avatar: game.avatar
 			};
 		});
 
@@ -94,7 +93,7 @@ async function statsRoutes(fastify, options) {
 		let query = 'SELECT * FROM game WHERE playerid_1 = ? OR playerid_2 = ?';
 		let params = [userId, userId];
 
-		if (gameType !== 'pong' && gameType !== 'p4') {
+		if (gameType && gameType !== 'pong' && gameType !== 'p4') {
 			return reply.code(400).send({ error: 'Invalid game type' });
 		}
 
@@ -106,7 +105,7 @@ async function statsRoutes(fastify, options) {
 		const games = fastify.db.prepare(query).all(...params);
 
 		if (games.length === 0 || !games) {
-			return reply.code(404).send({ error: 'No games found' });
+			return reply.code(204).send({ msg: 'No content' });
 		}
 
 		const stats = {

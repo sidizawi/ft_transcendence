@@ -3,6 +3,8 @@ import { BrowserCompatibility } from '../shared/utils/browserCheck';
 import { Menu } from '../shared/components/menu';
 import { Auth } from '../features/auth/auth';
 import { Profile } from '../features/profile/profile';
+import { Settings } from '../features/profile/settings';
+import { Friends } from '../features/friends/friends';
 import { Router } from '../shared/utils/routing';
 import { User } from '../shared/types/user';
 import { Tournament } from '../features/tournament/tournament';
@@ -12,7 +14,8 @@ import { Header } from '../shared/components/header';
 import { Footer } from '../shared/components/footer';
 import { i18n } from '../shared/i18n';
 import { TokenManager } from '../shared/utils/token';
-import { FriendsList } from '../shared/components/friends';
+import { Chat } from '../shared/components/chat';
+import { NotFound } from '../shared/components/notFound';
 
 export class TranscendenceApp {
   private state = {
@@ -25,7 +28,9 @@ export class TranscendenceApp {
   private router: Router;
   private header: Header;
   private footer: Footer;
-  private friendsList: FriendsList | null = null;
+  private connect4: Connect4;
+  private pong: Pong;
+  //private friendsList: FriendsList | null = null;
 
   constructor() {
     // Check if user is already logged in
@@ -34,12 +39,18 @@ export class TranscendenceApp {
       const user = TokenManager.getUserFromToken();
       if (user) {
         this.state.user = user;
-        this.friendsList = new FriendsList();
+        // Restore user data from localStorage if available
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          this.state.user = JSON.parse(storedUser);
+        }
       }
     }
 
     this.menu = new Menu(this.isLoggedIn(), () => this.handleLogout());
     this.auth = new Auth((user) => this.handleLogin(user));
+    this.connect4 = new Connect4();
+    this.pong = new Pong();
     this.router = new Router(
       () => this.renderCurrentPage(),
       () => this.isLoggedIn()
@@ -64,7 +75,6 @@ export class TranscendenceApp {
 
   private handleLogin(user: User) {
     this.state.user = user;
-    this.friendsList = new FriendsList();
     this.menu = new Menu(true, () => this.handleLogout());
     this.initializeApp();
     this.router.navigateTo('/profile');
@@ -72,19 +82,28 @@ export class TranscendenceApp {
 
   private handleLogout() {
     TokenManager.removeToken();
+    localStorage.removeItem('user'); // Remove user data from localStorage
     this.state.user = null;
-    this.friendsList = null;
     this.menu = new Menu(false, () => this.handleLogout());
     this.initializeApp();
     this.router.navigateTo('/signin');
   }
 
   private getPageTitle(path: string): string {
+    const chatMatch = path.match(/^\/chat\/(.+)$/);
+    if (chatMatch) {
+      return i18n.t('chat');
+    }
+
     switch (path) {
       case '/':
         return 'Home';
       case '/profile':
         return i18n.t('profile');
+      case '/profile/settings':
+        return i18n.t('editProfile');
+      case '/friends':
+        return i18n.t('friends');
       case '/tournament':
         return i18n.t('tournament');
       case '/pong':
@@ -95,22 +114,21 @@ export class TranscendenceApp {
         return i18n.t('signIn');
       case '/signup':
         return i18n.t('signUp');
+      case '/404':
+        return i18n.t('pageNotFound');
       default:
         return 'Transcendence';
     }
   }
 
   private initializeApp() {
-    const menuOverlay = document.getElementById('menu-overlay');
-    const wasMenuOpen = menuOverlay?.classList.contains('active');
-
     document.body.innerHTML = `
       <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
         ${this.header.render(this.getPageTitle(window.location.pathname))}
 
         <div 
           id="menu-overlay" 
-          class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm ${wasMenuOpen ? 'active' : ''}"
+          class="fixed inset-0 z-50 flex items-center justify-center bg-black/30 dark:bg-black/50 backdrop-blur-sm"
         >
           <div class="menu-box bg-transparent rounded-lg">
             ${this.menu.getMenuItems()}
@@ -121,7 +139,6 @@ export class TranscendenceApp {
         </main>
 
         ${this.footer.render()}
-        ${this.friendsList ? this.friendsList.render() : ''}
       </div>
     `;
 
@@ -132,13 +149,21 @@ export class TranscendenceApp {
     this.header.setupEventListeners();
     this.footer.setupEventListeners();
     this.menu.setupEventListeners();
-    this.friendsList?.setupEventListeners();
   }
 
   private renderCurrentPage() {
     const path = this.router.checkAuthAndRedirect(window.location.pathname);
     const main = document.querySelector('main');
     if (!main) return;
+
+    const chatMatch = path.match(/^\/chat\/(.+)$/);
+    if (chatMatch && this.state.user) {
+      const userId = chatMatch[1];
+      const chat = new Chat(userId);
+      main.innerHTML = chat.render();
+      chat.setupEventListeners();
+      return;
+    }
 
     switch (path) {
       case '/':
@@ -151,17 +176,31 @@ export class TranscendenceApp {
           profile.setupEventListeners();
         }
         break;
+      case '/profile/settings':
+        if (this.state.user) {
+          const settings = new Settings(this.state.user);
+          main.innerHTML = settings.render();
+          settings.setupEventListeners();
+        }
+        break;
+      case '/friends':
+        if (this.state.user) {
+          const friends = new Friends();
+          main.innerHTML = friends.render();
+          friends.setupEventListeners();
+        }
+        break;
       case '/tournament':
         const tournament = new Tournament();
         main.innerHTML = tournament.render();
         break;
       case '/pong':
-        const pong = new Pong();
-        main.innerHTML = pong.render();
+        main.innerHTML = this.pong.render();
+        this.pong.pongEventListener();
         break;
       case '/connect4':
-        const connect4 = new Connect4();
-        main.innerHTML = connect4.render();
+        main.innerHTML = this.connect4.render();
+        this.connect4.setupConnect4FirstPageEventListener();
         break;
       case '/signin':
         main.innerHTML = this.auth.renderSignIn();
@@ -172,7 +211,9 @@ export class TranscendenceApp {
         this.auth.setupAuthEventListeners(true);
         break;
       default:
-        this.renderHomePage(main);
+        const notFound = new NotFound();
+        main.innerHTML = notFound.render();
+        break;
     }
 
     const pageTitle = document.getElementById('page-title');

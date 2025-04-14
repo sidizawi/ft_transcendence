@@ -1,13 +1,13 @@
 To Do:
 
+	App:
+		- refactor
+		- changing to use router
+
 	Profile page:
-		- Being able to change user's info
 		- Being able to change the avatar
 		- Tabs' visual
 		- 2FA -> s'active et se desactive MAIS pb  connexion + pb boutton + demander refresh token
-
-	Sign In/Up Page:
-		- change db model
 
 	Footer:
 		- Names (?)
@@ -20,6 +20,7 @@ To Do:
 		- Check browsers (old) compatibility
 		- Accessibility (?)
 		- SSR (?)
+		- when reload on page it should load that page: /profile and reload => go to profile, not home
 
 	Friends:
 		- Everything
@@ -28,7 +29,20 @@ To Do:
 		- Clean up unused datas
 		- Changing colour names in files (?)
 
+	chat:
+		- add to db
+		- get all messages on connection
 
+	connect 4:
+		- add a pop up on winning
+		- add websocket
+		- create AI algo
+		- add timer
+		- check match null
+		- vusu coin derriere le front
+
+	pong:
+		- check if the websocket is closed
 
       let url = "http://localhost:3001/login";
       url = url.replace("localhost", window.location.hostname);

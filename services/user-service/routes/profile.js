@@ -6,6 +6,7 @@ import fastifyJwt from '@fastify/jwt';
 import fs from 'fs';
 import path from 'path';
 import multer from 'fastify-multer';
+import bcrypt from 'bcrypt';
 
 dotenv.config();
 
@@ -31,17 +32,14 @@ async function profileRoutes(fastify, options) {
 		await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET });
 	}
 
-	// Servir les fichiers statiques pour les avatars
-	fastify.register(require('@fastify/static'), {
-		root: path.join(__dirname, '../../uploads/avatars'),
-		prefix: '/avatars/'					 // URL prefix (e.g., http://localhost:3000/avatars/)
-	});
+	// // Servir les fichiers statiques pour les avatars
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// USER MODIFICATIONS ///
 	// Modify username without check
-	fastify.put('/profile/username', async (request, reply) => {
+	fastify.put('/username', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const { newUsername } = request.body;
@@ -66,7 +64,7 @@ async function profileRoutes(fastify, options) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Post email then check if already user, if not, send verification code
-	fastify.post('/profile/email/request', async (request, reply) => {
+	fastify.post('/email/request', async (request, reply) => {
 	await request.jwtVerify();
 	const userId = request.user.id;
 	const { newEmail } = request.body;
@@ -107,7 +105,7 @@ async function profileRoutes(fastify, options) {
 
 	// Verify email with code
 	// Check if code is correct and not expired 
-	fastify.put('/profile/email/verify', async (request, reply) => {
+	fastify.put('/email/verify', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const { verificationCode } = request.body;
@@ -139,7 +137,7 @@ async function profileRoutes(fastify, options) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	// Post new password and send code by mail
-	fastify.post('/profile/password/request', async (request, reply) => {
+	fastify.post('/password/request', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const userEmail = request.user.email;
@@ -169,7 +167,7 @@ async function profileRoutes(fastify, options) {
 	});
 
 	// Check if code is correct and not expired
-	fastify.put('/profile/password/verify', async (request, reply) => {
+	fastify.put('/password/verify', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const { verificationCode, newPassword } = request.body;
@@ -187,7 +185,7 @@ async function profileRoutes(fastify, options) {
 		  return reply.code(400).send({ error: 'Incorrect verification code' });
 		}
 		
-		const hashedPassword = await fastify.bcrypt.hash(newPassword);
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
 		
 		fastify.db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, userId);
 		
@@ -198,29 +196,37 @@ async function profileRoutes(fastify, options) {
 
 	
 	// Route pour uploader un avatar
-	fastify.post('/profile/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
+	fastify.post('/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
-		const userName = request.user.username;
+		
 		if (!request.file) {
 			return reply.code(400).send({ error: 'No file uploaded' });
 		}
-
+	
 		const validMimeTypes = ['image/jpeg', 'image/png'];
 		if (!validMimeTypes.includes(request.file.mimetype)) {
 			fs.unlinkSync(request.file.path);
 			return reply.code(400).send({ error: 'Invalid file type' });
 		}
-
-		const fileExtension = path.extname(request.file.originalname);
-		const newFileName = `${userId}-${userName}${fileExtension}`;
-		const newFilePath = path.join('uploads/avatars', newFileName);
-
+	
+		// Utilise le nom d'origine du fichier au lieu de le renommer
+		const originalFileName = request.file.originalname;
+		const newFilePath = path.join('uploads/avatars', originalFileName);
+	
+		// Si un fichier du même nom existe déjà, le supprimer d'abord
+		if (fs.existsSync(newFilePath)) {
+			fs.unlinkSync(newFilePath);
+		}
+	
 		fs.renameSync(request.file.path, newFilePath);
-
+	
 		fastify.db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(newFilePath, userId);
-
-		reply.code(200).send({ message: 'Avatar uploaded successfully', avatarPath: newFilePath });
+	
+		reply.code(200).send({ 
+			message: 'Avatar uploaded successfully', 
+			avatarPath: newFilePath 
+		});
 	});
 
 	// Inclure l'URL de l'avatar dans les réponses utilisateur
@@ -237,7 +243,8 @@ async function profileRoutes(fastify, options) {
 		user.avatarUrl = user.avatar ? `${request.protocol}://${request.hostname}/avatars/${path.basename(user.avatar)}` : null;
 
 		reply.code(200).send(user);
-
+		//FRONT END : <img src="http://localhost:3000/avatars/1-john_doe.png" alt="Profile avatar" />
+		//			  <img src={user.avatarUrl} alt={`Avatar de ${user.username}`} />
 
 		/*
 		user ressemble a :
