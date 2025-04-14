@@ -57,7 +57,7 @@ fastify.register(settingsRoutes, { prefix: '/settings' });
 fastify.register(statsRoutes, { prefix: '/stats' });
 fastify.register(refreshRoutes, { prefix: '/refresh'});
 fastify.register(friendRoutes, { prefix: '/friend'});
-fastify.register(profileRoutes, { prefix: 'profile'});
+fastify.register(profileRoutes, { prefix: '/profile'});
 
 /// SERVER ///
 fastify.listen({ port: 3004, host: '0.0.0.0' }, (err, address) => {

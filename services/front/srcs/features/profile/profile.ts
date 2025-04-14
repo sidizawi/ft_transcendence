@@ -102,7 +102,7 @@ export class Profile {
               <div class="relative">
                 <img 
                   src="${this.user.avatar}" 
-                  alt="${i18n.t('avatar')}" 
+                  alt="${i18n.t('profile')}" 
                   class="w-32 h-32 rounded-full object-cover"
                 >
                 <label 
@@ -267,11 +267,11 @@ export class Profile {
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.wonTournaments')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.won || 0}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.won || '-'}</p>
               </div>
               <div class="text-right">
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.playedTournaments')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.total || 0}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.total || '-'}</p>
               </div>
             </div>
           </div>
@@ -282,13 +282,13 @@ export class Profile {
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.currentStreak')}</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">
-                  ${stats.totalGames === 0 ? '-' : stats.streak?.current || '0'}
+                  ${stats.totalGames === 0 ? '-' : stats.streak?.current || '-'}
                 </p>
               </div>
               <div class="text-right">
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.bestStreak')}</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">
-                  ${stats.totalGames === 0 ? '-' : stats.streak?.best || '0'}
+                  ${stats.totalGames === 0 ? '-' : stats.streak?.best || '-'}
                 </p>
               </div>
             </div>

@@ -4,7 +4,7 @@ import { TokenManager } from '../../shared/utils/token';
 import { AvatarService } from '../../shared/services/avatarService';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user/profile`;
+const USER_API_URL = `http://${host}:3000/user/settings`;
 
 export class Settings {
   constructor(private user: User) {}

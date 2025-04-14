@@ -1,12 +1,12 @@
 import { User } from '../../shared/types/user';
-import { GameStats } from '../../shared/types/game';
+import { FriendGameStats } from '../../shared/types/game';
 import { i18n } from '../../shared/i18n';
 import { StatsService } from '../../shared/services/statsService';
 import { FriendService } from '../../shared/services/friendService';
 
 export class FriendProfile {
-  private pongStats: GameStats | null = null;
-  private connect4Stats: GameStats | null = null;
+  private pongStats: FriendGameStats | null = null;
+  private connect4Stats: FriendGameStats | null = null;
   private friendshipStatus: string | null = null;
   private userId: string | null = null;
 
@@ -18,8 +18,8 @@ export class FriendProfile {
   private async loadGameStats() {
     try {
       const [pongStats, connect4Stats] = await Promise.all([
-        StatsService.getGameStats('pong'),
-        StatsService.getGameStats('p4')
+        StatsService.getFriendGameStats('pong', this.username),
+        StatsService.getFriendGameStats('p4', this.username)
       ]);
 
       this.pongStats = pongStats;
@@ -250,7 +250,7 @@ export class FriendProfile {
     `;
   }
 
-  private renderGameStats(stats: GameStats | null): string {
+  private renderGameStats(stats: FriendGameStats | null): string {
     if (!stats) {
       return `
         <div class="text-center text-gray-600 dark:text-gray-400 py-8">
@@ -302,11 +302,11 @@ export class FriendProfile {
             <div class="flex items-center justify-between">
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.wonTournaments')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.won || 0}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.won || '-'}</p>
               </div>
               <div class="text-right">
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.playedTournaments')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.total || 0}</p>
+                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.total || '-'}</p>
               </div>
             </div>
           </div>
@@ -317,13 +317,13 @@ export class FriendProfile {
               <div>
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.currentStreak')}</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">
-                  ${stats.totalGames === 0 ? '-' : stats.streak?.current || '0'}
+                  ${stats.totalGames === 0 ? '-' : stats.streak?.current || '-'}
                 </p>
               </div>
               <div class="text-right">
                 <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.bestStreak')}</p>
                 <p class="text-xl font-bold text-gray-900 dark:text-white">
-                  ${stats.totalGames === 0 ? '-' : stats.streak?.best || '0'}
+                  ${stats.totalGames === 0 ? '-' : stats.streak?.best || '-'}
                 </p>
               </div>
             </div>
@@ -338,7 +338,7 @@ export class FriendProfile {
               ${stats.history.map(game => `
                 <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg">
                   <div class="flex items-center space-x-3">
-                    <span class="w-2 h-2 rounded-full ${game.result === 'win' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                    <span class="w-2 h-2 rounded-full ${game.playerWin === this.username ? 'bg-green-500' : 'bg-red-500'}"></span>
                     <div class="flex items-center space-x-2">
                       <img 
                         src="${game.avatar}" 

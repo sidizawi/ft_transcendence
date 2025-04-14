@@ -2,13 +2,13 @@ import { i18n } from '../i18n';
 import { TokenManager } from './token';
 
 const host = window.location.hostname;
-const AUTH_API_URL = `http://${host}:3000/auth`;
+const AUTH_API_URL = `http://${host}:3000/auth/2fa`;
 
 export class TwoFactorAuth {
-  static async enable(userId: string): Promise<{ success: boolean }> {
+  static async enable(): Promise<{ success: boolean }> {
     try {
       // Request 2FA setup
-      const setupResponse = await fetch(`${AUTH_API_URL}/2fa/email/send`, {
+      const setupResponse = await fetch(`${AUTH_API_URL}/email/send`, {
         method: 'POST',
         headers: TokenManager.getAuthHeaders(),
         credentials: 'include',
@@ -21,7 +21,7 @@ export class TwoFactorAuth {
       }
 
       // Verify the setup with email code
-      const verified = await this.verifyEmailCode();
+      const verified = await this.verifyEmailCode('switch');
       return { success: verified };
     } catch (error) {
       console.error('2FA enable error:', error);
@@ -29,10 +29,10 @@ export class TwoFactorAuth {
     }
   }
 
-  static async disable(userId: string): Promise<{ success: boolean }> {
+  static async disable(): Promise<{ success: boolean }> {
     try {
       // Request 2FA disable setup
-      const setupResponse = await fetch(`${AUTH_API_URL}/2fa/email/send`, {
+      const setupResponse = await fetch(`${AUTH_API_URL}/email/send`, {
         method: 'POST',
         headers: TokenManager.getAuthHeaders(),
         credentials: 'include',
@@ -45,7 +45,7 @@ export class TwoFactorAuth {
       }
 
       // Verify the code to disable 2FA
-      const verified = await this.verifyEmailCode();
+      const verified = await this.verifyEmailCode('switch');
       return { success: verified };
     } catch (error) {
       console.error('2FA disable error:', error);
@@ -53,7 +53,31 @@ export class TwoFactorAuth {
     }
   }
 
-  private static async verifyEmailCode(): Promise<boolean> {
+  static async login2FA(): Promise<{ success: boolean }> {
+    try {
+      // Request 2FA login verification
+      const setupResponse = await fetch(`${AUTH_API_URL}/email/send`, {
+        method: 'POST',
+        headers: TokenManager.getAuthHeaders(),
+        credentials: 'include',
+        body: JSON.stringify({ action: 'login' })
+      });
+
+      if (!setupResponse.ok) {
+        const data = await setupResponse.json();
+        throw new Error(data.error || 'Failed to setup 2FA login');
+      }
+
+      // Verify the login with email code
+      const verified = await this.verifyEmailCode('connection');
+      return { success: verified };
+    } catch (error) {
+      console.error('2FA login error:', error);
+      return { success: false };
+    }
+  }
+
+  private static async verifyEmailCode(type: 'switch' | 'connection'): Promise<boolean> {
     return new Promise((resolve) => {
       const modal = this.createModal(`
         <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
@@ -123,7 +147,8 @@ export class TwoFactorAuth {
           loadingSpinner?.classList.remove('hidden');
           verifyText?.classList.add('hidden');
 
-          const response = await fetch(`${AUTH_API_URL}/2fa/switch/verify`, {
+          const endpoint = type === 'switch' ? 'switch/verify' : 'connection/verify';
+          const response = await fetch(`${AUTH_API_URL}/${endpoint}`, {
             method: 'POST',
             headers: TokenManager.getAuthHeaders(),
             credentials: 'include',

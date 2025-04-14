@@ -66,3 +66,44 @@ To Do:
 	(enlever online)
 
 	classe friend enlever Id rajout online friend
+
+
+
+---> /@username ou restrictions car username != profile et autre
+
+'/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup'
+In case the URL doesn't start with '/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup' check that is it a username in database, if not 404, without changing the actual check
+
+
+      const [friendsResponse, receivingResponse, sendingResponse, blockedResponse] = await Promise.all([
+        fetch(`${FRIEND_API_URL}/friendlist`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
+        })
+      ]);
+
+      if (!friendsResponse.ok) {
+        throw new Error('Failed to fetch friends list');
+      }
+
+      const friendsData = await friendsResponse.json();
+
+      const friends: Friend[] = [];
+      const currentUser = TokenManager.getUserFromToken();
+
+      // Add accepted friends
+      if (friendsData.friendData) {
+        friendsData.friendData.forEach((friend: any) => {
+          friends.push({
+            userid1: currentUser?.id || '',
+            userid2: friend.id || '',
+            username1: currentUser?.username || '',
+            username2: friend.username,
+            status: 'accepted',
+            avatar: friend.avatar
+          });
+        });
+      }
