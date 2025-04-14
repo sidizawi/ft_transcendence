@@ -91,18 +91,15 @@ fastify.post('/update-request', async (request, reply) => {
 	  const userId = request.user.id;
 	  const { newUsername, newEmail, currentPassword } = request.body;
 	  
-	  // Vérifier qu'au moins un champ à modifier est fourni
 	  if (!newUsername && !newEmail && !request.body.newPassword) {
 		return reply.code(400).send({ error: 'At least one field to update is required' });
 	  }
 	  
-	  // Récupérer les informations de l'utilisateur
 	  const user = fastify.db.prepare('SELECT username, email, password FROM users WHERE id = ?').get(userId);
 	  if (!user) {
 		return reply.code(404).send({ error: 'User not found' });
 	  }
-	  
-	  // Vérifier le mot de passe actuel pour sécuriser la demande
+
 	  if (!currentPassword) {
 		return reply.code(400).send({ error: 'Current password is required for verification' });
 	  }
@@ -112,7 +109,6 @@ fastify.post('/update-request', async (request, reply) => {
 		return reply.code(401).send({ error: 'Current password is incorrect' });
 	  }
 	  
-	  // Vérifier si le nouveau nom d'utilisateur est déjà pris
 	  if (newUsername && newUsername !== user.username) {
 		const usernameExists = fastify.db.prepare('SELECT id FROM users WHERE username = ?').get(newUsername);
 		if (usernameExists) {
@@ -120,18 +116,15 @@ fastify.post('/update-request', async (request, reply) => {
 		}
 	  }
 	  
-	  // Vérifier si le nouvel email est déjà utilisé
 	  if (newEmail && newEmail !== user.email) {
 		const emailExists = fastify.db.prepare('SELECT id FROM users WHERE email = ?').get(newEmail);
 		if (emailExists) {
 		  return reply.code(400).send({ error: 'Email already in use' });
 		}
 	  }
-	  
-	  // Générer un code de vérification
+
 	  const verificationCode = crypto.randomInt(100000, 999999).toString();
-	  
-	  // Stocker les informations de mise à jour et le code
+
 	  verificationCodes[userId] = {
 		type: 'profile_update',
 		code: verificationCode,
@@ -140,13 +133,11 @@ fastify.post('/update-request', async (request, reply) => {
 		  email: newEmail || null,
 		  password: request.body.newPassword || null
 		},
-		expiresAt: Date.now() + 10 * 60 * 1000 // 10 minutes
+		expiresAt: Date.now() + 10 * 60 * 1000
 	  };
 	  
-	  // Déterminer où envoyer le code de vérification
 	  const recipientEmail = newEmail || user.email;
-	  
-	  // Envoyer le code par email
+
 	  try {
 		await transporter.sendMail({
 		  from: `"Transcendence" <${process.env.EMAIL_MAIL}>`,
@@ -180,7 +171,6 @@ fastify.post('/update-request', async (request, reply) => {
 	}
   });
   
-  // Confirmation de mise à jour de profil avec le code de vérification
   fastify.put('/update-confirm', async (request, reply) => {
 	try {
 	  await request.jwtVerify();
@@ -191,7 +181,6 @@ fastify.post('/update-request', async (request, reply) => {
 		return reply.code(400).send({ error: 'Verification code is required' });
 	  }
 	  
-	  // Vérifier le code
 	  const storedVerification = verificationCodes[userId];
 	  if (!storedVerification || 
 		  storedVerification.type !== 'profile_update' || 
@@ -208,7 +197,6 @@ fastify.post('/update-request', async (request, reply) => {
 	  let updateParams = [];
 	  let updateMessages = [];
 	  
-	  // Construire la requête SQL dynamique pour les mises à jour
 	  if (updates.username) {
 		updateSQL.push('username = ?');
 		updateParams.push(updates.username);
@@ -228,10 +216,8 @@ fastify.post('/update-request', async (request, reply) => {
 		updateMessages.push('Password updated');
 	  }
 	  
-	  // Ajouter l'ID de l'utilisateur aux paramètres
 	  updateParams.push(userId);
 	  
-	  // Exécuter la mise à jour si au moins un champ est à modifier
 	  if (updateSQL.length > 0) {
 		fastify.db.prepare(`
 		  UPDATE users 
@@ -239,14 +225,12 @@ fastify.post('/update-request', async (request, reply) => {
 		  WHERE id = ?
 		`).run(...updateParams);
 		
-		// Générer un nouveau token JWT si le nom d'utilisateur ou l'email a changé
 		let token = null;
 		if (updates.username || updates.email) {
 		  const updatedUser = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
 		  token = fastify.jwt.sign({ id: updatedUser.id });
 		}
 		
-		// Supprimer le code de vérification
 		delete verificationCodes[userId];
 		
 		reply.code(200).send({ 
@@ -279,11 +263,9 @@ fastify.post('/update-request', async (request, reply) => {
 			return reply.code(400).send({ error: 'Invalid file type' });
 		}
 	
-		// Utilise le nom d'origine du fichier au lieu de le renommer
 		const originalFileName = request.file.originalname;
 		const newFilePath = path.join('uploads/avatars', originalFileName);
 	
-		// Si un fichier du même nom existe déjà, le supprimer d'abord
 		if (fs.existsSync(newFilePath)) {
 			fs.unlinkSync(newFilePath);
 		}
