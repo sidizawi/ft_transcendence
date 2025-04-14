@@ -1,9 +1,5 @@
 To Do:
 
-	App:
-		- refactor
-		- changing to use router
-
 	Profile page:
 		- Being able to change the avatar
 		- Tabs' visual

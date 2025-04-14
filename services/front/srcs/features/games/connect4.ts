@@ -1,4 +1,5 @@
 import { i18n } from '../../shared/i18n';
+import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
 
 export class Connect4 {
@@ -7,11 +8,13 @@ export class Connect4 {
   private rows = 6;
   private won = false;
   private online = false;
+  private myTurn = false;
   private canPlay = true;
   private cellSize = 100;
   private red = '#f53b3b';
   private coinPadding = 10;
   private yellow = 'yellow';
+  private user : User | null;
   private room: string | null;
   private player = this.yellow;
   private ws : WebSocket | null;
@@ -25,6 +28,7 @@ export class Connect4 {
     const urlParams = new URLSearchParams(window.location.search);
     this.room = urlParams.get("room");
     this.ws = null;
+    this.user = TokenManager.getUserFromToken();
   }
 
   drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {
@@ -44,9 +48,9 @@ export class Connect4 {
       if (y > targetY) y = targetY;
       requestAnimationFrame(() => this.drop(x, y, targetY, speed, col, row));
     } else {
-      this.canPlay = true;
+      this.canPlay = this.myTurn;
       this.data[row * this.cols + col] = this.player == this.red ? 'R' : 'Y';
-      if (this.checkWin()) {
+      if (!this.online && this.checkWin()) {
         // todo open a pop up
         console.log(`player ${this.player == this.red ? "red" : "yellow"} won`);
         this.won = true;
@@ -145,8 +149,20 @@ export class Connect4 {
         return ;
       }
       this.canPlay = false;
+      if (this.online) {
+        this.myTurn = false;
+        this.ws?.send(JSON.stringify({
+          mode: "play",
+          col,
+          color:  this.player == this.red ? 'R' : 'Y',
+          room: this.room,
+          id: this.user?.id,
+          username: this.user?.username
+        }));
+      }
       this.animateCoin(col, this.columns[col]);
       this.columns[col]--;
+
     });
     this.drawBoard();
   }
@@ -188,9 +204,11 @@ export class Connect4 {
 
         const main = document.querySelector('main');
         if (type == "playLocal") {
+          this.myTurn = true;
           main!.innerHTML = this.renderCanvas();
           this.setupCanvasEventListener();
         } else {
+          this.canPlay = false;
           this.online = true;
           this.setupWebSocket(type);
           main!.innerHTML = this.renderWaitingRoom();
@@ -200,12 +218,17 @@ export class Connect4 {
   }
 
   setupWebSocket(type : string | null) {
-    this.ws = new WebSocket(`ws://localhost:3000/game/connect4`);
+    const token = TokenManager.getToken();
+
+    this.ws = new WebSocket(`ws://${window.location.hostname}:3000/game/connect4/friend${token ? "?token="+token : ""}`);
 
     this.ws.onopen = () => {
       this.ws?.send(JSON.stringify({
         mode: "new",
         type,
+        room: this.room,
+        id: this.user?.id,
+        username: this.user?.username
       }))
     }
 
@@ -213,6 +236,30 @@ export class Connect4 {
       const message = JSON.parse(event.data);
 
       console.log("message:", message);
+      if (message.mode == "created") {
+        // todo send message to the friend
+        this.room = message.room;
+        console.log(message);
+        console.log(`here is the link to the game: http://${window.location.hostname}:8000/connect4?room=${message.room}`)
+      } else if (message.mode == "connected") {
+        console.log("you play", message.color);
+        this.canPlay = message.color == 'R';
+        this.myTurn = this.canPlay;
+        const main = document.querySelector("main");
+        main!.innerHTML = this.renderCanvas();
+        this.setupCanvasEventListener();
+      } else if (message.mode == "win") {
+        this.won = true;
+        console.log(message.winner ? "you're the winner" : "you're THE loser");
+      } else if (message.mode == "played") {
+        this.myTurn = true;
+        this.animateCoin(message.col, this.columns[message.col]);
+        this.columns[message.col]--;
+      }
+    }
+
+    this.ws.onclose = () => {
+      this.rerender();
     }
   }
 
@@ -254,6 +301,12 @@ export class Connect4 {
         ${name}
       </button>
     `;
+  }
+
+  rerender() {
+    const main = document.querySelector('main');
+    main!.innerHTML = this.render();
+    this.setupConnect4FirstPageEventListener();
   }
 
   render(): string {
