@@ -15,7 +15,6 @@ ft_transcendence is our ambitious project—a journey into uncharted territories
 - [Submission & Peer Evaluation](#submission--peer-evaluation)
 - [Authors](#authors)
 - [Acknowledgments](#acknowledgments)
-- [License](#license)
 
 ---
 
