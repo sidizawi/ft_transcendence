@@ -12,7 +12,7 @@ export class Chat {
 
     const token = TokenManager.getToken();
 
-    this.ws = new WebSocket(`ws://localhost:3000/chat/message${token ? '?token=' + token : ''}`);
+    this.ws = new WebSocket(`ws://${window.location.hostname}:3000/chat/message${token ? '?token=' + token : ''}`);
 
     this.ws.onopen = () => {
       this.ws!.send(JSON.stringify({
