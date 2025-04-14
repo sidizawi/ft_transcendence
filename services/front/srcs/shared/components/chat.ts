@@ -17,6 +17,7 @@ export class Chat {
     this.ws.onopen = () => {
       this.ws!.send(JSON.stringify({
         type: "new",
+        userId: this.currentUser?.id,
         user: this.currentUser?.username,
         friend: this.friendUserName
       }));
@@ -31,6 +32,14 @@ export class Chat {
           sender: data.sender,
           timestamp: new Date(data.timestamp)
         });
+      } else if (data.type == "messages") {
+        data.messages.map((message: any) => {
+          this.addMessage({
+            text: message.text,
+            sender: message.sender,
+            timestamp: new Date(message.timestamp),
+          });
+        })
       }
     };
   }
