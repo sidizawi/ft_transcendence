@@ -44,7 +44,7 @@ export class TokenManager {
       username: decoded.username,
       email: decoded.email,
       avatar: decoded.avatar || '/img/default-avatar.jpg',
-      twoFactorEnabled: decoded.twoFactorEnabled || false,
+      twoFactorEnabled: decoded.twoFactorEnabled,
       stats: {
         pong: {
           wins: 0,

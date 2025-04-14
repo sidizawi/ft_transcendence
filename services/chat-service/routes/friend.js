@@ -12,20 +12,26 @@ async function friendRoutes(fastify, options) {
 		}
 	
 		await request.jwtVerify();
-		const actualuser = request.user.username;
 		const actualid = request.user.id;
-	
+
+		const actualUser = fastify.db.prepare("SELECT * FROM users WHERE id = ?").get(actualid);
+		if (!actualUser) {
+			reply.code(400);
+			return { error: 'User not found'};
+		}
+		const actualuser = actualUser.username;
+
 		if (actualuser === username){
 			reply.code(400)
 			return { error: 'Cannot add yourself'}
 		}
-	
+
 		const userExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(username);
 		if (!userExists) {
 			reply.code(400);
 			return { error: 'Username doesnt exist'};
 		}
-	
+
 		const friendid = userExists.id;
 
 		const actualUserRow = fastify.db.prepare("SELECT * FROM friend WHERE (userid1, userid2) = (?, ?)").get(actualid, friendid);
@@ -103,8 +109,8 @@ async function friendRoutes(fastify, options) {
 		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
 		const friendid = friendExists.id;
 		
-		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
-		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
+		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
 		
 		if (sendingRow.status !== 'sending' || receivRow.status !== 'receiving'){
 			reply.code(400);
@@ -137,8 +143,8 @@ async function friendRoutes(fastify, options) {
 		const friendExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(friendusername);
 		const friendid = friendExists.id;
 	
-		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
-		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
+		const receivRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(actualid, friendid);
+		const sendingRow = fastify.db.prepare("SELECT * FROM friend where (userid1, userid2) = (?, ?)").get(friendid, actualid);
 	
 		if (sendingRow.status !== 'sending' || receivRow.status !== 'receiving'){
 			reply.code(400);
@@ -248,29 +254,6 @@ async function friendRoutes(fastify, options) {
 		return { error: 'User successfully unblocked'};
 	});
 
-	// fastify.get('/friendlist', async (request, reply) => {
-	// 	await request.jwtVerify();
-	// 	const userId = request.user.id;
-
-	// 	const userfriends = fastify.db.prepare(
-	// 		"SELECT * from friend where userid1 = ? AND status = 'accepted'")
-	// 		.all(userId);
-
-	// 	if (!userfriends || userfriends.length === 0){
-	// 		return { message: 'No friends found', friendData: [] };
-	// 	}
-		
-	// 	const userids = userfriends.map(friend => friend.userid2);
-
-	// 	const placeholders = userids.map(() => '?').join(', ');
-			
-	// 	const friendData = fastify.db.prepare(`
-	// 		SELECT username, status FROM users WHERE id IN (${placeholders})`)
-	// 		.all(...userids);
-
-	// 	return { message: 'Successfully retrieve friend list', friendData};
-	// });
-
 	fastify.get('/friendlist', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
@@ -313,22 +296,6 @@ async function friendRoutes(fastify, options) {
 		return { message: 'Successfully retrieve request list', onlyUsername };
 	});
 
-	// fastify.get('/sendinglist', async (request, reply) => {
-	// 	await request.jwtVerify();
-	// 	const userId = request.user.id;
-	// 	const status = 'sending';
-
-	// 	const sendlist = fastify.db.prepare(`SELECT * FROM friend where (userid1, status) = (?, ?)`).all(
-	// 		userId,
-	// 		status
-	// 	)
-
-	// 	const onlyUsername = sendlist.map(item => ({ username2: item.username2 }));
-
-	// 	return { message: 'Successfully retrieve request list', onlyUsername}
-	// });
-
-
 	fastify.get('/receivinglist', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
@@ -349,20 +316,26 @@ async function friendRoutes(fastify, options) {
 		return { message: 'Successfully retrieve request list', onlyUsername };
 	});
 
-	// fastify.get('/receivinglist', async (request, reply) => {
-	// 	await request.jwtVerify();
-	// 	const userId = request.user.id;
-	// 	const status = 'receiving';
+	fastify.get('/blockedlist', async (request, reply) => {
+        await request.jwtVerify();
+        const userId = request.user.id; 
 
-	// 	const requestlist = fastify.db.prepare(`SELECT * FROM friend where (userid1, status) = (?, ?)`).all(
-	// 		userId,
-	// 		status
-	// 	)
+		const blockedlist = fastify.db.prepare(`
+            SELECT f.*, u.id, u.username, u.avatar
+            FROM friend f
+            JOIN users u ON f.userid2 = u.id
+            WHERE f.userid1 = ? AND f.status = 'blocked'`)
+            .all(userId);        
+		
+		const onlyUsername = blockedlist.map(item => ({
+            username2: item.username,
+            id: item.id,
+            avatar: item.avatar || '/img/default-avatar.jpg',
+        }));  
+		
+		return { message: 'Successfully retrieve blocked list', onlyUsername };
+    });
 
-	// 	const onlyUsername = requestlist.map(item => ({ username2: item.username2 }));
-
-	// 	return { message: 'Successfully retrieve request list', onlyUsername}
-	// });
 }
-  
+
 export default friendRoutes;

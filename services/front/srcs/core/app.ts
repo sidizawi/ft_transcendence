@@ -16,6 +16,7 @@ import { i18n } from '../shared/i18n';
 import { TokenManager } from '../shared/utils/token';
 import { Chat } from '../shared/components/chat';
 import { NotFound } from '../shared/components/notFound';
+import { FriendProfile } from '../features/profile/friendProfile';
 
 export class TranscendenceApp {
   private state = {
@@ -36,6 +37,11 @@ export class TranscendenceApp {
       const user = TokenManager.getUserFromToken();
       if (user) {
         this.state.user = user;
+        // Restore user data from localStorage if available
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          this.state.user = JSON.parse(storedUser);
+        }
       }
     }
 
@@ -72,6 +78,7 @@ export class TranscendenceApp {
 
   private handleLogout() {
     TokenManager.removeToken();
+    localStorage.removeItem('user');
     this.state.user = null;
     this.menu = new Menu(false, () => this.handleLogout());
     this.initializeApp();
@@ -82,6 +89,11 @@ export class TranscendenceApp {
     const chatMatch = path.match(/^\/chat\/(.+)$/);
     if (chatMatch) {
       return i18n.t('chat');
+    }
+
+    const userMatch = path.match(/^\/user\/(.+)$/);
+    if (userMatch) {
+      return userMatch[1];
     }
 
     switch (path) {
@@ -151,6 +163,15 @@ export class TranscendenceApp {
       const chat = new Chat(userId);
       main.innerHTML = chat.render();
       chat.setupEventListeners();
+      return;
+    }
+
+    const userMatch = path.match(/^\/user\/(.+)$/);
+    if (userMatch && this.state.user) {
+      const username = userMatch[1];
+      const friendProfile = new FriendProfile(username, '/img/default-avatar.jpg');
+      main.innerHTML = friendProfile.render();
+      friendProfile.setupEventListeners();
       return;
     }
 

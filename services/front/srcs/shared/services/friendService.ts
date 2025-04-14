@@ -7,7 +7,7 @@ const FRIEND_API_URL = `http://${host}:3000/chat/friend`;
 export class FriendService {
   static async getFriendsList(): Promise<Friend[]> {
     try {
-      const [friendsResponse, receivingResponse, sendingResponse] = await Promise.all([
+      const [friendsResponse, receivingResponse, sendingResponse, blockedResponse] = await Promise.all([
         fetch(`${FRIEND_API_URL}/friendlist`, {
           method: 'GET',
           headers: {
@@ -28,16 +28,24 @@ export class FriendService {
             'Authorization': `Bearer ${TokenManager.getToken()}`
           },
           credentials: 'include'
+        }),
+        fetch(`${FRIEND_API_URL}/blockedlist`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${TokenManager.getToken()}`
+          },
+          credentials: 'include'
         })
       ]);
 
-      if (!friendsResponse.ok || !receivingResponse.ok || !sendingResponse.ok) {
+      if (!friendsResponse.ok || !receivingResponse.ok || !sendingResponse.ok || !blockedResponse.ok) {
         throw new Error('Failed to fetch friends list');
       }
 
       const friendsData = await friendsResponse.json();
       const receivingData = await receivingResponse.json();
       const sendingData = await sendingResponse.json();
+      const blockedData = await blockedResponse.json();
 
       const friends: Friend[] = [];
       const currentUser = TokenManager.getUserFromToken();
@@ -47,11 +55,11 @@ export class FriendService {
         friendsData.friendData.forEach((friend: any) => {
           friends.push({
             userid1: currentUser?.id || '',
-            username1: currentUser?.username || '',
             userid2: friend.id || '',
+            username1: currentUser?.username || '',
             username2: friend.username,
             status: 'accepted',
-            avatar: friend.avatar // Include the avatar from the API response
+            avatar: friend.avatar
           });
         });
       }
@@ -65,7 +73,7 @@ export class FriendService {
             username1: currentUser?.username || '',
             username2: request.username2,
             status: 'receiving',
-            avatar: request.avatar // Include the avatar from the API response
+            avatar: request.avatar
           });
         });
       }
@@ -79,15 +87,22 @@ export class FriendService {
             username1: currentUser?.username || '',
             username2: request.username2,
             status: 'sending',
-            avatar: request.avatar // Include the avatar from the API response
+            avatar: request.avatar
           });
-          // console.log('sendingData');
-          // console.log('userid1', currentUser?.id);
-          // console.log('usesername1', currentUser?.username);
-          // console.log('userid2', friendsData.friendData[0].id);
-          // console.log('username2', friendsData.friendData[0].username);
-          // console.log('avatar', friendsData.friendData[0].avatar);
-          // console.log('friends', friends);
+        });
+      }
+
+      // Add blocked users
+      if (blockedData.onlyUsername) {
+        blockedData.onlyUsername.forEach((blocked: any) => {
+          friends.push({
+            userid1: currentUser?.id || '',
+            userid2: blocked.id || '',
+            username1: currentUser?.username || '',
+            username2: blocked.username2,
+            status: 'blocked',
+            avatar: blocked.avatar
+          });
         });
       }
 
@@ -238,6 +253,30 @@ export class FriendService {
       return await response.json();
     } catch (error) {
       console.error('Delete friend error:', error);
+      throw error;
+    }
+  }
+
+  static async cancelRequest(friendUsername: string) {
+    try {
+      const response = await fetch(`${FRIEND_API_URL}/cancel`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${TokenManager.getToken()}`
+        },
+        body: JSON.stringify({ friendusername: friendUsername }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error);
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Cancel friend request error:', error);
       throw error;
     }
   }

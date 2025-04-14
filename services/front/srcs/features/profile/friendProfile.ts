@@ -1,23 +1,25 @@
 import { User } from '../../shared/types/user';
-import { GameStats } from '../../shared/types/game';
+import { FriendGameStats } from '../../shared/types/game';
 import { i18n } from '../../shared/i18n';
-import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
-import { AvatarService } from '../../shared/services/avatarService';
 import { StatsService } from '../../shared/services/statsService';
+import { FriendService } from '../../shared/services/friendService';
 
-export class Profile {
-  private pongStats: GameStats | null = null;
-  private connect4Stats: GameStats | null = null;
+export class FriendProfile {
+  private pongStats: FriendGameStats | null = null;
+  private connect4Stats: FriendGameStats | null = null;
+  private friendshipStatus: string | null = null;
+  private userId: string | null = null;
 
-  constructor(private user: User, private onLogout: () => void) {
+  constructor(private username: string, private avatar: string) {
     this.loadGameStats();
+    this.loadFriendshipStatus();
   }
 
   private async loadGameStats() {
     try {
       const [pongStats, connect4Stats] = await Promise.all([
-        StatsService.getGameStats('pong'),
-        StatsService.getGameStats('p4')
+        StatsService.getFriendGameStats('pong', this.username),
+        StatsService.getFriendGameStats('p4', this.username)
       ]);
 
       this.pongStats = pongStats;
@@ -25,6 +27,23 @@ export class Profile {
       this.updateView();
     } catch (error) {
       console.error('Error loading game stats:', error);
+    }
+  }
+
+  private async loadFriendshipStatus() {
+    try {
+      const friends = await FriendService.getFriendsList();
+      const friend = friends.find(f => f.username2 === this.username);
+      if (friend) {
+        this.friendshipStatus = friend.status;
+        this.userId = friend.userid2;
+      } else {
+        this.friendshipStatus = 'none';
+        this.userId = null;
+      }
+      this.updateView();
+    } catch (error) {
+      console.error('Error loading friendship status:', error);
     }
   }
 
@@ -36,63 +55,125 @@ export class Profile {
     }
   }
 
-  private async handleAvatarChange(event: Event) {
-    const input = event.target as HTMLInputElement;
-    const file = input.files?.[0];
-
-    if (!file) return;
-
+  private async handleFriendAction(action: string) {
     try {
-      const { avatarPath } = await AvatarService.uploadAvatar(file);
-      // Update the user's avatar in memory and localStorage
-      this.user.avatar = avatarPath;
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        userData.avatar = avatarPath;
-        localStorage.setItem('user', JSON.stringify(userData));
+      switch (action) {
+        case 'add':
+          await FriendService.addFriend(this.username);
+          this.friendshipStatus = 'sending';
+          break;
+        case 'block':
+          await FriendService.blockFriend(this.username);
+          this.friendshipStatus = 'blocked';
+          break;
+        case 'unblock':
+          await FriendService.unblockFriend(this.username);
+          this.friendshipStatus = 'none';
+          break;
+        case 'delete':
+          await FriendService.deleteFriend(this.username);
+          this.friendshipStatus = 'none';
+          break;
+        case 'cancel':
+          await FriendService.cancelRequest(this.username);
+          this.friendshipStatus = 'none';
+          break;
       }
       this.updateView();
     } catch (error) {
-      console.error('Avatar upload error:', error);
-      alert(error instanceof Error ? error.message : i18n.t('updateError'));
+      console.error('Error handling friend action:', error);
     }
   }
 
-  private async handle2FAToggle() {
-    try {
-      const result = await (this.user.twoFactorEnabled 
-        ? TwoFactorAuth.disable()
-        : TwoFactorAuth.enable());
-
-      if (result.success) {
-        // Update 2FA status in memory and localStorage
-        this.user.twoFactorEnabled = !this.user.twoFactorEnabled;
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          const userData = JSON.parse(storedUser);
-          userData.twoFactorEnabled = this.user.twoFactorEnabled;
-          localStorage.setItem('user', JSON.stringify(userData));
-        }
-        this.updateView();
+  private openChat() {
+    if (this.userId) {
+      const chatUrl = `/chat/${this.userId}`;
+      const chatWindow = window.open(chatUrl, `chat-${this.userId}`, 'width=800,height=600');
+      if (chatWindow) {
+        chatWindow.focus();
       }
-    } catch (error) {
-      console.error('2FA error:', error);
     }
   }
 
-  private get2FAButtonClasses(): string {
-    return this.user.twoFactorEnabled
-      ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600/80 dark:hover:bg-red-600'
-      : 'bg-green-500 hover:bg-green-600 dark:bg-green-600/80 dark:hover:bg-green-600';
+  private renderActionButtons(): string {
+    const buttons = [];
+
+    if (this.friendshipStatus === 'accepted') {
+      buttons.push(`
+        <button 
+          id="messageBtn"
+          class="bg-orange dark:bg-nature text-white dark:text-nature-lightest px-4 py-2 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors flex items-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+          </svg>
+          ${i18n.t('message')}
+        </button>
+        <button 
+          id="deleteFriendBtn"
+          class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          </svg>
+          ${i18n.t('delete')}
+        </button>
+        <button 
+          id="blockUserBtn"
+          class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+          </svg>
+          ${i18n.t('block')}
+        </button>
+      `);
+    } else if (this.friendshipStatus === 'blocked') {
+      buttons.push(`
+        <button 
+          id="unblockBtn"
+          class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
+          </svg>
+          ${i18n.t('unblock')}
+        </button>
+      `);
+    } else if (this.friendshipStatus === 'sending') {
+      buttons.push(`
+        <button 
+          id="cancelRequestBtn"
+          class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          ${i18n.t('cancel')}
+        </button>
+      `);
+    } else if (this.friendshipStatus === 'none') {
+      buttons.push(`
+        <button 
+          id="addFriendBtn"
+          class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          ${i18n.t('addFriend')}
+        </button>
+      `);
+    }
+
+    return buttons.length > 0 ? `
+      <div class="absolute top-6 right-8 flex gap-2">
+        ${buttons.join('')}
+      </div>
+    ` : '';
   }
 
   render(): string {
-    if (!this.user) {
-      console.error('No user data available');
-      return '<div class="text-center text-red-600">Error: No user data available</div>';
-    }
-
     return `
       <div class="max-w-4xl mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
@@ -101,50 +182,15 @@ export class Profile {
             <div class="flex items-center px-8 pt-6">
               <div class="relative">
                 <img 
-                  src="${this.user.avatar}" 
-                  alt="${i18n.t('profile')}" 
+                  src="${this.avatar}" 
+                  alt="${this.username}" 
                   class="w-32 h-32 rounded-full object-cover"
-                >
-                <label 
-                  for="avatar-upload" 
-                  class="absolute bottom-0 right-0 bg-gray-100 dark:bg-gray-700 p-2 rounded-full shadow-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                  title="${i18n.t('changePhoto')}"
-                >
-                  <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                </label>
-                <input 
-                  type="file" 
-                  id="avatar-upload" 
-                  accept="image/*"
-                  class="hidden"
                 >
               </div>
               <div class="ml-6">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${this.user.username}</h1>
-                <p class="text-gray-600 dark:text-gray-400">${this.user.email}</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${this.username}</h1>
               </div>
-              <div class="ml-auto flex items-center space-x-2">
-                <a 
-                  href="/profile/settings"
-                  class="text-gray-600 dark:text-gray-400"
-                >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                </a>
-                ${!this.user.google ? `
-                  <button 
-                    id="toggle2FA"
-                    class="${this.get2FAButtonClasses()} text-white dark:text-white/90 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    ${this.user.twoFactorEnabled ? i18n.t('disable2FA') : i18n.t('enable2FA')}
-                  </button>
-                ` : ''}
-              </div>
+              ${this.renderActionButtons()}
             </div>
           </div>
 
@@ -180,13 +226,6 @@ export class Profile {
               <div class="tab-content active" data-tab="pong">
                 <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Pong Dashboard</h3>
                 ${this.renderGameStats(this.pongStats)}
-
-                <!-- Tournament Button - Only in Pong tab -->
-                <div class="mt-8">
-                  <button class="w-full bg-orange-light dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature/90 shadow-md transition-colors">
-                    ${i18n.t('joinTournament')}
-                  </button>
-                </div>
               </div>
 
               <!-- Connect4 Stats -->
@@ -196,20 +235,14 @@ export class Profile {
               </div>
             </div>
 
-            <!-- Friends and Logout -->
-            <div class="mt-8 pt-8 border-t border-gray-300 dark:border-gray-600 flex justify-center space-x-4">
+            <!-- Back Button -->
+            <div class="mt-8 flex justify-center">
               <a 
                 href="/friends"
-                class="px-8 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+                class="px-6 py-2 bg-orange-lighter dark:bg-forest text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
               >
-                ${i18n.t('friends')}
+                ${i18n.t('back')}
               </a>
-              <button 
-                id="logoutBtn"
-                class="px-8 bg-red-500 dark:bg-red-600/80 hover:bg-red-600 dark:hover:bg-red-600 text-white dark:text-white/90 py-3 rounded-lg transition-colors"
-              >
-                ${i18n.t('logout')}
-              </button>
             </div>
           </div>
         </div>
@@ -217,7 +250,7 @@ export class Profile {
     `;
   }
 
-  private renderGameStats(stats: GameStats | null): string {
+  private renderGameStats(stats: FriendGameStats | null): string {
     if (!stats) {
       return `
         <div class="text-center text-gray-600 dark:text-gray-400 py-8">
@@ -305,7 +338,7 @@ export class Profile {
               ${stats.history.map(game => `
                 <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg">
                   <div class="flex items-center space-x-3">
-                    <span class="w-2 h-2 rounded-full ${game.result === 'win' ? 'bg-green-500' : 'bg-red-500'}"></span>
+                    <span class="w-2 h-2 rounded-full ${game.playerWin === this.username ? 'bg-green-500' : 'bg-red-500'}"></span>
                     <div class="flex items-center space-x-2">
                       <img 
                         src="${game.avatar}" 
@@ -329,22 +362,10 @@ export class Profile {
   }
 
   setupEventListeners() {
-    const toggle2FABtn = document.getElementById('toggle2FA');
-    const logoutBtn = document.getElementById('logoutBtn');
+    // Tab switching
     const tabButtons = document.querySelectorAll('.tab-button');
     const tabContents = document.querySelectorAll('.tab-content');
-    const avatarUpload = document.getElementById('avatar-upload') as HTMLInputElement;
 
-    // Avatar upload
-    avatarUpload?.addEventListener('change', (e) => this.handleAvatarChange(e));
-
-    // 2FA toggle
-    toggle2FABtn?.addEventListener('click', () => this.handle2FAToggle());
-
-    // Logout
-    logoutBtn?.addEventListener('click', this.onLogout);
-
-    // Tab switching
     tabButtons.forEach(button => {
       button.addEventListener('click', () => {
         const tab = button.getAttribute('data-tab');
@@ -382,5 +403,20 @@ export class Profile {
       initialTab.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
       initialTab.querySelector('.tab-indicator')?.classList.add('scale-x-100');
     }
+
+    // Action buttons
+    const messageBtn = document.getElementById('messageBtn');
+    const addFriendBtn = document.getElementById('addFriendBtn');
+    const blockUserBtn = document.getElementById('blockUserBtn');
+    const unblockBtn = document.getElementById('unblockBtn');
+    const deleteFriendBtn = document.getElementById('deleteFriendBtn');
+    const cancelRequestBtn = document.getElementById('cancelRequestBtn');
+
+    messageBtn?.addEventListener('click', () => this.openChat());
+    addFriendBtn?.addEventListener('click', () => this.handleFriendAction('add'));
+    blockUserBtn?.addEventListener('click', () => this.handleFriendAction('block'));
+    unblockBtn?.addEventListener('click', () => this.handleFriendAction('unblock'));
+    deleteFriendBtn?.addEventListener('click', () => this.handleFriendAction('delete'));
+    cancelRequestBtn?.addEventListener('click', () => this.handleFriendAction('cancel'));
   }
 }

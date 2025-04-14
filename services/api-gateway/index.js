@@ -17,8 +17,8 @@ fastify.addHook('onResponse', (request, reply, done) => {
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
-  origin: "http://localhost:8000", // Autorise toutes les origines (tu peux restreindre si besoin)
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: true, // Autorise toutes les origines (tu peux restreindre si besoin)
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 });

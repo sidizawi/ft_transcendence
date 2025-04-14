@@ -46,7 +46,7 @@ await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
   origin: "http://localhost:8000", // Autorise toutes les origines (tu peux restreindre si besoin)
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 });
@@ -110,9 +110,7 @@ fastify.post('/register', async (request, reply) => {
     ).get(username);
 
     const token = fastify.jwt.sign({
-      id: user.id,
-      username: user.username,
-      email: user.email
+      id: user.id
     });
 
     reply.code(201);
@@ -160,10 +158,7 @@ fastify.post('/login', async (request, reply) => {
     }
     
     const token = fastify.jwt.sign({
-        id: user.id,
-        username: user.username,
-        email: user.email,
-        avatar: user.avatar
+        id: user.id
     });
     
     reply.code(200);
@@ -185,7 +180,7 @@ fastify.post('/google/callback', async (request, reply) => {
       audience: process.env.GOOGLE_CLIENT_ID
     });
     const payload = ticket.getPayload();
-    const { email, name } = payload;
+    const { email, name, picture } = payload;
 
     let user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
     if (!user) {
@@ -198,15 +193,13 @@ fastify.post('/google/callback', async (request, reply) => {
         total_points: 0
       };
 
-      const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data, is_two_factor_enabled) VALUES (?, ?, ?, ?, ?)");
-      const result = stmt.run(name, email, hashedPassword, JSON.stringify(initialGameData), 0);
+      const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data, is_two_factor_enabled, avatar, google) VALUES (?, ?, ?, ?, ?, ?, ?)");
+      const result = stmt.run(name, email, hashedPassword, JSON.stringify(initialGameData), 0, picture, 1);
       user = { id: result.lastInsertRowid, username: name, email };
     }
 
     const token = fastify.jwt.sign({
-      id: user.id,
-      username: user.username,
-      email: user.email
+      id: user.id
   });
 
       reply.code(200);
@@ -314,10 +307,6 @@ try {
   fastify.db.prepare("UPDATE users SET is_two_factor_enabled = ? WHERE id = ?").run(newTwoFactorState, userId);
   delete otpCache[userId];
   const message = newTwoFactorState ? '2FA activé avec succès.' : '2FA désactivé avec succès.';
-  // const isTwoFactorEnabled = user.is_two_factor_enabled ? 1 : 0;
-  // fastify.db.prepare("UPDATE users SET is_two_factor_enabled = ? WHERE id = ?").run(isTwoFactorEnabled, userId);
-  // delete otpCache[userId];
-  // const message = isTwoFactorEnabled ? '2FA activé avec succès.' : '2FA désactivé avec succès.';
   reply.code(200);
   return { message };
 } catch (err) {
