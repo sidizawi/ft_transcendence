@@ -1,6 +1,3 @@
-Below is a beautiful, comprehensive README in Markdown that you can copy and paste into your repository’s README.md. It’s designed for your biggest project, ft_transcendence, developed by Caymard, Lagea, Sidzawi, Vdarras, and Lomajeru. It features a well-organized table of contents, a detailed overview of the project’s goals, modules, and bonus challenges—all without discussing the file structure. Enjoy!
-
-```markdown
 # ft_transcendence
 
 *Surprise. Version 16.0*
