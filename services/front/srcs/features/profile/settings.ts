@@ -5,6 +5,7 @@ import { AvatarService } from '../../shared/services/avatarService';
 
 const host = window.location.hostname;
 const USER_API_URL = `http://${host}:3000/user/settings`;
+const PROFILE_API_URL = `http://${host}:3000/user/profile`;
 
 export class Settings {
   constructor(private user: User) {}
@@ -17,6 +18,45 @@ export class Settings {
     }
   }
 
+  private async fetchAndUpdateUserProfile() {
+    try {
+      const response = await fetch(PROFILE_API_URL, {
+        method: 'GET',
+        headers: TokenManager.getAuthHeaders(),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const profile = await response.json();
+      if (!profile) {
+        throw new Error('Profile data not found');
+      }
+
+      // Update user data
+      this.user = {
+        ...this.user,
+        username: profile.username,
+        email: profile.email,
+        avatar: profile.avatar || '/img/default-avatar.jpg',
+        twoFactorEnabled: profile.is_two_factor_enabled,
+        google: profile.google || false,
+        stats: this.user.stats // Keep existing stats
+      };
+
+      // Update localStorage
+      localStorage.setItem('user', JSON.stringify(this.user));
+
+      // Update view
+      this.updateView();
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
+    }
+  }
+
   private async handleAvatarChange(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -25,14 +65,7 @@ export class Settings {
 
     try {
       const { avatarPath } = await AvatarService.uploadAvatar(file);
-      this.user.avatar = avatarPath;
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        userData.avatar = avatarPath;
-        localStorage.setItem('user', JSON.stringify(userData));
-      }
-      this.updateView();
+      await this.fetchAndUpdateUserProfile();
     } catch (error) {
       console.error('Avatar upload error:', error);
       alert(error instanceof Error ? error.message : i18n.t('updateError'));
@@ -57,12 +90,12 @@ export class Settings {
       }
       
       if (!this.user.google) {
-        if (email !== this.user.email) {
+        if (email && email !== this.user.email) {
           updates.push(this.handleEmailUpdate(email));
         }
         
         if (password) {
-          if (password !== confirmPassword) {
+          if (password && password !== confirmPassword) {
             throw new Error(i18n.t('passwordMismatch'));
           }
           updates.push(this.handlePasswordUpdate(password));
@@ -72,6 +105,7 @@ export class Settings {
       if (updates.length > 0) {
         const results = await Promise.all(updates);
         if (results.every(result => result)) {
+          await this.fetchAndUpdateUserProfile();
           window.location.href = '/profile';
         }
       }
@@ -97,13 +131,7 @@ export class Settings {
       const data = await response.json();
       TokenManager.setToken(data.token);
       
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        userData.username = username;
-        localStorage.setItem('user', JSON.stringify(userData));
-      }
-      
+      await this.fetchAndUpdateUserProfile();
       return true;
     } catch (error) {
       console.error('Username update error:', error);
@@ -149,13 +177,7 @@ export class Settings {
               const data = await verifyResponse.json();
               TokenManager.setToken(data.token);
               
-              const storedUser = localStorage.getItem('user');
-              if (storedUser) {
-                const userData = JSON.parse(storedUser);
-                userData.email = email;
-                localStorage.setItem('user', JSON.stringify(userData));
-              }
-              
+              await this.fetchAndUpdateUserProfile();
               modal.remove();
               resolve(true);
             } else {
@@ -232,6 +254,7 @@ export class Settings {
             });
 
             if (verifyResponse.ok) {
+              await this.fetchAndUpdateUserProfile();
               modal.remove();
               resolve(true);
             } else {

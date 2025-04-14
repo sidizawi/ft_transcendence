@@ -7,6 +7,7 @@ import fs from 'fs';
 import path from 'path';
 import multer from 'fastify-multer';
 import bcrypt from 'bcrypt';
+import db from '../db.js';
 
 dotenv.config();
 
@@ -38,161 +39,213 @@ async function settingsRoutes(fastify, options) {
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/// USER MODIFICATIONS ///
-	// Modify username without check
-	fastify.put('/username', async (request, reply) => {
-		await request.jwtVerify();
-		const userId = request.user.id;
-		const { newUsername } = request.body;
-		
-		if (!newUsername) {
-		  return reply.code(400).send({ error: 'New username is required' });
-		}
-		
-		const existingUser = fastify.db.prepare('SELECT id FROM users WHERE username = ?').get(newUsername);
-		if (existingUser) {
+// Demande de mise à jour de profil avec vérification
+
+fastify.put('/username', async (request, reply) => {
+	try {
+	  await request.jwtVerify();
+	  const userId = request.user.id;
+	  const { newUsername } = request.body;
+	
+	  if (!newUsername) {
+		return reply.code(400).send({ error: 'New username is required' });
+	  }
+	  
+	  const user = fastify.db.prepare('SELECT username FROM users WHERE id = ?').get(userId);
+	  if (!user) {
+		return reply.code(404).send({ error: 'User not found' });
+	  }
+	  
+	  if (newUsername === user.username) {
+		return reply.code(200).send({ message: 'Username is already set to this value' });
+	  }
+	  
+	  const usernameExists = fastify.db.prepare('SELECT id FROM users WHERE username = ?').get(newUsername);
+	  if (usernameExists) {
+		return reply.code(400).send({ error: 'Username already taken' });
+	  }
+	  
+	  fastify.db.prepare('UPDATE users SET username = ? WHERE id = ?').run(newUsername, userId);
+	  fastify.db.prepare('UPDATE friend SET username1 = ? WHERE userid1 = ?').run(newUsername, userId);
+	  fastify.db.prepare('UPDATE friend SET username2 = ? WHERE userid2 = ?').run(newUsername, userId);
+	  
+	  const updatedUser = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
+	  const token = fastify.jwt.sign({ id: updatedUser.id });
+	  
+	  return reply.code(200).send({ 
+		message: 'Username updated successfully', 
+		username: newUsername,
+		token 
+	  });
+	  
+	} catch (error) {
+	  console.error('Username update error:', error);
+	  return reply.code(500).send({ error: 'Internal server error', details: error.message });
+	}
+  });
+
+
+fastify.post('/update-request', async (request, reply) => {
+	try {
+	  await request.jwtVerify();
+	  const userId = request.user.id;
+	  const { newUsername, newEmail, currentPassword } = request.body;
+	  
+	  if (!newUsername && !newEmail && !request.body.newPassword) {
+		return reply.code(400).send({ error: 'At least one field to update is required' });
+	  }
+	  
+	  const user = fastify.db.prepare('SELECT username, email, password FROM users WHERE id = ?').get(userId);
+	  if (!user) {
+		return reply.code(404).send({ error: 'User not found' });
+	  }
+
+	  if (!currentPassword) {
+		return reply.code(400).send({ error: 'Current password is required for verification' });
+	  }
+	  
+	  const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+	  if (!isPasswordValid) {
+		return reply.code(401).send({ error: 'Current password is incorrect' });
+	  }
+	  
+	  if (newUsername && newUsername !== user.username) {
+		const usernameExists = fastify.db.prepare('SELECT id FROM users WHERE username = ?').get(newUsername);
+		if (usernameExists) {
 		  return reply.code(400).send({ error: 'Username already taken' });
 		}
-		
-		fastify.db.prepare('UPDATE users SET username = ? WHERE id = ?').run(newUsername, userId);
-		
-		const user = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
-		const token = fastify.jwt.sign({ id: user.id });
-		
-		reply.code(200).send({ message: 'Username updated successfully', token });
-	  });
+	  }
+	  
+	  if (newEmail && newEmail !== user.email) {
+		const emailExists = fastify.db.prepare('SELECT id FROM users WHERE email = ?').get(newEmail);
+		if (emailExists) {
+		  return reply.code(400).send({ error: 'Email already in use' });
+		}
+	  }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	  const verificationCode = crypto.randomInt(100000, 999999).toString();
 
-	// Post email then check if already user, if not, send verification code
-	fastify.post('/email/request', async (request, reply) => {
-	await request.jwtVerify();
-	const userId = request.user.id;
-	const { newEmail } = request.body;
-	
-	if (!newEmail) {
-		return reply.code(400).send({ error: 'New email is required' });
-	}
-	
-	const existingUser = fastify.db.prepare('SELECT id FROM users WHERE email = ?').get(newEmail);
-	if (existingUser) {
-		return reply.code(400).send({ error: 'Email already in use' });
-	}
-	
-	const verificationCode = crypto.randomInt(100000, 999999).toString();
-	
-	verificationCodes[userId] = {
-		type: 'email',
-		newEmail: newEmail,
+	  verificationCodes[userId] = {
+		type: 'profile_update',
 		code: verificationCode,
-		expiresAt: Date.now() + 10 * 60 * 1000 
-	};
-	
-	try {
+		updates: {
+		  username: newUsername || null,
+		  email: newEmail || null,
+		  password: request.body.newPassword || null
+		},
+		expiresAt: Date.now() + 10 * 60 * 1000
+	  };
+	  
+	  const recipientEmail = newEmail || user.email;
+
+	  try {
 		await transporter.sendMail({
-		from: `"Transcendence" <${process.env.SMTP_USER}>`,
-		to: newEmail,
-		subject: 'Email Change Verification Code',
-		text: `Your verification code to change your email is: ${verificationCode}. This code will expire in 10 minutes.`,
-		html: `<p>Your verification code to change your email is: <strong>${verificationCode}</strong></p><p>This code will expire in 10 minutes.</p>`
+		  from: `"Transcendence" <${process.env.EMAIL_MAIL}>`,
+		  to: recipientEmail,
+		  subject: 'Profile Update Verification Code',
+		  text: `Your verification code to update your profile is: ${verificationCode}. This code will expire in 10 minutes.`,
+		  html: `
+			<h2>Profile Update Request</h2>
+			<p>Your verification code to update your profile is: <strong>${verificationCode}</strong></p>
+			<p>This code will expire in 10 minutes.</p>
+			<p>Changes requested:</p>
+			<ul>
+			  ${newUsername ? `<li>Username: ${user.username} → ${newUsername}</li>` : ''}
+			  ${newEmail ? `<li>Email: ${user.email} → ${newEmail}</li>` : ''}
+			  ${request.body.newPassword ? '<li>Password: [updated]</li>' : ''}
+			</ul>
+		  `
 		});
 		
-		reply.code(200).send({ message: 'Verification code sent to new email' });
-	} catch (error) {
+		reply.code(200).send({ 
+		  message: 'Verification code sent',
+		  sentTo: recipientEmail 
+		});
+	  } catch (error) {
 		console.error('Error sending email:', error);
 		reply.code(500).send({ error: 'Failed to send verification email' });
+	  }
+	} catch (error) {
+	  console.error('Profile update request error:', error);
+	  reply.code(500).send({ error: 'Internal server error', details: error.message });
 	}
-	});
-
-	// Verify email with code
-	// Check if code is correct and not expired 
-	fastify.put('/email/verify', async (request, reply) => {
-		await request.jwtVerify();
-		const userId = request.user.id;
-		const { verificationCode } = request.body;
+  });
+  
+  fastify.put('/update-confirm', async (request, reply) => {
+	try {
+	  await request.jwtVerify();
+	  const userId = request.user.id;
+	  const { verificationCode } = request.body;
+	  
+	  if (!verificationCode) {
+		return reply.code(400).send({ error: 'Verification code is required' });
+	  }
+	  
+	  const storedVerification = verificationCodes[userId];
+	  if (!storedVerification || 
+		  storedVerification.type !== 'profile_update' || 
+		  storedVerification.expiresAt < Date.now()) {
+		return reply.code(400).send({ error: 'Invalid or expired verification code' });
+	  }
+	  
+	  if (storedVerification.code !== verificationCode) {
+		return reply.code(400).send({ error: 'Incorrect verification code' });
+	  }
+	  
+	  const updates = storedVerification.updates;
+	  let updateSQL = [];
+	  let updateParams = [];
+	  let updateMessages = [];
+	  
+	  if (updates.username) {
+		updateSQL.push('username = ?');
+		updateParams.push(updates.username);
+		updateMessages.push('Username updated');
+	  }
+	  
+	  if (updates.email) {
+		updateSQL.push('email = ?');
+		updateParams.push(updates.email);
+		updateMessages.push('Email updated');
+	  }
+	  
+	  if (updates.password) {
+		const hashedPassword = await bcrypt.hash(updates.password, 10);
+		updateSQL.push('password = ?');
+		updateParams.push(hashedPassword);
+		updateMessages.push('Password updated');
+	  }
+	  
+	  updateParams.push(userId);
+	  
+	  if (updateSQL.length > 0) {
+		fastify.db.prepare(`
+		  UPDATE users 
+		  SET ${updateSQL.join(', ')} 
+		  WHERE id = ?
+		`).run(...updateParams);
 		
-		if (!verificationCode) {
-		  return reply.code(400).send({ error: 'Verification code is required' });
+		let token = null;
+		if (updates.username || updates.email) {
+		  const updatedUser = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
+		  token = fastify.jwt.sign({ id: updatedUser.id });
 		}
-		
-		const storedVerification = verificationCodes[userId];
-		if (!storedVerification || storedVerification.type !== 'email' || storedVerification.expiresAt < Date.now()) {
-		  return reply.code(400).send({ error: 'Invalid or expired verification code' });
-		}
-		
-		if (storedVerification.code !== verificationCode) {
-		  return reply.code(400).send({ error: 'Incorrect verification code' });
-		}
-		
-		fastify.db.prepare('UPDATE users SET email = ? WHERE id = ?').run(storedVerification.newEmail, userId);
 		
 		delete verificationCodes[userId];
-
-		const user = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
-		const token = fastify.jwt.sign({ id: user.id });
 		
-		reply.code(200).send({ message: 'Email updated successfully', token });
-	  });
-	
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-	// Post new password and send code by mail
-	fastify.post('/password/request', async (request, reply) => {
-		await request.jwtVerify();
-		const userId = request.user.id;
-		const userEmail = request.user.email;
-		
-		const verificationCode = crypto.randomInt(100000, 999999).toString();
-
-		verificationCodes[userId] = {
-			type: 'password',
-			code: verificationCode,
-			expiresAt: Date.now() + 10 * 60 * 1000 
-		};
-		
-		try {
-		await transporter.sendMail({
-			from: `"Transcendence" <${process.env.SMTP_USER}>`,
-			to: userEmail,
-			subject: 'Password Change Verification Code',
-			text: `Your verification code to change your password is: ${verificationCode}. This code will expire in 10 minutes.`,
-			html: `<p>Your verification code to change your password is: <strong>${verificationCode}</strong></p><p>This code will expire in 10 minutes.</p>`
+		reply.code(200).send({ 
+		  message: 'Profile updated successfully', 
+		  updates: updateMessages.join(', '),
+		  token: token
 		});
-		
-		reply.code(200).send({ message: 'Verification code sent to your email' });
-		} catch (error) {
-			console.error('Error sending email:', error);
-			reply.code(500).send({ error: 'Failed to send verification email' });
-		}
-	});
-
-	// Check if code is correct and not expired
-	fastify.put('/password/verify', async (request, reply) => {
-		await request.jwtVerify();
-		const userId = request.user.id;
-		const { verificationCode, newPassword } = request.body;
-		
-		if (!verificationCode || !newPassword) {
-		  return reply.code(400).send({ error: 'Verification code and new password are required' });
-		}
-		
-		const storedVerification = verificationCodes[userId];
-		if (!storedVerification || storedVerification.type !== 'password' || storedVerification.expiresAt < Date.now()) {
-		  return reply.code(400).send({ error: 'Invalid or expired verification code' });
-		}
-		
-		if (storedVerification.code !== verificationCode) {
-		  return reply.code(400).send({ error: 'Incorrect verification code' });
-		}
-		
-		const hashedPassword = await bcrypt.hash(newPassword, 10);
-		
-		fastify.db.prepare('UPDATE users SET password = ? WHERE id = ?').run(hashedPassword, userId);
-		
-		delete verificationCodes[userId];
-		
-		reply.code(200).send({ message: 'Password updated successfully' });
-	  });
+	  } else {
+		reply.code(400).send({ error: 'No fields to update' });
+	  }
+	} catch (error) {
+	  console.error('Profile update confirmation error:', error);
+	  reply.code(500).send({ error: 'Failed to update profile', details: error.message });
+	}
+  });
 
 	
 	// Route pour uploader un avatar
@@ -210,11 +263,9 @@ async function settingsRoutes(fastify, options) {
 			return reply.code(400).send({ error: 'Invalid file type' });
 		}
 	
-		// Utilise le nom d'origine du fichier au lieu de le renommer
 		const originalFileName = request.file.originalname;
 		const newFilePath = path.join('uploads/avatars', originalFileName);
 	
-		// Si un fichier du même nom existe déjà, le supprimer d'abord
 		if (fs.existsSync(newFilePath)) {
 			fs.unlinkSync(newFilePath);
 		}

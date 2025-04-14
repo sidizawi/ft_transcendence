@@ -59,7 +59,7 @@ export class Friends {
   }
 
   private navigateToProfile(username: string) {
-    window.history.pushState(null, '', `/${username}`); //////// TO check
+    window.history.pushState(null, '', `/users/${username}`); //////// TO check
     const friendProfile = new FriendProfile(username, this.getFriendAvatar(username));
     const main = document.querySelector('main');
     if (main) {

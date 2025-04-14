@@ -1,17 +1,13 @@
 To Do:
 
 	FriendProfile page:
-		- URL !!!!@
-
-	Login page:
-		- 2FA Google
+		- URL !!!!@ /user/
 
 	LogUp page:
 		- Check robustesse mdp quand create pcq back non (?)
 
 	Settings page:
 		- Avatar visual
-		- (pas de settings si Google) -> juste avatar
 		- Pourquoi ca refresh pour aller vers profile
 		- Si username change en meme temps que email/mdp et mauvais code, si code ok apres, pb username deja change
 
@@ -59,3 +55,6 @@ To Do:
 
 '/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup'
 In case the URL doesn't start with '/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup' check that is it a username in database, if not 404, without changing the actual check
+
+
+//Google just en localhost -> a distance pb securite Google
