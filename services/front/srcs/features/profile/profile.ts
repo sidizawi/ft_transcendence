@@ -62,8 +62,8 @@ export class Profile {
   private async handle2FAToggle() {
     try {
       const result = await (this.user.twoFactorEnabled 
-        ? TwoFactorAuth.disable(this.user.id)
-        : TwoFactorAuth.enable(this.user.id));
+        ? TwoFactorAuth.disable()
+        : TwoFactorAuth.enable());
 
       if (result.success) {
         // Update 2FA status in memory and localStorage
@@ -136,12 +136,14 @@ export class Profile {
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                   </svg>
                 </a>
-                <button 
-                  id="toggle2FA"
-                  class="${this.get2FAButtonClasses()} text-white dark:text-white/90 px-4 py-2 rounded-lg transition-colors"
-                >
-                  ${this.user.twoFactorEnabled ? i18n.t('disable2FA') : i18n.t('enable2FA')}
-                </button>
+                ${!this.user.google ? `
+                  <button 
+                    id="toggle2FA"
+                    class="${this.get2FAButtonClasses()} text-white dark:text-white/90 px-4 py-2 rounded-lg transition-colors"
+                  >
+                    ${this.user.twoFactorEnabled ? i18n.t('disable2FA') : i18n.t('enable2FA')}
+                  </button>
+                ` : ''}
               </div>
             </div>
           </div>

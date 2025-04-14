@@ -129,6 +129,7 @@ export class Auth {
         email: profile.email,
         avatar: profile.avatar || '/img/default-avatar.jpg',
         twoFactorEnabled: profile.is_two_factor_enabled,
+        google: profile.google,
         stats: {
           pong: {
             wins: 0,
@@ -149,7 +150,7 @@ export class Auth {
       localStorage.setItem('user', JSON.stringify(user));
 
       if (user.twoFactorEnabled) {
-        const validated = await TwoFactorAuth.login2FA(user.id);
+        const validated = await TwoFactorAuth.login2FA();
         if (!validated.success) {
           TokenManager.removeToken();
           localStorage.removeItem('user');

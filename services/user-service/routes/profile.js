@@ -12,7 +12,8 @@ async function profileRoutes(fastify ,options) {
             username: userExists.username,
             email: userExists.email,
             avatar: userExists.avatar ? userExists.avatar : null,
-            is_two_factor_enabled: userExists.is_two_factor_enabled === 1 ? true : false 
+            is_two_factor_enabled: userExists.is_two_factor_enabled === 1 ? true : false,
+            google: userExists.google === 1 ? true : false,
         }
        
 console.log(userExists)

@@ -180,7 +180,9 @@ fastify.post('/google/callback', async (request, reply) => {
       audience: process.env.GOOGLE_CLIENT_ID
     });
     const payload = ticket.getPayload();
-    const { email, name } = payload;
+    const { email, name, picture } = payload;
+
+console.log(payload)
 
     let user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
     if (!user) {
@@ -193,8 +195,8 @@ fastify.post('/google/callback', async (request, reply) => {
         total_points: 0
       };
 
-      const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data, is_two_factor_enabled) VALUES (?, ?, ?, ?, ?)");
-      const result = stmt.run(name, email, hashedPassword, JSON.stringify(initialGameData), 0);
+      const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data, is_two_factor_enabled, avatar, google) VALUES (?, ?, ?, ?, ?, ?, ?)");
+      const result = stmt.run(name, email, hashedPassword, JSON.stringify(initialGameData), 0, picture, 1);
       user = { id: result.lastInsertRowid, username: name, email };
     }
 

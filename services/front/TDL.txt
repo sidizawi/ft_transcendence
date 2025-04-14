@@ -4,11 +4,10 @@ To Do:
 		- URL !!!!@
 
 	Login page:
-		- 2FA
+		- 2FA Google
 
 	LogUp page:
-		- pas 2FA quand Google
-		- Chek robustesse mdp quand create pca back non (?)
+		- Check robustesse mdp quand create pcq back non (?)
 
 	Settings page:
 		- Avatar visual
@@ -21,8 +20,6 @@ To Do:
 		- ADD Ajout message d'erreur
 		- switch to friends directory ?
 		- 
-
-	CHAT
 
 	PARTOUT:
 		- Quand server renvoit erreur meme si traitee dans le front -> console du navigateur renvoit ERREUR
@@ -58,52 +55,7 @@ To Do:
 
 
 
-- /profile (recuperation des datas du user connecte)
-	- Username
-	- Email
-	- Avatar
-	- 2FA
-	(enlever online)
-
-	classe friend enlever Id rajout online friend
-
-
-
 ---> /@username ou restrictions car username != profile et autre
 
 '/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup'
 In case the URL doesn't start with '/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup' check that is it a username in database, if not 404, without changing the actual check
-
-
-      const [friendsResponse, receivingResponse, sendingResponse, blockedResponse] = await Promise.all([
-        fetch(`${FRIEND_API_URL}/friendlist`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${TokenManager.getToken()}`
-          },
-          credentials: 'include'
-        })
-      ]);
-
-      if (!friendsResponse.ok) {
-        throw new Error('Failed to fetch friends list');
-      }
-
-      const friendsData = await friendsResponse.json();
-
-      const friends: Friend[] = [];
-      const currentUser = TokenManager.getUserFromToken();
-
-      // Add accepted friends
-      if (friendsData.friendData) {
-        friendsData.friendData.forEach((friend: any) => {
-          friends.push({
-            userid1: currentUser?.id || '',
-            userid2: friend.id || '',
-            username1: currentUser?.username || '',
-            username2: friend.username,
-            status: 'accepted',
-            avatar: friend.avatar
-          });
-        });
-      }

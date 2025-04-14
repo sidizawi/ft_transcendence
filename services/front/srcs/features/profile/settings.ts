@@ -45,9 +45,9 @@ export class Settings {
     const formData = new FormData(form);
 
     const username = formData.get('username') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
+    const email = !this.user.google ? formData.get('email') as string : this.user.email;
+    const password = !this.user.google ? formData.get('password') as string : '';
+    const confirmPassword = !this.user.google ? formData.get('confirmPassword') as string : '';
 
     try {
       const updates: Promise<boolean>[] = [];
@@ -56,15 +56,17 @@ export class Settings {
         updates.push(this.handleUsernameUpdate(username));
       }
       
-      if (email !== this.user.email) {
-        updates.push(this.handleEmailUpdate(email));
-      }
-      
-      if (password) {
-        if (password !== confirmPassword) {
-          throw new Error(i18n.t('passwordMismatch'));
+      if (!this.user.google) {
+        if (email !== this.user.email) {
+          updates.push(this.handleEmailUpdate(email));
         }
-        updates.push(this.handlePasswordUpdate(password));
+        
+        if (password) {
+          if (password !== confirmPassword) {
+            throw new Error(i18n.t('passwordMismatch'));
+          }
+          updates.push(this.handlePasswordUpdate(password));
+        }
       }
 
       if (updates.length > 0) {
@@ -83,10 +85,7 @@ export class Settings {
     try {
       const response = await fetch(`${USER_API_URL}/username`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
+        headers: TokenManager.getAuthHeaders(),
         body: JSON.stringify({ newUsername: username })
       });
 
@@ -116,10 +115,7 @@ export class Settings {
     try {
       const requestResponse = await fetch(`${USER_API_URL}/email/request`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
+        headers: TokenManager.getAuthHeaders(),
         body: JSON.stringify({ newEmail: email })
       });
 
@@ -145,10 +141,7 @@ export class Settings {
           try {
             const verifyResponse = await fetch(`${USER_API_URL}/email/verify`, {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TokenManager.getToken()}`
-              },
+              headers: TokenManager.getAuthHeaders(),
               body: JSON.stringify({ verificationCode: code })
             });
 
@@ -205,10 +198,7 @@ export class Settings {
     try {
       const requestResponse = await fetch(`${USER_API_URL}/password/request`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
+        headers: TokenManager.getAuthHeaders(),
         body: JSON.stringify({ newPassword: password })
       });
 
@@ -234,10 +224,7 @@ export class Settings {
           try {
             const verifyResponse = await fetch(`${USER_API_URL}/password/verify`, {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TokenManager.getToken()}`
-              },
+              headers: TokenManager.getAuthHeaders(),
               body: JSON.stringify({
                 verificationCode: code,
                 newPassword: password
@@ -348,10 +335,7 @@ export class Settings {
       try {
         const requestResponse = await fetch(`${USER_API_URL}/delete/request`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${TokenManager.getToken()}`
-          },
+          headers: TokenManager.getAuthHeaders(),
           body: JSON.stringify({ password: passwordInput.value })
         });
 
@@ -432,10 +416,7 @@ export class Settings {
 
             const deleteResponse = await fetch(`${USER_API_URL}/delete/confirm`, {
               method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TokenManager.getToken()}`
-              },
+              headers: TokenManager.getAuthHeaders(),
               body: JSON.stringify({ verificationCode })
             });
 
@@ -561,44 +542,56 @@ export class Settings {
                   />
                 </div>
 
-                <div>
-                  <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    ${i18n.t('email')}
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="${this.user.email}"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+                ${!this.user.google ? `
+                  <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      ${i18n.t('email')}
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      placeholder="${this.user.email}"
+                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
 
-                <div>
-                  <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    ${i18n.t('newPassword')}
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="••••••••"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      ${i18n.t('newPassword')}
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      placeholder="••••••••"
+                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
 
-                <div>
-                  <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    ${i18n.t('confirmPassword')}
-                  </label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    placeholder="••••••••"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      ${i18n.t('confirmPassword')}
+                    </label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                ` : `
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      ${i18n.t('email')}
+                    </label>
+                    <div class="mt-1 block w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">
+                      ${this.user.email}
+                      <span class="ml-2 text-xs">(${i18n.t('googleAccount')})</span>
+                    </div>
+                  </div>
+                `}
 
                 <div class="flex flex-col space-y-4 pt-6">
                   <button
@@ -644,19 +637,21 @@ export class Settings {
     deleteAccountBtn?.addEventListener('click', () => this.handleDeleteAccount());
 
     // Add password confirmation validation
-    const validatePasswords = () => {
-      if (passwordInput.value && confirmPasswordInput.value) {
-        if (passwordInput.value !== confirmPasswordInput.value) {
-          confirmPasswordInput.setCustomValidity(i18n.t('passwordMismatch'));
+    if (!this.user.google) {
+      const validatePasswords = () => {
+        if (passwordInput.value && confirmPasswordInput.value) {
+          if (passwordInput.value !== confirmPasswordInput.value) {
+            confirmPasswordInput.setCustomValidity(i18n.t('passwordMismatch'));
+          } else {
+            confirmPasswordInput.setCustomValidity('');
+          }
         } else {
           confirmPasswordInput.setCustomValidity('');
         }
-      } else {
-        confirmPasswordInput.setCustomValidity('');
-      }
-    };
+      };
 
-    passwordInput?.addEventListener('input', validatePasswords);
-    confirmPasswordInput?.addEventListener('input', validatePasswords);
+      passwordInput?.addEventListener('input', validatePasswords);
+      confirmPasswordInput?.addEventListener('input', validatePasswords);
+    }
   }
 }
