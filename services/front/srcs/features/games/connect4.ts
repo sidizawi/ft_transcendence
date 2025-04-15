@@ -19,6 +19,8 @@ export class Connect4 {
   private user : User | null;
   private room: string | null;
   private ws : WebSocket | null;
+  private opponent: string | null;
+  private opponentColor: string | null;
   private data = new Array(42).fill('X');
   private columns = new Array(7).fill(5);
   private canvas = null as HTMLCanvasElement | null;
@@ -29,6 +31,8 @@ export class Connect4 {
     const urlParams = new URLSearchParams(window.location.search);
     this.room = urlParams.get("room");
     this.ws = null;
+    this.opponent = null;
+    this.opponentColor = null;
     this.user = TokenManager.getUserFromToken();
   }
 
@@ -163,10 +167,9 @@ export class Connect4 {
         this.ws?.send(JSON.stringify({
           mode: "play",
           col,
-          color:  this.player == this.red ? 'R' : 'Y',
+          color: this.player == this.red ? 'R' : 'Y',
           room: this.room,
           id: this.user?.id,
-          username: this.user?.username
         }));
       }
       this.animateCoin(col, this.columns[col]);
@@ -253,8 +256,13 @@ export class Connect4 {
         ModalManager.openModal(i18n.t('games.connect4.title'), `here is the link to the game: http://${window.location.hostname}:8000/connect4?room=${message.room}`);
       } else if (message.mode == "connected") {
         ModalManager.openModal(i18n.t('games.connect4.title'), `you play ${message.color == 'R' ? 'first with red' : 'second with yellow'}`);
+        if (type == "playVsAI") {
+          this.room = message.room;
+        }
         this.canPlay = message.color == 'R';
         this.myTurn = this.canPlay;
+        this.opponent = message.opponent;
+        this.opponentColor = message.color == 'R' ? "yellow" : "red";
         const main = document.querySelector("main");
         main!.innerHTML = this.renderCanvas();
         this.setupCanvasEventListener();
@@ -270,6 +278,9 @@ export class Connect4 {
       } else if (message.mode == "tie") {
         ModalManager.openModal(i18n.t('games.connect4.title'), "No winner this time, it's a tie!");
         this.renderBackBtn();
+      } else if (message.mode == "close") {
+        this.rerender();
+        ModalManager.openModal(i18n.t('games.connect4.title'), message.message);
       }
     }
 
@@ -295,6 +306,24 @@ export class Connect4 {
   }
 
   renderCanvas(): string {
+    if (this.online) {
+      // todo: check for the width
+      return `
+        <div class="flex flex-col items-center justify-center h-screen">
+          <div class="mb-1 flex" style="width: 700px;">
+            <div class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              <strong>${this.user?.username}</strong>  -  <p>${this.opponentColor == 'red' ? 'yellow' : 'red'}</p>
+            </div>
+            <div class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors">
+              <strong>${this.opponent}</strong>  -  <p>${this.opponentColor}</p>
+            </div>
+          </div>
+          <canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>
+          <div class="mt-4 flex justify-center" id="backBtn">
+          </div>
+        </div>
+      `;      
+    }
     return `
       <div class="flex flex-col items-center justify-center h-screen">
         <canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>
@@ -307,6 +336,7 @@ export class Connect4 {
   renderBackBtn() {
     const backBtn = document.getElementById("backBtn");
 
+    // todo: check SAP, just go back, but remove data
     backBtn!.innerHTML = `
       <a 
         href="/connect4"

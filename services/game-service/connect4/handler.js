@@ -2,10 +2,10 @@ let ROWS = 6;
 let COLS = 7;
 
 let rooms = new Map();
-let links = new Map();
 
 function getRoomId(fastify, data) {
-	const userGames = fastify.db.prepare("SELECT COUNT(*) FROM game WHERE playerid_1 = ? OR playerid_2 = ?").get(data.id, data.id);
+	const userGames = fastify.db.prepare("SELECT COUNT(*) AS count FROM game WHERE playerid_1 = ? OR playerid_2 = ?").get(data.id, data.id);
+	console.log("user games", userGames);
 	return `${data.id}-game-${userGames.count || 0}`;
 }
 
@@ -19,17 +19,25 @@ function handleNewConn(fastify, data, socket) {
 			}));
 			return ;
 		}
+		if (room.player2Username) {
+			socket.send(JSON.stringify({
+				mode: "close",
+				message: "can't play in this room"
+			}))
+		}
 		room.player2Username = data.username;
 		room.playerid_2 = data.id;
 		room.player2ws = socket;
 		const color = ['R', 'Y'][Math.floor(Math.random() * 2)];
 		socket.send(JSON.stringify({
 			mode: "connected",
-			color: color
+			color: color,
+			opponent: room.player1Username
 		}));
 		room.player1ws.send(JSON.stringify({
 			mode: "connected",
-			color: color == 'R' ? 'Y' : 'R'
+			color: color == 'R' ? 'Y' : 'R',
+			opponent: room.player2Username
 		}))
 		return ;
 	}
@@ -43,7 +51,17 @@ function handleNewConn(fastify, data, socket) {
 		player2ws: null,
 		columns: new Array(7).fill(5),
 		data: new Array(42).fill('X'),
+		type: data.type,
 	});
+	if (data.type == "playVsAI") {
+		socket.send(JSON.stringify({
+			mode: "connected",
+			color: 'R',
+			opponent: "AI",
+			room: roomId
+		}))
+		return ;
+	}
 	socket.send(JSON.stringify({
 		mode: "created",
 		room: roomId
@@ -116,27 +134,62 @@ function   checkWin(data) {
 	return (false);
 }
 
+function playAI(fastify, room) {
+	let col = Math.floor(Math.random() * COLS);
+
+	while (room.columns[col] < 0) {
+		col = Math.floor(Math.random() * COLS);
+	}
+
+	let row = room.columns[col];
+	room.data[row * COLS + col] = 'Y';
+	room.columns[col]--;
+
+	room.player1ws.send(JSON.stringify({
+		mode: "played",
+		col
+	}));
+
+	if (checkWin(room.data)) {
+		room.player1ws.send(JSON.stringify({
+			mode: "win",
+			winner: false
+		}));
+		return ;
+	}
+
+	if (room.data.every((elem) => elem != 'X')) {
+		room.player1ws.send(JSON.stringify({
+			mode: "tie",
+		}));
+		return ;
+	}
+}
+
 function handlePlay(fastify, data) {
 	let room = rooms.get(data.room);
-
-	console.log("room keys", Object.keys(room));
 
 	let row = room.columns[data.col];
 	room.data[row * COLS + data.col] = data.color;
 	room.columns[data.col]--;
 
+	// todo : check how to save data when playing against an AI (maybe the first user is the AI)
 	if (checkWin(room.data)) {
 		room.player1ws.send(JSON.stringify({
 			mode: "win",
 			winner: data.id == room.playerid_1
 		}));
 
+		if (room.type == "playVsAI") {
+			// todo: save to db
+			return ;
+		}
+
 		room.player2ws.send(JSON.stringify({
 			mode: "win",
 			winner: data.id == room.playerid_2
 		}));
 
-		// tood: save to db
 		let tmp = fastify.db.prepare("INSERT INTO game \
 			(playerid_1, playerid_2, username_1, username_2, game_type, score_1, score_2, player_win, player_lost) \
 			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
@@ -176,6 +229,11 @@ function handlePlay(fastify, data) {
 			mode: "tie",
 		}));
 
+		if (room.type == "playVsAI") {
+			// todo: save to db
+			return ;
+		}
+
 		room.player2ws.send(JSON.stringify({
 			mode: "tie",
 		}));
@@ -200,6 +258,12 @@ function handlePlay(fastify, data) {
 		return ;
 	}
 
+	if (room.type == "playVsAI") {
+		setTimeout(() => {
+			playAI(fastify, room);
+		}, 2000);
+		return ;
+	}
 
 	if (room.playerid_1 == data.id) {
 		room.player2ws.send(JSON.stringify({
