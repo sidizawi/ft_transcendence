@@ -172,29 +172,39 @@ fastify.put('/username', async (request, reply) => {
 		return reply.code(400).send({ error: 'Verification code is required' });
 	  }
 	  
-	  const storedVerification = verificationCodes[userId];
-	  if (!storedVerification || 
-		  storedVerification.type !== 'profile_update' || 
-		  storedVerification.expiresAt < Date.now()) {
-		return reply.code(400).send({ error: 'Invalid or expired verification code' });
+	  const userVerification = verificationCodes[userId];
+	  if (!userVerification || userVerification.type !== 'profile_update') {
+		return reply.code(400).send({ error: 'No pending update request or invalid verification type' });
 	  }
 	  
-	  if (storedVerification.code !== verificationCode) {
-		return reply.code(400).send({ error: 'Incorrect verification code' });
+	  if (userVerification.code !== verificationCode) {
+		return reply.code(401).send({ error: 'Invalid verification code' });
 	  }
 	  
-	  const updates = storedVerification.updates;
-	  let updateSQL = [];
-	  let updateParams = [];
-	  let updateMessages = [];
+	  if (userVerification.expiresAt < Date.now()) {
+		delete verificationCodes[userId];
+		return reply.code(401).send({ error: 'Verification code has expired' });
+	  }
 	  
-	  if (updates.username) {
+	  const updates = userVerification.updates;
+	  const updateSQL = [];
+	  const updateParams = [];
+	  const updateMessages = [];
+	  
+	  const currentUser = fastify.db.prepare('SELECT username, email FROM users WHERE id = ?').get(userId);
+	  if (!currentUser) {
+		return reply.code(404).send({ error: 'User not found' });
+	  }
+	  
+	  const oldUsername = currentUser.username;
+	  
+	  if (updates.username && updates.username !== oldUsername) {
 		updateSQL.push('username = ?');
 		updateParams.push(updates.username);
 		updateMessages.push('Username updated');
 	  }
 	  
-	  if (updates.email) {
+	  if (updates.email && updates.email !== currentUser.email) {
 		updateSQL.push('email = ?');
 		updateParams.push(updates.email);
 		updateMessages.push('Email updated');
@@ -210,31 +220,57 @@ fastify.put('/username', async (request, reply) => {
 	  updateParams.push(userId);
 	  
 	  if (updateSQL.length > 0) {
-		fastify.db.prepare(`
-		  UPDATE users 
-		  SET ${updateSQL.join(', ')} 
-		  WHERE id = ?
-		`).run(...updateParams);
+		const transaction = fastify.db.transaction(() => {
+		  fastify.db.prepare(`
+			UPDATE users 
+			SET ${updateSQL.join(', ')} 
+			WHERE id = ?
+		  `).run(...updateParams);
+		  
+		  if (updates.username && updates.username !== oldUsername) {
+			fastify.db.prepare('UPDATE friend SET username1 = ? WHERE userid1 = ? AND username1 = ?')
+			  .run(updates.username, userId, oldUsername);
+			
+			fastify.db.prepare('UPDATE friend SET username2 = ? WHERE userid2 = ? AND username2 = ?')
+			  .run(updates.username, userId, oldUsername);
+			
+			fastify.db.prepare('UPDATE game SET username_1 = ? WHERE playerid_1 = ? AND username_1 = ?')
+			  .run(updates.username, userId, oldUsername);
+			
+			fastify.db.prepare('UPDATE game SET username_2 = ? WHERE playerid_2 = ? AND username_2 = ?')
+			  .run(updates.username, userId, oldUsername);
+			
+			fastify.db.prepare('UPDATE game SET player_win = ? WHERE player_win = ? AND (playerid_1 = ? OR playerid_2 = ?)')
+			  .run(updates.username, oldUsername, userId, userId);
+			
+			fastify.db.prepare('UPDATE game SET player_lost = ? WHERE player_lost = ? AND (playerid_1 = ? OR playerid_2 = ?)')
+			  .run(updates.username, oldUsername, userId, userId);
+		  }
+		});
+		
+		transaction();
 		
 		let token = null;
 		if (updates.username || updates.email) {
 		  const updatedUser = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
-		  token = fastify.jwt.sign({ id: updatedUser.id });
+		  token = fastify.jwt.sign({ 
+			id: updatedUser.id
+		  });
 		}
 		
 		delete verificationCodes[userId];
 		
-		reply.code(200).send({ 
+		return reply.code(200).send({ 
 		  message: 'Profile updated successfully', 
 		  updates: updateMessages.join(', '),
 		  token: token
 		});
 	  } else {
-		reply.code(400).send({ error: 'No fields to update' });
+		return reply.code(400).send({ error: 'No fields to update' });
 	  }
 	} catch (error) {
 	  console.error('Profile update confirmation error:', error);
-	  reply.code(500).send({ error: 'Failed to update profile', details: error.message });
+	  return reply.code(500).send({ error: 'Failed to update profile', details: error.message });
 	}
   });
 
