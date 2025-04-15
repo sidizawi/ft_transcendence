@@ -17,7 +17,7 @@ all: build up
 build:
 	mkdir -p shared/avatars
 	chmod 777 shared/avatars
-	$(DOCKER_COMPOSE) build --no-cache
+	$(DOCKER_COMPOSE) build
 
 # Lancer tous les services
 up:

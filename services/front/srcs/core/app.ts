@@ -138,6 +138,8 @@ export class TranscendenceApp {
         <main id="main-content" class="container mx-auto px-4 py-8 flex-grow">
         </main>
 
+        <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"></div>
+
         ${this.footer.render()}
       </div>
     `;

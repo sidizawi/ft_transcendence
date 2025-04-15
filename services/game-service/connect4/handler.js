@@ -19,10 +19,10 @@ function handleNewConn(fastify, data, socket) {
 			}));
 			return ;
 		}
+		room.player2Username = data.username;
 		room.playerid_2 = data.id;
 		room.player2ws = socket;
 		const color = ['R', 'Y'][Math.floor(Math.random() * 2)];
-		console.log("color", color);
 		socket.send(JSON.stringify({
 			mode: "connected",
 			color: color
@@ -36,7 +36,9 @@ function handleNewConn(fastify, data, socket) {
 	const roomId = getRoomId(fastify, data);
 	rooms.set(roomId, {
 		playerid_1: data.id,
+		player1Username: data.username,
 		playerid_2: null,
+		player2Username: null,
 		player1ws: socket,
 		player2ws: null,
 		columns: new Array(7).fill(5),
@@ -117,17 +119,11 @@ function   checkWin(data) {
 function handlePlay(fastify, data) {
 	let room = rooms.get(data.room);
 
-	if (room.columns[data.col] < 0) {
-		// todo: send error
-		return ;
-	}
+	console.log("room keys", Object.keys(room));
+
 	let row = room.columns[data.col];
 	room.data[row * COLS + data.col] = data.color;
 	room.columns[data.col]--;
-
-	for (let i = 0; i < ROWS; i++) {
-		console.log(room.data.slice(i * COLS, i * COLS + COLS).join(" "));
-	}
 
 	if (checkWin(room.data)) {
 		room.player1ws.send(JSON.stringify({
@@ -141,9 +137,69 @@ function handlePlay(fastify, data) {
 		}));
 
 		// tood: save to db
+		let tmp = fastify.db.prepare("INSERT INTO game \
+			(playerid_1, playerid_2, username_1, username_2, game_type, score_1, score_2, player_win, player_lost) \
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		
+		if (data.id == room.playerid_1) {
+			tmp.run(
+				room.playerid_1, 
+				room.playerid_2, 
+				room.player1Username, 
+				room.player2Username, 
+				"p4",
+				1,
+				0,
+				room.player1Username,
+				room.player2Username,
+			);
+		} else {
+			tmp.run(
+				room.playerid_1, 
+				room.playerid_2, 
+				room.player1Username, 
+				room.player2Username, 
+				"p4",
+				0,
+				1,
+				room.player2Username,
+				room.player1Username,
+			);
+		}
 		rooms.delete(data.room);
 		return ;
 	}
+
+	if (room.data.every((elem) => elem != 'X')) {
+
+		room.player1ws.send(JSON.stringify({
+			mode: "tie",
+		}));
+
+		room.player2ws.send(JSON.stringify({
+			mode: "tie",
+		}));
+
+		let tmp = fastify.db.prepare("INSERT INTO game \
+			(playerid_1, playerid_2, username_1, username_2, game_type, score_1, score_2, player_win, player_lost) \
+			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+		// todo: to check
+		tmp.run(
+			room.playerid_1, 
+			room.playerid_2, 
+			room.player1Username, 
+			room.player2Username, 
+			"p4",
+			0,
+			0,
+			room.player1Username,
+			room.player2Username,
+		);
+
+		rooms.delete(data.room);
+		return ;
+	}
+
 
 	if (room.playerid_1 == data.id) {
 		room.player2ws.send(JSON.stringify({
@@ -171,7 +227,6 @@ export const connect4Handler = async (fastify) => {
 		socket.on("message", (message) => {
 			const data = JSON.parse(message.toString());
 
-			console.log("received", data);
 			if (data.mode == "new") {
 				handleNewConn(fastify, data, socket);
 			} else if (data.mode == "play") {

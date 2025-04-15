@@ -30,11 +30,8 @@ To Do:
 		- get all messages on connection
 
 	connect 4:
-		- add a pop up on winning
-		- add websocket
 		- create AI algo
 		- add timer
-		- check match null
 		- vusu coin derriere le front
 
 	pong:

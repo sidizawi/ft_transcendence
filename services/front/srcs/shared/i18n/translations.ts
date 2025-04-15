@@ -23,6 +23,7 @@ export const translations = {
         bestStreak: 'Beste Serie',
         recentGames: 'Letzte Spiele'
       },
+      close: "schließen",
       enable2FA: '2FA aktivieren',
       disable2FA: '2FA deaktivieren',
       enable2FATitle: '2FA Aktivierung',
@@ -152,6 +153,7 @@ export const translations = {
         bestStreak: 'Best Streak',
         recentGames: 'Recent Games'
       },
+      close: "Close",
       enable2FA: 'Enable 2FA',
       disable2FA: 'Disable 2FA',
       enable2FATitle: 'Enable Two-Factor Authentication',
@@ -279,6 +281,7 @@ export const translations = {
         bestStreak: 'Meilleure série',
         recentGames: 'Parties récentes'
       },
+      close: "fermer",
       enable2FA: 'Activer 2FA',
       disable2FA: 'Désactiver 2FA',
       enable2FATitle: 'Activer l\'authentification à deux facteurs',
@@ -408,6 +411,7 @@ export const translations = {
         bestStreak: 'Beste Reeks',
         recentGames: 'Recente Spellen'
       },
+      close: "sluiten",
       enable2FA: '2FA inschakelen',
       disable2FA: '2FA uitschakelen',
       enable2FATitle: 'Tweefactorauthenticatie inschakelen',
