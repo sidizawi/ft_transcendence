@@ -85,28 +85,19 @@ fastify.put('/username', async (request, reply) => {
   });
 
 
-fastify.post('/update-request', async (request, reply) => {
+  fastify.post('/update-request', async (request, reply) => {
 	try {
 	  await request.jwtVerify();
 	  const userId = request.user.id;
-	  const { newUsername, newEmail, currentPassword } = request.body;
+	  const { newUsername, newEmail, newPassword } = request.body;
 	  
-	  if (!newUsername && !newEmail && !request.body.newPassword) {
+	  if (!newUsername && !newEmail && !newPassword) {
 		return reply.code(400).send({ error: 'At least one field to update is required' });
 	  }
 	  
-	  const user = fastify.db.prepare('SELECT username, email, password FROM users WHERE id = ?').get(userId);
+	  const user = fastify.db.prepare('SELECT username, email FROM users WHERE id = ?').get(userId);
 	  if (!user) {
 		return reply.code(404).send({ error: 'User not found' });
-	  }
-
-	  if (!currentPassword) {
-		return reply.code(400).send({ error: 'Current password is required for verification' });
-	  }
-	  
-	  const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-	  if (!isPasswordValid) {
-		return reply.code(401).send({ error: 'Current password is incorrect' });
 	  }
 	  
 	  if (newUsername && newUsername !== user.username) {
@@ -122,22 +113,22 @@ fastify.post('/update-request', async (request, reply) => {
 		  return reply.code(400).send({ error: 'Email already in use' });
 		}
 	  }
-
+  
 	  const verificationCode = crypto.randomInt(100000, 999999).toString();
-
+  
 	  verificationCodes[userId] = {
 		type: 'profile_update',
 		code: verificationCode,
 		updates: {
 		  username: newUsername || null,
 		  email: newEmail || null,
-		  password: request.body.newPassword || null
+		  password: newPassword || null
 		},
 		expiresAt: Date.now() + 10 * 60 * 1000
 	  };
 	  
 	  const recipientEmail = newEmail || user.email;
-
+  
 	  try {
 		await transporter.sendMail({
 		  from: `"Transcendence" <${process.env.EMAIL_MAIL}>`,
@@ -152,7 +143,7 @@ fastify.post('/update-request', async (request, reply) => {
 			<ul>
 			  ${newUsername ? `<li>Username: ${user.username} → ${newUsername}</li>` : ''}
 			  ${newEmail ? `<li>Email: ${user.email} → ${newEmail}</li>` : ''}
-			  ${request.body.newPassword ? '<li>Password: [updated]</li>' : ''}
+			  ${newPassword ? '<li>Password: [Password will be updated]</li>' : ''}
 			</ul>
 		  `
 		});
