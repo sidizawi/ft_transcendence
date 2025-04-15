@@ -14,7 +14,19 @@ async function statsRoutes(fastify, options) {
 		await request.jwtVerify();
 
 		const userId = request.user.id;
-		const userName = request.user.username;
+
+		const userExist = fastify.db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+		if (!userExist) {
+			return reply.code(404).send({ error: 'User not found' });
+		}
+		const userName = userExist.username;
+		if (!opponent || !score || !game) {
+			return reply.code(400).send({ error: 'Missing required fields' });
+		}
+
+		if (game !== 'pong' && game !== 'p4') {
+			return reply.code(400).send({ error: 'Invalid game type' });
+		}
 
 		const opponentExist = fastify.db.prepare('SELECT * FROM users WHERE username = ?').get(opponent);
 		if (!opponentExist) {
