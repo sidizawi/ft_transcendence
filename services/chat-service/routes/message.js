@@ -41,11 +41,11 @@ function handleNewConn(fastify, data, socket) {
 
     const messages = dbMessages.map((mess) => {
         return {
-            text: mess.content,
+            text: typeof mess.content === 'string' ? sanitizeInput(mess.content) : mess.content,
             sender: mess.sender_id == chatRoom.user1Id ? chatRoom.user1 : chatRoom.user2,
             timestamp: mess.timestamp
         };
-    })
+    });
 
     socket.send(JSON.stringify({
         type: "messages",
@@ -81,6 +81,10 @@ function handleNewMessage(fastify, data) {
     let id, chatRoom;
     let id1 = `${data.user}-${data.friend}`;
     let id2 = `${data.friend}-${data.user}`;
+
+    if (data.text && typeof data.text === 'string') {
+        data.text = sanitizeInput(data.text);
+    }
 
     if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
         id = id1;
