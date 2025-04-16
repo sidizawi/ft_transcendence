@@ -1,0 +1,281 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base font settings */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
+
+  /* 4K Resolution Styles */
+  @screen 5xl {
+    html {
+      font-size: 24px; /* Base font size for 4K */
+    }
+  }
+
+  body:not(.dark) {
+    background-color: theme('colors.cream');
+  }
+
+  .bg-white:not(.menu-box *) {
+    @apply bg-orange-lightest;
+  }
+
+  .text-gray-900:not(.menu-box *) {
+    @apply text-orange-darker;
+  }
+
+  .text-gray-600:not(.menu-box *) {
+    @apply text-orange-darker/80;
+  }
+
+  .text-gray-700:not(.menu-box *) {
+    @apply text-orange-darker;
+  }
+
+  .border-gray-300:not(.menu-box *) {
+    @apply border-orange-light;
+  }
+
+  .bg-gray-50:not(.menu-box *) {
+    @apply bg-orange-lighter;
+  }
+
+  .bg-gray-100:not(.menu-box *) {
+    @apply bg-orange-lighter;
+  }
+
+  /* Dark mode overrides */
+  .dark body {
+    @apply bg-forest-darkest;
+  }
+
+  .dark .bg-gray-800:not(.menu-box *) {
+    @apply bg-forest-darker;
+  }
+
+  .dark .bg-gray-700:not(.menu-box *) {
+    @apply bg-forest;
+  }
+
+  .dark .bg-gray-900:not(.menu-box *) {
+    @apply bg-forest-darkest;
+  }
+
+  .dark .text-white:not(.menu-box *) {
+    @apply text-nature-lightest;
+  }
+
+  .dark .text-gray-300:not(.menu-box *) {
+    @apply text-nature-light;
+  }
+
+  .dark .text-gray-400:not(.menu-box *) {
+    @apply text-nature;
+  }
+
+  .dark .border-gray-600:not(.menu-box *) {
+    @apply border-forest;
+  }
+
+  .dark .border-gray-700:not(.menu-box *) {
+    @apply border-forest-darker;
+  }
+}
+
+/* Tab Transitions */
+.tab-indicator {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: left;
+}
+
+.tab-button {
+  transition: color 0.3s ease;
+}
+
+/* Google Sign-In Button Override */
+#google-signin-button {
+  @apply flex justify-center items-center w-full;
+}
+
+#google-signin-button > div {
+  @apply !w-full sm:!w-[280px] md:!w-[280px] !mx-auto max-w-[90%];
+}
+
+#google-signin-button div[role="button"] {
+  @apply !bg-orange dark:!bg-nature !text-white dark:!text-nature-lightest transition-colors !border-2 !border-orange/20 dark:!border-nature/20 !shadow-none !rounded-full !h-11;
+}
+
+#google-signin-button div[role="button"]:hover {
+  @apply !bg-orange-darker dark:!bg-nature/90;
+}
+
+#google-signin-button div[role="button"] > div {
+  @apply !px-4;
+}
+
+#google-signin-button div[role="button"] > div > span {
+  @apply !font-sans !text-base !font-medium;
+}
+
+#google-signin-button div[role="button"] > div > div {
+  @apply !mr-3;
+}
+
+/* Menu Overlay */
+#menu-overlay {
+  backdrop-filter: blur(5px);
+  transition: visibility 0.3s, opacity 0.3s;
+  visibility: hidden;
+  opacity: 0;
+}
+
+#menu-overlay.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* Menu Box */
+.menu-box {
+  @apply fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 p-4 sm:p-6 w-[min(90vw,360px)] space-y-3 sm:space-y-4;
+}
+
+/* 4K Menu Box */
+.5xl\:menu-box {
+  @apply w-[min(90vw,720px)] p-4k-4 space-y-4k-4;
+}
+
+/* Menu Links */
+.menu-box a {
+  @apply block text-center font-bold py-3 sm:py-3.5 px-6 sm:px-8 rounded-lg transform transition-all duration-200 shadow-lg min-w-[200px] text-sm sm:text-base;
+}
+
+/* 4K Menu Links */
+.5xl\:menu-box a {
+  @apply py-4k-2 px-4k-8 min-w-[400px] text-4k-base rounded-4k;
+}
+
+.menu-box a:hover {
+  @apply scale-[1.02] opacity-90;
+}
+
+/* Menu Link Colors - Using theme palette in gradient order (darkest to lightest) */
+.menu-box a:nth-child(1) {
+  @apply bg-orange-darker text-white hover:bg-orange-darker/90 dark:bg-forest-darkest dark:text-nature-lightest dark:hover:bg-forest-darkest/90;
+}
+
+.menu-box a:nth-child(2) {
+  @apply bg-orange text-white hover:bg-orange/90 dark:bg-forest-darker dark:text-nature-lightest dark:hover:bg-forest-darker/90;
+}
+
+.menu-box a:nth-child(3) {
+  @apply bg-orange-light text-white hover:bg-orange-light/90 dark:bg-forest dark:text-nature-lightest dark:hover:bg-forest/90;
+}
+
+.menu-box a:nth-child(4) {
+  @apply bg-orange-lighter text-orange-darker hover:bg-orange-lighter/90 dark:bg-nature dark:text-nature-lightest dark:hover:bg-nature/90;
+}
+
+.menu-box a:nth-child(5) {
+  @apply bg-orange-lightest text-orange-darker hover:bg-orange-lightest/90 dark:bg-nature-light dark:text-white dark:hover:bg-nature-light/90;
+}
+
+/* Form Inputs */
+input {
+  @apply text-base sm:text-lg;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Touch-friendly buttons */
+button {
+  @apply select-none touch-manipulation;
+}
+
+/* Prevent text selection on interactive elements */
+.no-select {
+  @apply select-none;
+}
+
+/* Better tap targets for mobile */
+.tap-target {
+  @apply min-h-[44px] min-w-[44px];
+}
+
+/* 4K tap targets */
+.5xl\:tap-target {
+  @apply min-h-4k-touch min-w-4k-touch;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Prevent iOS zoom on input focus */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Responsive container padding */
+.container {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+/* 4K container padding */
+.5xl\:container {
+  @apply px-4k-8 max-w-4k mx-auto;
+}
+
+/* Responsive text sizes */
+h1 {
+  @apply text-2xl sm:text-3xl md:text-4xl;
+}
+
+h2 {
+  @apply text-xl sm:text-2xl md:text-3xl;
+}
+
+/* 4K text sizes */
+.5xl\:h1 {
+  @apply text-4k-4xl;
+}
+
+.5xl\:h2 {
+  @apply text-4k-3xl;
+}
+
+.5xl\:h3 {
+  @apply text-4k-2xl;
+}
+
+.5xl\:p {
+  @apply text-4k-base;
+}
+
+/* Better touch feedback */
+@media (hover: none) {
+  .menu-box a:active,
+  button:active {
+    @apply opacity-70 transform scale-95;
+  }
+}

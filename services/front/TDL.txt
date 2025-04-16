@@ -1,0 +1,78 @@
+To Do:
+
+	FriendProfile page:
+		- URL !!!!@ /users/
+
+	LogUp page:
+		- Check robustesse mdp quand create pcq back non (?)
+
+	Settings page:
+		- Avatar visual IDEM dans users/:username -> pb avec /../ -> check app.ts
+		- changer window.href.location ----> refresh pour rediriger
+		- ATTENTION mail de verif pas envoye au bon (new et pas ancien)
+		- faire sauter page query (chgt d'une data) dans historique
+		- ok si meme mdp????
+
+	Friends page:
+		- Search barre -> API ou fetch dymamique -> web socket? :(((
+		- ADD Ajout message d'erreur
+		- switch to friends directory ?
+		- 
+
+	PARTOUT:
+		- Quand server renvoit erreur meme si traitee dans le front -> console du navigateur renvoit ERREUR
+		- quand trop de retour supprime historique???????
+	
+	Visuel:
+		-Profile page:
+			- Game Tab
+		-Footer:
+			- Names (?)
+		- Header:
+			- Fixed or moving (?)
+		-Random Page:
+			- SCROLL ?????
+		- Other:
+			- enlever le hover 2FA quand code pas entier?
+			- Colour for black texts in light mode (?)
+			- Back buttons
+			- SVG friendsProfile.ts
+			- ADD/DELETE colours in Dark Mode
+			- Change colour Dark Mode (?)
+
+
+
+	Functionnality to check at the END:
+		- Traductions
+		- Browsers Compatibility
+		- Accessibility (?)
+		- SSR (?)
+		- when reload on page it should load that page: /profile and reload => go to profile, not home
+
+	Files:
+		- Clean up unused datas
+
+	connect 4:
+		- create AI algo
+		- add timer
+		- vusu coin derriere le front
+
+	pong:
+		- check if the websocket is closed
+
+      let url = "http://localhost:3001/login";
+      url = url.replace("localhost", window.location.hostname);
+      console.log(url);
+
+      const response = await fetch('http://' + window.location.hostname + ':3001/login', {
+
+
+
+
+---> /@username ou restrictions car username != profile et autre
+
+'/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup'
+In case the URL doesn't start with '/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup' check that is it a username in database, if not 404, without changing the actual check
+
+
+//Google just en localhost -> a distance pb securite Google

@@ -1,0 +1,2 @@
+GET http://localhost:3004/profile/check-username/ahahahha HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ0ZXN0IiwiZW1haWwiOiJ0ZXN0QDE5LmJlIiwiaWF0IjoxNzQzMTc3NzYwfQ.9Blvnk_dfN579o5wnXCPaNmxriWThUH2O7Qx-tj9fxQ

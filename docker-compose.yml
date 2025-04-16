@@ -1,0 +1,138 @@
+#version: '3.8'
+
+services:
+  db:
+    build: ./services/db
+    ports:
+      - "2999:2999"
+    volumes:
+      - ./database:/app/data
+    env_file:
+      - .env
+      
+  api-gateway:
+    build: ./services/api-gateway
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - game-service
+    volumes:
+      - ./services/front:/app/front
+      # - ./database:/app/data/
+    develop:
+      watch:
+        - action: sync
+          path: ./services/api-gateway
+          target: /app
+          ignore:
+            - node_modules/
+    env_file:
+      - .env
+
+  auth-service:
+    build: ./services/auth-service
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./services/front:/app/front
+      - database:/app/data
+    develop:
+      watch:
+        - action: sync
+          path: ./services/auth-service
+          target: /app
+          ignore:
+            - node_modules/
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  front:
+    build: ./services/front
+    ports:
+      - 8000:8000
+    volumes:
+      - shared-avatars:/app/uploads/avatars
+    depends_on:
+      - api-gateway
+      - auth-service
+    develop:
+      watch:
+        - action: sync
+          path: ./services/front
+          target: /app
+          ignore:
+            - node_modules/
+
+  game-service:
+    build: ./services/game-service
+    ports:
+      - "3002:3002"
+    volumes:
+      - database:/app/data
+    develop:
+      watch:
+        - action: sync
+          path: ./services/game-service
+          target: /app
+          ignore:
+            - node_modules/
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+  chat-service:
+   build: ./services/chat-service
+   ports:
+     - "3003:3003"
+   volumes:
+     - ./services/front:/app/front
+     - database:/app/data
+   develop:
+     watch:
+       - action: sync
+         path: ./services/chat-service
+         target: /app
+         ignore:
+           - node_modules/
+   env_file:
+     - .env
+   depends_on:
+     - db
+
+  user-service:
+    build: ./services/user-service
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./services/front:/app/front
+      - database:/app/data
+      - shared-avatars:/app/uploads/avatars
+    develop:
+      watch:
+        - action: sync
+          path: ./services/user-service
+          target: /app
+          ignore:
+            - node_modules/
+    env_file:
+      - .env
+    depends_on:
+      - db
+
+volumes:
+  database:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: './database'
+  shared-avatars:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ${PWD}/shared/avatars
