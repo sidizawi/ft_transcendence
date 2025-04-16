@@ -54,6 +54,8 @@ export class Settings {
         stats: this.user.stats // Keep existing stats
       };
 
+      localStorage.setItem('user', JSON.stringify(this.user));
+      
       this.updateView();
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -131,7 +133,7 @@ export class Settings {
         TokenManager.setToken(data.token);
         
         await this.fetchAndUpdateUserProfile();
-        // window.location.href = '/profile'; //ce qui cause reload
+        window.location.href = '/profile'; //ce qui cause reload
         return true;
       } catch (error) {
         console.error('Username update error:', error);

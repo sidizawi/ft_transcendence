@@ -87,8 +87,8 @@ export class FriendProfile {
 
   private openChat() {
     if (this.userId) {
-      const chatUrl = `/chat/${this.userId}`;
-      const chatWindow = window.open(chatUrl, `chat-${this.userId}`, 'width=800,height=600');
+      const chatUrl = `/chat/${this.username}`;
+      const chatWindow = window.open(chatUrl, `chat-${this.username}`, 'width=800,height=600');
       if (chatWindow) {
         chatWindow.focus();
       }
