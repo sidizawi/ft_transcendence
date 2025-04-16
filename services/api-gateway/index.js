@@ -1,8 +1,8 @@
 import Fastify from 'fastify';
 import fastifyHttpProxy from '@fastify/http-proxy';
 import fastifyCors from '@fastify/cors';
-import fs from 'fs/promises';
 import path from 'path';
+import fastifyHelmet from '@fastify/helmet';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -15,6 +15,20 @@ fastify.addHook('onResponse', (request, reply, done) => {
 	console.log(`${request.method} ${request.url} ${reply.statusCode} ${rep}`);
 	done();
 });
+
+fastify.register(fastifyHelmet, {
+  contentSecurityPolicy: {
+    directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],
+    imgSrc: ["'self'", "data:"],
+    connectSrc: ["'self'", "wss:", "ws:"]
+    }
+  },
+  crossOriginEmbedderPolicy: false
+  });
+
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {

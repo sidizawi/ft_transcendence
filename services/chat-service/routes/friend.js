@@ -2,10 +2,39 @@
 import dotenv from 'dotenv';
 dotenv.config();
 
+function sanitizeInput(input) {
+	if (typeof input !== 'string') return input;
+	return input
+	  .replace(/&/g, '&amp;')
+	  .replace(/</g, '&lt;')
+	  .replace(/>/g, '&gt;')
+	  .replace(/"/g, '&quot;')
+	  .replace(/'/g, '&#039;');
+  }
+  
+  function XSSanitizer(body) {
+	if (!body || typeof body !== 'object') return body;
+	
+	const sanitizedBody = {};
+	
+	for (const key in body) {
+	  if (Object.prototype.hasOwnProperty.call(body, key)) {
+		if (typeof body[key] === 'string') {
+		  sanitizedBody[key] = sanitizeInput(body[key]);
+		} else {
+		  sanitizedBody[key] = body[key];
+		}
+	  }
+	}
+	
+	return sanitizedBody;
+  }
+
+
 async function friendRoutes(fastify, options) {
 
 	fastify.post('/add', async (request, reply) => {
-		const { username } = request.body;
+		const { username } = XSSanitizer(request.body);
 		if (!username){
 			reply.code(400);
 			return { error: 'Username needed'};
@@ -63,7 +92,7 @@ async function friendRoutes(fastify, options) {
 	});
 	
 	fastify.delete('/cancel', async (request, reply) => {
-		const { friendusername } = request.body;
+		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
 			return { error: 'Friendusername needed'};
@@ -97,7 +126,7 @@ async function friendRoutes(fastify, options) {
 	});
 
 	fastify.patch('/accept', async (request, reply) => {
-		const { friendusername } = request.body;
+		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
 			return { error: 'Friendusername needed'};
@@ -131,7 +160,7 @@ async function friendRoutes(fastify, options) {
 	});
 	
 	fastify.patch('/reject', async (request, reply) => {
-		const { friendusername } = request.body;
+		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
 			return { error: 'Friendusername needed'};
@@ -165,7 +194,7 @@ async function friendRoutes(fastify, options) {
 	});
 	
 	fastify.delete('/delete', async (request, reply) => {
-		const { friendusername } = request.body;
+		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
 			return { error: 'Friendusername needed'};
@@ -199,7 +228,7 @@ async function friendRoutes(fastify, options) {
 	});
 	
 	fastify.patch('/block', async (request, reply) => {
-		const { friendusername } = request.body;
+		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
 			return { error: 'Friendusername needed'};
@@ -225,7 +254,7 @@ async function friendRoutes(fastify, options) {
 	});
 
 	fastify.patch('/unblock', async (request, reply) => {
-		const { friendusername } = request.body;
+		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
 			return { error: 'Friendusername needed'};

@@ -8,7 +8,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import multipart from '@fastify/multipart';
 
-
+import fastifyHelmet from '@fastify/helmet';;
 import statsRoutes from './routes/stats.js';
 import refreshRoutes from './routes/refresh.js';
 import friendRoutes from './routes/friend.js';
@@ -23,14 +23,23 @@ dotenv.config();
 	// 	done();
 	// });
 const fastify = Fastify({ logger: true });
-
+fastify.register(fastifyHelmet, {
+	contentSecurityPolicy: {
+	  directives: {
+		defaultSrc: ["'self'"],
+		scriptSrc: ["'self'", "'unsafe-inline'"],
+		styleSrc: ["'self'", "'unsafe-inline'"],
+		imgSrc: ["'self'", "data:"],
+		connectSrc: ["'self'", "wss:", "ws:"]
+	  }
+	},
+	crossOriginEmbedderPolicy: false
+  });
 
 // Enregistrer le plugin pour gérer multipart/form-data
 await fastify.register(multipart, {
 limits: { fileSize: 5 * 1024 * 1024 } // optionnel, ici 5MB max
 });
-
-
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
