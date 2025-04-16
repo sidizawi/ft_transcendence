@@ -11,4 +11,5 @@ export interface User {
   };
   twoFactorEnabled: boolean;
   online?: boolean;
+  google: boolean;
 }

@@ -261,7 +261,7 @@ function handlePlay(fastify, data) {
 	if (room.type == "playVsAI") {
 		setTimeout(() => {
 			playAI(fastify, room);
-		}, 2000);
+		}, 1000);
 		return ;
 	}
 
