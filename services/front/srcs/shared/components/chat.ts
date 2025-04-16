@@ -8,7 +8,7 @@ export class Chat {
 
   constructor(friendUserName: string) {
     this.friendUserName = friendUserName;
-    this.currentUser = TokenManager.getUserFromToken();
+    this.currentUser = TokenManager.getUserFromLocalStorage();
 
     const token = TokenManager.getToken();
 
@@ -26,6 +26,8 @@ export class Chat {
     this.ws.onmessage = (event: MessageEvent) => {
       let data = JSON.parse(event.data.toString());
 
+
+      console.log("data received:", data);
       if (data.type == "message") {
         this.addMessage({
           text: data.text,
@@ -41,7 +43,11 @@ export class Chat {
           });
         })
       }
+
     };
+    this.ws.onclose = () => {
+      console.log("connection closed"); 
+    }
   }
 
   public render(): string {

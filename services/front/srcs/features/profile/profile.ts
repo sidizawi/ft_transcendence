@@ -103,6 +103,7 @@ export class Profile {
                 <img 
                   src="${this.user.avatar}" 
                   alt="${i18n.t('profile')}" 
+                  lazy
                   class="w-32 h-32 rounded-full object-cover"
                 >
                 <label 
