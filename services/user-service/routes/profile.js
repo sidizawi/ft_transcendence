@@ -17,6 +17,25 @@ async function profileRoutes(fastify ,options) {
        
         return ({ message: 'Successfully retrieved profile'}, profile)
     });
+
+    fastify.get('/check-username/:username', async (request, reply) => {
+        const { username } = request.params;
+
+        const userExists = fastify.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        if (!userExists){
+            return reply.code(404).send({ error: 'Username doesnt exists'});
+        }
+        return reply.code(200).send({ message: 'Username exists'});
+    });
+
+    fastify.get('/all-username', async (request, reply) => {
+        const allUsers = fastify.db.prepare('SELECT username FROM users').all();
+        if (!allUsers){
+            return reply.code(404).send({ error: 'No users found'});
+        }
+        const usernames = allUsers.map(user => user.username);
+        return reply.code(200).send({ usernames });
+    });
 }
 
 export default profileRoutes;
