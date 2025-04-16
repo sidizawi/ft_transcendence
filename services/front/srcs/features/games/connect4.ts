@@ -34,7 +34,6 @@ export class Connect4 {
     this.opponent = null;
     this.opponentColor = null;
     this.user = TokenManager.getUserFromLocalStorage();
-    console.log(this.user);
   }
 
   drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {
@@ -212,6 +211,9 @@ export class Connect4 {
       if (btn.classList.contains("not-connected")) {
         return;
       }
+
+      this.clean();
+
       btn.addEventListener('click', (event) => {
         const type = (event.target as HTMLElement).getAttribute("data");
 
@@ -269,6 +271,7 @@ export class Connect4 {
         this.setupCanvasEventListener();
       } else if (message.mode == "win") {
         this.won = true;
+        this.cleanWs()
         // todo: check translation
         ModalManager.openModal(i18n.t('games.connect4.title'), message.winner ? "you're the winner" : "you're THE loser");
         this.renderBackBtn();
@@ -277,18 +280,44 @@ export class Connect4 {
         this.animateCoin(message.col, this.columns[message.col]);
         this.columns[message.col]--;
       } else if (message.mode == "tie") {
+        this.cleanWs()
         ModalManager.openModal(i18n.t('games.connect4.title'), "No winner this time, it's a tie!");
         this.renderBackBtn();
       } else if (message.mode == "close") {
+        this.cleanWs()
         this.rerender();
         ModalManager.openModal(i18n.t('games.connect4.title'), message.message);
       }
     }
 
     this.ws.onclose = () => {
+      if (!this.ws) {
+        return ;
+      }
       this.rerender();
       ModalManager.openModal(i18n.t('games.connect4.title'), "connection lost");
     }
+  }
+
+  clean() {
+    let ws = this.ws;
+    this.ws = null;
+    ws?.close();
+    this.won = false;
+    this.online = false;
+    this.myTurn = false;
+    this.opponent = null;
+    this.player = this.red;
+    this.opponentColor = null;
+    this.data.fill('X');
+    this.columns.fill(5);
+  }
+
+  cleanWs() {
+    this.room = null;
+    let ws = this.ws;
+    this.ws = null;
+    ws?.close();
   }
 
   renderWaitingRoom() : string {

@@ -166,6 +166,20 @@ function playAI(fastify, room) {
 	}
 }
 
+function sendPlayedMessage(room, data) {
+	if (room.playerid_1 == data.id && room.type != "playVsAI") {
+		room.player2ws.send(JSON.stringify({
+			mode: 'played',
+			col: data.col
+		}));
+	} else if (room.playerid_2 == data.id){
+		room.player1ws.send(JSON.stringify({
+			mode: 'played',
+			col: data.col
+		}));
+	}
+}
+
 function handlePlay(fastify, data) {
 	let room = rooms.get(data.room);
 
@@ -175,6 +189,8 @@ function handlePlay(fastify, data) {
 
 	// todo : check how to save data when playing against an AI (maybe the first user is the AI)
 	if (checkWin(room.data)) {
+		sendPlayedMessage(room, data);
+
 		room.player1ws.send(JSON.stringify({
 			mode: "win",
 			winner: data.id == room.playerid_1
@@ -224,6 +240,7 @@ function handlePlay(fastify, data) {
 	}
 
 	if (room.data.every((elem) => elem != 'X')) {
+		sendPlayedMessage(room, data);
 
 		room.player1ws.send(JSON.stringify({
 			mode: "tie",
@@ -265,17 +282,7 @@ function handlePlay(fastify, data) {
 		return ;
 	}
 
-	if (room.playerid_1 == data.id) {
-		room.player2ws.send(JSON.stringify({
-			mode: 'played',
-			col: data.col
-		}));
-	} else {
-		room.player1ws.send(JSON.stringify({
-			mode: 'played',
-			col: data.col
-		}));
-	}
+	sendPlayedMessage(room, data);
 }
 
 export const connect4Handler = async (fastify) => {
