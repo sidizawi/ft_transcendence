@@ -15,9 +15,6 @@ async function profileRoutes(fastify ,options) {
             is_two_factor_enabled: userExists.is_two_factor_enabled === 1 ? true : false,
             google: userExists.google === 1 ? true : false,
         }
-       
-console.log(userExists)
-
         return ({ message: 'Successfully retrieved profile'}, profile)
     });
 

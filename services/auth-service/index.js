@@ -41,7 +41,7 @@ const transporter = nodemailer.createTransport({
 // });
 const fastify = Fastify({ logger: true });
 
-await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
+await fastify.register(fastifyJwt, {secret: process.env.JWT_SECRET, sign: {expiresIn: '1d'}});
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
@@ -181,8 +181,6 @@ fastify.post('/google/callback', async (request, reply) => {
     });
     const payload = ticket.getPayload();
     const { email, name, picture } = payload;
-
-console.log(payload)
 
     let user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
     if (!user) {

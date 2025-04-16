@@ -34,6 +34,7 @@ export class Connect4 {
     this.opponent = null;
     this.opponentColor = null;
     this.user = TokenManager.getUserFromLocalStorage();
+    console.log(this.user);
   }
 
   drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {

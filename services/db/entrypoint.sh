@@ -66,6 +66,17 @@ CREATE TABLE IF NOT EXISTS conversations (
     FOREIGN KEY (user2_id) REFERENCES users(id),
     FOREIGN KEY (last_message_id) REFERENCES messages(id)
 );
+CREATE TABLE IF NOT EXISTS gdpr_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    email TEXT NOT NULL,
+    request_type TEXT NOT NULL,
+    details TEXT,
+    status TEXT NOT NULL,
+    created_at DATETIME NOT NULL,
+    processed_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
 EOF
 
 #JSON friends in friendlist
