@@ -48,7 +48,7 @@ export class FriendService {
       const blockedData = await blockedResponse.json();
 
       const friends: Friend[] = [];
-      const currentUser = TokenManager.getUserFromToken();
+      const currentUser = TokenManager.getUserFromLocalStorage();
 
       // Add accepted friends
       if (friendsData.friendData) {

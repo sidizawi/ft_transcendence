@@ -25,6 +25,7 @@ export const translations = {
         wonTournaments: 'Gewonnene Turniere',
         playedTournaments: 'Gespielte Turniere'
       },
+      close: "schließen",
       enable2FA: '2FA aktivieren',
       disable2FA: '2FA deaktivieren',
       enable2FATitle: '2FA Aktivierung',
@@ -59,6 +60,9 @@ export const translations = {
       continueWith: 'Weiter mit Google',
       games: {
         playVsAI: 'Gegen KI spielen',
+        playAgain: 'Nochmal spielen',
+        playLocal: 'Gegen lokalen Spieler spielen',
+        playTournament: 'Gegen Turnier spielen',
         playVsFriend: 'Gegen Freund spielen',
         pong: {
           title: 'Pong',
@@ -166,6 +170,7 @@ export const translations = {
         wonTournaments: 'Won Tournaments',
         playedTournaments: 'Played Tournaments'
       },
+      close: "Close",
       enable2FA: 'Enable 2FA',
       disable2FA: 'Disable 2FA',
       enable2FATitle: 'Enable Two-Factor Authentication',
@@ -200,6 +205,9 @@ export const translations = {
       continueWith: 'Continue with Google',
       games: {
         playVsAI: 'Play vs AI',
+        playAgain: 'Play again',
+        playLocal: 'Play Local',
+        playTournament: 'Play Tournament',
         playVsFriend: 'Play vs Friend',
         pong: {
           title: 'Pong',
@@ -305,6 +313,7 @@ export const translations = {
         wonTournaments: 'Tournois Gagnés',
         playedTournaments: 'Tournois Joués'
       },
+      close: "fermer",
       enable2FA: 'Activer 2FA',
       disable2FA: 'Désactiver 2FA',
       enable2FATitle: 'Activer l\'authentification à deux facteurs',
@@ -339,7 +348,10 @@ export const translations = {
       continueWith: 'Continuer avec Google',
       games: {
         playVsAI: 'Jouer contre l\'IA',
+        playAgain: 'Jouer à nouveau',
         playVsFriend: 'Jouer contre un ami',
+        playLocal: 'Jouer localement',
+        playTournament: 'Jouer dans un tournoi',
         pong: {
           title: 'Pong',
           description: 'Jeu Pong classique - Défiez vos amis ou jouez contre l\'IA.'
@@ -446,6 +458,7 @@ export const translations = {
         wonTournaments: 'Toernooien Winnen',
         playedTournaments: 'Toernooien Gespeeld'
       },
+      close: "sluiten",
       enable2FA: '2FA inschakelen',
       disable2FA: '2FA uitschakelen',
       enable2FATitle: 'Tweefactorauthenticatie inschakelen',
@@ -480,7 +493,10 @@ export const translations = {
       continueWith: 'Doorgaan met Google',
       games: {
         playVsAI: 'Speel tegen AI',
+        playAgain: 'Speel opnieuw',
         playVsFriend: 'Speel tegen vriend',
+        playLocal: 'Speel lokaal',
+        playTournament: 'Speel toernooi',
         pong: {
           title: 'Pong',
           description: 'Klassiek Pong spel - Daag je vrienden uit of speel tegen AI.'

@@ -9,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const fastify = Fastify({ logger: false });
+
 fastify.addHook('onResponse', (request, reply, done) => {
 	let rep = JSON.stringify(reply);
 	console.log(`${request.method} ${request.url} ${reply.statusCode} ${rep}`);
@@ -17,7 +18,7 @@ fastify.addHook('onResponse', (request, reply, done) => {
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
-  origin: "http://localhost:8000", // Autorise toutes les origines (tu peux restreindre si besoin)
+  origin: true, // Autorise toutes les origines (tu peux restreindre si besoin)
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -32,12 +33,14 @@ fastify.register(fastifyHttpProxy, {
 // Proxy vers game-service
 fastify.register(fastifyHttpProxy, {
   upstream: 'http://game-service:3002',
-  prefix: '/game'
+  prefix: '/game',
+  websocket: true
 });
 
 fastify.register(fastifyHttpProxy, {
 	upstream: 'http://chat-service:3003',
-	prefix: '/chat'
+	prefix: '/chat',
+  websocket: true
 });
 
 fastify.register(fastifyHttpProxy, {

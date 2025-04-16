@@ -2,18 +2,64 @@ import { User } from '../../shared/types/user';
 import { i18n } from '../../shared/i18n';
 import { TokenManager } from '../../shared/utils/token';
 import { AvatarService } from '../../shared/services/avatarService';
+// import { Profile } from './profile';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user/profile`;
+const USER_API_URL = `http://${host}:3000/user/settings`;
+const PROFILE_API_URL = `http://${host}:3000/user/profile`;
 
 export class Settings {
   constructor(private user: User) {}
 
   private updateView() {
+    // window.history.pushState({}, '', '/profile'); //show avatar dans settings, mais fait tout planter
     const main = document.querySelector('main');
     if (main) {
       main.innerHTML = this.render();
       this.setupEventListeners();
+    }
+    // const main = document.querySelector('main');
+    // if (main) {
+    //   const profile = new Profile(this.state.user, () => this.handleLogout());
+    //   main.innerHTML = profile.render();
+    //   profile.setupEventListeners();
+    // }
+  }
+
+  private async fetchAndUpdateUserProfile() {
+    try {
+      const response = await fetch(PROFILE_API_URL, {
+        method: 'GET',
+        headers: TokenManager.getAuthHeaders(),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch user profile');
+      }
+
+      const profile = await response.json();
+      if (!profile) {
+        throw new Error('Profile data not found');
+      }
+
+      // Update user data
+      this.user = {
+        ...this.user,
+        username: profile.username,
+        email: profile.email,
+        avatar: profile.avatar || '/img/default-avatar.jpg',
+        twoFactorEnabled: profile.is_two_factor_enabled,
+        google: profile.google || false,
+        stats: this.user.stats // Keep existing stats
+      };
+
+      localStorage.setItem('user', JSON.stringify(this.user));
+      
+      this.updateView();
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+      throw error;
     }
   }
 
@@ -24,18 +70,11 @@ export class Settings {
     if (!file) return;
 
     try {
-      const { avatarPath } = await AvatarService.uploadAvatar(file);
-      this.user.avatar = avatarPath;
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        userData.avatar = avatarPath;
-        localStorage.setItem('user', JSON.stringify(userData));
-      }
-      this.updateView();
+      await AvatarService.uploadAvatar(file);
+      await this.fetchAndUpdateUserProfile();
     } catch (error) {
       console.error('Avatar upload error:', error);
-      alert(error instanceof Error ? error.message : i18n.t('updateError'));
+      throw new Error(error || i18n.t('uploadAvatar'));
     }
   }
 
@@ -43,91 +82,78 @@ export class Settings {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
+  
+    const newUsername = formData.get('username') as string;
+    const newEmail = !this.user.google ? formData.get('email') as string : null;
+    const newPassword = !this.user.google ? formData.get('password') as string : '';
+    // const confirmPassword = !this.user.google ? formData.get('confirmPassword') as string : '';
 
-    const username = formData.get('username') as string;
-    const email = formData.get('email') as string;
-    const password = formData.get('password') as string;
-    const confirmPassword = formData.get('confirmPassword') as string;
-
-    try {
-      const updates: Promise<boolean>[] = [];
-
-      if (username !== this.user.username) {
-        updates.push(this.handleUsernameUpdate(username));
-      }
-      
-      if (email !== this.user.email) {
-        updates.push(this.handleEmailUpdate(email));
-      }
-      
-      if (password) {
-        if (password !== confirmPassword) {
-          throw new Error(i18n.t('passwordMismatch'));
-        }
-        updates.push(this.handlePasswordUpdate(password));
-      }
-
-      if (updates.length > 0) {
-        const results = await Promise.all(updates);
-        if (results.every(result => result)) {
-          window.location.href = '/profile';
-        }
-      }
-    } catch (error) {
-      console.error('Update error:', error);
-      alert(error instanceof Error ? error.message : i18n.t('updateError'));
+    // // For non-Google users, validate the password.
+    // if (!this.user.google && newPassword && newPassword !== confirmPassword) {
+    //   this.showVerificationError(messageDiv, i18n.t('passwordMismatch'));
+    //   return;
+    // }
+  
+    const payload: {
+      newUsername?: string;
+      newEmail?: string;
+      newPassword?: string;
+    } = {};
+  
+    if (newUsername && newUsername !== this.user.username) {
+      payload.newUsername = newUsername;
     }
-  }
+    if (!this.user.google) {
+      if (newEmail && newEmail !== this.user.email) {
+        payload.newEmail = newEmail;
+      }
+      if (newPassword) {
+        payload.newPassword = newPassword;
+      }
+    }
+  
+    if (Object.keys(payload).length === 0)
+      return;
+  
 
-  private async handleUsernameUpdate(username: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${USER_API_URL}/username`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
-        body: JSON.stringify({ newUsername: username })
-      });
+    if (Object.keys(payload).length === 1 && payload.newUsername) {
+      try {
+        const response = await fetch(`${USER_API_URL}/username`, {
+          method: 'PUT',
+          headers: TokenManager.getAuthHeaders(),
+          body: JSON.stringify({ newUsername: payload.newUsername })
+        });
 
-      if (!response.ok) {
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || i18n.t('updateError'));
+        }
+
         const data = await response.json();
-        throw new Error(data.error || i18n.t('updateError'));
+        TokenManager.setToken(data.token);
+        
+        await this.fetchAndUpdateUserProfile();
+        window.location.href = '/profile'; //ce qui cause reload
+        return true;
+      } catch (error) {
+        console.error('Username update error:', error);
+        throw error;
       }
-
-      const data = await response.json();
-      TokenManager.setToken(data.token);
-      
-      const storedUser = localStorage.getItem('user');
-      if (storedUser) {
-        const userData = JSON.parse(storedUser);
-        userData.username = username;
-        localStorage.setItem('user', JSON.stringify(userData));
-      }
-      
-      return true;
-    } catch (error) {
-      console.error('Username update error:', error);
-      throw error;
     }
-  }
 
-  private async handleEmailUpdate(email: string): Promise<boolean> {
+
     try {
-      const requestResponse = await fetch(`${USER_API_URL}/email/request`, {
+      const requestResponse = await fetch(`${USER_API_URL}/update-request`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
-        body: JSON.stringify({ newEmail: email })
+        headers: TokenManager.getAuthHeaders(),
+        body: JSON.stringify(payload)
       });
 
       if (!requestResponse.ok) {
-        const data = await requestResponse.json();
-        throw new Error(data.error || i18n.t('updateError'));
-      }
-
+          const data = await requestResponse.json();
+          throw new Error(data.error || i18n.t('updateError'));
+        }
+  
       return new Promise((resolve) => {
         const modal = this.createVerificationModal(i18n.t('emailVerification'));
         const verifyButton = document.getElementById('verify-code') as HTMLButtonElement;
@@ -143,12 +169,9 @@ export class Settings {
           }
 
           try {
-            const verifyResponse = await fetch(`${USER_API_URL}/email/verify`, {
+            const verifyResponse = await fetch(`${USER_API_URL}/update-confirm`, {
               method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TokenManager.getToken()}`
-              },
+              headers: TokenManager.getAuthHeaders(),
               body: JSON.stringify({ verificationCode: code })
             });
 
@@ -156,13 +179,8 @@ export class Settings {
               const data = await verifyResponse.json();
               TokenManager.setToken(data.token);
               
-              const storedUser = localStorage.getItem('user');
-              if (storedUser) {
-                const userData = JSON.parse(storedUser);
-                userData.email = email;
-                localStorage.setItem('user', JSON.stringify(userData));
-              }
-              
+              await this.fetchAndUpdateUserProfile();
+              // window.location.href = '/profile'; //ce qui cause reload
               modal.remove();
               resolve(true);
             } else {
@@ -176,7 +194,7 @@ export class Settings {
             this.showVerificationError(messageDiv, i18n.t('verificationError'));
           }
         };
-
+  
         codeInput?.addEventListener('input', () => {
           const code = codeInput.value.trim();
           verifyButton.disabled = !code || code.length !== 6 || !/^\d+$/.test(code);
@@ -200,89 +218,7 @@ export class Settings {
       throw error;
     }
   }
-
-  private async handlePasswordUpdate(password: string): Promise<boolean> {
-    try {
-      const requestResponse = await fetch(`${USER_API_URL}/password/request`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${TokenManager.getToken()}`
-        },
-        body: JSON.stringify({ newPassword: password })
-      });
-
-      if (!requestResponse.ok) {
-        const data = await requestResponse.json();
-        throw new Error(data.error || i18n.t('updateError'));
-      }
-
-      return new Promise((resolve) => {
-        const modal = this.createVerificationModal(i18n.t('passwordVerification'));
-        const verifyButton = document.getElementById('verify-code') as HTMLButtonElement;
-        const cancelButton = document.getElementById('cancel-verification');
-        const codeInput = document.getElementById('verification-code') as HTMLInputElement;
-        const messageDiv = document.getElementById('verification-message');
-
-        const handleVerify = async () => {
-          const code = codeInput.value.trim();
-          if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
-            this.showVerificationError(messageDiv, i18n.t('invalid2FACode'));
-            return;
-          }
-
-          try {
-            const verifyResponse = await fetch(`${USER_API_URL}/password/verify`, {
-              method: 'PUT',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TokenManager.getToken()}`
-              },
-              body: JSON.stringify({
-                verificationCode: code,
-                newPassword: password
-              })
-            });
-
-            if (verifyResponse.ok) {
-              modal.remove();
-              resolve(true);
-            } else {
-              const data = await verifyResponse.json();
-              this.showVerificationError(messageDiv, data.error || i18n.t('invalid2FACode'));
-              codeInput.value = '';
-              codeInput.focus();
-            }
-          } catch (error) {
-            console.error('Password verification error:', error);
-            this.showVerificationError(messageDiv, i18n.t('verificationError'));
-          }
-        };
-
-        codeInput?.addEventListener('input', () => {
-          const code = codeInput.value.trim();
-          verifyButton.disabled = !code || code.length !== 6 || !/^\d+$/.test(code);
-        });
-
-        verifyButton?.addEventListener('click', handleVerify);
-        codeInput?.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter' && !verifyButton.disabled) {
-            e.preventDefault();
-            handleVerify();
-          }
-        });
-
-        cancelButton?.addEventListener('click', () => {
-          modal.remove();
-          resolve(false);
-        });
-      });
-    } catch (error) {
-      console.error('Password update error:', error);
-      throw error;
-    }
-  }
-
+  
   private async handleDeleteAccount() {
     // First step: Show password confirmation modal
     const modal = document.createElement('div');
@@ -348,10 +284,7 @@ export class Settings {
       try {
         const requestResponse = await fetch(`${USER_API_URL}/delete/request`, {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${TokenManager.getToken()}`
-          },
+          headers: TokenManager.getAuthHeaders(),
           body: JSON.stringify({ password: passwordInput.value })
         });
 
@@ -432,10 +365,7 @@ export class Settings {
 
             const deleteResponse = await fetch(`${USER_API_URL}/delete/confirm`, {
               method: 'DELETE',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${TokenManager.getToken()}`
-              },
+              headers: TokenManager.getAuthHeaders(),
               body: JSON.stringify({ verificationCode })
             });
 
@@ -524,7 +454,7 @@ export class Settings {
                 <div class="relative mb-4">
                   <img 
                     src="${this.user.avatar}" 
-                    alt="${i18n.t('profile')}" 
+                    alt="${i18n.t('avatar')}" 
                     class="w-32 h-32 rounded-full object-cover"
                   >
                   <label 
@@ -556,49 +486,61 @@ export class Settings {
                     type="text"
                     id="username"
                     name="username"
-                    value="${this.user.username}"
+                    placeholder="${this.user.username}"
                     class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                   />
                 </div>
 
-                <div>
-                  <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    ${i18n.t('email')}
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    value="${this.user.email}"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+                ${!this.user.google ? `
+                  <div>
+                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      ${i18n.t('email')}
+                    </label>
+                    <input
+                      type="email"
+                      id="email"
+                      name="email"
+                      placeholder="${this.user.email}"
+                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
 
-                <div>
-                  <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    ${i18n.t('newPassword')}
-                  </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="••••••••"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      ${i18n.t('newPassword')}
+                    </label>
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      placeholder="••••••••"
+                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
 
-                <div>
-                  <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    ${i18n.t('confirmPassword')}
-                  </label>
-                  <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    placeholder="••••••••"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                  />
-                </div>
+                  <div>
+                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      ${i18n.t('confirmPassword')}
+                    </label>
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      placeholder="••••••••"
+                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    />
+                  </div>
+                ` : `
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      ${i18n.t('email')}
+                    </label>
+                    <div class="mt-1 block w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">
+                      ${this.user.email}
+                      <span class="ml-2 text-xs">(${i18n.t('googleAccount')})</span>
+                    </div>
+                  </div>
+                `}
 
                 <div class="flex flex-col space-y-4 pt-6">
                   <button
@@ -612,13 +554,13 @@ export class Settings {
                   <div class="flex justify-center space-x-4">
                     <a
                       href="/profile"
-                      class="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                      class="px-6 py-2 bg-orange-lighter dark:bg-forest text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
                     >
                       ${i18n.t('back')}
                     </a>
                     <button
                       type="submit"
-                      class="px-6 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-orange dark:bg-nature hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+                      class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange dark:bg-nature hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
                     >
                       ${i18n.t('saveChanges')}
                     </button>
@@ -644,19 +586,21 @@ export class Settings {
     deleteAccountBtn?.addEventListener('click', () => this.handleDeleteAccount());
 
     // Add password confirmation validation
-    const validatePasswords = () => {
-      if (passwordInput.value && confirmPasswordInput.value) {
-        if (passwordInput.value !== confirmPasswordInput.value) {
-          confirmPasswordInput.setCustomValidity(i18n.t('passwordMismatch'));
+    if (!this.user.google) {
+      const validatePasswords = () => {
+        if (passwordInput.value && confirmPasswordInput.value) {
+          if (passwordInput.value !== confirmPasswordInput.value) {
+            confirmPasswordInput.setCustomValidity(i18n.t('passwordMismatch'));
+          } else {
+            confirmPasswordInput.setCustomValidity('');
+          }
         } else {
           confirmPasswordInput.setCustomValidity('');
         }
-      } else {
-        confirmPasswordInput.setCustomValidity('');
-      }
-    };
+      };
 
-    passwordInput?.addEventListener('input', validatePasswords);
-    confirmPasswordInput?.addEventListener('input', validatePasswords);
+      passwordInput?.addEventListener('input', validatePasswords);
+      confirmPasswordInput?.addEventListener('input', validatePasswords);
+    }
   }
 }

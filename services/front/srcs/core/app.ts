@@ -16,6 +16,7 @@ import { i18n } from '../shared/i18n';
 import { TokenManager } from '../shared/utils/token';
 import { Chat } from '../shared/components/chat';
 import { NotFound } from '../shared/components/notFound';
+import { FriendProfile } from '../features/profile/friendProfile';
 
 export class TranscendenceApp {
   private state = {
@@ -28,12 +29,16 @@ export class TranscendenceApp {
   private router: Router;
   private header: Header;
   private footer: Footer;
+  private connect4: Connect4;
+  private pong: Pong;
+  //private friendsList: FriendsList | null = null;
 
   constructor() {
     // Check if user is already logged in
     const token = TokenManager.getToken();
     if (token) {
-      const user = TokenManager.getUserFromToken();
+      const user = TokenManager.getUserFromLocalStorage();
+      console.log("user", user);
       if (user) {
         this.state.user = user;
         // Restore user data from localStorage if available
@@ -46,6 +51,8 @@ export class TranscendenceApp {
 
     this.menu = new Menu(this.isLoggedIn(), () => this.handleLogout());
     this.auth = new Auth((user) => this.handleLogin(user));
+    this.connect4 = new Connect4();
+    this.pong = new Pong();
     this.router = new Router(
       () => this.renderCurrentPage(),
       () => this.isLoggedIn()
@@ -77,7 +84,7 @@ export class TranscendenceApp {
 
   private handleLogout() {
     TokenManager.removeToken();
-    localStorage.removeItem('user'); // Remove user data from localStorage
+    localStorage.removeItem('user');
     this.state.user = null;
     this.menu = new Menu(false, () => this.handleLogout());
     this.initializeApp();
@@ -88,6 +95,11 @@ export class TranscendenceApp {
     const chatMatch = path.match(/^\/chat\/(.+)$/);
     if (chatMatch) {
       return i18n.t('chat');
+    }
+
+    const userMatch = path.match(/^\/user\/(.+)$/);
+    if (userMatch) {
+      return userMatch[1];
     }
 
     switch (path) {
@@ -133,6 +145,8 @@ export class TranscendenceApp {
         <main id="main-content" class="container mx-auto px-4 py-8 flex-grow">
         </main>
 
+        <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"></div>
+
         ${this.footer.render()}
       </div>
     `;
@@ -153,12 +167,21 @@ export class TranscendenceApp {
 
     const chatMatch = path.match(/^\/chat\/(.+)$/);
     if (chatMatch && this.state.user) {
-      const userId = chatMatch[1];
-      const chat = new Chat(userId);
+      const username = chatMatch[1];
+      const chat = new Chat(username);
       main.innerHTML = chat.render();
       chat.setupEventListeners();
       return;
     }
+
+    const userMatch = path.match(/^\/users\/(.+)$/); //attention autorise tout apres /users
+    if (userMatch && this.state.user) {
+      const username = userMatch[1];
+      const friendProfile = new FriendProfile(username, '/img/default-avatar.jpg');
+      main.innerHTML = friendProfile.render();
+      friendProfile.setupEventListeners();
+      return;
+    } //fct a checker
 
     switch (path) {
       case '/':
@@ -190,12 +213,12 @@ export class TranscendenceApp {
         main.innerHTML = tournament.render();
         break;
       case '/pong':
-        const pong = new Pong();
-        main.innerHTML = pong.render();
+        main.innerHTML = this.pong.render();
+        this.pong.pongEventListener();
         break;
       case '/connect4':
-        const connect4 = new Connect4();
-        main.innerHTML = connect4.render();
+        main.innerHTML = this.connect4.render();
+        this.connect4.setupConnect4FirstPageEventListener();
         break;
       case '/signin':
         main.innerHTML = this.auth.renderSignIn();

@@ -1,33 +1,64 @@
 To Do:
 
-	Profile page:
-		- Being able to change the avatar
-		- Tabs' visual
-		- 2FA -> s'active et se desactive MAIS pb  connexion + pb boutton + demander refresh token
+	FriendProfile page:
+		- URL !!!!@ /users/
 
-	Sign In/Up Page:
-		- change db model
+	LogUp page:
+		- Check robustesse mdp quand create pcq back non (?)
 
-	Footer:
-		- Names (?)
+	Settings page:
+		- Avatar visual IDEM dans users/:username -> pb avec /../ -> check app.ts
+		- changer window.href.location ----> refresh pour rediriger
+		- ATTENTION mail de verif pas envoye au bon (new et pas ancien)
+		- faire sauter page query (chgt d'une data) dans historique
+		- ok si meme mdp????
 
-	Header:
-		- Fixed or moving (?)
+	Friends page:
+		- Search barre -> API ou fetch dymamique -> web socket? :(((
+		- ADD Ajout message d'erreur
+		- switch to friends directory ?
+		- 
 
-	Other:
-		- Colour for black texts in light mode (?)
-		- Check browsers (old) compatibility
+	PARTOUT:
+		- Quand server renvoit erreur meme si traitee dans le front -> console du navigateur renvoit ERREUR
+		- quand trop de retour supprime historique???????
+	
+	Visuel:
+		-Profile page:
+			- Game Tab
+		-Footer:
+			- Names (?)
+		- Header:
+			- Fixed or moving (?)
+		-Random Page:
+			- SCROLL ?????
+		- Other:
+			- enlever le hover 2FA quand code pas entier?
+			- Colour for black texts in light mode (?)
+			- Back buttons
+			- SVG friendsProfile.ts
+			- ADD/DELETE colours in Dark Mode
+			- Change colour Dark Mode (?)
+
+
+
+	Functionnality to check at the END:
+		- Traductions
+		- Browsers Compatibility
 		- Accessibility (?)
 		- SSR (?)
-
-	Friends:
-		- Everything
+		- when reload on page it should load that page: /profile and reload => go to profile, not home
 
 	Files:
 		- Clean up unused datas
-		- Changing colour names in files (?)
 
+	connect 4:
+		- create AI algo
+		- add timer
+		- vusu coin derriere le front
 
+	pong:
+		- check if the websocket is closed
 
       let url = "http://localhost:3001/login";
       url = url.replace("localhost", window.location.hostname);
@@ -38,22 +69,10 @@ To Do:
 
 
 
+---> /@username ou restrictions car username != profile et autre
 
-			const FRIEND_API_URL = 'http://localhost:3003/friend';
-	[...]	await fetch(`${FRIEND_API_URL}/accept`, {
-
-
-
+'/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup'
+In case the URL doesn't start with '/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup' check that is it a username in database, if not 404, without changing the actual check
 
 
-
-auth-service-1  | {"level":30,"time":1742905139337,"pid":42,"hostname":"8e81dd75173b","reqId":"req-u","req":{"method":"OPTIONS","url":"/2fa/email/setup","host":"localhost:3001","remoteAddress":"172.18.0.1","remotePort":47888},"msg":"incoming request"}
-auth-service-1  | {"level":30,"time":1742905139337,"pid":42,"hostname":"8e81dd75173b","reqId":"req-u","res":{"statusCode":204},"responseTime":0.5784139931201935,"msg":"request completed"}
-auth-service-1  | {"level":30,"time":1742905139346,"pid":42,"hostname":"8e81dd75173b","reqId":"req-v","req":{"method":"POST","url":"/2fa/email/setup","host":"localhost:3001","remoteAddress":"172.18.0.1","remotePort":47874},"msg":"incoming request"}
-auth-service-1  | undefined
-auth-service-1  | {"level":30,"time":1742905140790,"pid":42,"hostname":"8e81dd75173b","reqId":"req-v","res":{"statusCode":200},"responseTime":1443.480591982603,"msg":"request completed"}
-
-auth-service-1  | {"level":30,"time":1742905168548,"pid":42,"hostname":"8e81dd75173b","reqId":"req-w","req":{"method":"OPTIONS","url":"/2fa/email/verify","host":"localhost:3001","remoteAddress":"172.18.0.1","remotePort":47888},"msg":"incoming request"}
-auth-service-1  | {"level":30,"time":1742905168549,"pid":42,"hostname":"8e81dd75173b","reqId":"req-w","res":{"statusCode":204},"responseTime":0.5650530159473419,"msg":"request completed"}
-auth-service-1  | {"level":30,"time":1742905168552,"pid":42,"hostname":"8e81dd75173b","reqId":"req-x","req":{"method":"POST","url":"/2fa/email/verify","host":"localhost:3001","remoteAddress":"172.18.0.1","remotePort":47874},"msg":"incoming request"}
-auth-service-1  | {"level":30,"time":1742905168555,"pid":42,"hostname":"8e81dd75173b","reqId":"req-x","res":{"statusCode":200},"responseTime":2.623441994190216,"msg":"request completed"}
+//Google just en localhost -> a distance pb securite Google

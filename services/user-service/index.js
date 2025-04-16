@@ -39,7 +39,7 @@ await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
-  origin: "http://localhost:8000", // Autorise toutes les origines (tu peux restreindre si besoin)
+  origin: true, // Autorise toutes les origines (tu peux restreindre si besoin)
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
@@ -57,7 +57,7 @@ fastify.register(settingsRoutes, { prefix: '/settings' });
 fastify.register(statsRoutes, { prefix: '/stats' });
 fastify.register(refreshRoutes, { prefix: '/refresh'});
 fastify.register(friendRoutes, { prefix: '/friend'});
-fastify.register(profileRoutes, { prefix: 'profile'});
+fastify.register(profileRoutes, { prefix: '/profile'});
 
 /// SERVER ///
 fastify.listen({ port: 3004, host: '0.0.0.0' }, (err, address) => {

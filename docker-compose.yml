@@ -16,7 +16,7 @@ services:
       - "3000:3000"
     depends_on:
       - auth-service
-      # - game-service
+      - game-service
     volumes:
       - ./services/front:/app/front
       # - ./database:/app/data/
@@ -66,24 +66,23 @@ services:
           ignore:
             - node_modules/
 
-  #game-service:
-  #  build: ./services/game-service
-  #  ports:
-  #    - "3002:3002"
-  #  volumes:
-  #    - ./services/front:/app/front
-  #    - database:/app/data
-  #  develop:
-  #    watch:
-  #      - action: sync
-  #        path: ./services/game-service
-  #        target: /app
-  #        ignore:
-  #          - node_modules/
-  #  env_file:
-  #    - .env
-  #  depends_on:
-  #    - db
+  game-service:
+    build: ./services/game-service
+    ports:
+      - "3002:3002"
+    volumes:
+      - database:/app/data
+    develop:
+      watch:
+        - action: sync
+          path: ./services/game-service
+          target: /app
+          ignore:
+            - node_modules/
+    env_file:
+      - .env
+    depends_on:
+      - db
 
   chat-service:
    build: ./services/chat-service

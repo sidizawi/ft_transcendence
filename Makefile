@@ -2,7 +2,7 @@
 PROJECT_NAME = ft_transcendence
 
 # Commandes Docker
-DOCKER_COMPOSE = docker compose
+DOCKER_COMPOSE = docker-compose
 DOCKER = docker
 
 # Services définis dans docker-compose.yml
@@ -17,7 +17,7 @@ all: build up
 build:
 	mkdir -p shared/avatars
 	chmod 777 shared/avatars
-	$(DOCKER_COMPOSE) build --no-cache
+	$(DOCKER_COMPOSE) build
 
 # Lancer tous les services
 up:
