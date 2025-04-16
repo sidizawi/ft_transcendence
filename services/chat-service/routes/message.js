@@ -195,6 +195,11 @@ export default async function messageRoutes(fastify, options) {
             return reply.code(204).send({ message: 'No messages found' });
         }
 
+        const sanitizedMessages = messages.map(message => ({
+            ...message,
+            content: typeof message.content === 'string' ? sanitizeInput(message.content) : message.content
+        }));
+
         // Mark messages as read
         fastify.db.prepare(`
             UPDATE messages 
@@ -203,7 +208,7 @@ export default async function messageRoutes(fastify, options) {
         `).run(otherUserId, currentUserId);
         
         reply.code(201);
-        return { messages };
+        return { sanitizedMessages };
     });
 
     fastify.register(async function (fastify) {
@@ -219,6 +224,12 @@ export default async function messageRoutes(fastify, options) {
             socket.on('message', (message) => {
                 let data = JSON.parse(message.toString());
 
+                if (data.text && typeof data.text === 'string') {
+                    data.text = sanitizeInput(data.text);
+                }
+                if (data.content && typeof data.content === 'string') {
+                    data.content = sanitizeInput(data.content);
+                }
                 if (data.type == "new") {
                     handleNewConn(fastify, data, socket);
                 } else if (data.type == "close") {
