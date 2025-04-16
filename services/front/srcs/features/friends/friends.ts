@@ -180,7 +180,7 @@ export class Friends {
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
                       >
-                      <span class="text-gray-900 dark:text-white hover:underline">${friend.username2}</span>
+                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
                     </div>
                     <div class="space-x-2">
                       <button 
@@ -216,7 +216,7 @@ export class Friends {
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
                       >
-                      <span class="text-gray-900 dark:text-white hover:underline">${friend.username2}</span>
+                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
                     </div>
                     <button 
                       class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-white transition-colors"
@@ -246,7 +246,7 @@ export class Friends {
                         >
                         <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
                       </div>
-                      <span class="text-gray-900 dark:text-white hover:underline">${friend.username2}</span>
+                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
                     </div>
                     <div class="flex items-center space-x-3">
                       <button 
@@ -302,7 +302,7 @@ export class Friends {
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover grayscale hover:opacity-80 transition-opacity"
                       >
-                      <span class="text-gray-900 dark:text-white hover:underline">${friend.username2}</span>
+                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
                     </div>
                     <button 
                       class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600"

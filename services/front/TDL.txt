@@ -1,15 +1,17 @@
 To Do:
 
 	FriendProfile page:
-		- URL !!!!@ /user/
+		- URL !!!!@ /users/
 
 	LogUp page:
 		- Check robustesse mdp quand create pcq back non (?)
 
 	Settings page:
-		- Avatar visual
-		- Pourquoi ca refresh pour aller vers profile
-		- Si username change en meme temps que email/mdp et mauvais code, si code ok apres, pb username deja change
+		- Avatar visual IDEM dans users/:username -> pb avec /../ -> check app.ts
+		- changer window.href.location ----> refresh pour rediriger
+		- ATTENTION mail de verif pas envoye au bon (new et pas ancien)
+		- faire sauter page query (chgt d'une data) dans historique
+		- ok si meme mdp????
 
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
@@ -19,6 +21,7 @@ To Do:
 
 	PARTOUT:
 		- Quand server renvoit erreur meme si traitee dans le front -> console du navigateur renvoit ERREUR
+		- quand trop de retour supprime historique???????
 	
 	Visuel:
 		-Profile page:

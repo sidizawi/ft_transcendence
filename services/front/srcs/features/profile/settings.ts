@@ -2,6 +2,7 @@ import { User } from '../../shared/types/user';
 import { i18n } from '../../shared/i18n';
 import { TokenManager } from '../../shared/utils/token';
 import { AvatarService } from '../../shared/services/avatarService';
+// import { Profile } from './profile';
 
 const host = window.location.hostname;
 const USER_API_URL = `http://${host}:3000/user/settings`;
@@ -11,11 +12,18 @@ export class Settings {
   constructor(private user: User) {}
 
   private updateView() {
+    // window.history.pushState({}, '', '/profile'); //show avatar dans settings, mais fait tout planter
     const main = document.querySelector('main');
     if (main) {
       main.innerHTML = this.render();
       this.setupEventListeners();
     }
+    // const main = document.querySelector('main');
+    // if (main) {
+    //   const profile = new Profile(this.state.user, () => this.handleLogout());
+    //   main.innerHTML = profile.render();
+    //   profile.setupEventListeners();
+    // }
   }
 
   private async fetchAndUpdateUserProfile() {
@@ -46,10 +54,6 @@ export class Settings {
         stats: this.user.stats // Keep existing stats
       };
 
-      // Update localStorage
-      localStorage.setItem('user', JSON.stringify(this.user));
-
-      // Update view
       this.updateView();
     } catch (error) {
       console.error('Error fetching user profile:', error);
@@ -64,11 +68,11 @@ export class Settings {
     if (!file) return;
 
     try {
-      const { avatarPath } = await AvatarService.uploadAvatar(file);
+      await AvatarService.uploadAvatar(file);
       await this.fetchAndUpdateUserProfile();
     } catch (error) {
       console.error('Avatar upload error:', error);
-      alert(error instanceof Error ? error.message : i18n.t('updateError'));
+      throw new Error(error || i18n.t('uploadAvatar'));
     }
   }
 
@@ -76,82 +80,78 @@ export class Settings {
     event.preventDefault();
     const form = event.target as HTMLFormElement;
     const formData = new FormData(form);
+  
+    const newUsername = formData.get('username') as string;
+    const newEmail = !this.user.google ? formData.get('email') as string : null;
+    const newPassword = !this.user.google ? formData.get('password') as string : '';
+    // const confirmPassword = !this.user.google ? formData.get('confirmPassword') as string : '';
 
-    const username = formData.get('username') as string;
-    const email = !this.user.google ? formData.get('email') as string : this.user.email;
-    const password = !this.user.google ? formData.get('password') as string : '';
-    const confirmPassword = !this.user.google ? formData.get('confirmPassword') as string : '';
-
-    try {
-      const updates: Promise<boolean>[] = [];
-
-      if (username !== this.user.username) {
-        updates.push(this.handleUsernameUpdate(username));
-      }
-      
-      if (!this.user.google) {
-        if (email && email !== this.user.email) {
-          updates.push(this.handleEmailUpdate(email));
-        }
-        
-        if (password) {
-          if (password && password !== confirmPassword) {
-            throw new Error(i18n.t('passwordMismatch'));
-          }
-          updates.push(this.handlePasswordUpdate(password));
-        }
-      }
-
-      if (updates.length > 0) {
-        const results = await Promise.all(updates);
-        if (results.every(result => result)) {
-          await this.fetchAndUpdateUserProfile();
-          window.location.href = '/profile';
-        }
-      }
-    } catch (error) {
-      console.error('Update error:', error);
-      alert(error instanceof Error ? error.message : i18n.t('updateError'));
+    // // For non-Google users, validate the password.
+    // if (!this.user.google && newPassword && newPassword !== confirmPassword) {
+    //   this.showVerificationError(messageDiv, i18n.t('passwordMismatch'));
+    //   return;
+    // }
+  
+    const payload: {
+      newUsername?: string;
+      newEmail?: string;
+      newPassword?: string;
+    } = {};
+  
+    if (newUsername && newUsername !== this.user.username) {
+      payload.newUsername = newUsername;
     }
-  }
+    if (!this.user.google) {
+      if (newEmail && newEmail !== this.user.email) {
+        payload.newEmail = newEmail;
+      }
+      if (newPassword) {
+        payload.newPassword = newPassword;
+      }
+    }
+  
+    if (Object.keys(payload).length === 0)
+      return;
+  
 
-  private async handleUsernameUpdate(username: string): Promise<boolean> {
-    try {
-      const response = await fetch(`${USER_API_URL}/username`, {
-        method: 'PUT',
-        headers: TokenManager.getAuthHeaders(),
-        body: JSON.stringify({ newUsername: username })
-      });
+    if (Object.keys(payload).length === 1 && payload.newUsername) {
+      try {
+        const response = await fetch(`${USER_API_URL}/username`, {
+          method: 'PUT',
+          headers: TokenManager.getAuthHeaders(),
+          body: JSON.stringify({ newUsername: payload.newUsername })
+        });
 
-      if (!response.ok) {
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || i18n.t('updateError'));
+        }
+
         const data = await response.json();
-        throw new Error(data.error || i18n.t('updateError'));
+        TokenManager.setToken(data.token);
+        
+        await this.fetchAndUpdateUserProfile();
+        // window.location.href = '/profile'; //ce qui cause reload
+        return true;
+      } catch (error) {
+        console.error('Username update error:', error);
+        throw error;
       }
-
-      const data = await response.json();
-      TokenManager.setToken(data.token);
-      
-      await this.fetchAndUpdateUserProfile();
-      return true;
-    } catch (error) {
-      console.error('Username update error:', error);
-      throw error;
     }
-  }
 
-  private async handleEmailUpdate(email: string): Promise<boolean> {
+
     try {
-      const requestResponse = await fetch(`${USER_API_URL}/email/request`, {
+      const requestResponse = await fetch(`${USER_API_URL}/update-request`, {
         method: 'POST',
         headers: TokenManager.getAuthHeaders(),
-        body: JSON.stringify({ newEmail: email })
+        body: JSON.stringify(payload)
       });
 
       if (!requestResponse.ok) {
-        const data = await requestResponse.json();
-        throw new Error(data.error || i18n.t('updateError'));
-      }
-
+          const data = await requestResponse.json();
+          throw new Error(data.error || i18n.t('updateError'));
+        }
+  
       return new Promise((resolve) => {
         const modal = this.createVerificationModal(i18n.t('emailVerification'));
         const verifyButton = document.getElementById('verify-code') as HTMLButtonElement;
@@ -167,7 +167,7 @@ export class Settings {
           }
 
           try {
-            const verifyResponse = await fetch(`${USER_API_URL}/email/verify`, {
+            const verifyResponse = await fetch(`${USER_API_URL}/update-confirm`, {
               method: 'PUT',
               headers: TokenManager.getAuthHeaders(),
               body: JSON.stringify({ verificationCode: code })
@@ -178,6 +178,7 @@ export class Settings {
               TokenManager.setToken(data.token);
               
               await this.fetchAndUpdateUserProfile();
+              // window.location.href = '/profile'; //ce qui cause reload
               modal.remove();
               resolve(true);
             } else {
@@ -191,7 +192,7 @@ export class Settings {
             this.showVerificationError(messageDiv, i18n.t('verificationError'));
           }
         };
-
+  
         codeInput?.addEventListener('input', () => {
           const code = codeInput.value.trim();
           verifyButton.disabled = !code || code.length !== 6 || !/^\d+$/.test(code);
@@ -215,84 +216,7 @@ export class Settings {
       throw error;
     }
   }
-
-  private async handlePasswordUpdate(password: string): Promise<boolean> {
-    try {
-      const requestResponse = await fetch(`${USER_API_URL}/password/request`, {
-        method: 'POST',
-        headers: TokenManager.getAuthHeaders(),
-        body: JSON.stringify({ newPassword: password })
-      });
-
-      if (!requestResponse.ok) {
-        const data = await requestResponse.json();
-        throw new Error(data.error || i18n.t('updateError'));
-      }
-
-      return new Promise((resolve) => {
-        const modal = this.createVerificationModal(i18n.t('passwordVerification'));
-        const verifyButton = document.getElementById('verify-code') as HTMLButtonElement;
-        const cancelButton = document.getElementById('cancel-verification');
-        const codeInput = document.getElementById('verification-code') as HTMLInputElement;
-        const messageDiv = document.getElementById('verification-message');
-
-        const handleVerify = async () => {
-          const code = codeInput.value.trim();
-          if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
-            this.showVerificationError(messageDiv, i18n.t('invalid2FACode'));
-            return;
-          }
-
-          try {
-            const verifyResponse = await fetch(`${USER_API_URL}/password/verify`, {
-              method: 'PUT',
-              headers: TokenManager.getAuthHeaders(),
-              body: JSON.stringify({
-                verificationCode: code,
-                newPassword: password
-              })
-            });
-
-            if (verifyResponse.ok) {
-              await this.fetchAndUpdateUserProfile();
-              modal.remove();
-              resolve(true);
-            } else {
-              const data = await verifyResponse.json();
-              this.showVerificationError(messageDiv, data.error || i18n.t('invalid2FACode'));
-              codeInput.value = '';
-              codeInput.focus();
-            }
-          } catch (error) {
-            console.error('Password verification error:', error);
-            this.showVerificationError(messageDiv, i18n.t('verificationError'));
-          }
-        };
-
-        codeInput?.addEventListener('input', () => {
-          const code = codeInput.value.trim();
-          verifyButton.disabled = !code || code.length !== 6 || !/^\d+$/.test(code);
-        });
-
-        verifyButton?.addEventListener('click', handleVerify);
-        codeInput?.addEventListener('keypress', (e) => {
-          if (e.key === 'Enter' && !verifyButton.disabled) {
-            e.preventDefault();
-            handleVerify();
-          }
-        });
-
-        cancelButton?.addEventListener('click', () => {
-          modal.remove();
-          resolve(false);
-        });
-      });
-    } catch (error) {
-      console.error('Password update error:', error);
-      throw error;
-    }
-  }
-
+  
   private async handleDeleteAccount() {
     // First step: Show password confirmation modal
     const modal = document.createElement('div');
