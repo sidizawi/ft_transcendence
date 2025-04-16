@@ -50,9 +50,9 @@ export class Friends {
     );
   }
 
-  private openChatInNewTab(userId: string) {
-    const chatUrl = `/chat/${userId}`;
-    const chatWindow = window.open(chatUrl, `chat-${userId}`, 'width=800,height=600');
+  private openChatInNewTab(username: string) {
+    const chatUrl = `/chat/${username}`;
+    const chatWindow = window.open(chatUrl, `chat-${username}`, 'width=800,height=600');
     if (chatWindow) {
       chatWindow.focus();
     }
@@ -272,7 +272,7 @@ export class Friends {
                       <button 
                         class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         data-action="chat"
-                        data-userid="${friend.userid2}"
+                        data-username="${friend.username2}"
                         title="${i18n.t('chat')}"
                       >
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -364,10 +364,10 @@ export class Friends {
     }
   }
 
-  private async handleFriendAction(action: string, username: string, userId?: string) {
+  private async handleFriendAction(action: string, username: string) {
     try {
-      if (action === 'chat' && userId) {
-        this.openChatInNewTab(userId);
+      if (action === 'chat' && username) {
+        this.openChatInNewTab(username);
         return;
       }
 
@@ -446,10 +446,10 @@ export class Friends {
         e.stopPropagation();
         const action = button.getAttribute('data-action');
         const username = button.getAttribute('data-username');
-        const userId = button.getAttribute('data-userid');
+        // const userId = button.getAttribute('data-userid');
 
         if (action && username) {
-          await this.handleFriendAction(action, username, userId);
+          await this.handleFriendAction(action, username);
         }
       });
     });
