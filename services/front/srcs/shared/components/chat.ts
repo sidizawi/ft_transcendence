@@ -7,7 +7,7 @@ export class Chat {
   private ws: WebSocket | null;
 
   constructor(friendUserName: string) {
-    this.friendUserName = friendUserName;
+    this.friendUserName = decodeURI(friendUserName);
     this.currentUser = TokenManager.getUserFromLocalStorage();
 
     const token = TokenManager.getToken();

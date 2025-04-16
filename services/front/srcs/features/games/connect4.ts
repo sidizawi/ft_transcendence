@@ -205,6 +205,8 @@ export class Connect4 {
   }
   
   setupConnect4FirstPageEventListener() {
+    this.setupCreateTournament();
+    return ;
     const playBtn = document.querySelectorAll(".connect4Btn");
 
     playBtn.forEach((btn) => {
@@ -222,6 +224,8 @@ export class Connect4 {
           this.myTurn = true;
           main!.innerHTML = this.renderCanvas();
           this.setupCanvasEventListener();
+        } else if (type == "playTournament") {
+          this.setupTournamentPage();
         } else {
           this.canPlay = false;
           this.online = true;
@@ -232,10 +236,99 @@ export class Connect4 {
     });
   }
 
+  setupTournamentPage() {
+    const main = document.querySelector("main");
+
+    // todo: add translate
+    // add previous btn
+    main!.innerHTML = `
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+            ${i18n.t('games.connect4.title')}
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+            ${i18n.t('games.connect4.description')}
+          </p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <button data="create" class="tournamentBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              create a tournament
+            </button>
+            <button data="join" class="tournamentBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              join a tournament
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const tournamentBtn = document.querySelectorAll(".tournamentBtn");
+
+    tournamentBtn.forEach((btn) => {
+      btn.addEventListener('click', (event) => {
+        const type = (event.target as HTMLElement).getAttribute("data");
+
+        if (type == "create") {
+          this.setupCreateTournament();
+        } else {
+          this.setupJoinTournament();
+        }
+      });
+    })
+  }
+
+  setupCreateTournament() {
+    const main = document.querySelector("main");
+
+    main!.innerHTML = `
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+            ${i18n.t('games.connect4.title')}
+          </h1>
+          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+            ${i18n.t('games.connect4.description')}
+          </p>
+          <div class="flex flex-col items-center">
+            <form id="createTournamentForm">
+              <div>
+                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Tournament name
+                </label>
+                <input id="tournamentName" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+              </div>
+              <div class="flex items-center justify-start space-x-2">
+                <input id="tournamentPrivate" type="radio" name="privacy"/>
+                <label for="tournamentPrivate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Private
+                </label>
+              </div>
+              <div>
+                <input id="tournamentPublic" type="radio" name="privacy"/>
+                <label for="tournamentPublic" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Public
+                </label>
+              </div>
+              <div>
+                <label for="tournamentCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Tournament code *
+                </label>
+                <input id="tournamentCode" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  setupJoinTournament() {}
+
   setupWebSocket(type : string | null) {
     const token = TokenManager.getToken();
 
-    this.ws = new WebSocket(`ws://${window.location.hostname}:3000/game/connect4/friend${token ? "?token="+token : ""}`);
+    const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
+    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/connect4/friend${token ? "?token="+token : ""}`);
 
     this.ws.onopen = () => {
       this.ws?.send(JSON.stringify({
@@ -337,7 +430,7 @@ export class Connect4 {
 
   renderCanvas(): string {
     if (this.online) {
-      // todo: check for the width
+      // todo: check for the width, and translate
       return `
         <div class="flex flex-col items-center justify-center h-screen">
           <div class="mb-1 flex" style="width: 700px;">

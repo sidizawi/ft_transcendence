@@ -19,6 +19,12 @@ function handleNewConn(fastify, data, socket) {
 			}));
 			return ;
 		}
+		if (room.type != "playVsFriend") {
+			socket.send(JSON.stringify({
+				mode: "close",
+				message: "can't play in this room"
+			}));
+		}
 		if (room.player2Username) {
 			socket.send(JSON.stringify({
 				mode: "close",
@@ -299,6 +305,15 @@ export const connect4Handler = async (fastify) => {
 			const data = JSON.parse(message.toString());
 
 			console.log("data received", data);
+
+			if (!data.id || !data.username) {
+				socket.send(JSON.stringify({
+					mode: "close",
+					message: "required field are empty",
+				}));
+				return ;
+			}
+
 			if (data.mode == "new") {
 				handleNewConn(fastify, data, socket);
 			} else if (data.mode == "play") {

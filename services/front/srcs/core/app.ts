@@ -38,7 +38,6 @@ export class TranscendenceApp {
     const token = TokenManager.getToken();
     if (token) {
       const user = TokenManager.getUserFromLocalStorage();
-      console.log("user", user);
       if (user) {
         this.state.user = user;
         // Restore user data from localStorage if available
