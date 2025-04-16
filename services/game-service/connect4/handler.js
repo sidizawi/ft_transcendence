@@ -291,6 +291,7 @@ export const connect4Handler = async (fastify) => {
 		socket.on("message", (message) => {
 			const data = JSON.parse(message.toString());
 
+			console.log("data received", data);
 			if (data.mode == "new") {
 				handleNewConn(fastify, data, socket);
 			} else if (data.mode == "play") {

@@ -33,7 +33,7 @@ export class Connect4 {
     this.ws = null;
     this.opponent = null;
     this.opponentColor = null;
-    this.user = TokenManager.getUserFromToken();
+    this.user = TokenManager.getUserFromLocalStorage();
   }
 
   drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {
