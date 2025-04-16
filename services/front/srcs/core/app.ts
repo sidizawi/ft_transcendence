@@ -166,14 +166,14 @@ export class TranscendenceApp {
       return;
     }
 
-    const userMatch = path.match(/^\/user\/(.+)$/);
+    const userMatch = path.match(/^\/users\/(.+)$/); //attention autorise tout apres /users
     if (userMatch && this.state.user) {
       const username = userMatch[1];
       const friendProfile = new FriendProfile(username, '/img/default-avatar.jpg');
       main.innerHTML = friendProfile.render();
       friendProfile.setupEventListeners();
       return;
-    }
+    } //fct a checker
 
     switch (path) {
       case '/':

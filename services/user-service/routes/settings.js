@@ -85,168 +85,194 @@ fastify.put('/username', async (request, reply) => {
   });
 
 
-fastify.post('/update-request', async (request, reply) => {
+  fastify.post('/update-request', async (request, reply) => {
 	try {
-	  await request.jwtVerify();
-	  const userId = request.user.id;
-	  const { newUsername, newEmail, currentPassword } = request.body;
-	  
-	  if (!newUsername && !newEmail && !request.body.newPassword) {
+	await request.jwtVerify();
+	const userId = request.user.id;
+	const { newUsername, newEmail, newPassword } = request.body;
+	
+	if (!newUsername && !newEmail && !newPassword) {
 		return reply.code(400).send({ error: 'At least one field to update is required' });
-	  }
-	  
-	  const user = fastify.db.prepare('SELECT username, email, password FROM users WHERE id = ?').get(userId);
-	  if (!user) {
+	}
+	
+	const user = fastify.db.prepare('SELECT username, email FROM users WHERE id = ?').get(userId);
+	if (!user) {
 		return reply.code(404).send({ error: 'User not found' });
-	  }
-
-	  if (!currentPassword) {
-		return reply.code(400).send({ error: 'Current password is required for verification' });
-	  }
-	  
-	  const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
-	  if (!isPasswordValid) {
-		return reply.code(401).send({ error: 'Current password is incorrect' });
-	  }
-	  
-	  if (newUsername && newUsername !== user.username) {
+	}
+	
+	if (newUsername && newUsername !== user.username) {
 		const usernameExists = fastify.db.prepare('SELECT id FROM users WHERE username = ?').get(newUsername);
 		if (usernameExists) {
-		  return reply.code(400).send({ error: 'Username already taken' });
+		return reply.code(400).send({ error: 'Username already taken' });
 		}
-	  }
-	  
-	  if (newEmail && newEmail !== user.email) {
+	}
+	
+	if (newEmail && newEmail !== user.email) {
 		const emailExists = fastify.db.prepare('SELECT id FROM users WHERE email = ?').get(newEmail);
 		if (emailExists) {
-		  return reply.code(400).send({ error: 'Email already in use' });
+		return reply.code(400).send({ error: 'Email already in use' });
 		}
-	  }
+	}
 
-	  const verificationCode = crypto.randomInt(100000, 999999).toString();
+	const verificationCode = crypto.randomInt(100000, 999999).toString();
 
-	  verificationCodes[userId] = {
+	verificationCodes[userId] = {
 		type: 'profile_update',
 		code: verificationCode,
 		updates: {
-		  username: newUsername || null,
-		  email: newEmail || null,
-		  password: request.body.newPassword || null
+		username: newUsername || null,
+		email: newEmail || null,
+		password: newPassword || null
 		},
 		expiresAt: Date.now() + 10 * 60 * 1000
-	  };
-	  
-	  const recipientEmail = newEmail || user.email;
+	};
+	
+	const recipientEmail = newEmail || user.email;
 
-	  try {
+	try {
 		await transporter.sendMail({
-		  from: `"Transcendence" <${process.env.EMAIL_MAIL}>`,
-		  to: recipientEmail,
-		  subject: 'Profile Update Verification Code',
-		  text: `Your verification code to update your profile is: ${verificationCode}. This code will expire in 10 minutes.`,
-		  html: `
+		from: `"Transcendence" <${process.env.EMAIL_MAIL}>`,
+		to: recipientEmail,
+		subject: 'Profile Update Verification Code',
+		text: `Your verification code to update your profile is: ${verificationCode}. This code will expire in 10 minutes.`,
+		html: `
 			<h2>Profile Update Request</h2>
 			<p>Your verification code to update your profile is: <strong>${verificationCode}</strong></p>
 			<p>This code will expire in 10 minutes.</p>
 			<p>Changes requested:</p>
 			<ul>
-			  ${newUsername ? `<li>Username: ${user.username} → ${newUsername}</li>` : ''}
-			  ${newEmail ? `<li>Email: ${user.email} → ${newEmail}</li>` : ''}
-			  ${request.body.newPassword ? '<li>Password: [updated]</li>' : ''}
+			${newUsername ? `<li>Username: ${user.username} → ${newUsername}</li>` : ''}
+			${newEmail ? `<li>Email: ${user.email} → ${newEmail}</li>` : ''}
+			${newPassword ? '<li>Password: [Password will be updated]</li>' : ''}
 			</ul>
-		  `
+		`
 		});
 		
 		reply.code(200).send({ 
-		  message: 'Verification code sent',
-		  sentTo: recipientEmail 
+		message: 'Verification code sent',
+		sentTo: recipientEmail 
 		});
-	  } catch (error) {
+	} catch (error) {
 		console.error('Error sending email:', error);
 		reply.code(500).send({ error: 'Failed to send verification email' });
-	  }
-	} catch (error) {
-	  console.error('Profile update request error:', error);
-	  reply.code(500).send({ error: 'Internal server error', details: error.message });
 	}
-  });
-  
-  fastify.put('/update-confirm', async (request, reply) => {
+	} catch (error) {
+	console.error('Profile update request error:', error);
+	reply.code(500).send({ error: 'Internal server error', details: error.message });
+	}
+});
+
+fastify.put('/update-confirm', async (request, reply) => {
 	try {
-	  await request.jwtVerify();
-	  const userId = request.user.id;
-	  const { verificationCode } = request.body;
-	  
-	  if (!verificationCode) {
+	await request.jwtVerify();
+	const userId = request.user.id;
+	const { verificationCode } = request.body;
+	
+	if (!verificationCode) {
 		return reply.code(400).send({ error: 'Verification code is required' });
-	  }
-	  
-	  const storedVerification = verificationCodes[userId];
-	  if (!storedVerification || 
-		  storedVerification.type !== 'profile_update' || 
-		  storedVerification.expiresAt < Date.now()) {
-		return reply.code(400).send({ error: 'Invalid or expired verification code' });
-	  }
-	  
-	  if (storedVerification.code !== verificationCode) {
-		return reply.code(400).send({ error: 'Incorrect verification code' });
-	  }
-	  
-	  const updates = storedVerification.updates;
-	  let updateSQL = [];
-	  let updateParams = [];
-	  let updateMessages = [];
-	  
-	  if (updates.username) {
+	}
+	
+	const userVerification = verificationCodes[userId];
+	if (!userVerification || userVerification.type !== 'profile_update') {
+		return reply.code(400).send({ error: 'No pending update request or invalid verification type' });
+	}
+	
+	if (userVerification.code !== verificationCode) {
+		return reply.code(401).send({ error: 'Invalid verification code' });
+	}
+	
+	if (userVerification.expiresAt < Date.now()) {
+		delete verificationCodes[userId];
+		return reply.code(401).send({ error: 'Verification code has expired' });
+	}
+	
+	const updates = userVerification.updates;
+	const updateSQL = [];
+	const updateParams = [];
+	const updateMessages = [];
+	
+	const currentUser = fastify.db.prepare('SELECT username, email FROM users WHERE id = ?').get(userId);
+	if (!currentUser) {
+		return reply.code(404).send({ error: 'User not found' });
+	}
+	
+	const oldUsername = currentUser.username;
+	
+	if (updates.username && updates.username !== oldUsername) {
 		updateSQL.push('username = ?');
 		updateParams.push(updates.username);
 		updateMessages.push('Username updated');
-	  }
-	  
-	  if (updates.email) {
+	}
+	
+	if (updates.email && updates.email !== currentUser.email) {
 		updateSQL.push('email = ?');
 		updateParams.push(updates.email);
 		updateMessages.push('Email updated');
-	  }
-	  
-	  if (updates.password) {
+	}
+	
+	if (updates.password) {
 		const hashedPassword = await bcrypt.hash(updates.password, 10);
 		updateSQL.push('password = ?');
 		updateParams.push(hashedPassword);
 		updateMessages.push('Password updated');
-	  }
-	  
-	  updateParams.push(userId);
-	  
-	  if (updateSQL.length > 0) {
+	}
+	
+	updateParams.push(userId);
+	
+	if (updateSQL.length > 0) {
+		const transaction = fastify.db.transaction(() => {
 		fastify.db.prepare(`
-		  UPDATE users 
-		  SET ${updateSQL.join(', ')} 
-		  WHERE id = ?
+			UPDATE users 
+			SET ${updateSQL.join(', ')} 
+			WHERE id = ?
 		`).run(...updateParams);
+		
+		if (updates.username && updates.username !== oldUsername) {
+			fastify.db.prepare('UPDATE friend SET username1 = ? WHERE userid1 = ? AND username1 = ?')
+			.run(updates.username, userId, oldUsername);
+			
+			fastify.db.prepare('UPDATE friend SET username2 = ? WHERE userid2 = ? AND username2 = ?')
+			.run(updates.username, userId, oldUsername);
+			
+			fastify.db.prepare('UPDATE game SET username_1 = ? WHERE playerid_1 = ? AND username_1 = ?')
+			.run(updates.username, userId, oldUsername);
+			
+			fastify.db.prepare('UPDATE game SET username_2 = ? WHERE playerid_2 = ? AND username_2 = ?')
+			.run(updates.username, userId, oldUsername);
+			
+			fastify.db.prepare('UPDATE game SET player_win = ? WHERE player_win = ? AND (playerid_1 = ? OR playerid_2 = ?)')
+			.run(updates.username, oldUsername, userId, userId);
+			
+			fastify.db.prepare('UPDATE game SET player_lost = ? WHERE player_lost = ? AND (playerid_1 = ? OR playerid_2 = ?)')
+			.run(updates.username, oldUsername, userId, userId);
+		}
+		});
+		
+		transaction();
 		
 		let token = null;
 		if (updates.username || updates.email) {
-		  const updatedUser = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
-		  token = fastify.jwt.sign({ id: updatedUser.id });
+		const updatedUser = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
+		token = fastify.jwt.sign({ 
+			id: updatedUser.id
+		});
 		}
 		
 		delete verificationCodes[userId];
 		
-		reply.code(200).send({ 
-		  message: 'Profile updated successfully', 
-		  updates: updateMessages.join(', '),
-		  token: token
+		return reply.code(200).send({ 
+		message: 'Profile updated successfully', 
+		updates: updateMessages.join(', '),
+		token: token
 		});
-	  } else {
-		reply.code(400).send({ error: 'No fields to update' });
-	  }
-	} catch (error) {
-	  console.error('Profile update confirmation error:', error);
-	  reply.code(500).send({ error: 'Failed to update profile', details: error.message });
+	} else {
+		return reply.code(400).send({ error: 'No fields to update' });
 	}
-  });
-
+	} catch (error) {
+	console.error('Profile update confirmation error:', error);
+	return reply.code(500).send({ error: 'Failed to update profile', details: error.message });
+	}
+});
 	
 	// Route pour uploader un avatar
 	fastify.post('/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
