@@ -66,8 +66,8 @@ async function statsRoutes(fastify, options) {
 		}
 	  
 		// The query uses a CASE expression to pick the avatar of the opponent:
-		// if the current user is player 1, then the avatar comes from users where id = playerid_2,
-		// otherwise it comes from users where id = playerid_1.
+		// if the current user is player 1, then the avatar comes FROM users where id = playerid_2,
+		// otherwise it comes FROM users where id = playerid_1.
 		const query = `
 		  SELECT 
 			g.*,
