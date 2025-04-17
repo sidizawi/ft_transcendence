@@ -61,13 +61,16 @@ To Do:
 		- check that the user can open only one game (open play with friend -> then play with AI (bug))
 
 	tournament:
-		- first page: create a tournament / join a tournament
 		- create tournament page: name, public | private, code, capacity
 		- join a tournament: list tournament (to join a private one, it needs a code)
 		- waiting page
 		- game page: where we can see each group
 		- canvas
 		- add previous and next btn
+		- save to db
+
+	games:
+		- check how to change href
 
 	chat:
 		- check connection

@@ -1,7 +1,9 @@
 let ROWS = 6;
 let COLS = 7;
 
-let rooms = new Map();
+let friendAndAIRooms = new Map();
+let tournamentRooms = new Map();
+let openTournaments = [];
 
 function getRoomId(fastify, data) {
 	const userGames = fastify.db.prepare("SELECT COUNT(*) AS count FROM game WHERE playerid_1 = ? OR playerid_2 = ?").get(data.id, data.id);
@@ -11,7 +13,7 @@ function getRoomId(fastify, data) {
 
 function handleNewConn(fastify, data, socket) {
 	if (data.room) {
-		const room = rooms.get(data.room);
+		const room = friendAndAIRooms.get(data.room);
 		if (!room) {
 			socket.send(JSON.stringify({
 				mode: "close",
@@ -48,7 +50,7 @@ function handleNewConn(fastify, data, socket) {
 		return ;
 	}
 	const roomId = getRoomId(fastify, data);
-	rooms.set(roomId, {
+	friendAndAIRooms.set(roomId, {
 		playerid_1: data.id,
 		player1Username: data.username,
 		playerid_2: null,
@@ -74,7 +76,7 @@ function handleNewConn(fastify, data, socket) {
 	}));
 }
 
-function   checkWin(data) {
+function checkWin(data) {
 	let idx, count, coin;
 	for (let i = 0; i < ROWS; i++) {
 		for (let j = 0; j < COLS; j++ ) {
@@ -187,7 +189,7 @@ function sendPlayedMessage(room, data) {
 }
 
 function handlePlay(fastify, data) {
-	let room = rooms.get(data.room);
+	let room = friendAndAIRooms.get(data.room);
 
 	let row = room.columns[data.col];
 	room.data[row * COLS + data.col] = data.color;
@@ -241,7 +243,7 @@ function handlePlay(fastify, data) {
 				room.player1Username,
 			);
 		}
-		rooms.delete(data.room);
+		friendAndAIRooms.delete(data.room);
 		return ;
 	}
 
@@ -277,7 +279,7 @@ function handlePlay(fastify, data) {
 			room.player2Username,
 		);
 
-		rooms.delete(data.room);
+		friendAndAIRooms.delete(data.room);
 		return ;
 	}
 
@@ -289,6 +291,54 @@ function handlePlay(fastify, data) {
 	}
 
 	sendPlayedMessage(room, data);
+}
+
+function handleCreateTournament(socket, data) {
+	const id = crypto.randomUUID();
+
+	tournamentRooms.set(id, {
+		createdBy: data.userId,
+		name: data.name,
+		code: data.code,
+		pub: data.pub,
+		numPlayers: data.players,
+		players: [
+			{
+				userId: data.userId,
+				username: data.username,
+				socket,
+				//games: []
+				//groups: []
+				//group: null
+			}
+		],
+	});
+
+	openTournaments.push(id);
+	
+	socket.send(JSON.stringify({
+		mode: "created",
+		room: id,
+	}));
+}
+
+function handleListTournament(socket) {
+	const lst = openTournaments.map((id) => {
+		let room = tournamentRooms.get(id);
+		if (!room) {
+			return null;
+		}
+		return {
+			room: id,
+			name: room.name,
+			pub: room.pub
+		};
+	}).filter((obj) => obj != null);
+
+	socket.send(JSON.stringify({
+		mode: "list",
+		lst
+	}));
 }
 
 export const connect4Handler = async (fastify) => {
@@ -321,4 +371,34 @@ export const connect4Handler = async (fastify) => {
 			}
 		});
 	});
+
+	fastify.get("/connect4/tournament", {websocket: true}, (socket, req) => {
+		const { token } = req.query;
+
+		if (!token) {
+			socket.close();
+		}
+
+		// todo: verify token
+
+		socket.on("message", (message) => {
+			const data = JSON.parse(message.toString());
+
+			console.log("tournament data received", data);
+
+			if (!data.userId || !data.username) {
+				socket.send(JSON.stringify({
+					mode: "close",
+					message: "invalid_identifier",
+				}));
+				return ;
+			}
+
+			if (data.mode == "create") {
+				handleCreateTournament(socket, data);
+			} else if (data.mode == "list") {
+				handleListTournament(socket);
+			}
+		});
+	})
 }

@@ -70,7 +70,7 @@ export const translations = {
         },
         connect4: {
           title: 'Vier Gewinnt',
-          description: 'Klassisches Vier-Gewinnt-Spiel - Fordere deine Freunde heraus oder spiele gegen die KI.'
+          description: 'Klassisches Vier-Gewinnt-Spiel - Fordere deine Freunde heraus oder spiele gegen die KI'
         }
       },
       tournaments: {
@@ -215,7 +215,7 @@ export const translations = {
         },
         connect4: {
           title: 'Connect 4',
-          description: 'Classic Connect 4 game - Challenge your friends or play against AI.'
+          description: 'Classic Connect 4 game - Challenge your friends or play against AI'
         }
       },
       tournaments: {
@@ -358,7 +358,7 @@ export const translations = {
         },
         connect4: {
           title: 'Puissance 4',
-          description: 'Jeu Puissance 4 classique - Défiez vos amis ou jouez contre l\'IA.'
+          description: 'Jeu Puissance 4 classique - Défiez vos amis ou jouez contre l\'IA'
         }
       },
       tournaments: {
@@ -503,7 +503,7 @@ export const translations = {
         },
         connect4: {
           title: 'Vier op een rij',
-          description: 'Klassiek Vier op een rij spel - Daag je vrienden uit of speel tegen AI.'
+          description: 'Klassiek Vier op een rij spel - Daag je vrienden uit of speel tegen AI'
         }
       },
       tournaments: {
