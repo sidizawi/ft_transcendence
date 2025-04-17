@@ -205,7 +205,19 @@ export class Connect4 {
   }
   
   setupConnect4FirstPageEventListener() {
-    this.setupTournamentPage();
+    this.renderJoinTournamentRoom({lst:[{
+      name: "here is the name of the tournament",
+      room: "test-123",
+      pub: false
+    }, {
+      name: "here is the name of the tournament",
+      room: "test-1234",
+      pub: true
+    }, {
+      name: "here is the name of the tournament",
+      room: "test-1235",
+      pub: false
+    }]});
     return ;
     const playBtn = document.querySelectorAll(".connect4Btn");
 
@@ -412,8 +424,6 @@ export class Connect4 {
       }
     }
 
-    this.ws.onclose = () => {}
-
     this.renderWaitingTournamentRoom();
   }
 
@@ -459,18 +469,30 @@ export class Connect4 {
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.connect4.title')}
+            ${i18n.t('games.connect4.title')} tournament
           </h1>
-          <!-- todo: change from websocket -->
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
-            ${data == null ? 
-              "loading tournaments" 
-              : 
-              data.lst.map((room : any) => {
-                ``
-              })
-            }
-          </p>
+          ${data == null ?
+            `
+            <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+              loading tournaments 
+            </p>
+            ` : ""
+          }
+          ${
+            !data ? "" :
+            data.lst.map((room: any) =>
+              `
+              <div class="flex items-center justify-between mb-4">
+                <p class="text-gray-600 dark:text-gray-400 text-center">${room.name}</p>
+                <div class="flex items-center justify-center">
+                  ${!room.pub ? `<input id="${room.room}-input" placeholder="tournament code" class="mx-2 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>` : ""}
+                  <button room="${room.room}" pub="${room.pub}" class="joinTournamentBtn p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                    join
+                  </button>
+                </div>
+              </div>
+            `).join('')
+          }
           <div class="flex items-center justify-center">
             <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
               Leave
@@ -487,6 +509,30 @@ export class Connect4 {
       this.cleanWs();
       this.rerender();
     });
+    
+    const joinBtns = document.querySelectorAll(".joinTournamentBtn");
+
+    joinBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        const room = (e.target as HTMLElement).getAttribute("room");
+        const pub = (e.target as HTMLElement).getAttribute("pub") == "true";
+
+        let code = null;
+        if (!pub) {
+          code = (document.getElementById(`${room}-input`) as HTMLInputElement)?.value;
+        }
+
+        this.ws?.send(JSON.stringify({
+          mode: "join",
+          room,
+          code,
+          userId: this.user?.id,
+          username: this.user?.username,
+        }));
+
+        this.renderWaitingTournamentRoom();
+      })
+    })
   }
 
   setupJoinTournament() {

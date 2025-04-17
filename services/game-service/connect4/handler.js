@@ -322,6 +322,27 @@ function handleCreateTournament(socket, data) {
 	}));
 }
 
+/*
+	one tournament
+	{
+		createdBy: data.userId,
+		name: data.name,
+		code: data.code,
+		pub: data.pub,
+		numPlayers: data.players,
+		players: [
+			{
+				userId: data.userId,
+				username: data.username,
+				socket,
+				//games: []
+				//groups: []
+				//group: null
+			}
+		],
+	}
+*/
+
 function handleListTournament(socket) {
 	const lst = openTournaments.map((id) => {
 		let room = tournamentRooms.get(id);
@@ -339,6 +360,18 @@ function handleListTournament(socket) {
 		mode: "list",
 		lst
 	}));
+}
+
+function handleJoinTournament(socket, data) {
+	// data : room, code, userId, username 
+
+	const room = tournamentRooms.get(data.room);
+
+	if (!room) {
+		socket.send(JSON.stringify({
+			mode: "",
+		}))
+	}
 }
 
 export const connect4Handler = async (fastify) => {
@@ -398,7 +431,13 @@ export const connect4Handler = async (fastify) => {
 				handleCreateTournament(socket, data);
 			} else if (data.mode == "list") {
 				handleListTournament(socket);
+			} else if (data.mode == "join") {
+				handleJoinTournament(socket, data);
 			}
 		});
+
+		socket.on("close", () => {
+			// todo: remove user from the room
+		})
 	})
 }
