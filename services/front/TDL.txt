@@ -1,16 +1,11 @@
 To Do:
 
-	FriendProfile page:
-		- URL !!!!@ /users/
-
 	LogUp page:
 		- Check robustesse mdp quand create pcq back non (?)
 
 	Settings page:
 		- Avatar visual IDEM dans users/:username -> pb avec /../ -> check app.ts
 		- changer window.href.location ----> refresh pour rediriger
-		- ATTENTION mail de verif pas envoye au bon (new et pas ancien)
-		- faire sauter page query (chgt d'une data) dans historique
 		- ok si meme mdp????
 
 	Friends page:
@@ -22,6 +17,8 @@ To Do:
 	PARTOUT:
 		- Quand server renvoit erreur meme si traitee dans le front -> console du navigateur renvoit ERREUR
 		- quand trop de retour supprime historique???????
+		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
+		- si /users/URLPAGE EXISTANTE affiche page profile de settings/pong etc
 	
 	Visuel:
 		-Profile page:
@@ -59,6 +56,9 @@ To Do:
 
 	pong:
 		- check if the websocket is closed
+
+
+
 
       let url = "http://localhost:3001/login";
       url = url.replace("localhost", window.location.hostname);

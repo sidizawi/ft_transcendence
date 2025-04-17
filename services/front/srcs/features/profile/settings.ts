@@ -501,7 +501,6 @@ export class Settings {
                       id="email"
                       name="email"
                       placeholder="${this.user.email}"
-                      value="${this.user.email}"
                       class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     />
                   </div>

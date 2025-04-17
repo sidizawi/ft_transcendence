@@ -41,6 +41,7 @@ export const translations = {
       save: 'Speichern',
       saveChanges: 'Änderungen speichern',
       back: 'Zurück',
+      emailVerification: 'Verifizierung per E-Mail',
       deleteAccount: 'Konto löschen',
       deleteAccountConfirm: 'Sind Sie sicher, dass Sie Ihr Konto löschen möchten?',
       deleteAccountWarning: 'Diese Aktion kann nicht rückgängig gemacht werden.',
@@ -84,6 +85,7 @@ export const translations = {
       addFriend: 'Freund hinzufügen',
       enterUsername: 'Benutzername eingeben',
       add: 'Hinzufügen',
+      searchFriends: 'Freunde suchen',
       friendStatus: {
         sending: 'Anfrage gesendet',
         receiving: 'Anfrage erhalten',
@@ -187,6 +189,7 @@ export const translations = {
       save: 'Save',
       saveChanges: 'Save Changes',
       back: 'Back',
+      emailVerification: 'Verification by email',
       deleteAccount: 'Delete Account',
       deleteAccountConfirm: 'Are you sure you want to delete your account?',
       deleteAccountWarning: 'This action cannot be undone.',
@@ -229,6 +232,7 @@ export const translations = {
       addFriend: 'Add Friend',
       enterUsername: 'Enter username',
       add: 'Add',
+      searchFriends: 'Search friends',
       friendStatus: {
         sending: 'Request sent',
         receiving: 'Request received',
@@ -329,6 +333,7 @@ export const translations = {
       save: 'Enregistrer',
       saveChanges: 'Enregistrer les modifications',
       back: 'Retour',
+      emailVerification: 'Vérification par email',
       deleteAccount: 'Supprimer le compte',
       deleteAccountConfirm: 'Êtes-vous sûr de vouloir supprimer votre compte ?',
       deleteAccountWarning: 'Cette action ne peut pas être annulée.',
@@ -372,6 +377,7 @@ export const translations = {
       addFriend: 'Ajouter un ami',
       enterUsername: "Entrez le nom d'utilisateur",
       add: 'Ajouter',
+      searchFriends: 'Rechercher des amis',
       friendStatus: {
         sending: 'Demande envoyée',
         receiving: 'Demande reçue',
@@ -474,6 +480,7 @@ export const translations = {
       save: 'Opslaan',
       saveChanges: 'Wijzigingen opslaan',
       back: 'Terug',
+      emailVerification: 'Verificatie per e-mail',
       deleteAccount: 'Account verwijderen',
       deleteAccountConfirm: 'Weet u zeker dat u uw account wilt verwijderen?',
       deleteAccountWarning: 'Deze actie kan niet ongedaan worden gemaakt.',
@@ -517,6 +524,7 @@ export const translations = {
       addFriend: 'Vriend toevoegen',
       enterUsername: 'Voer gebruikersnaam in',
       add: 'Toevoegen',
+      searchFriends: 'Vrienden zoeken',
       friendStatus: {
         sending: 'Verzoek verzonden',
         receiving: 'Verzoek ontvangen',
