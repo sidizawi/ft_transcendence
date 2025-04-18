@@ -2,7 +2,7 @@ import { i18n } from '../i18n';
 import { TokenManager } from './token';
 
 const host = window.location.hostname;
-const AUTH_API_URL = `http://${host}:3000/auth/2fa`;
+const AUTH_API_URL = `https://${host}:8080/api/auth/2fa`;
 
 export class TwoFactorAuth {
   static async enable(): Promise<{ success: boolean }> {

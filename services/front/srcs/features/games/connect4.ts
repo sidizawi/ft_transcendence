@@ -3,6 +3,9 @@ import { i18n } from '../../shared/i18n';
 import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
 
+const host = window.location.hostname;
+const CONNECT4_WS_URL = `wss://${host}:8080/ws/game/connect4`;
+
 export class Connect4 {
 
   private cols = 7;
@@ -233,7 +236,8 @@ export class Connect4 {
   setupWebSocket(type : string | null) {
     const token = TokenManager.getToken();
 
-    this.ws = new WebSocket(`ws://${window.location.hostname}:3000/game/connect4/friend${token ? "?token="+token : ""}`);
+    
+    this.ws = new WebSocket(`${CONNECT4_WS_URL}/friend${token ? "?token="+token : ""}`);
 
     this.ws.onopen = () => {
       this.ws?.send(JSON.stringify({

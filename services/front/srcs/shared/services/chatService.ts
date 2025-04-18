@@ -2,7 +2,7 @@ import { io, Socket } from 'socket.io-client';
 import { TokenManager } from '../utils/token';
 
 const host = window.location.hostname;
-const CHAT_API_URL = `http://${host}:3000/chat/message`;
+const CHAT_API_URL = `https://${host}:8080/api/chat/message`;
 
 export interface ChatMessage {
   id: string;

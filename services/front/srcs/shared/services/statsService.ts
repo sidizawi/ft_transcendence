@@ -2,8 +2,8 @@ import { TokenManager } from '../utils/token';
 import { GameStats, FriendGameStats } from '../types/game';
 
 const host = window.location.hostname;
-const STATS_API_URL = `http://${host}:3000/user/stats`;
-const FRIEND_STATS_API_URL = `http://${host}:3000/user/friend`;
+const STATS_API_URL = `https://${host}:8080/api/user/stats`;
+const FRIEND_STATS_API_URL = `https://${host}:8080/api/user/friend`;
 
 export class StatsService {
   static async getGameStats(gameType: 'pong' | 'p4'): Promise<GameStats> {

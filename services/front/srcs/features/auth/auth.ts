@@ -5,8 +5,8 @@ import { TokenManager } from '../../shared/utils/token';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 
 const host = window.location.hostname;
-const AUTH_API_URL = `http://${host}:3000/auth`;
-const USER_API_URL = `http://${host}:3000/user`;
+const AUTH_API_URL = `https://${host}:8080/api/auth`;
+const USER_API_URL = `https://${host}:8080/api/user`;
 
 export class Auth {
   constructor(private onLogin: (user: User) => void) {
