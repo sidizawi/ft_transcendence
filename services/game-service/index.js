@@ -9,18 +9,16 @@ dotenv.config();
 
 const fastify = Fastify({logger: true})
 
-fastify.decorate('db', db);
+// fastify.register(require('@fastify/jwt'), {
+//   secret: process.env.JWT_SECRET });
 
-fastify.register(require('@fastify/jwt'), {
-  secret: process.env.JWT_SECRET });
-
-fastify.decorate('authenticate', async (request, reply) => {
-  try {
-    await request.jwtVerify();
-  } catch (err) {
-    reply.code(401).send({ error: 'Unauthorized' });
-  }
-});
+// fastify.decorate('authenticate', async (request, reply) => {
+//   try {
+//     await request.jwtVerify();
+//   } catch (err) {
+//     reply.code(401).send({ error: 'Unauthorized' });
+//   }
+// });
 
 fastify.decorate('db', db);
 
@@ -114,17 +112,8 @@ fastify.register(async function (wsRoutes) {
     const { token } = req.query;
     const ws = socket;
 
-    if (token) {
-      try {
-        const userData = fastify.jwt.verify(token);
-        ws.userId = userData.id;
-        ws.username = userData.username;
-        console.log(`User authenticated: ${ws.userId} (${ws.username})`);
-      } catch (err) {
-        console.error('JWT verification failed:', err);
-        ws.close(1008, 'Invalid token');
-        return;
-      }
+    if (!token)  {
+       socket.close();
     }
      ws.on('message', (message) => {
       try {
