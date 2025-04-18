@@ -12,20 +12,26 @@ async function friendRoutes(fastify, options) {
 		}
 	
 		await request.jwtVerify();
-		const actualuser = request.user.username;
 		const actualid = request.user.id;
-	
+
+		const actualUser = fastify.db.prepare("SELECT * FROM users WHERE id = ?").get(actualid);
+		if (!actualUser) {
+			reply.code(400);
+			return { error: 'User not found'};
+		}
+		const actualuser = actualUser.username;
+
 		if (actualuser === username){
 			reply.code(400)
 			return { error: 'Cannot add yourself'}
 		}
-	
+
 		const userExists = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(username);
 		if (!userExists) {
 			reply.code(400);
 			return { error: 'Username doesnt exist'};
 		}
-	
+
 		const friendid = userExists.id;
 
 		const actualUserRow = fastify.db.prepare("SELECT * FROM friend WHERE (userid1, userid2) = (?, ?)").get(actualid, friendid);

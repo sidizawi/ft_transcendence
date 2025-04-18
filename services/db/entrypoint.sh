@@ -10,8 +10,9 @@ CREATE TABLE IF NOT EXISTS users (
     password TEXT NOT NULL,
     avatar TEXT DEFAULT NULL,
     game_data TEXT DEFAULT '{}',
-    is_two_factor_enabled BOOLEAN DEFAULT 1,
-    status BOOLEAN NOT NULL CHECK (status IN (0, 1)) DEFAULT 0
+    is_two_factor_enabled BOOLEAN DEFAULT 0,
+    status BOOLEAN NOT NULL CHECK (status IN (0, 1)) DEFAULT 0,
+    google BOOLEAN DEFAULT 0
 );
 CREATE TABLE IF NOT EXISTS friend (
     userid1 INTEGER,
@@ -22,8 +23,8 @@ CREATE TABLE IF NOT EXISTS friend (
     PRIMARY KEY (userid1, userid2),
     FOREIGN KEY (userid1) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (userid2) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (username1) REFERENCES users(username) ON DELETE CASCADE,
-    FOREIGN KEY (username2) REFERENCES users(username) ON DELETE CASCADE 
+    FOREIGN KEY (username1) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (username2) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS game (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,10 +40,10 @@ CREATE TABLE IF NOT EXISTS game (
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (playerid_1) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (playerid_2) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (username_1) REFERENCES users(username) ON DELETE CASCADE,
-    FOREIGN KEY (username_2) REFERENCES users(username) ON DELETE CASCADE,
-    FOREIGN KEY (player_win) REFERENCES users(username) ON DELETE CASCADE,
-    FOREIGN KEY (player_lost) REFERENCES users(username) ON DELETE CASCADE
+    FOREIGN KEY (username_1) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (username_2) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (player_win) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (player_lost) REFERENCES users(username) ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE IF NOT EXISTS messages (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,6 +65,17 @@ CREATE TABLE IF NOT EXISTS conversations (
     FOREIGN KEY (user1_id) REFERENCES users(id),
     FOREIGN KEY (user2_id) REFERENCES users(id),
     FOREIGN KEY (last_message_id) REFERENCES messages(id)
+);
+CREATE TABLE IF NOT EXISTS gdpr_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    email TEXT NOT NULL,
+    request_type TEXT NOT NULL,
+    details TEXT,
+    status TEXT NOT NULL,
+    created_at DATETIME NOT NULL,
+    processed_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 EOF
 

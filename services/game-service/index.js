@@ -1,7 +1,7 @@
-import Fastify from 'fastify';
-import websocket from '@fastify/websocket';
 import dotenv from 'dotenv';
+import Fastify from 'fastify';
 import db from './db.js';
+import websocket from '@fastify/websocket';
 import { createGame, addPlayer, updatePlayerPosition, handleDisconnect, startGame } from './pong/game.js';
 import { connect4Handler } from './connect4/handler.js'
 
@@ -21,6 +21,8 @@ fastify.decorate('authenticate', async (request, reply) => {
     reply.code(401).send({ error: 'Unauthorized' });
   }
 });
+
+fastify.decorate('db', db);
 
 fastify.register(websocket);
 

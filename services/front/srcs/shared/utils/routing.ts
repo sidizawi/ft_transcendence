@@ -24,13 +24,11 @@ export class Router {
   }
 
   checkAuthAndRedirect(path: string): string {
-    // Redirect to profile if trying to access auth pages while logged in
     if ((path === '/signin' || path === '/signup') && this.isLoggedIn()) {
       this.navigateTo('/profile');
       return '/profile';
     }
 
-    // Redirect to signin if trying to access protected pages while logged out
     if ((path === '/profile' || path === '/profile/settings') && !this.isLoggedIn()) {
       this.navigateTo('/signin');
       return '/signin';

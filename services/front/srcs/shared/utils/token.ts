@@ -58,8 +58,15 @@ export class TokenManager {
           totalGames: 0,
           winRate: 0
         }
-      }
+      },
+      google: decoded.google
     };
+  }
+
+  static getUserFromLocalStorage(): User | null {
+    let decoded = localStorage.getItem("user");
+    if (!decoded) return null;
+    return JSON.parse(decoded) as User;
   }
 
   static getAuthHeaders(): HeadersInit {
