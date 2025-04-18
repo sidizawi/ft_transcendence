@@ -1,5 +1,5 @@
 let chatRooms = new Map();
-
+  
 function handleNewConn(fastify, data, socket) {
     let id, chatRoom;
     let id1 = `${data.user}-${data.friend}`;
@@ -41,7 +41,7 @@ function handleNewConn(fastify, data, socket) {
 
     const messages = dbMessages.map((mess) => {
         return {
-            text: typeof mess.content === 'string' ? sanitizeInput(mess.content) : mess.content,
+            text: mess.content,
             sender: mess.sender_id == chatRoom.user1Id ? chatRoom.user1 : chatRoom.user2,
             timestamp: mess.timestamp
         };
@@ -83,7 +83,7 @@ function handleNewMessage(fastify, data) {
     let id2 = `${data.friend}-${data.user}`;
 
     if (data.text && typeof data.text === 'string') {
-        data.text = sanitizeInput(data.text);
+        data.text = data.text;
     }
 
     if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
@@ -195,11 +195,6 @@ export default async function messageRoutes(fastify, options) {
             return reply.code(204).send({ message: 'No messages found' });
         }
 
-        const sanitizedMessages = messages.map(message => ({
-            ...message,
-            content: typeof message.content === 'string' ? sanitizeInput(message.content) : message.content
-        }));
-
         // Mark messages as read
         fastify.db.prepare(`
             UPDATE messages 
@@ -208,7 +203,7 @@ export default async function messageRoutes(fastify, options) {
         `).run(otherUserId, currentUserId);
         
         reply.code(201);
-        return { sanitizedMessages };
+        return { messages };
     });
 
     fastify.register(async function (fastify) {
@@ -224,12 +219,6 @@ export default async function messageRoutes(fastify, options) {
             socket.on('message', (message) => {
                 let data = JSON.parse(message.toString());
 
-                if (data.text && typeof data.text === 'string') {
-                    data.text = sanitizeInput(data.text);
-                }
-                if (data.content && typeof data.content === 'string') {
-                    data.content = sanitizeInput(data.content);
-                }
                 if (data.type == "new") {
                     handleNewConn(fastify, data, socket);
                 } else if (data.type == "close") {
