@@ -87,7 +87,7 @@ function setupNewGame(ws, mode, opponent = null) {
 }
 
 fastify.register(async function (wsRoutes) {
-  wsRoutes.get('/ws/pong', { websocket: true }, (socket, req) => {
+  wsRoutes.get('/pong', { websocket: true }, (socket, req) => {
     console.log('Player connected');
     const { token } = req.query;
     //if (!token) {

@@ -6,6 +6,9 @@ import { drawWaitingScreen, gameLoop } from './pong/draw';
 import { handleKeyDown, handleKeyUp } from './pong/event';
 import Paddle from './pong/Paddle';
 
+const host = window.location.hostname;
+const PONG_WS_URL = `wss://${host}:8080/ws/game/pong`;
+
 export class Pong {
 
   private BALL_SIZE = 10;
@@ -78,8 +81,7 @@ export class Pong {
     this.state.rightPlayer = new Paddle(this.state.canvas.width - 20, this.state.canvas.height / 2 - this.PADDLE_HEIGHT / 2, this.PADDLE_WIDTH, this.PADDLE_HEIGHT, this.PADDLE_SPEED);
     
     const token = TokenManager.getToken();
-    const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
-    this.state.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/ws/pong?${token ? `token=${token}` : ''}`);
+    this.state.ws = new WebSocket(`${PONG_WS_URL}?${token ? `token=${token}` : ''}`);
 
     this.state.ws.onclose = () => {
       console.log("Disconnected from server");
