@@ -1,10 +1,18 @@
 import Fastify from 'fastify';
 import websocket from '@fastify/websocket';
 import dotenv from 'dotenv';
+import db from './db.js';
 import { createGame, addPlayer, updatePlayerPosition, handleDisconnect, startGame } from './pong/game.js';
 import { connect4Handler } from './connect4/handler.js'
 
 dotenv.config();
+
+const fastify = Fastify({logger: true})
+
+fastify.decorate('db', db);
+
+fastify.register(require('@fastify/jwt'), {
+  secret: process.env.JWT_SECRET });
 
 fastify.decorate('authenticate', async (request, reply) => {
   try {
@@ -17,10 +25,19 @@ fastify.decorate('authenticate', async (request, reply) => {
 fastify.register(websocket);
 
 let canvasDimensions;
-const waitingPlayers = [];
+export const waitingPlayers = [];
+export const activePlayerIds = new Set();
 
 // Helper function for creating games
 function setupNewGame(ws, mode, opponent = null) {
+  // Check if user is already in a game
+  if (ws.userId && activePlayerIds.has(ws.userId)) {
+    ws.send(JSON.stringify({
+      type: 'error',
+      message: 'You are already in a game'
+    }));
+    return null;
+  }
   // Generate a unique game ID
   const gameId = `game-${Date.now()}`;
   // Create a new game with the client dimensions
@@ -93,13 +110,20 @@ fastify.register(async function (wsRoutes) {
   wsRoutes.get('/ws/pong', { websocket: true }, (socket, req) => {
     console.log('Player connected');
     const { token } = req.query;
-    //if (!token) {
-    //  socket.close();
-    //  return;
-    //}
-    // todo: check for local
-
     const ws = socket;
+
+    if (token) {
+      try {
+        const userData = fastify.jwt.verify(token);
+        ws.userId = userData.id;
+        ws.username = userData.username;
+        console.log(`User authenticated: ${ws.userId} (${ws.username})`);
+      } catch (err) {
+        console.error('JWT verification failed:', err);
+        ws.close(1008, 'Invalid token');
+        return;
+      }
+    }
      ws.on('message', (message) => {
       try {
         const data = JSON.parse(message.toString());

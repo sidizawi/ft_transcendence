@@ -1,5 +1,8 @@
-import { aiMove } from "./ai.js";
+import { aiThink, aiMove } from "./ai.js";
 import Ball from './Ball.js';
+import { createAndUpdateGameRecord } from '../db.js';
+import { activePlayerIds } from '../index.js';
+
 
 // Game constants
 const WINNING_SCORE = 4;
@@ -43,7 +46,7 @@ export const createGame = (gameId, wss, dimensions = null) => {
   return games[gameId];
 };
 
-// Add player to game
+// Add player to game - update to store usernames
 export const addPlayer = (gameId, playerId, ws) => {
   const game = games[gameId];
   if (!game) return null;
@@ -51,13 +54,26 @@ export const addPlayer = (gameId, playerId, ws) => {
   // Determine which side the player will be on
   const side = Object.keys(game.players).length === 0 ? 'left' : 'right';
   
-  // Add player to the game
+  // Get username based on connection type
+  let username = side;
+  if (ws && ws.username) {
+    username = ws.username;
+  } else if (playerId.startsWith('ai-')) {
+    username = "Computer";
+  } else {
+    username = `Player ${side === 'left' ? '1' : '2'}`;
+  }
+  
+  // Add player to the game with username info
   game.players[playerId] = {
     id: playerId,
     side: side,
     y: game.dimensions.height / 2 - game.dimensions.paddleHeight / 2,
-    targetY: game.dimensions.height / 2 - game.dimensions.paddleHeight / 2, // Add this
-    ws: ws
+    targetY: game.dimensions.height / 2 - game.dimensions.paddleHeight / 2,
+    ws: ws,
+    userId: ws ? ws.userId : null,
+    username: username,
+    dbGameId: ws ? ws.dbGameId : null
   };
   
   // If we have two players, start the game
@@ -100,7 +116,7 @@ export const startGame = (gameId) => {
   if (aiPlayer) {
     // Create AI movement interval - once per second
     game.aiInterval = setInterval(() => {
-      aiMove(game.ball, aiPlayer, game.dimensions);
+      aiThink(game.ball, aiPlayer, game.dimensions);
     }, 1000); // 1000ms = 1 second
   }
   
@@ -108,25 +124,64 @@ export const startGame = (gameId) => {
   game.intervalId = setInterval(() => updateGame(gameId), 1000/60); // 60fps
 };
 
-// Stop game
-export const stopGame = (gameId) => {
+// Stop game - update to record results
+export const stopGame = (gameId, winner = null) => {
   const game = games[gameId];
-  if (!game || game.status !== 'playing') return;
+  if (!game) return;
   
-  // Clear the interval to stop the game loop
-  if (game.intervalId) {
-    clearInterval(game.intervalId);
-    game.intervalId = null;
-  }
+  // Clear intervals
+  if (game.intervalId) clearInterval(game.intervalId);
+  if (game.aiInterval) clearInterval(game.aiInterval);
   
   game.status = 'gameOver';
   
-  // Broadcast game end to all players
+  // Determine winner if not specified
+  if (!winner) {
+    winner = game.scores.left > game.scores.right ? 'left' : 'right';
+  }
+  
+  // Get player information
+  const leftPlayer = Object.values(game.players).find(p => p.side === 'left');
+  const rightPlayer = Object.values(game.players).find(p => p.side === 'right');
+  
+  // Remove players from active players Set (import this from index.js)
+  if (leftPlayer?.userId) {
+    activePlayerIds.delete(leftPlayer.userId);
+  }
+  if (rightPlayer?.userId) {
+    activePlayerIds.delete(rightPlayer.userId);
+  }
+  
+  // Get usernames
+  const winnerPlayer = winner === 'left' ? leftPlayer : rightPlayer;
+  const loserPlayer = winner === 'left' ? rightPlayer : leftPlayer;
+  
+  const winnerName = winnerPlayer?.username || winner;
+  const loserName = loserPlayer?.username || (winner === 'left' ? 'right' : 'left');
+  
+  // Write completed game to database
+  if ((leftPlayer && leftPlayer.userId) || (rightPlayer && rightPlayer.userId)) {
+    createAndUpdateGameRecord(
+      leftPlayer?.userId || 0,
+      rightPlayer?.userId || 0,
+      leftPlayer?.username || "Player 1",
+      rightPlayer?.username || "Player 2",
+      game.scores.left,
+      game.scores.right,
+      winnerName,
+      loserName
+    );
+    
+    console.log(`Game ${gameId} saved to DB: ${winnerName} beat ${loserName}`);
+  }
+  
+  // Send game over message to both players with usernames
   Object.values(game.players).forEach(player => {
     if (player.ws && player.ws.readyState === 1) {
       player.ws.send(JSON.stringify({
         type: 'gameOver',
-        winner: game.scores.left > game.scores.right ? 'left' : 'right',
+        winner: winnerName,
+        loser: loserName,
         scores: game.scores
       }));
     }
@@ -180,10 +235,10 @@ const updateGame = (gameId) => {
   // Get players
   const leftPlayer = Object.values(players).find(p => p.side === 'left');
   const rightPlayer = Object.values(players).find(p => p.side === 'right');
-  const aiPlayer = Object.values(players).find(p => p.ws === null);
+  const aiPlayer = Object.values(game.players).find(p => p.id.startsWith('ai-'));
 
   if (aiPlayer) {
-    aiMove(ball, aiPlayer, dimensions);
+    aiMove(aiPlayer, PADDLE_SPEED);
   }
   
   if (!leftPlayer || !rightPlayer) return;
@@ -243,29 +298,18 @@ const updateGame = (gameId) => {
       stopGame(gameId);
     }
   }
-  // AI move for single player mode
-  // Move AI smoothly toward target
-  Object.values(game.players).forEach(player => {
-    if (player.id.startsWith('ai-') && player.targetY !== undefined) {
-      // Move toward target position at normal paddle speed
-      if (Math.abs(player.y - player.targetY) < PADDLE_SPEED) {
-        player.y = player.targetY; // Arrived at target
-      } else if (player.y < player.targetY) {
-        player.y += PADDLE_SPEED; // Move down
-      } else if (player.y > player.targetY) {
-        player.y -= PADDLE_SPEED; // Move up
-      }
-    }
-  });
   
   // Send game state to all connected players
   broadcastGameState(gameId);
 };
 
-// Broadcast current game state to all players
+// Broadcast current game state to all players - update to include usernames
 const broadcastGameState = (gameId) => {
   const game = games[gameId];
   if (!game) return;
+  
+  const leftPlayer = Object.values(game.players).find(p => p.side === 'left');
+  const rightPlayer = Object.values(game.players).find(p => p.side === 'right');
   
   const gameState = {
     type: 'gameState',
@@ -274,8 +318,10 @@ const broadcastGameState = (gameId) => {
       y: game.ball.y
     },
     players: {
-      left: Object.values(game.players).find(p => p.side === 'left')?.y,
-      right: Object.values(game.players).find(p => p.side === 'right')?.y
+      left: leftPlayer?.y,
+      right: rightPlayer?.y,
+      leftName: leftPlayer?.username || 'Left',
+      rightName: rightPlayer?.username || 'Right'
     },
     scores: game.scores,
     status: game.status
@@ -297,6 +343,11 @@ export const handleDisconnect = (gameId, playerId) => {
   // Remove player from game
   if (game.players[playerId]) {
     delete game.players[playerId];
+  }
+
+  const player = game.players[playerId];
+  if (player && player.userId) {
+    activePlayerIds.delete(player.userId);
   }
   
   // If game is in progress, end it

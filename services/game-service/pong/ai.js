@@ -1,5 +1,5 @@
 // AI move function that works directly with game structure
-export const aiMove = (ball, aiPlayer, dimensions) => {
+export const aiThink = (ball, aiPlayer, dimensions) => {
   const { width, height, paddleWidth, paddleHeight } = dimensions;
   
   // Only think if we have an AI player
@@ -66,3 +66,15 @@ function predictBallPosition(initialY, speedY, time, canvasHeight) {
     return fullCycle - normalizedPosition;
   }
 }
+
+export const aiMove = (aiPlayer, paddleSpeed) => {
+  if (!aiPlayer || aiPlayer.targetY === undefined) return;
+
+  if (Math.abs(aiPlayer.y - aiPlayer.targetY) < paddleSpeed) {
+    aiPlayer.y = aiPlayer.targetY;
+  } else if (aiPlayer.y < aiPlayer.targetY) {
+    aiPlayer.y += paddleSpeed;
+  } else if (aiPlayer.y > aiPlayer.targetY) {
+    aiPlayer.y -= paddleSpeed;
+  }
+};
