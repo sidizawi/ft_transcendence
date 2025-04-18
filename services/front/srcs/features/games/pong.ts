@@ -38,7 +38,8 @@ export class Pong {
       aiKeys: {},
       ws: null,
       waitingOpponent: false,
-      animationRunning: false
+      animationRunning: false,
+      user: TokenManager.getUserFromLocalStorage(),
   };
 
   stopGame(winner: string): void {
