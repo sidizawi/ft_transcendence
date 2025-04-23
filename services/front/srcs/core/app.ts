@@ -9,7 +9,7 @@ import { Router } from '../shared/utils/routing';
 import { User } from '../shared/types/user';
 import { Tournament } from '../features/tournament/tournament';
 import { Pong } from '../features/games/pong';
-import { Connect4 } from '../features/games/connect4';
+import { Connect4, Connect4HomePage } from '../features/games/connect4';
 import { Header } from '../shared/components/header';
 import { Footer } from '../shared/components/footer';
 import { i18n } from '../shared/i18n';
@@ -24,12 +24,13 @@ export class TranscendenceApp {
     currentPage: 'home'
   };
 
+  public router: Router;
+
   private menu: Menu;
   private auth: Auth;
-  private router: Router;
   private header: Header;
   private footer: Footer;
-  private connect4: Connect4;
+  private connect4: Connect4HomePage;
   private pong: Pong;
   //private friendsList: FriendsList | null = null;
 
@@ -50,7 +51,7 @@ export class TranscendenceApp {
 
     this.menu = new Menu(this.isLoggedIn(), () => this.handleLogout());
     this.auth = new Auth((user) => this.handleLogin(user));
-    this.connect4 = new Connect4();
+    this.connect4 = new Connect4HomePage();
     this.pong = new Pong();
     this.router = new Router(
       () => this.renderCurrentPage(),
@@ -182,6 +183,18 @@ export class TranscendenceApp {
       return;
     } //fct a checker
 
+    const connect4Match = path.match(/^\/connect4\/(.+)$/)
+    if (connect4Match) {
+      new Connect4(connect4Match[1]);
+      return ;
+    }
+
+    const tournamentMatch = path.match(/^\/tournament\/(.+)$/)
+    if (tournamentMatch) {
+      new Tournament(tournamentMatch[1]);
+      return ;
+    }
+
     switch (path) {
       case '/':
         this.renderHomePage(main);
@@ -208,16 +221,18 @@ export class TranscendenceApp {
         }
         break;
       case '/tournament':
-        const tournament = new Tournament();
-        main.innerHTML = tournament.render();
+      case '/tournament/':
+        new Tournament();
         break;
       case '/pong':
+      case '/pong/':
         main.innerHTML = this.pong.render();
         this.pong.pongEventListener();
         break;
       case '/connect4':
+      case '/connect4/':
         main.innerHTML = this.connect4.render();
-        this.connect4.setupConnect4FirstPageEventListener();
+        this.connect4.setupEventListener();
         break;
       case '/signin':
         main.innerHTML = this.auth.renderSignIn();

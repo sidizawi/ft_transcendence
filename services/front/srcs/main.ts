@@ -1,3 +1,3 @@
 import { TranscendenceApp } from './core/app';
 
-new TranscendenceApp();
+export const app = new TranscendenceApp();

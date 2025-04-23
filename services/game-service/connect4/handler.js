@@ -21,7 +21,7 @@ function handleNewConn(fastify, data, socket) {
 			}));
 			return ;
 		}
-		if (room.type != "playVsFriend") {
+		if (room.type != "play_vs_friend") {
 			socket.send(JSON.stringify({
 				mode: "close",
 				message: "can't play in this room"
@@ -61,7 +61,7 @@ function handleNewConn(fastify, data, socket) {
 		data: new Array(42).fill('X'),
 		type: data.type,
 	});
-	if (data.type == "playVsAI") {
+	if (data.type == "play_vs_AI") {
 		socket.send(JSON.stringify({
 			mode: "connected",
 			color: 'R',
@@ -175,7 +175,7 @@ function playAI(fastify, room) {
 }
 
 function sendPlayedMessage(room, data) {
-	if (room.playerid_1 == data.id && room.type != "playVsAI") {
+	if (room.playerid_1 == data.id && room.type != "play_vs_AI") {
 		room.player2ws.send(JSON.stringify({
 			mode: 'played',
 			col: data.col
@@ -195,7 +195,6 @@ function handlePlay(fastify, data) {
 	room.data[row * COLS + data.col] = data.color;
 	room.columns[data.col]--;
 
-	// todo : check how to save data when playing against an AI (maybe the first user is the AI)
 	if (checkWin(room.data)) {
 		sendPlayedMessage(room, data);
 
@@ -204,8 +203,7 @@ function handlePlay(fastify, data) {
 			winner: data.id == room.playerid_1
 		}));
 
-		if (room.type == "playVsAI") {
-			// todo: save to db
+		if (room.type == "play_vs_AI") {
 			return ;
 		}
 
@@ -254,8 +252,7 @@ function handlePlay(fastify, data) {
 			mode: "tie",
 		}));
 
-		if (room.type == "playVsAI") {
-			// todo: save to db
+		if (room.type == "play_vs_AI") {
 			return ;
 		}
 
@@ -283,7 +280,7 @@ function handlePlay(fastify, data) {
 		return ;
 	}
 
-	if (room.type == "playVsAI") {
+	if (room.type == "play_vs_AI") {
 		setTimeout(() => {
 			playAI(fastify, room);
 		}, 1000);
@@ -382,6 +379,7 @@ export const connect4Handler = async (fastify) => {
 			socket.close();
 		}
 
+		fastify.jwt.verify(token);
 		// todo: verify token
 
 		socket.on("message", (message) => {
@@ -400,6 +398,10 @@ export const connect4Handler = async (fastify) => {
 			if (data.mode == "new") {
 				handleNewConn(fastify, data, socket);
 			} else if (data.mode == "play") {
+				if (!data.room) {
+					socket.close();
+					return ;
+				}
 				handlePlay(fastify, data);
 			}
 		});

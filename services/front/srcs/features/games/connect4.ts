@@ -1,3 +1,4 @@
+import { app } from '../../main';
 import { ModalManager } from '../../shared/components/modal';
 import { i18n } from '../../shared/i18n';
 import { User } from '../../shared/types/user';
@@ -27,13 +28,26 @@ export class Connect4 {
   private ctx = null as CanvasRenderingContext2D | null;
   private coinRadius = (this.cellSize - this.coinPadding * 2) / 2;
 
-  constructor() {
+  constructor(type : string | null) {
     const urlParams = new URLSearchParams(window.location.search);
     this.room = urlParams.get("room");
     this.ws = null;
     this.opponent = null;
     this.opponentColor = null;
     this.user = TokenManager.getUserFromLocalStorage();
+
+    const main = document.querySelector('main');
+
+    if (type == "play_local") {
+      this.myTurn = true;
+      main!.innerHTML = this.renderCanvas();
+      this.setupCanvasEventListener();
+    } else {
+      this.canPlay = false;
+      this.online = true;
+      this.setupWebSocket(type);
+      main!.innerHTML = this.renderWaitingRoom();
+    }
   }
 
   drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {
@@ -170,6 +184,7 @@ export class Connect4 {
           color: this.player == this.red ? 'R' : 'Y',
           room: this.room,
           id: this.user?.id,
+          username: this.user?.username
         }));
       }
       this.animateCoin(col, this.columns[col]);
@@ -203,367 +218,6 @@ export class Connect4 {
       }
     }
   }
-  
-  setupConnect4FirstPageEventListener() {
-    this.renderJoinTournamentRoom({lst:[{
-      name: "here is the name of the tournament",
-      room: "test-123",
-      pub: false
-    }, {
-      name: "here is the name of the tournament",
-      room: "test-1234",
-      pub: true
-    }, {
-      name: "here is the name of the tournament",
-      room: "test-1235",
-      pub: false
-    }]});
-    return ;
-    const playBtn = document.querySelectorAll(".connect4Btn");
-
-    playBtn.forEach((btn) => {
-      if (btn.classList.contains("not-connected")) {
-        return;
-      }
-
-      this.clean();
-
-      btn.addEventListener('click', (event) => {
-        const type = (event.target as HTMLElement).getAttribute("data");
-
-        const main = document.querySelector('main');
-        if (type == "playLocal") {
-          this.myTurn = true;
-          main!.innerHTML = this.renderCanvas();
-          this.setupCanvasEventListener();
-        } else if (type == "playTournament") {
-          this.setupTournamentPage();
-        } else {
-          this.canPlay = false;
-          this.online = true;
-          this.setupWebSocket(type);
-          main!.innerHTML = this.renderWaitingRoom();
-        }
-      });
-    });
-  }
-
-  setupTournamentPage() {
-    const main = document.querySelector("main");
-
-    this.clean();
-    this.cleanWs();
-
-    // todo: add translate
-    // add previous btn
-    main!.innerHTML = `
-      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.connect4.title')}
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
-            ${i18n.t('games.connect4.description')}
-          </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button data="create" class="tournamentBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              create a tournament
-            </button>
-            <button data="join" class="tournamentBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              join a tournament
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const tournamentBtn = document.querySelectorAll(".tournamentBtn");
-
-    tournamentBtn.forEach((btn) => {
-      btn.addEventListener('click', (event) => {
-        const type = (event.target as HTMLElement).getAttribute("data");
-
-        if (type == "create") {
-          this.setupCreateTournament();
-        } else {
-          this.setupJoinTournament();
-        }
-      });
-    })
-  }
-
-  setupCreateTournament() {
-    const main = document.querySelector("main");
-
-    // todo: translate
-    main!.innerHTML = `
-      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.connect4.title')}
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
-            ${i18n.t('games.connect4.description')}
-          </p>
-          <div class="flex flex-col items-center  w-full">
-            <form id="createTournamentForm">
-              <div class="mb-4">
-                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Tournament name
-                </label>
-                <input id="tournamentName" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
-              </div>
-              <div class="mb-4">
-                <label for="tournamentPlayers" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  number of players
-                </label>
-                <input id="tournamentPlayers" type="number" min="4" max="16" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-900"/>
-              </div>
-              <div class="flex items-center justify-start space-x-2 mb-4">
-                <input id="tournamentPrivate" type="radio" name="privacy" value="private"/>
-                <label for="tournamentPrivate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Private
-                </label>
-              </div>
-              <div class="flex items-center justify-start space-x-2 mb-4">
-                <input id="tournamentPublic" checked="true" type="radio" name="privacy" value="public" />
-                <label for="tournamentPublic" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Public
-                </label>
-              </div>
-              <div class="mb-4">
-                <label for="tournamentCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                  Tournament code *
-                </label>
-                <input id="tournamentCode" disabled class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-900"/>
-              </div>
-              <button type="submit" class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-                Creat
-              </button>
-              <div id="error-message" class="mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400 hidden"></div>
-            </form>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const form = document.getElementById("createTournamentForm");
-
-    function showError(message: string) {
-      const error = document.getElementById("error-message");
-      error!.innerText = message;
-      error?.classList.remove("hidden");
-    }
-
-    form?.addEventListener('submit', (event) => {
-      event.preventDefault();
-
-      document.getElementById("error-message")?.classList.add("hidden");
-
-      const code = (document.getElementById("tournamentCode") as HTMLInputElement).value;
-      const name = (document.getElementById("tournamentName") as HTMLInputElement).value;
-      const pub = (document.getElementById("tournamentPublic") as HTMLInputElement).checked;
-      const players = parseInt((document.getElementById("tournamentPlayers") as HTMLInputElement).value);
-      
-      if (!name.length) {
-        showError("tournament name shouldn't be empty");
-        return ;
-      }
-      if (!pub && !code.length) {
-        showError("tournament code shouldn't be empty");
-        return ;
-      }
-      if (players < 4 || players > 16 || players % 2 != 0) {
-        showError("numbers of players should be even and between 4 and 16");
-        return ;
-      }
-
-      this.setupTournamentWS(name, players, code, pub);
-    })
-
-    form?.addEventListener('change', (event) => {
-      if ((event.target as HTMLElement)!.matches('input[name="privacy"]')) {
-        const value = (event.target as HTMLElement).getAttribute("value");
-
-        const code = document.getElementById("tournamentCode") as HTMLInputElement;
-        code!.value = "";
-        if (value == "public") {
-          code?.setAttribute("disabled", "");
-        } else {
-          code?.removeAttribute("disabled");
-        }
-      }
-    })
-  }
-
-  setupTournamentWS(name: string, players: number, code: string, pub: boolean) {
-    const token = TokenManager.getToken();
-
-    const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
-    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/connect4/tournament${token ? "?token="+token : ""}`);
-
-    this.ws.onopen = () => {
-      this.ws?.send(JSON.stringify({
-        mode: "create",
-        name,
-        players,
-        code,
-        pub,
-        userId: this.user?.id,
-        username: this.user?.username,
-      }));
-    }
-
-    this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      console.log("received data", data);
-      if (data.mode == "created") {
-        this.room = data.room;
-        console.log("room", this.room);
-      }
-    }
-
-    this.renderWaitingTournamentRoom();
-  }
-
-  renderWaitingTournamentRoom() {
-    const main = document.querySelector("main");
-
-    // todo: add translate
-    // add previous btn
-    main!.innerHTML = `
-      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.connect4.title')}
-          </h1>
-          <!-- todo: change from websocket -->
-          <p id="waitingTournamentText" class="text-gray-600 dark:text-gray-400 text-center mb-8">
-            waiting for others
-          </p>
-          <div class="flex items-center justify-center">
-            <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              Leave
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const leave = document.getElementById("leave");
-
-    leave?.addEventListener('click', () => {
-      this.clean();
-      this.cleanWs();
-      this.rerender();
-    });
-  }
-
-  renderJoinTournamentRoom(data : any = null) {
-    const main = document.querySelector("main");
-
-    // todo: add translate
-    // add previous btn
-    main!.innerHTML = `
-      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.connect4.title')} tournament
-          </h1>
-          ${data == null ?
-            `
-            <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
-              loading tournaments 
-            </p>
-            ` : ""
-          }
-          ${
-            !data ? "" :
-            data.lst.map((room: any) =>
-              `
-              <div class="flex items-center justify-between mb-4">
-                <p class="text-gray-600 dark:text-gray-400 text-center">${room.name}</p>
-                <div class="flex items-center justify-center">
-                  ${!room.pub ? `<input id="${room.room}-input" placeholder="tournament code" class="mx-2 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>` : ""}
-                  <button room="${room.room}" pub="${room.pub}" class="joinTournamentBtn p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-                    join
-                  </button>
-                </div>
-              </div>
-            `).join('')
-          }
-          <div class="flex items-center justify-center">
-            <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              Leave
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    const leave = document.getElementById("leave");
-
-    leave?.addEventListener('click', () => {
-      this.clean();
-      this.cleanWs();
-      this.rerender();
-    });
-    
-    const joinBtns = document.querySelectorAll(".joinTournamentBtn");
-
-    joinBtns.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        const room = (e.target as HTMLElement).getAttribute("room");
-        const pub = (e.target as HTMLElement).getAttribute("pub") == "true";
-
-        let code = null;
-        if (!pub) {
-          code = (document.getElementById(`${room}-input`) as HTMLInputElement)?.value;
-        }
-
-        this.ws?.send(JSON.stringify({
-          mode: "join",
-          room,
-          code,
-          userId: this.user?.id,
-          username: this.user?.username,
-        }));
-
-        this.renderWaitingTournamentRoom();
-      })
-    })
-  }
-
-  setupJoinTournament() {
-    this.clean();
-    this.cleanWs();
-
-    const token = TokenManager.getToken();
-
-    const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
-    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/connect4/tournament${token ? "?token="+token : ""}`);
-
-    this.ws.onopen = () => {
-      this.ws?.send(JSON.stringify({
-        mode: "list",
-        userId: this.user?.id,
-        username: this.user?.username
-      }));
-    }
-
-    this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      console.log("received data", data);
-      if (data.mode == "list") {
-        this.renderWaitingTournamentRoom();
-      }
-    }
-
-    this.ws.onclose = () => {}
-    this.renderWaitingTournamentRoom();
-  }
 
   setupWebSocket(type : string | null) {
     const token = TokenManager.getToken();
@@ -593,7 +247,7 @@ export class Connect4 {
         ModalManager.openModal(i18n.t('games.connect4.title'), `here is the link to the game: http://${window.location.hostname}:8000/connect4?room=${message.room}`);
       } else if (message.mode == "connected") {
         ModalManager.openModal(i18n.t('games.connect4.title'), `you play ${message.color == 'R' ? 'first with red' : 'second with yellow'}`);
-        if (type == "playVsAI") {
+        if (type == "play_vs_AI") {
           this.room = message.room;
         }
         this.canPlay = message.color == 'R';
@@ -619,7 +273,7 @@ export class Connect4 {
         this.renderBackBtn();
       } else if (message.mode == "close") {
         this.cleanWs()
-        this.rerender();
+        app.router.navigateTo("/connect4");
         ModalManager.openModal(i18n.t('games.connect4.title'), message.message);
       }
     }
@@ -628,7 +282,7 @@ export class Connect4 {
       if (!this.ws) {
         return ;
       }
-      this.rerender();
+      app.router.navigateTo("/connect4");
       ModalManager.openModal(i18n.t('games.connect4.title'), "connection lost");
     }
   }
@@ -710,6 +364,32 @@ export class Connect4 {
       </a>
     `
   }
+}
+
+export class Connect4HomePage {
+
+  setupEventListener() {
+    const playBtn = document.querySelectorAll(".connect4Btn");
+
+    playBtn.forEach((btn) => {
+      if (btn.classList.contains("not-connected")) {
+        return;
+      }
+
+      //this.clean();
+
+      btn.addEventListener('click', (event) => {
+        const type = (event.target as HTMLElement).getAttribute("data") || "";
+
+        if (type == "play_tournament") {
+          app.router.navigateTo("/tournament");
+          return ;
+        }
+        const route = "/connect4/" + type;
+        app.router.navigateTo(route);
+      });
+    });
+  }
 
   renderBtnConn(data: string, name: string): string {
     const token = TokenManager.getToken();
@@ -724,12 +404,6 @@ export class Connect4 {
     `;
   }
 
-  rerender() {
-    const main = document.querySelector('main');
-    main!.innerHTML = this.render();
-    this.setupConnect4FirstPageEventListener();
-  }
-
   render(): string {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
@@ -741,12 +415,12 @@ export class Connect4 {
             ${i18n.t('games.connect4.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button data="playLocal" class="connect4Btn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            <button data="play_local" class="connect4Btn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
               ${i18n.t('games.playLocal')}
             </button>
-            ${this.renderBtnConn("playVsFriend", i18n.t('games.playVsFriend'))}
-            ${this.renderBtnConn("playVsAI", i18n.t('games.playVsAI'))}
-            ${this.renderBtnConn("playTournament", i18n.t('games.playTournament'))}
+            ${this.renderBtnConn("play_vs_friend", i18n.t('games.playVsFriend'))}
+            ${this.renderBtnConn("play_vs_AI", i18n.t('games.playVsAI'))}
+            ${this.renderBtnConn("play_tournament", i18n.t('games.playTournament'))}
           </div>
         </div>
       </div>
