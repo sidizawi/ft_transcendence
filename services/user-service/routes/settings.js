@@ -25,6 +25,34 @@ const upload = multer({ dest: './uploads/avatars/' });
 
 const verificationCodes = {};
 
+function sanitizeInput(input) {
+	if (typeof input !== 'string') return input;
+	return input
+	  .replace(/&/g, '&amp;')
+	  .replace(/</g, '&lt;')
+	  .replace(/>/g, '&gt;')
+	  .replace(/"/g, '&quot;')
+	  .replace(/'/g, '&#039;');
+  }
+  
+  function XSSanitizer(body) {
+	if (!body || typeof body !== 'object') return body;
+	
+	const sanitizedBody = {};
+	
+	for (const key in body) {
+	  if (Object.prototype.hasOwnProperty.call(body, key)) {
+		if (typeof body[key] === 'string') {
+		  sanitizedBody[key] = sanitizeInput(body[key]);
+		} else {
+		  sanitizedBody[key] = body[key];
+		}
+	  }
+	}
+	
+	return sanitizedBody;
+  }
+
 async function settingsRoutes(fastify, options) {
 	if (!fastify.db) {
 		fastify.decorate('db', db);
@@ -45,7 +73,8 @@ async function settingsRoutes(fastify, options) {
 		try {
 		await request.jwtVerify();
 		const userId = request.user.id;
-		const { newUsername } = request.body;
+		let { newUsername } = XSSanitizer(request.body);
+
 		
 		if (!newUsername) {
 			return reply.code(400).send({ error: 'New username is required' });
@@ -89,7 +118,7 @@ async function settingsRoutes(fastify, options) {
 		try {
 			await request.jwtVerify();
 			const userId = request.user.id;
-			const { newUsername, newEmail, newPassword } = request.body;
+			const { newUsername, newEmail, newPassword } = XSSanitizer(request.body);
 			
 			if (!newUsername && !newEmail && !newPassword) {
 				return reply.code(400).send({ error: 'At least one field to update is required' });
@@ -344,7 +373,7 @@ async function settingsRoutes(fastify, options) {
 	try {
 	  await request.jwtVerify();
 	  const userId = request.user.id;
-	  const { password } = request.body;
+	  const { password } = XSSanitizer(request.body);
 	  
 		const user = fastify.db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
 		if (!user) {

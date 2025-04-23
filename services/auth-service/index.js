@@ -11,6 +11,7 @@ import fastifyJwt from '@fastify/jwt';
 import dotenv from 'dotenv';
 import { OAuth2Client } from 'google-auth-library';
 import nodemailer from 'nodemailer';
+import fastifyHelmet from '@fastify/helmet';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -40,6 +41,18 @@ const transporter = nodemailer.createTransport({
 //     done();
 // });
 const fastify = Fastify({ logger: true });
+fastify.register(fastifyHelmet, {
+  contentSecurityPolicy: {
+    directives: {
+    defaultSrc: ["'self'"],
+    scriptSrc: ["'self'", "'unsafe-inline'"],
+    styleSrc: ["'self'", "'unsafe-inline'"],
+    imgSrc: ["'self'", "data:"],
+    connectSrc: ["'self'", "wss:", "ws:"]
+    }
+  },
+  crossOriginEmbedderPolicy: false
+  });
 
 await fastify.register(fastifyJwt, {secret: process.env.JWT_SECRET, sign: {expiresIn: '1d'}});
 
@@ -61,6 +74,34 @@ fastify.decorate('authenticate', async (request, reply) => {
     }
 });
 
+function sanitizeInput(input) {
+  if (typeof input !== 'string') return input;
+  return input
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function XSSanitizer(body) {
+  if (!body || typeof body !== 'object') return body;
+  
+  const sanitizedBody = {};
+  
+  for (const key in body) {
+    if (Object.prototype.hasOwnProperty.call(body, key)) {
+      if (typeof body[key] === 'string') {
+        sanitizedBody[key] = sanitizeInput(body[key]);
+      } else {
+        sanitizedBody[key] = body[key];
+      }
+    }
+  }
+  
+  return sanitizedBody;
+}
+
 /// AUTHENTIFICATION ///
 //Register
 fastify.get('/register', async (request, reply) => {
@@ -79,7 +120,9 @@ fastify.get('/register', async (request, reply) => {
 });
 
 fastify.post('/register', async (request, reply) => {
-    const { username, email, password } = request.body;
+
+    const { username, email, password } = XSSanitizer(request.body);
+
     if (!username || !email || !password) {
         reply.code(400);
         return { error: 'Tous les champs sont requis' };
@@ -134,7 +177,7 @@ fastify.get('/login', async (request, reply) => {
 });
 
 fastify.post('/login', async (request, reply) => {
-    const { login, password } = request.body;
+    const { login, password } = XSSanitizer(request.body);
     
     if (!login || !password) {
         reply.code(400);

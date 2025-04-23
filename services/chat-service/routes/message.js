@@ -1,5 +1,5 @@
 let chatRooms = new Map();
-
+  
 function handleNewConn(fastify, data, socket) {
     let id, chatRoom;
     let id1 = `${data.user}-${data.friend}`;
@@ -45,7 +45,7 @@ function handleNewConn(fastify, data, socket) {
             sender: mess.sender_id == chatRoom.user1Id ? chatRoom.user1 : chatRoom.user2,
             timestamp: mess.timestamp
         };
-    })
+    });
 
     socket.send(JSON.stringify({
         type: "messages",
@@ -81,6 +81,10 @@ function handleNewMessage(fastify, data) {
     let id, chatRoom;
     let id1 = `${data.user}-${data.friend}`;
     let id2 = `${data.friend}-${data.user}`;
+
+    if (data.text && typeof data.text === 'string') {
+        data.text = data.text;
+    }
 
     if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
         id = id1;
