@@ -1,0 +1,8 @@
+POST http://localhost:2999/read/get HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ0ZXN0IiwiZW1haWwiOiJ0ZXN0QDE5LmJlIiwiaWF0IjoxNzQzMTc3NzYwfQ.9Blvnk_dfN579o5wnXCPaNmxriWThUH2O7Qx-tj9fxQ
+
+{
+    "query": "SELECT * FROM users WHERE username = ?",
+    "params": "leo"
+}

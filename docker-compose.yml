@@ -17,6 +17,13 @@ services:
       - "2999:2999"
     volumes:
       - ./database:/app/data
+    develop:
+      watch:
+        - action: sync
+          path: ./services/db
+          target: /app
+          ignore:
+            - node_modules/
     env_file:
       - .env
       

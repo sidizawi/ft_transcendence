@@ -30,5 +30,5 @@ sqlite3 "$DB_PATH" < /tmp/populate_test_data.sql
 
 echo "Test data has been populated into $DB_PATH"
 
-# Pour garder le conteneur en vie:
-exec tail -f /dev/null
+# # Pour garder le conteneur en vie:
+# exec tail -f /dev/null
