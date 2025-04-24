@@ -156,7 +156,7 @@ async function friendRoutes(fastify, options) {
 		);
 
 		reply.code(201);
-		return { error: 'Friend request successfully accepted'};
+		return { message: 'Friend request successfully accepted'};
 	});
 	
 	fastify.patch('/reject', async (request, reply) => {
@@ -190,7 +190,7 @@ async function friendRoutes(fastify, options) {
 		);
 	
 		reply.code(201);
-		return { error: 'Friend request successfully rejected'};
+		return { message: 'Friend request successfully rejected'};
 	});
 	
 	fastify.delete('/delete', async (request, reply) => {
@@ -224,7 +224,7 @@ async function friendRoutes(fastify, options) {
 		);
 	
 		reply.code(201);
-		return { error: 'Friend request successfully deleted'};
+		return { message: 'Friend request successfully deleted'};
 	});
 	
 	fastify.patch('/block', async (request, reply) => {
@@ -250,7 +250,7 @@ async function friendRoutes(fastify, options) {
 		);
 	
 		reply.code(201);
-		return { error: 'Friend request successfully blocked'};
+		return { message: 'Friend request successfully blocked'};
 	});
 
 	fastify.patch('/unblock', async (request, reply) => {
