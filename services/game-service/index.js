@@ -5,6 +5,7 @@ import fastifyJwt 	from '@fastify/jwt';
 import websocket from '@fastify/websocket';
 import { createGame, addPlayer, updatePlayerPosition, handleDisconnect, startGame } from './pong/game.js';
 import { connect4Handler } from './connect4/handler.js'
+import { tournamentHandler } from './tournament/handler.js';
 
 dotenv.config();
 
@@ -167,6 +168,7 @@ fastify.register(async function (wsRoutes) {
 });
 
 fastify.register(connect4Handler);
+fastify.register(tournamentHandler);
 
 fastify.listen({ port: 3002, host: '0.0.0.0' }, (err, address) => {
   if (err) {

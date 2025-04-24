@@ -50,7 +50,7 @@ export class Tournament {
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.connect4.title')}
+            ${i18n.t('tournaments.title')}
           </h1>
           <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
             ${i18n.t('games.connect4.description')}
@@ -62,6 +62,15 @@ export class Tournament {
                   Tournament name
                 </label>
                 <input id="tournamentName" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+              </div>
+              <div class="mb-4">
+                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Game
+                </label>
+                <select name="game" id="game-type" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <option value="pong" selected>${i18n.t('games.pong.title')}</option>
+                  <option value="p4">${i18n.t('games.connect4.title')}</option>
+                </select>
               </div>
               <div class="mb-4">
                 <label for="tournamentPlayers" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -110,11 +119,12 @@ export class Tournament {
 
       document.getElementById("error-message")?.classList.add("hidden");
 
+      const game = (document.getElementById("game-type") as HTMLInputElement).value;
       const code = (document.getElementById("tournamentCode") as HTMLInputElement).value;
       const name = (document.getElementById("tournamentName") as HTMLInputElement).value;
       const pub = (document.getElementById("tournamentPublic") as HTMLInputElement).checked;
       const players = parseInt((document.getElementById("tournamentPlayers") as HTMLInputElement).value);
-      
+
       if (!name.length) {
         showError("tournament name shouldn't be empty");
         return ;
@@ -127,8 +137,12 @@ export class Tournament {
         showError("numbers of players should be even and between 4 and 16");
         return ;
       }
+      if (!game.length || (game != "p4" && game != "pong")) {
+        showError("bad game type");
+        return ;
+      }
 
-      this.setupTournamentWS(name, players, code, pub);
+      this.createTournament(name, players, code, game, pub);
     })
 
     form?.addEventListener('change', (event) => {
@@ -146,11 +160,11 @@ export class Tournament {
     })
   }
 
-  setupTournamentWS(name: string, players: number, code: string, pub: boolean) {
+  createTournament(name: string, players: number, code: string, game: string, pub: boolean) {
     const token = TokenManager.getToken();
 
     const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
-    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/connect4/tournament${token ? "?token="+token : ""}`);
+    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/tournament${token ? "?token="+token : ""}`);
 
     this.ws.onopen = () => {
       this.ws?.send(JSON.stringify({
@@ -159,17 +173,15 @@ export class Tournament {
         players,
         code,
         pub,
+        game,
         userId: this.user?.id,
         username: this.user?.username,
       }));
+
+      this.ws?.close();
+      this.ws = null;
+      app.router.navigateTo("/tournament/join");
     }
-
-    this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-
-      console.log("received data", data);
-    }
-
     this.renderWaitingTournamentRoom();
   }
 
@@ -182,7 +194,7 @@ export class Tournament {
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.connect4.title')}
+            ${i18n.t('tournaments.title')}
           </h1>
           <!-- todo: change from websocket -->
           <p id="waitingTournamentText" class="text-gray-600 dark:text-gray-400 text-center mb-8">
@@ -213,7 +225,7 @@ export class Tournament {
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.connect4.title')} tournament
+            ${i18n.t('tournaments.title')}
           </h1>
           ${data == null ?
             `
@@ -282,7 +294,7 @@ export class Tournament {
     const token = TokenManager.getToken();
 
     const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
-    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/connect4/tournament${token ? "?token="+token : ""}`);
+    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/tournament${token ? "?token="+token : ""}`);
 
     this.ws.onopen = () => {
       this.ws?.send(JSON.stringify({
@@ -301,7 +313,6 @@ export class Tournament {
       }
     }
 
-    this.ws.onclose = () => {}
     this.renderWaitingTournamentRoom();
   }
 

@@ -2,8 +2,6 @@ let ROWS = 6;
 let COLS = 7;
 
 let friendAndAIRooms = new Map();
-let tournamentRooms = new Map();
-let openTournaments = [];
 
 function getRoomId(fastify, data) {
 	const userGames = fastify.db.prepare("SELECT COUNT(*) AS count FROM game WHERE playerid_1 = ? OR playerid_2 = ?").get(data.id, data.id);
@@ -290,87 +288,6 @@ function handlePlay(fastify, data) {
 	sendPlayedMessage(room, data);
 }
 
-function handleCreateTournament(socket, data) {
-	const id = crypto.randomUUID();
-
-	tournamentRooms.set(id, {
-		createdBy: data.userId,
-		name: data.name,
-		code: data.code,
-		pub: data.pub,
-		numPlayers: data.players,
-		players: [
-			{
-				userId: data.userId,
-				username: data.username,
-				socket,
-				//games: []
-				//groups: []
-				//group: null
-			}
-		],
-	});
-
-	openTournaments.push(id);
-	
-	socket.send(JSON.stringify({
-		mode: "created",
-		room: id,
-	}));
-}
-
-/*
-	one tournament
-	{
-		createdBy: data.userId,
-		name: data.name,
-		code: data.code,
-		pub: data.pub,
-		numPlayers: data.players,
-		players: [
-			{
-				userId: data.userId,
-				username: data.username,
-				socket,
-				//games: []
-				//groups: []
-				//group: null
-			}
-		],
-	}
-*/
-
-function handleListTournament(socket) {
-	const lst = openTournaments.map((id) => {
-		let room = tournamentRooms.get(id);
-		if (!room) {
-			return null;
-		}
-		return {
-			room: id,
-			name: room.name,
-			pub: room.pub
-		};
-	}).filter((obj) => obj != null);
-
-	socket.send(JSON.stringify({
-		mode: "list",
-		lst
-	}));
-}
-
-function handleJoinTournament(socket, data) {
-	// data : room, code, userId, username 
-
-	const room = tournamentRooms.get(data.room);
-
-	if (!room) {
-		socket.send(JSON.stringify({
-			mode: "",
-		}))
-	}
-}
-
 export const connect4Handler = async (fastify) => {
 	fastify.get("/connect4/friend", { websocket: true }, (socket, req) => {
 		const { token } = req.query;
@@ -380,7 +297,6 @@ export const connect4Handler = async (fastify) => {
 		}
 
 		fastify.jwt.verify(token);
-		// todo: verify token
 
 		socket.on("message", (message) => {
 			const data = JSON.parse(message.toString());
@@ -406,40 +322,4 @@ export const connect4Handler = async (fastify) => {
 			}
 		});
 	});
-
-	fastify.get("/connect4/tournament", {websocket: true}, (socket, req) => {
-		const { token } = req.query;
-
-		if (!token) {
-			socket.close();
-		}
-
-		// todo: verify token
-
-		socket.on("message", (message) => {
-			const data = JSON.parse(message.toString());
-
-			console.log("tournament data received", data);
-
-			if (!data.userId || !data.username) {
-				socket.send(JSON.stringify({
-					mode: "close",
-					message: "invalid_identifier",
-				}));
-				return ;
-			}
-
-			if (data.mode == "create") {
-				handleCreateTournament(socket, data);
-			} else if (data.mode == "list") {
-				handleListTournament(socket);
-			} else if (data.mode == "join") {
-				handleJoinTournament(socket, data);
-			}
-		});
-
-		socket.on("close", () => {
-			// todo: remove user from the room
-		})
-	})
 }
