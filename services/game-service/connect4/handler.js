@@ -1,7 +1,8 @@
 let ROWS = 6;
 let COLS = 7;
 
-let friendAndAIRooms = new Map();
+let rooms = new Map();
+let sockets = new Map();
 
 function getRoomId(fastify, data) {
 	const userGames = fastify.db.prepare("SELECT COUNT(*) AS count FROM game WHERE playerid_1 = ? OR playerid_2 = ?").get(data.id, data.id);
@@ -11,7 +12,7 @@ function getRoomId(fastify, data) {
 
 function handleNewConn(fastify, data, socket) {
 	if (data.room) {
-		const room = friendAndAIRooms.get(data.room);
+		const room = rooms.get(data.room);
 		if (!room) {
 			socket.send(JSON.stringify({
 				mode: "close",
@@ -24,13 +25,16 @@ function handleNewConn(fastify, data, socket) {
 				mode: "close",
 				message: "can't play in this room"
 			}));
+			return ;
 		}
 		if (room.player2Username) {
 			socket.send(JSON.stringify({
 				mode: "close",
 				message: "can't play in this room"
 			}))
+			return ;
 		}
+		sockets.set(socket, data.room);
 		room.player2Username = data.username;
 		room.playerid_2 = data.id;
 		room.player2ws = socket;
@@ -48,7 +52,7 @@ function handleNewConn(fastify, data, socket) {
 		return ;
 	}
 	const roomId = getRoomId(fastify, data);
-	friendAndAIRooms.set(roomId, {
+	rooms.set(roomId, {
 		playerid_1: data.id,
 		player1Username: data.username,
 		playerid_2: null,
@@ -59,6 +63,7 @@ function handleNewConn(fastify, data, socket) {
 		data: new Array(42).fill('X'),
 		type: data.type,
 	});
+	sockets.set(socket, roomId);
 	if (data.type == "play_vs_AI") {
 		socket.send(JSON.stringify({
 			mode: "connected",
@@ -187,7 +192,7 @@ function sendPlayedMessage(room, data) {
 }
 
 function handlePlay(fastify, data) {
-	let room = friendAndAIRooms.get(data.room);
+	let room = rooms.get(data.room);
 
 	let row = room.columns[data.col];
 	room.data[row * COLS + data.col] = data.color;
@@ -202,6 +207,8 @@ function handlePlay(fastify, data) {
 		}));
 
 		if (room.type == "play_vs_AI") {
+			rooms.delete(data.room);
+			sockets.delete(data.id == room.playerid_1 ? room.player1ws : room.player2ws);
 			return ;
 		}
 
@@ -239,7 +246,8 @@ function handlePlay(fastify, data) {
 				room.player1Username,
 			);
 		}
-		friendAndAIRooms.delete(data.room);
+		rooms.delete(data.room);
+		sockets.delete(data.id == room.playerid_1 ? room.player1ws : room.player2ws);
 		return ;
 	}
 
@@ -251,6 +259,8 @@ function handlePlay(fastify, data) {
 		}));
 
 		if (room.type == "play_vs_AI") {
+			rooms.delete(data.room);
+			sockets.delete(data.id == room.playerid_1 ? room.player1ws : room.player2ws);
 			return ;
 		}
 
@@ -274,7 +284,8 @@ function handlePlay(fastify, data) {
 			room.player2Username,
 		);
 
-		friendAndAIRooms.delete(data.room);
+		rooms.delete(data.room);
+		sockets.delete(data.id == room.playerid_1 ? room.player1ws : room.player2ws);
 		return ;
 	}
 
@@ -319,6 +330,32 @@ export const connect4Handler = async (fastify) => {
 					return ;
 				}
 				handlePlay(fastify, data);
+			}
+		});
+
+		socket.on("close", () => {
+			let roomId = sockets.get(socket);
+
+			if (!roomId) {
+				return ;
+			}
+
+			let room = rooms.get(roomId);
+			if (!room) {
+				return ;
+			}
+
+			if (socket == room.player1ws && room.player2ws) {
+				room.player2ws.send(JSON.stringify({
+					mode: "close",
+					message: "friend disconnected"
+				}))
+			}
+			if (socket == room.player2ws && room.player1ws) {
+				room.player1ws.send(JSON.stringify({
+					mode: "close",
+					message: "friend disconnected"
+				}))
 			}
 		});
 	});

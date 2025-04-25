@@ -1,12 +1,14 @@
 import { app } from '../../main';
+import { ModalManager } from '../../shared/components/modal';
 import { i18n } from '../../shared/i18n';
 import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
 
 export class Tournament {
 
-  private ws: WebSocket | null;
   private user: User | null;
+  private ws: WebSocket | null;
+  private room: string | null = null;
 
   constructor(path: string | null = null) {
     this.ws = null;
@@ -31,7 +33,12 @@ export class Tournament {
 
     tournamentBtn.forEach((btn) => {
       btn.addEventListener('click', (event) => {
-        const type = (event.target as HTMLElement).getAttribute("data");
+        btn = event.target as HTMLElement
+        const type = btn.getAttribute("data");
+
+        if (btn.classList.contains("not-connected")) {
+          return ;
+        }
 
         if (type == "create") {
           app.router.navigateTo("/tournament/create");
@@ -178,14 +185,26 @@ export class Tournament {
         username: this.user?.username,
       }));
 
-      this.ws?.close();
-      this.ws = null;
-      app.router.navigateTo("/tournament/join");
     }
-    this.renderWaitingTournamentRoom();
+    
+    this.ws.onmessage = (e) => {
+      const message = JSON.parse(e.data);
+
+      console.log("create message received:", message);
+      if (message.mode == "created") {
+        this.room = message.room;
+        this.ws?.close();
+        this.ws = null;
+        // this.renderWaitingTournamentRoom();
+        // todo: open new websocket to join a tournament
+        this.renderWaitingRoom("created", true);
+      }
+    }
+
+    this.renderWaitingRoom("Creating the tournament");
   }
 
-  renderWaitingTournamentRoom() {
+  renderWaitingRoom(message: string, leave: boolean = false) {
     const main = document.querySelector("main");
 
     // todo: add translate
@@ -196,24 +215,35 @@ export class Tournament {
           <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
-          <!-- todo: change from websocket -->
           <p id="waitingTournamentText" class="text-gray-600 dark:text-gray-400 text-center mb-8">
-            waiting for others
+            ${message}
           </p>
-          <div class="flex items-center justify-center">
-            <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              Leave
-            </button>
-          </div>
+          ${leave ? `
+            <div class="flex items-center justify-center">
+              <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                Leave
+              </button>
+            </div>
+            `
+          : ""}
         </div>
       </div>
     `;
 
-    const leave = document.getElementById("leave");
+    if (leave) {
+      const leave = document.getElementById("leave");
 
-    leave?.addEventListener('click', () => {
-      app.router.navigateTo("/tournament");
-    });
+      leave?.addEventListener('click', () => {
+        this.clean();
+        app.router.navigateTo("/tournament");
+      });
+    }
+  }
+
+  clean() {
+    this.ws?.close();
+    this.ws = null;
+    this.room = null;
   }
 
   renderJoinTournamentRoom(data : any = null) {
@@ -236,12 +266,15 @@ export class Tournament {
           }
           ${
             !data ? "" :
-            data.lst.map((room: any) =>
+            data.map((room: any) =>
               `
               <div class="flex items-center justify-between mb-4">
-                <p class="text-gray-600 dark:text-gray-400 text-center">${room.name}</p>
+                <p class="text-gray-600 dark:text-gray-400 text-center">${room.name} - created by ${room.createdBy} - ${room.game}</p>
                 <div class="flex items-center justify-center">
-                  ${!room.pub ? `<input id="${room.room}-input" placeholder="tournament code" class="mx-2 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>` : ""}
+                  ${!room.pub ? `
+                    <input id="${room.room}-input" placeholder="tournament code" class="mx-2 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+                  ` : ""
+                  }
                   <button room="${room.room}" pub="${room.pub}" class="joinTournamentBtn p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
                     join
                   </button>
@@ -249,19 +282,35 @@ export class Tournament {
               </div>
             `).join('')
           }
-          <div class="flex items-center justify-center">
-            <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              Leave
-            </button>
-          </div>
+          ${data && data.length == 0 ? `
+            <div class="flex items-center justify-center flex-col mb-4">
+              <p class="text-gray-600 dark:text-gray-400 text-center mb-2">there are no open tournament</p>
+              <button id="create" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                Create a new tournament
+              </button>
+            </div>
+            ` : `
+              <div class="flex items-center justify-center">
+                <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                  Leave
+                </button>
+              </div>
+            `
+          }
         </div>
       </div>
     `;
 
     const leave = document.getElementById("leave");
+    const create = document.getElementById("create");
 
     leave?.addEventListener('click', () => {
-      app.router.navigateTo("/connect4");
+      app.router.navigateTo("/tournament");
+    });
+
+    create?.addEventListener('click', () => {
+      this.clean();
+      app.router.navigateTo("/tournament/create");
     });
     
     const joinBtns = document.querySelectorAll(".joinTournamentBtn");
@@ -284,7 +333,7 @@ export class Tournament {
           username: this.user?.username,
         }));
 
-        this.renderWaitingTournamentRoom();
+        this.renderWaitingRoom("waiting to join");
       })
     })
   }
@@ -304,19 +353,70 @@ export class Tournament {
       }));
     }
 
+    // todo: traduction
     this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
       console.log("received data", data);
       if (data.mode == "list") {
-        this.renderWaitingTournamentRoom();
+        this.renderJoinTournamentRoom(data.lst);
+      } else if (data.mode == "joined") {
+        // todo
+        this.clean();
+        this.room = data.room;
+        this.renderWaitingRoom("joined", true);
+      } else if (data.mode == "cant_join") {
+        this.ws?.send(JSON.stringify({
+          mode: "list",
+          userId: this.user?.id,
+          username: this.user?.username
+        }))
+        this.renderJoinTournamentRoom();
+        ModalManager.openModal(i18n.t('tournaments.title'), data.message);
       }
     }
 
-    this.renderWaitingTournamentRoom();
+    window.addEventListener("beforeunload", () => {
+      this.clean();
+      console.log("loaded window");
+    });
+
+    this.renderJoinTournamentRoom();
+  }
+
+  setupTournamentRoom() {
+    if (!this.room) {
+      this.clean();
+      app.router.navigateTo("/tournament/join");
+      return ;
+    }
+
+    const main = document.querySelector("main");
+  
+    main!.innerHTML = `
+      <div>
+        <h1>welcome</h1>
+      </div>
+    `;
+
+    //this.ws = 
+  }
+
+  renderBtnConn(data: string, name: string, token: string | null): string {
+    let className = "tournamentBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors";
+    if (!token) {
+      className = "tournamentBtn not-connected w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors";
+    }
+    return `
+      <button data="${data}" class="${className}">
+        ${name}
+      </button>
+    `;
   }
 
   render(): string {
+    const token = TokenManager.getToken();
+
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
@@ -327,12 +427,8 @@ export class Tournament {
             ${i18n.t('tournaments.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button data="create" class="tournamentBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              ${i18n.t('tournaments.create')}
-            </button>
-            <button data="join" class="tournamentBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              ${i18n.t('tournaments.join')}
-            </button>
+            ${this.renderBtnConn("create", i18n.t('tournaments.create'), token)}
+            ${this.renderBtnConn("join", i18n.t('tournaments.join'), token)}
           </div>
         </div>
       </div>
