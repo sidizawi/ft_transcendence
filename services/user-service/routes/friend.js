@@ -1,3 +1,6 @@
+import { queryGet, queryAll, queryPost } from "../services/query.js";
+import { getUserByUsername } from "../services/userService.js";
+
 async function friendRoutes(fastify, options) {
     fastify.get('/gamestats/:game/:username', async (request, reply) => {
         const { game, username} = request.params;
@@ -6,16 +9,17 @@ async function friendRoutes(fastify, options) {
             return reply.code(400).send({ error: 'Invalid game type'});
         }
 
-        const userExists = fastify.db.prepare('SELECT * FROM users where username = ?').get(username);
+        const userExists = await getUserByUsername(username);
         if (!userExists){
             return reply.code(400).send({ error: 'Username doesnt exist'});
         }
+
         const userId = userExists.id;
 
         const query = 'SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?) AND game_type = ?';
         const params = [userId, userId, game];
+        const games = await queryAll(query, params);
 
-        const games = fastify.db.prepare(query).all(...params);
         if (!games || games.length === 0){
             return reply.code(204).send({msg: 'No content'});
         }
@@ -43,10 +47,11 @@ async function friendRoutes(fastify, options) {
             return reply.code(400).send({ error: 'Invalid game type'});
         }
 
-        const userExists = fastify.db.prepare('SELECT * FROM users where username = ?').get(username);
+        const userExists = await getUserByUsername(username);
         if (!userExists){
             return reply.code(400).send({ error: 'Username doesnt exist'});
         }
+
         const userId = userExists.id;
 
         const query = `
@@ -59,9 +64,7 @@ async function friendRoutes(fastify, options) {
             WHERE (g.playerid_1 = ? OR g.playerid_2 = ?) AND g.game_type = ?
             ORDER BY g.date DESC`;
         const params = [userId, userId, userId, game];
-
-        const history = fastify.db.prepare(query).all(...params);
-
+        const history = await queryAll(query, params);
 
         if (!history || history.length === 0) {
             return reply.code(204).send({ msg: 'No content' });
@@ -87,7 +90,7 @@ async function friendRoutes(fastify, options) {
     fastify.get('/avatar/:username', async (request, reply) => {
         const { username} = request.params;
 
-        const userExists = fastify.db.prepare('SELECT * FROM users where username = ?').get(username);
+        const userExists = await getUserByUsername(username);
         if (!userExists){
             return reply.code(400).send({ error: 'Username doesnt exist'});
         }

@@ -14,15 +14,12 @@ import refreshRoutes from './routes/refresh.js';
 import friendRoutes from './routes/friend.js';
 import settingsRoutes from './routes/settings.js';
 import profileRoutes from './routes/profile.js';
+import gdprRoutes from './routes/gdpr.js';
 
 dotenv.config();
 
-// const fastify = Fastify({ logger: false });
-// fastify.addHook('onResponse', (request, reply, done) => {
-	// 	console.log(`${request.method} ${request.url} ${reply.statusCode}`);
-	// 	done();
-	// });
 const fastify = Fastify({ logger: true });
+
 fastify.register(fastifyHelmet, {
 	contentSecurityPolicy: {
 	  directives: {
@@ -44,7 +41,14 @@ limits: { fileSize: 5 * 1024 * 1024 } // optionnel, ici 5MB max
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+await fastify.register(fastifyStatic, {
+	root: path.join(__dirname, '../../uploads/avatars'),
+	prefix: '/avatars/'					 // URL prefix (e.g., http://localhost:3000/avatars/)
+});
+
 await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
+
+export const verificationCodes = {};
 
 // Activer CORS pour permettre les requêtes du frontend
 fastify.register(fastifyCors, {
@@ -54,19 +58,12 @@ fastify.register(fastifyCors, {
   credentials: true
 });
 
-await fastify.register(fastifyStatic, {
-	root: path.join(__dirname, '../../uploads/avatars'),
-	prefix: '/avatars/'					 // URL prefix (e.g., http://localhost:3000/avatars/)
-});
-
-
-fastify.decorate('db', db);
-
 fastify.register(settingsRoutes, { prefix: '/settings' });
 fastify.register(statsRoutes, { prefix: '/stats' });
 fastify.register(refreshRoutes, { prefix: '/refresh'});
 fastify.register(friendRoutes, { prefix: '/friend'});
 fastify.register(profileRoutes, { prefix: '/profile'});
+fastify.register(gdprRoutes, { prefix: '/gdpr'});
 
 /// SERVER ///
 fastify.listen({ port: 3004, host: '0.0.0.0' }, (err, address) => {
