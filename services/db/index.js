@@ -5,6 +5,7 @@ import fastifyCors from '@fastify/cors';
 import db from './db.js';
 import writeRoutes from './routes/write.js';
 import readRoutes from './routes/read.js';
+import transactionRoutes from './routes/transactions.js';
 
 const fastify = Fastify({ logger: false });
 
@@ -28,6 +29,7 @@ fastify.decorate('db', db);
 
 fastify.register(writeRoutes, { prefix: '/write'});
 fastify.register(readRoutes, { prefix: '/read'});
+fastify.register(transactionRoutes, { prefix: '/transaction'});
 
 fastify.listen({ port: 2999, host: '0.0.0.0' }, (err, address) => {
     if (err) {

@@ -8,8 +8,31 @@ import path from 'path';
 import multer from 'fastify-multer';
 import bcrypt from 'bcrypt';
 
-import { XSSanitizer } from '../../utils/sanitize.js';
+import { XSSanitizer } from '../utils/sanitize.js';
 import { verificationCodes } from '../index.js';
+import { getUsernameById, 
+	getIdByUsername, 
+	getIdUsernameEmailById, 
+	getUsernameEmailById,
+	getIdByEmail,
+	getIdUsernameEmailAvatarById,
+	updateUsernameById,
+	updateAvatarById,
+	updateSomeById
+} from '../services/userService.js';
+
+import { updateFriendUsernameById,
+	updateFriendUsernameByIdUsername
+ } from '../services/friendService.js';
+
+import { updateUsernameByPlayerAndUsername,
+	updatePlayerwinByPlayerwinAndPlayerid
+ } from '../services/gameService.js';
+
+import { beginTransaction,
+	commitTransaction,
+	rollbackTransaction
+} from '../services/query.js';
 
 dotenv.config();
 
@@ -44,7 +67,7 @@ async function settingsRoutes(fastify, options) {
 			return reply.code(400).send({ error: 'New username is required' });
 		}
 		
-		const user = fastify.db.prepare('SELECT username FROM users WHERE id = ?').get(userId);
+		const user = await getUsernameById(userId);
 		if (!user) {
 			return reply.code(404).send({ error: 'User not found' });
 		}
@@ -53,16 +76,16 @@ async function settingsRoutes(fastify, options) {
 			return reply.code(200).send({ message: 'Username is already set to this value' });
 		}
 		
-		const usernameExists = fastify.db.prepare('SELECT id FROM users WHERE username = ?').get(newUsername);
+		const usernameExists = await getIdByUsername(newUsername);
 		if (usernameExists) {
 			return reply.code(400).send({ error: 'Username already taken' });
 		}
 		
-		fastify.db.prepare('UPDATE users SET username = ? WHERE id = ?').run(newUsername, userId);
-		fastify.db.prepare('UPDATE friend SET username1 = ? WHERE userid1 = ?').run(newUsername, userId);
-		fastify.db.prepare('UPDATE friend SET username2 = ? WHERE userid2 = ?').run(newUsername, userId);
+		await updateUsernameById(newUsername, userId);
+		await updateFriendUsernameById(newUsername, 1, userId);
+		await updateFriendUsernameById(newUsername, 2, userId);
 		
-		const updatedUser = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
+		const updatedUser = await getIdUsernameEmailById(userId);
 		const token = fastify.jwt.sign({ id: updatedUser.id });
 		
 		return reply.code(200).send({ 
@@ -77,7 +100,6 @@ async function settingsRoutes(fastify, options) {
 		}
 	});
 
-
 	fastify.post('/update-request', async (request, reply) => {
 		try {
 			await request.jwtVerify();
@@ -88,20 +110,20 @@ async function settingsRoutes(fastify, options) {
 				return reply.code(400).send({ error: 'At least one field to update is required' });
 			}
 			
-			const user = fastify.db.prepare('SELECT username, email FROM users WHERE id = ?').get(userId);
+			const user = await getUsernameEmailById(userId);
 			if (!user) {
 				return reply.code(404).send({ error: 'User not found' });
 			}
 			
 			if (newUsername && newUsername !== user.username) {
-				const usernameExists = fastify.db.prepare('SELECT id FROM users WHERE username = ?').get(newUsername);
+				const usernameExists = await getIdByUsername(newUsername);
 				if (usernameExists) {
 					return reply.code(400).send({ error: 'Username already taken' });
 				}
 			}
 			
 			if (newEmail && newEmail !== user.email) {
-				const emailExists = fastify.db.prepare('SELECT id FROM users WHERE email = ?').get(newEmail);
+				const emailExists = await getIdByEmail(newEmail);
 				if (emailExists) {
 					return reply.code(400).send({ error: 'Email already in use' });
 				}
@@ -154,6 +176,7 @@ async function settingsRoutes(fastify, options) {
 		}
 	});
   
+	// TODO: test the transaction
 	fastify.put('/update-confirm', async (request, reply) => {
 		try {
 		await request.jwtVerify();
@@ -183,7 +206,7 @@ async function settingsRoutes(fastify, options) {
 		const updateParams = [];
 		const updateMessages = [];
 		
-		const currentUser = fastify.db.prepare('SELECT username, email FROM users WHERE id = ?').get(userId);
+		const currentUser = await getIdUsernameEmailById(userId);
 		if (!currentUser) {
 			return reply.code(404).send({ error: 'User not found' });
 		}
@@ -212,51 +235,42 @@ async function settingsRoutes(fastify, options) {
 		updateParams.push(userId);
 		
 		if (updateSQL.length > 0) {
-			const transaction = fastify.db.transaction(() => {
-			fastify.db.prepare(`
-				UPDATE users 
-				SET ${updateSQL.join(', ')} 
-				WHERE id = ?
-			`).run(...updateParams);
-			
-			if (updates.username && updates.username !== oldUsername) {
-				fastify.db.prepare('UPDATE friend SET username1 = ? WHERE userid1 = ? AND username1 = ?')
-				.run(updates.username, userId, oldUsername);
+			try {
+				await beginTransaction();
+				await updateSomeById(updateSQL.join(', '), updateParams);
+
+				if (updates.username && updates.username !== oldUsername) {
+
+					await updateFriendUsernameByIdUsername(1, updates.username, 1, userId, oldUsername);
+					await updateFriendUsernameByIdUsername(2, updates.username, 2, userId, oldUsername);
+					
+					await updateUsernameByPlayerAndUsername(1, updates.username, 1, userId, oldUsername);
+					await updateUsernameByPlayerAndUsername(2, updates.username, 2, userId, oldUsername);
+					
+					await updatePlayerwinByPlayerwinAndPlayerid('win', updates.username, oldUsername, userId);
+					await updatePlayerwinByPlayerwinAndPlayerid('lost', updates.username, oldUsername, userId);
+				}
+				await commitTransaction();
 				
-				fastify.db.prepare('UPDATE friend SET username2 = ? WHERE userid2 = ? AND username2 = ?')
-				.run(updates.username, userId, oldUsername);
+				let token = null;
+				if (updates.username || updates.email) {
+				const updatedUser = await getIdUsernameEmailById(userId);
+				token = fastify.jwt.sign({ 
+					id: updatedUser.id
+				});
+				}
 				
-				fastify.db.prepare('UPDATE game SET username_1 = ? WHERE playerid_1 = ? AND username_1 = ?')
-				.run(updates.username, userId, oldUsername);
+				delete verificationCodes[userId];
 				
-				fastify.db.prepare('UPDATE game SET username_2 = ? WHERE playerid_2 = ? AND username_2 = ?')
-				.run(updates.username, userId, oldUsername);
-				
-				fastify.db.prepare('UPDATE game SET player_win = ? WHERE player_win = ? AND (playerid_1 = ? OR playerid_2 = ?)')
-				.run(updates.username, oldUsername, userId, userId);
-				
-				fastify.db.prepare('UPDATE game SET player_lost = ? WHERE player_lost = ? AND (playerid_1 = ? OR playerid_2 = ?)')
-				.run(updates.username, oldUsername, userId, userId);
+				return reply.code(200).send({ 
+				message: 'Profile updated successfully', 
+				updates: updateMessages.join(', '),
+				token: token
+				});
+			} catch (error) {
+				await rollbackTransaction();
+				return reply.code(500).send({ error: 'Failed to update profile', details: error.message });
 			}
-			});
-			
-			transaction();
-			
-			let token = null;
-			if (updates.username || updates.email) {
-			const updatedUser = fastify.db.prepare('SELECT id, username, email FROM users WHERE id = ?').get(userId);
-			token = fastify.jwt.sign({ 
-				id: updatedUser.id
-			});
-			}
-			
-			delete verificationCodes[userId];
-			
-			return reply.code(200).send({ 
-			message: 'Profile updated successfully', 
-			updates: updateMessages.join(', '),
-			token: token
-			});
 		} else {
 			return reply.code(400).send({ error: 'No fields to update' });
 		}
@@ -266,8 +280,6 @@ async function settingsRoutes(fastify, options) {
 		}
 	});
 
-	
-	// Route pour uploader un avatar
 	fastify.post('/avatar', { preHandler: upload.single('avatar') }, async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
@@ -291,7 +303,7 @@ async function settingsRoutes(fastify, options) {
 	
 		fs.renameSync(request.file.path, newFilePath);
 	
-		fastify.db.prepare('UPDATE users SET avatar = ? WHERE id = ?').run(newFilePath, userId);
+		await updateAvatarById(newFilePath, userId);
 	
 		reply.code(200).send({ 
 			message: 'Avatar uploaded successfully', 
@@ -304,7 +316,7 @@ async function settingsRoutes(fastify, options) {
 		await request.jwtVerify();
 		const userId = request.user.id;
 
-		const user = fastify.db.prepare('SELECT id, username, email, avatar FROM users WHERE id = ?').get(userId);
+		const user = await getIdUsernameEmailAvatarById(userId);
 		if (!user) {
 			return reply.code(404).send({ error: 'User not found' });
 		}

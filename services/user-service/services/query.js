@@ -46,3 +46,30 @@ export async function queryPost(query, params) {
         })
     })
 }
+
+export async function beginTransaction() {
+    await fetch('http://db:2999/transaction/begin', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+}
+
+export async function commitTransaction() {
+    await fetch('http://db:2999/transaction/commit', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+}
+
+export async function rollbackTransaction() {
+    await fetch('http://db:2999/transaction/rollback', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+}
