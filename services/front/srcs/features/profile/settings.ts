@@ -2,7 +2,7 @@ import { User } from '../../shared/types/user';
 import { i18n } from '../../shared/i18n';
 import { TokenManager } from '../../shared/utils/token';
 import { AvatarService } from '../../shared/services/avatarService';
-// import { Profile } from './profile';
+import { Router } from '../../shared/utils/routing';
 
 const host = window.location.hostname;
 const USER_API_URL = `http://${host}:3000/user/settings`;
@@ -12,18 +12,12 @@ export class Settings {
   constructor(private user: User) {}
 
   private updateView() {
-    // window.history.pushState({}, '', '/profile'); //show avatar dans settings, mais fait tout planter
     const main = document.querySelector('main');
     if (main) {
       main.innerHTML = this.render();
       this.setupEventListeners();
     }
-    // const main = document.querySelector('main');
-    // if (main) {
-    //   const profile = new Profile(this.state.user, () => this.handleLogout());
-    //   main.innerHTML = profile.render();
-    //   profile.setupEventListeners();
-    // }
+    window.location.href = '/profile'; //ce qui cause reload
   }
 
   private async fetchAndUpdateUserProfile() {
@@ -51,7 +45,6 @@ export class Settings {
         avatar: profile.avatar || '/img/default-avatar.jpg',
         twoFactorEnabled: profile.is_two_factor_enabled,
         google: profile.google || false,
-        stats: this.user.stats // Keep existing stats
       };
 
       localStorage.setItem('user', JSON.stringify(this.user));
@@ -132,8 +125,8 @@ export class Settings {
         const data = await response.json();
         TokenManager.setToken(data.token);
         
-        await this.fetchAndUpdateUserProfile();
-        window.location.href = '/profile'; //ce qui cause reload
+        await this.fetchAndUpdateUserProfile()
+
         return true;
       } catch (error) {
         console.error('Username update error:', error);
@@ -180,7 +173,7 @@ export class Settings {
               TokenManager.setToken(data.token);
               
               await this.fetchAndUpdateUserProfile();
-              // window.location.href = '/profile'; //ce qui cause reload
+
               modal.remove();
               resolve(true);
             } else {
@@ -453,7 +446,7 @@ export class Settings {
               <div class="flex flex-col items-center mb-8">
                 <div class="relative mb-4">
                   <img 
-                    src="${this.user.avatar}" 
+                    src="/${this.user.avatar}" 
                     alt="${i18n.t('avatar')}" 
                     class="w-32 h-32 rounded-full object-cover"
                   >

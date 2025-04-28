@@ -286,7 +286,7 @@ async function settingsRoutes(fastify, options) {
 		const validMimeTypes = ['image/jpeg', 'image/png'];
 		if (!validMimeTypes.includes(request.file.mimetype)) {
 			fs.unlinkSync(request.file.path);
-			return reply.code(400).send({ error: 'Invalid file type' });
+			return reply.code(400).e-lecransend({ error: 'Invalid file type' });
 		}
 	
 		const originalFileName = request.file.originalname;

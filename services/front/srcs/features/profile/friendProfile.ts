@@ -182,7 +182,7 @@ export class FriendProfile {
             <div class="flex items-center px-8 pt-6">
               <div class="relative">
                 <img 
-                  src="${this.avatar}" 
+                  src="/${this.avatar}" 
                   alt="${this.username}" 
                   class="w-32 h-32 rounded-full object-cover"
                 >
@@ -234,17 +234,16 @@ export class FriendProfile {
                 ${this.renderGameStats(this.connect4Stats)}
               </div>
             </div>
-
-            <!-- Back Button -->
-            <div class="mt-8 flex justify-center">
-              <a 
-                href="/friends"
-                class="px-6 py-2 bg-orange-lighter dark:bg-forest text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
-              >
-                ${i18n.t('back')}
-              </a>
-            </div>
           </div>
+        </div>
+        <!-- Back Button -->
+        <div class="mt-8 flex justify-center">
+          <a 
+            href="/friends"
+            class="px-6 py-2 text-orange-darker dark:text-nature-lightest rounded-lg transition-colors"
+          >
+            ${i18n.t('back')}
+          </a>
         </div>
       </div>
     `;

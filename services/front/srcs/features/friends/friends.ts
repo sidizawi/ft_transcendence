@@ -84,9 +84,6 @@ export class Friends {
           </h3>
           <form id="add-friend-form" class="space-y-4">
             <div>
-              <label for="friend-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                ${i18n.t('enterUsername')}
-              </label>
               <input 
                 type="text" 
                 id="friend-username"
@@ -318,10 +315,11 @@ export class Friends {
           ` : ''}
         </div>
 
+        <!-- Back Button -->
         <div class="mt-8 flex justify-center">
           <a 
             href="/profile"
-            class="px-6 py-2 bg-orange-lighter dark:bg-forest text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
+            class="px-6 py-2 text-orange-darker dark:text-nature-lightest rounded-lg transition-colors"
           >
             ${i18n.t('back')}
           </a>

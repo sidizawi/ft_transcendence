@@ -4,7 +4,7 @@ To Do:
 		- Check robustesse mdp quand create pcq back non (?)
 
 	Settings page:
-		- Avatar visual IDEM dans users/:username -> pb avec /../ -> check app.ts
+		- pas safe acceder image quand pas log + ajout ID persinne devant nom img?
 		- changer window.href.location ----> refresh pour rediriger
 		- ok si meme mdp????
 

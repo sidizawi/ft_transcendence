@@ -1,5 +1,3 @@
-import { NotFound } from '../components/notFound';
-import { FriendProfile } from '../../features/profile/friendProfile';
 import { TokenManager } from './token';
 
 const host = window.location.hostname;
@@ -47,16 +45,15 @@ export class Router {
     const userMatch = path.match(/^\/users\/([^/]+)$/);
     if (userMatch && this.isLoggedIn()) {
       const username = userMatch[1];
-      
+
       // Skip checking for special routes
       if (['signin', 'signup', 'profile', 'friends', 'tournament', 'pong', 'connect4'].includes(username)) {
         return path;
       }
 
-      // Check if username matches logged-in user
       const currentUser = TokenManager.getUserFromLocalStorage();
       if (currentUser && username === currentUser.username) {
-        history.pushState(null, '', '/profile'); //redirects /!!\
+        this.navigateTo('/profile');
         return '/profile';
       }
 
@@ -67,16 +64,18 @@ export class Router {
         });
 
         if (!response.ok) {
-          // history.pushState(null, '', `${username}`);
+          this.navigateTo('/404');
           return '/404';
         }
 
         const data = await response.json();
         if (!data.message || data.message !== 'Username exists') {
+          this.navigateTo('/404');
           return '/404';
         }
       } catch (error) {
         console.error('Error checking username:', error);
+        this.navigateTo('/404');
         return '/404';
       }
     }
