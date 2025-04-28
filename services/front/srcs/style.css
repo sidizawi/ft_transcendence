@@ -96,7 +96,7 @@
 }
 
 /* Google Sign-In Button Override */
-#google-signin-button {
+/* #google-signin-button {
   @apply flex justify-center items-center w-full;
 }
 
@@ -122,7 +122,7 @@
 
 #google-signin-button div[role="button"] > div > div {
   @apply !mr-3;
-}
+} */
 
 /* Menu Overlay */
 #menu-overlay {

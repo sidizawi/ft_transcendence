@@ -122,6 +122,14 @@ export const translations = {
       cancel: 'Abbrechen',
       saveChanges: 'Änderungen speichern',
       back: 'Zurück',
+
+      //SignUp
+      usernameFormatError: 'Der Benutzername darf nicht leer sein oder Leerzeichen enthalten',
+      emailFormatError: 'Bitte geben Sie eine gültige E-Mail-Adresse ein',
+      emptyPassword: 'Passwort darf nicht leer sein',
+      emptyAllFields: 'Bitte füllen Sie vor dem Absenden alle Felder aus',
+      passwordStrengthError: 'Das Passwort muss mindestens 8 Zeichen lang sein und einen Großbuchstaben und ein Sonderzeichen enthalten.',
+      or : 'oder',
       
       // Profile & Settings
       changePhoto: 'Foto ändern',
@@ -280,6 +288,14 @@ export const translations = {
         disable2FA: 'Disable 2FA',
         twoFactorAuth: 'Two-Factor Authentication',
         
+        //SignUp
+        usernameFormatError: 'The username must not be empty or contain spaces',
+        emailFormatError: 'Please enter a valid email address',
+        emptyPassword: 'Password cannot be empty',
+        emptyAllFields: 'Please fill in all fields before submitting',
+        passwordStrengthError: 'Password must be at least 8 characters, have one uppercase letter, and one special character',
+        or: 'or',
+
         // Validation & Messages
         required: 'Required',
         invalidEmail: 'Invalid email address',
@@ -429,6 +445,14 @@ export const translations = {
         enable2FA: 'Activer 2FA',
         disable2FA: 'Désactiver 2FA',
         twoFactorAuth: 'Authentification à deux facteurs',
+        
+        //SignUp
+        usernameFormatError: 'Le nom d\'utilisateur ne peut être vide ni contenir d\'espace',
+        emailFormatError: 'Veuillez entrer une adresse email valide',
+        emptyPassword: 'Le mot de passe ne peut être vide',
+        emptyAllFields: 'Veuillez remplir tous les champs avant de soumettre',
+        passwordStrengthError: 'Le mot de passe doit comporter au moins 8 caractères, une lettre majuscule et un caractère spécial',
+        or: 'ou',
 
         // Validation & Messages
         required: 'Requis',
@@ -579,7 +603,15 @@ export const translations = {
       enable2FA: '2FA inschakelen',
       disable2FA: '2FA uitschakelen',
       twoFactorAuth: 'Twee-factor authenticatie',
-      
+              
+      //SignUp
+      usernameFormatError: 'De gebruikersnaam mag niet leeg zijn of spaties bevatten',
+      emailFormatError: 'Voer een geldig e-mailadres in',
+      emptyPassword: 'Wachtwoord mag niet leeg zijn',
+      emptyAllFields: 'Vul alle velden in voordat u verzendt',
+      passwordStrengthError: 'Het wachtwoord moet minimaal 8 tekens lang zijn, één hoofdletter bevatten en één speciaal teken bevatten',
+      or: 'of',
+
       // Validation & Messages
       required: 'Verplicht',
       invalidEmail: 'Ongeldig e-mailadres',

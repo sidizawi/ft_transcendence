@@ -180,7 +180,12 @@ fastify.post('/google/callback', async (request, reply) => {
       audience: process.env.GOOGLE_CLIENT_ID
     });
     const payload = ticket.getPayload();
-    const { email, name, picture } = payload;
+    const { email, name: rawName, picture } = payload;
+
+    let name = rawName;
+    if (name.includes(' ')) {
+      name = name.split(' ')[0];
+    }
 
     let user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
     if (!user) {

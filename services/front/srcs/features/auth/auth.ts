@@ -3,6 +3,7 @@ import { GoogleAuth } from '../../shared/utils/googleAuth';
 import { i18n } from '../../shared/i18n';
 import { TokenManager } from '../../shared/utils/token';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
+import { ModalManager } from '../../shared/components/modal';
 
 const host = window.location.hostname;
 const AUTH_API_URL = `http://${host}:3000/auth`;
@@ -70,7 +71,6 @@ export class Auth {
       // Fetch user profile after successful login
       await this.fetchAndSetUserProfile();
     } catch (error) {
-      console.error('Login error:', error);
       this.showError(error instanceof Error ? error.message : i18n.t('loginError'));
     }
   }
@@ -101,7 +101,6 @@ export class Auth {
       // Fetch user profile after successful registration
       await this.fetchAndSetUserProfile();
     } catch (error) {
-      console.error('Signup error:', error);
       this.showError(error instanceof Error ? error.message : i18n.t('signupError'));
     }
   }
@@ -160,7 +159,6 @@ export class Auth {
 
       this.onLogin(user);
     } catch (error) {
-      console.error('Error fetching user profile:', error);
       TokenManager.removeToken();
       localStorage.removeItem('user');
       throw error;
@@ -171,7 +169,7 @@ export class Auth {
     const signMessage = document.getElementById('sign-message');
     if (signMessage) {
       signMessage.textContent = message;
-      signMessage.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400';
+      signMessage.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 text-center dark:text-red-400';
       signMessage.classList.remove('hidden');
     }
   }
@@ -204,7 +202,7 @@ export class Auth {
             <form id="signIn-form" class="space-y-4">
               <div>
                 <label for="user-identifier" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  ${i18n.t('username')} or ${i18n.t('email')}
+                  ${i18n.t('username')} ${i18n.t('or')} ${i18n.t('email')}
                 </label>
                 <input 
                   type="text" 
@@ -249,7 +247,7 @@ export class Auth {
                   <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                  <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">${i18n.t('continueWith')}</span>
+                  <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">${i18n.t('or')}</span>
                 </div>
               </div>
 
@@ -284,7 +282,7 @@ export class Auth {
                   type="text" 
                   id="username"
                   class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  
                 >
               </div>
 
@@ -296,7 +294,7 @@ export class Auth {
                   type="email" 
                   id="email"
                   class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  
                 >
               </div>
 
@@ -309,7 +307,7 @@ export class Auth {
                     type="password" 
                     id="password"
                     class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                    required
+                    
                   >
                   <button 
                     type="button"
@@ -335,7 +333,7 @@ export class Auth {
                   <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                  <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">${i18n.t('continueWith')}</span>
+                  <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">${i18n.t('or')}</span>
                 </div>
               </div>
 
@@ -364,23 +362,54 @@ export class Auth {
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-      
+
       if (isSignUp) {
         const usernameInput = document.getElementById('username') as HTMLInputElement;
         const emailInput = document.getElementById('email') as HTMLInputElement;
         const passwordInput = document.getElementById('password') as HTMLInputElement;
-        
+
         if (usernameInput && emailInput && passwordInput) {
-          await this.handleSignUp(
-            usernameInput.value,
-            emailInput.value,
-            passwordInput.value
-          );
+          const username = usernameInput.value.trim(); //space allowed?
+          const email = emailInput.value.trim();
+          const password = passwordInput.value;
+
+          if (!username && !email && !password) {
+            this.showError(i18n.t('emptyAllFields'));
+            return;
+          }
+
+          // Email regex pattern
+          const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+          if (!username || username.includes(' ')) {
+            this.showError(i18n.t('usernameFormatError'));
+            return;
+          }
+
+          if (!email || !emailPattern.test(email)) {
+            this.showError(i18n.t('emailFormatError'));
+            return;
+          }
+
+          if (!password) {
+            this.showError(i18n.t('emptyPassword'));
+            return;
+          }
+
+          // // Password validation: minimum 8 characters, one uppercase, one special character
+          // const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]).{8,}$/;
+
+          // if (!passwordPattern.test(password)) {
+          //   this.showError(i18n.t('passwordStrengthError'));
+          //   return;
+          // }
+
+          await this.handleSignUp(username, email, password);
         }
       } else {
         const identifierInput = document.getElementById('user-identifier') as HTMLInputElement;
         const passwordInput = document.getElementById('password') as HTMLInputElement;
-        
+
         if (identifierInput && passwordInput) {
           await this.handleLogin(
             identifierInput.value,

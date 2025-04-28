@@ -1,6 +1,9 @@
 To Do:
 
-	LogUp page:
+	twoFactorAuth/translations
+		- title -> 2FAVerification (pop up dans profile ex)
+
+	SignUp page:
 		- Check robustesse mdp quand create pcq back non (?)
 
 	Settings page:
@@ -10,15 +13,14 @@ To Do:
 
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
-		- ADD Ajout message d'erreur
-		- switch to friends directory ?
 		- 
 
 	PARTOUT:
-		- Quand server renvoit erreur meme si traitee dans le front -> console du navigateur renvoit ERREUR
-		- quand trop de retour supprime historique???????
+		- console du navigateur renvoit ERREUR
+		- quand trop de retour supprime historique??????? (i.e. retour au signIn)
 		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
-		- si /users/URLPAGE EXISTANTE affiche page profile de settings/pong etc
+		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
+		-Attention message erreur quand vient du back -> ne peut traduire
 	
 	Visuel:
 		-Profile page:
@@ -65,14 +67,6 @@ To Do:
       console.log(url);
 
       const response = await fetch('http://' + window.location.hostname + ':3001/login', {
-
-
-
-
----> /@username ou restrictions car username != profile et autre
-
-'/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup'
-In case the URL doesn't start with '/profile' , '/friends' , '/tournament' , '/pong' , '/connect4' , '/signin' , '/signup' check that is it a username in database, if not 404, without changing the actual check
 
 
 //Google just en localhost -> a distance pb securite Google

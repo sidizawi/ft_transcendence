@@ -91,7 +91,7 @@ export class TwoFactorAuth {
             <input 
               type="text" 
               id="2fa-verification-code"
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange dark:focus:ring-nature focus:border-transparent"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-1 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
               placeholder="000000"
               maxlength="6"
               pattern="[0-9]*"

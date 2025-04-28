@@ -87,13 +87,13 @@ export class Friends {
               <input 
                 type="text" 
                 id="friend-username"
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange dark:focus:ring-nature focus:border-transparent"
+                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-1 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
                 placeholder="${i18n.t('enterUsername')}"
                 required
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
             </div>
-            <div id="add-friend-error" class="text-red-400 text-sm hidden"></div>
+            <div id="add-friend-error" class="mt-4 p-4 rounded-lg hidden"></div>
             <div class="flex justify-end space-x-3">
               <button 
                 type="button"
@@ -331,10 +331,11 @@ export class Friends {
   }
 
   private showAddFriendError(message: string) {
-    const errorDiv = document.getElementById('add-friend-error');
-    if (errorDiv) {
-      errorDiv.textContent = message;
-      errorDiv.classList.remove('hidden');
+    const errorAddMessage = document.getElementById('add-friend-error');
+    if (errorAddMessage) {
+      errorAddMessage.textContent = message;
+      errorAddMessage.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 text-center dark:text-red-400';
+      errorAddMessage.classList.remove('hidden');
     }
   }
 
@@ -346,21 +347,24 @@ export class Friends {
   }
 
   private async handleAddFriend(username: string) {
-    this.isAddingFriend = true;
     this.updateView();
-
+  
     try {
+      this.isAddingFriend = true;
       await FriendService.addFriend(username);
       this.addFriendOpen = false;
       await this.loadFriends();
     } catch (error) {
-      console.error('Error adding friend:', error);
-      this.showAddFriendError(error instanceof Error ? error.message : 'Failed to add friend');
-    } finally {
       this.isAddingFriend = false;
-      this.updateView();
+      this.showAddFriendError(error instanceof Error ? error.message : 'Failed to add friend');
+      return;
     }
+  
+    this.isAddingFriend = false;
+    this.updateView();
   }
+  
+  
 
   private async handleFriendAction(action: string, username: string) {
     try {

@@ -77,7 +77,7 @@ export class GoogleAuth {
       
       window.google.accounts.id.renderButton(element, {
         type: 'standard',
-        theme: 'filled_blue',
+        theme: 'outline',
         size: 'large',
         shape: 'pill',
         text: 'continue_with',
