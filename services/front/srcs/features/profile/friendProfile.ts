@@ -343,7 +343,7 @@ export class FriendProfile {
                     <span class="w-2 h-2 rounded-full ${game.playerWin === this.username ? 'bg-green-500' : 'bg-red-500'}"></span>
                     <div class="flex items-center space-x-2">
                       <img 
-                        src="${game.avatar}" 
+                        src="/${game.avatar}" 
                         alt="${game.opponent}"
                         class="w-8 h-8 rounded-full object-cover"
                       >

@@ -1,10 +1,8 @@
 To Do:
 
-
+ajouter dans db /img/default.jpg si rien
 ajouter status quand co et deco
 ajouter status friends.ts
-rendu auto de friendsTab quand login/logup
-redirection apres log????????
 
 	twoFactorAuth/translations
 		- title -> 2FAVerification (pop up dans profile ex)

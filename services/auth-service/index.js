@@ -68,7 +68,7 @@ fastify.get('/register', async (request, reply) => {
         if (request.cookies && request.cookies.token) {
             try {
                 await request.jwtVerify({ cookie: 'token' });
-                return reply.redirect('/user/profile');
+                return ;
             } catch (err) {}
         }
         const html = await fs.readFile(path.join(__dirname, 'front', 'public', 'register.html'), 'utf8');
@@ -123,7 +123,7 @@ fastify.get('/login', async (request, reply) => {
         if (request.cookies && request.cookies.token) {
             try {
                 await request.jwtVerify({ cookie: 'token' });
-                return reply.redirect('/user/profile');
+                return ;
             } catch (err) {}
         }
         const html = await fs.readFile(path.join(__dirname, 'front', 'public', 'login.html'), 'utf8');

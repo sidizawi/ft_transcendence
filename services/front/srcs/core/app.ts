@@ -81,8 +81,8 @@ export class TranscendenceApp {
   private handleLogin(user: User) {
     this.state.user = user;
     this.menu = new Menu(true, () => this.handleLogout());
-    this.initializeFriendsTab();
     this.initializeApp();
+    this.initializeFriendsTab();
     this.router.navigateTo('/profile');
   }
 
