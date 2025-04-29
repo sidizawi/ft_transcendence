@@ -171,11 +171,11 @@ export class Friends {
               <div class="space-y-3">
                 ${receivingRequests.map(friend => `
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer max-w-[60%]" data-action="view-profile" data-username="${friend.username2}">
+                    <div class="flex items-center space-x-3 cursor-pointer max-w-[70%]" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
                         alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
+                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
                       >
                       <span class="text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap block">
                         ${friend.username2}
@@ -209,14 +209,17 @@ export class Friends {
               <div class="space-y-3">
                 ${sendingRequests.map(friend => `
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
+                    <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
                         alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
+                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
                       >
-                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                      <span class="text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap block">
+                        ${friend.username2}
+                      </span>
                     </div>
+                    <div class="flex items-center space-x-3">
                     <button 
                       class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-white transition-colors"
                       data-action="cancel"
@@ -294,13 +297,15 @@ export class Friends {
               <div class="space-y-3">
                 ${blockedFriends.map(friend => `
                   <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
+                    <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
                         alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover grayscale hover:opacity-80 transition-opacity"
+                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
                       >
-                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                      <span class="text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap block">
+                        ${friend.username2}
+                      </span>
                     </div>
                     <button 
                       class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600"

@@ -123,9 +123,13 @@ export class Profile {
                   class="hidden"
                 >
               </div>
-              <div class="ml-6">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${this.user.username}</h1>
-                <p class="text-gray-600 dark:text-gray-400">${this.user.email}</p>
+              <div class="ml-6 max-w-[60%]">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap">
+                  ${this.user.username}
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 truncate overflow-hidden whitespace-nowrap">
+                  ${this.user.email}
+                </p>
               </div>
               <div class="ml-auto flex items-center space-x-2">
                 <a 
