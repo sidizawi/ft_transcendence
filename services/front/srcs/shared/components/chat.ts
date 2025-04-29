@@ -54,7 +54,7 @@ export class Chat {
     return `
       <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Chat</h2>
+          <h2 class="text-xl font-semibold text-center text-gray-800 dark:text-white"><a href="/users/${this.friendUserName}">${this.friendUserName}</a></h2>
         </div>
         
         <div id="chat-messages" class="h-96 overflow-y-auto p-4 space-y-4">

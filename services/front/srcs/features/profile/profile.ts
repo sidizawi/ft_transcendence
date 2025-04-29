@@ -201,7 +201,7 @@ export class Profile {
             <div class="mt-8 pt-8 border-t border-gray-300 dark:border-gray-600 flex justify-center space-x-4">
               <a 
                 href="/friends"
-                class="px-8 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+                class="px-8 bg-orange-light dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature/90 shadow-md transition-colors"
               >
                 ${i18n.t('friends')}
               </a>

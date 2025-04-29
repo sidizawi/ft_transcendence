@@ -87,6 +87,10 @@ export const translations = {
       add: 'Hinzufügen',
       searchFriends: 'Freunde suchen',
       friendsList: 'Freundesliste',
+      onlineFriends: 'Freund(e) online',
+      offlineFriends: 'Freund(e) offline',
+      noFriendsOnline: 'keine Freunde online',
+      noFriendsOffline: 'keine Freunde offline',
       friendStatus: {
         sending: 'Anfrage gesendet',
         receiving: 'Anfrage erhalten',
@@ -245,6 +249,10 @@ export const translations = {
       add: 'Add',
       searchFriends: 'Search friends',
       friendsList: 'Friend list',
+      onlineFriends: 'Online friend(s)',
+      offlineFriends: 'Offline friend(s)',
+      noFriendsOnline: 'no online friends',
+      noFriendsOffline: 'no offline friends',
       friendStatus: {
         sending: 'Request sent',
         receiving: 'Request received',
@@ -401,6 +409,10 @@ export const translations = {
       add: 'Ajouter',
       searchFriends: 'Rechercher des amis',
       friendsList: 'Liste d\'amis',
+      onlineFriends: 'Ami(s) en ligne',
+      offlineFriends: 'Ami(s) hors ligne',
+      noFriendsOnline: 'pas d\'amis en ligne',
+      noFriendsOffline: 'pas d\'amis hors ligne',
       friendStatus: {
         sending: 'Demande envoyée',
         receiving: 'Demande reçue',
@@ -559,6 +571,10 @@ export const translations = {
       add: 'Toevoegen',
       searchFriends: 'Vrienden zoeken',
       friendsList: 'Vriendenlijst',
+      onlineFriends: 'Vriend(en) online',
+      offlineFriends: 'Vriend(en) offline',
+      noFriendsOnline: 'geen vrienden online',
+      noFriendsOffline: 'geen vrienden offline',
       friendStatus: {
         sending: 'Verzoek verzonden',
         receiving: 'Verzoek ontvangen',
