@@ -1,8 +1,10 @@
 To Do:
 
 
-	FriendsTab:
-		- max-w(40%) -> ne se base pas sur le bon max-w
+ajouter status quand co et deco
+ajouter status friends.ts
+rendu auto de friendsTab quand login/logup
+redirection apres log????????
 
 	twoFactorAuth/translations
 		- title -> 2FAVerification (pop up dans profile ex)

@@ -53,9 +53,17 @@ export class Chat {
   public render(): string {
     return `
       <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-xl font-semibold text-center text-gray-800 dark:text-white"><a href="/users/${this.friendUserName}">${this.friendUserName}</a></h2>
-        </div>
+      <div class="p-4 border-b border-gray-200 dark:border-gray-700">
+        <h2 class="text-xl font-semibold text-gray-800 dark:text-white text-center">
+          <a 
+            href="/users/${this.friendUserName}"
+            class="mx-auto max-w-full truncate overflow-hidden whitespace-nowrap block"
+            style="max-width: 80%"
+          >
+            ${this.friendUserName}
+          </a>
+        </h2>
+      </div>
         
         <div id="chat-messages" class="h-96 overflow-y-auto p-4 space-y-4">
           <!-- Messages will be populated here -->

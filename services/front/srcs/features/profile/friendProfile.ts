@@ -177,18 +177,21 @@ export class FriendProfile {
     return `
       <div class="max-w-4xl mx-auto">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+
           <!-- Profile Header -->
           <div class="relative">
             <div class="flex items-center px-8 pt-6">
-              <div class="relative">
+              <div class="relative shrink-0">
                 <img 
                   src="/${this.avatar}" 
                   alt="${this.username}" 
                   class="w-32 h-32 rounded-full object-cover"
                 >
               </div>
-              <div class="ml-6">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${this.username}</h1>
+              <div class="ml-6 flex-1 min-w-0">
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap">
+                  ${this.username}
+                </h1>
               </div>
               ${this.renderActionButtons()}
             </div>
