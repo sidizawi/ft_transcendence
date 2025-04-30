@@ -320,16 +320,16 @@ export class Friends {
             </div>
           ` : ''}
         </div>
-      </div>
-      
-      <!-- Back Button -->
-      <div class="mt-8 flex justify-center">
-        <a 
-          href="/profile"
-          class="px-6 py-2 text-orange-darker dark:text-nature-lightest rounded-lg transition-colors"
-        >
-          ${i18n.t('back')}
-        </a>
+        
+        <!-- Back Button -->
+        <div class="mt-8 flex justify-center">
+          <a 
+            href="/profile"
+            class="px-6 py-2 text-orange-darker dark:text-nature-lightest rounded-lg transition-colors"
+          >
+            ${i18n.t('back')}
+          </a>
+        </div>
       </div>
 
       ${this.renderAddFriendModal()}

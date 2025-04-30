@@ -545,12 +545,6 @@ export class Settings {
                   </button>
 
                   <div class="flex justify-center space-x-4">
-                    <a
-                      href="/profile"
-                      class="px-6 py-2 bg-orange-lighter dark:bg-forest text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
-                    >
-                      ${i18n.t('back')}
-                    </a>
                     <button
                       type="submit"
                       class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange dark:bg-nature hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
@@ -562,6 +556,15 @@ export class Settings {
               </form>
             </div>
           </div>
+        </div>
+        <!-- Back Button -->
+        <div class="mt-8 flex justify-center">
+          <a
+            href="/profile"
+            class="px-6 py-2 text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
+          >
+            ${i18n.t('back')}
+          </a>
         </div>
       </div>
     `;
