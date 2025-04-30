@@ -83,6 +83,8 @@ export class TranscendenceApp {
   }
 
   private handleLogout() {
+    // this.chat.clean();
+    // todo
     TokenManager.removeToken();
     localStorage.removeItem('user');
     this.state.user = null;

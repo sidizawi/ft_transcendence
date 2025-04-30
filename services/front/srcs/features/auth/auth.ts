@@ -3,6 +3,7 @@ import { GoogleAuth } from '../../shared/utils/googleAuth';
 import { i18n } from '../../shared/i18n';
 import { TokenManager } from '../../shared/utils/token';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
+// import { chatService } from '../../main';
 
 const host = window.location.hostname;
 const AUTH_API_URL = `http://${host}:3000/auth`;
@@ -66,6 +67,7 @@ export class Auth {
 
       const data = await response.json();
       TokenManager.setToken(data.token);
+      // chatService.setup();
       
       // Fetch user profile after successful login
       await this.fetchAndSetUserProfile();
@@ -97,7 +99,8 @@ export class Auth {
 
       const data = await response.json();
       TokenManager.setToken(data.token);
-      
+      // chatService.setup();
+
       // Fetch user profile after successful registration
       await this.fetchAndSetUserProfile();
     } catch (error) {
