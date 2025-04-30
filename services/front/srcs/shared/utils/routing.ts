@@ -64,18 +64,15 @@ export class Router {
         });
 
         if (!response.ok) {
-          // this.navigateTo('/404'); //attention reload
           return '/404';
         }
 
         const data = await response.json();
         if (!data.message || data.message !== 'Username exists') {
-          // this.navigateTo('/404');
           return '/404';
         }
       } catch (error) {
         console.error('Error checking username:', error);
-        // this.navigateTo('/404');
         return '/404';
       }
     }

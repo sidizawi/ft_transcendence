@@ -204,8 +204,9 @@ export class FriendProfile {
               <div class="relative">
                 <div class="flex -mb-px space-x-8">
                   <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg font-medium transition-colors"
+                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-gray-600 dark:text-gray-400 font-medium"
                     data-tab="pong"
+                    data-active="true"
                   >
                     <span class="flex items-center space-x-2">
                       <span>${i18n.t('pong')}</span>
@@ -213,8 +214,9 @@ export class FriendProfile {
                     <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-orange dark:bg-nature transform scale-x-0 transition-transform"></span>
                   </button>
                   <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg font-medium transition-colors"
+                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-gray-600 dark:text-gray-400 font-medium"
                     data-tab="connect4"
+                    data-active="false"
                   >
                     <span class="flex items-center space-x-2">
                       <span>${i18n.t('connect4')}</span>
@@ -365,46 +367,63 @@ export class FriendProfile {
 
   setupEventListeners() {
     // Tab switching
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
+    const tabButtons = document.querySelectorAll('.tab-button') as NodeListOf<HTMLButtonElement>;
+    const tabContents = document.querySelectorAll('.tab-content') as NodeListOf<HTMLElement>;
 
     tabButtons.forEach(button => {
       button.addEventListener('click', () => {
         const tab = button.getAttribute('data-tab');
-        
-        // Update button styles
+  
+        // Reset all buttons
         tabButtons.forEach(btn => {
-          btn.classList.remove('text-orange', 'dark:text-nature');
-          btn.classList.add('text-gray-600', 'dark:text-gray-400');
+          btn.setAttribute('data-active', 'false');
+          btn.classList.remove('text-orange-500', 'font-bold');
+          btn.classList.add('text-orange-500/50', 'font-medium'); // orange but lighter when inactive
+  
           btn.querySelector('.tab-indicator')?.classList.remove('scale-x-100');
           btn.querySelector('.tab-indicator')?.classList.add('scale-x-0');
         });
-
-        // Set active tab style
-        button.classList.remove('text-gray-600', 'dark:text-gray-400');
-        button.classList.add('text-orange', 'dark:text-nature');
+  
+        // Set clicked button as active
+        button.setAttribute('data-active', 'true');
+        button.classList.remove('text-orange-500/50', 'font-medium');
+        button.classList.add('text-orange-500', 'font-bold');
+  
         button.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
         button.querySelector('.tab-indicator')?.classList.add('scale-x-100');
-
-        // Show corresponding content
+  
+        // Show correct content
         tabContents.forEach(content => {
-          if (content.getAttribute('data-tab') === tab) {
-            content.classList.remove('hidden');
-          } else {
-            content.classList.add('hidden');
-          }
+          content.classList.toggle('hidden', content.getAttribute('data-tab') !== tab);
         });
+  
+        // Update ?tab param
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab || 'pong');
+        history.replaceState(null, '', url.toString());
       });
     });
-
-    // Set initial active tab
-    const initialTab = tabButtons[0];
+  
+    // On load: restore from ?tab or default
+    const params = new URLSearchParams(window.location.search);
+    const activeTab = params.get('tab') || 'pong';
+    const initialTab = Array.from(tabButtons).find(
+      btn => btn.getAttribute('data-tab') === activeTab
+    );
+  
     if (initialTab) {
-      initialTab.classList.remove('text-gray-600', 'dark:text-gray-400');
-      initialTab.classList.add('text-orange', 'dark:text-nature');
+      initialTab.setAttribute('data-active', 'true');
+      initialTab.classList.remove('text-orange-500/50', 'font-medium');
+      initialTab.classList.add('text-orange-500', 'font-bold');
+  
       initialTab.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
       initialTab.querySelector('.tab-indicator')?.classList.add('scale-x-100');
+  
+      tabContents.forEach(content => {
+        content.classList.toggle('hidden', content.getAttribute('data-tab') !== activeTab);
+      });
     }
+
 
     // Action buttons
     const messageBtn = document.getElementById('messageBtn');
