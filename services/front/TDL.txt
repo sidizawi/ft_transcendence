@@ -1,30 +1,37 @@
 To Do:
 
-ajouter dans db /img/default.jpg si rien
 ajouter status quand co et deco
 ajouter status friends.ts
 
+	friendsTab:
+		- refresh quand chgmnt AMIS (friends.ts)
+
+	auth.ts:
+		- Google logo
+
 	twoFactorAuth/translations
 		- title -> 2FAVerification (pop up dans profile ex)
-
-	SignUp page:
-		- Check robustesse mdp quand create pcq back non (?)
+		- langue des mails
 
 	Settings page:
-		- pas safe acceder image quand pas log + ajout ID persinne devant nom img?
 		- changer window.href.location ----> refresh pour rediriger
 		- ok si meme mdp????
 
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
-		- 
 
 	PARTOUT:
 		- console du navigateur renvoit ERREUR
-		- quand trop de retour supprime historique??????? (i.e. retour au signIn)
 		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
 		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
-		-Attention message erreur quand vient du back -> ne peut traduire
+		-	Attention message erreur quand vient du back -> ne peut traduire
+
+	
+	FriendsProfile:
+		- Erreur avatar quand NULL
+	BACK:
+		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
+		- ajouter dans db /img/default.jpg si rien
 	
 	Visuel:
 		-Profile page:
