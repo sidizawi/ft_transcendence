@@ -3,6 +3,7 @@ import { i18n } from '../../shared/i18n';
 import { TokenManager } from '../../shared/utils/token';
 import { AvatarService } from '../../shared/services/avatarService';
 import { Router } from '../../shared/utils/routing';
+import { SVGIcons } from '../../shared/components/svg';
 
 const host = window.location.hostname;
 const USER_API_URL = `http://${host}:3000/user/settings`;
@@ -17,7 +18,7 @@ export class Settings {
       main.innerHTML = this.render();
       this.setupEventListeners();
     }
-    window.location.href = '/profile'; //ce qui cause reload
+    window.location.href = '/profile';
   }
 
   private async fetchAndUpdateUserProfile() {
@@ -37,7 +38,6 @@ export class Settings {
         throw new Error('Profile data not found');
       }
 
-      // Update user data
       this.user = {
         ...this.user,
         username: profile.username,
@@ -79,13 +79,6 @@ export class Settings {
     const newUsername = formData.get('username') as string;
     const newEmail = !this.user.google ? formData.get('email') as string : null;
     const newPassword = !this.user.google ? formData.get('password') as string : '';
-    // const confirmPassword = !this.user.google ? formData.get('confirmPassword') as string : '';
-
-    // // For non-Google users, validate the password.
-    // if (!this.user.google && newPassword && newPassword !== confirmPassword) {
-    //   this.showVerificationError(messageDiv, i18n.t('passwordMismatch'));
-    //   return;
-    // }
   
     const payload: {
       newUsername?: string;
@@ -108,7 +101,6 @@ export class Settings {
     if (Object.keys(payload).length === 0)
       return;
   
-
     if (Object.keys(payload).length === 1 && payload.newUsername) {
       try {
         const response = await fetch(`${USER_API_URL}/username`, {
@@ -125,7 +117,7 @@ export class Settings {
         const data = await response.json();
         TokenManager.setToken(data.token);
         
-        await this.fetchAndUpdateUserProfile()
+        await this.fetchAndUpdateUserProfile();
 
         return true;
       } catch (error) {
@@ -133,7 +125,6 @@ export class Settings {
         throw error;
       }
     }
-
 
     try {
       const requestResponse = await fetch(`${USER_API_URL}/update-request`, {
@@ -213,7 +204,6 @@ export class Settings {
   }
   
   private async handleDeleteAccount() {
-    // First step: Show password confirmation modal
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
@@ -231,11 +221,63 @@ export class Settings {
           <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
             ${i18n.t('enterPassword')}
           </label>
-          <input 
-            type="password" 
-            id="delete-account-password"
-            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
-          >
+
+
+          <div>
+            <label for="username" class="block text-base font-medium text-gray-700 dark:text-gray-300">
+              ${i18n.t('username')}
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="${this.user.username}"
+              class="
+                mt-1 block w-full
+                rounded-md
+
+                border border-orange-darker/30
+                dark:border-transparent
+                dark:bg-gray-700 dark:text-white
+
+                placeholder-orange-darker/40
+                text-orange-darker
+
+                focus:outline-none
+
+                focus:border-orange
+                focus:ring-2
+                focus:ring-orange-lightest
+
+                px-3 py-2
+
+                text-sm
+              "                                      
+            >
+          </div>
+
+
+          <div class="relative">
+            <input 
+              type="password" 
+              id="delete-account-password"
+              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent pr-10"
+            >
+            <button 
+              type="button"
+              id="toggle-delete-password"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              ${SVGIcons.getEyeIcon(false)}
+            </button>
+          </div>
+
+
+
+
+
+
+
         </div>
         <div class="flex justify-end space-x-4">
           <button 
@@ -259,6 +301,7 @@ export class Settings {
     const cancelButton = modal.querySelector('#cancel-delete');
     const confirmButton = modal.querySelector('#confirm-delete');
     const passwordInput = modal.querySelector('#delete-account-password') as HTMLInputElement;
+    const toggleDeletePassword = modal.querySelector('#toggle-delete-password');
     const errorDiv = modal.querySelector('#delete-account-error');
 
     const showError = (message: string) => {
@@ -268,6 +311,14 @@ export class Settings {
         errorDiv.classList.remove('hidden');
       }
     };
+
+    toggleDeletePassword?.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      if (toggleDeletePassword instanceof HTMLElement) {
+        toggleDeletePassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
+      }
+    });
 
     cancelButton?.addEventListener('click', () => {
       modal.remove();
@@ -287,7 +338,6 @@ export class Settings {
           return;
         }
 
-        // Show verification code modal
         modal.remove();
         const verificationModal = document.createElement('div');
         verificationModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
@@ -542,12 +592,13 @@ export class Settings {
                     <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300">
                       ${i18n.t('newPassword')}
                     </label>
-                    <input
-                      type="password"
-                      id="password"
-                      name="password"
-                      placeholder="••••••••"
-                      class="
+                    <div class="relative">
+                      <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="••••••••"
+                        class="
                         mt-1 block w-full
                         rounded-md
 
@@ -567,41 +618,58 @@ export class Settings {
                         px-3 py-2
 
                         text-sm
-                      "                                      
-                    >
+                        "                                      
+                      >
+                      <button 
+                        type="button"
+                        id="toggle-password"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      >
+                        ${SVGIcons.getEyeIcon(false)}
+                      </button>
+                    </div>
                   </div>
 
                   <div>
                     <label for="confirmPassword" class="block text-base font-medium text-gray-700 dark:text-gray-300">
                       ${i18n.t('confirmPassword')}
                     </label>
-                    <input
-                      type="password"
-                      id="confirmPassword"
-                      name="confirmPassword"
-                      placeholder="••••••••"
-                      class="
-                        mt-1 block w-full
-                        rounded-md
+                    <div class="relative">
+                      <input
+                        type="password"
+                        id="confirmPassword"
+                        name="confirmPassword"
+                        placeholder="••••••••"
+                        class="
+                          mt-1 block w-full
+                          rounded-md
 
-                        border border-orange-darker/30
-                        dark:border-transparent
-                        dark:bg-gray-700 dark:text-white
+                          border border-orange-darker/30
+                          dark:border-transparent
+                          dark:bg-gray-700 dark:text-white
 
-                        placeholder-orange-darker/40
-                        text-orange-darker
+                          placeholder-orange-darker/40
+                          text-orange-darker
 
-                        focus:outline-none
+                          focus:outline-none
 
-                        focus:border-orange
-                        focus:ring-2
-                        focus:ring-orange-lightest
+                          focus:border-orange
+                          focus:ring-2
+                          focus:ring-orange-lightest
 
-                        px-3 py-2
+                          px-3 py-2
 
-                        text-sm
-                      "                                      
-                    >
+                          text-sm
+                        "                                      
+                      >
+                      <button 
+                        type="button"
+                        id="toggle-confirm-password"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      >
+                        ${SVGIcons.getEyeIcon(false)}
+                      </button>
+                    </div>
                   </div>
                 ` : `
                   <div>
@@ -655,11 +723,31 @@ export class Settings {
     const updateForm = document.getElementById('update-info-form');
     const passwordInput = document.getElementById('password') as HTMLInputElement;
     const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
+    const togglePassword = document.getElementById('toggle-password');
+    const toggleConfirmPassword = document.getElementById('toggle-confirm-password');
     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 
     avatarUpload?.addEventListener('change', (e) => this.handleAvatarChange(e));
     updateForm?.addEventListener('submit', (e) => this.handleInfoUpdate(e));
     deleteAccountBtn?.addEventListener('click', () => this.handleDeleteAccount());
+
+    // Password visibility toggle
+    togglePassword?.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      if (togglePassword instanceof HTMLElement) {
+        togglePassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
+      }
+    });
+
+    // Confirm password visibility toggle
+    toggleConfirmPassword?.addEventListener('click', () => {
+      const isPassword = confirmPasswordInput.type === 'password';
+      confirmPasswordInput.type = isPassword ? 'text' : 'password';
+      if (toggleConfirmPassword instanceof HTMLElement) {
+        toggleConfirmPassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
+      }
+    });
 
     // Add password confirmation validation
     if (!this.user.google) {

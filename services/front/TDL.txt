@@ -26,6 +26,7 @@ si token non resent (supp ou autre) rediriger vers sign in
 		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
 		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
 		-	Attention message erreur quand vient du back -> ne peut traduire
+		- taille des "box" idem partout??
 
 	
 	FriendsProfile:
