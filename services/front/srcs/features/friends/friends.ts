@@ -87,7 +87,27 @@ export class Friends {
               <input 
                 type="text" 
                 id="friend-username"
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-1 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
+                class="
+                  mt-1 block w-full
+                  rounded-md
+
+                  border border-orange-darker/30
+                  dark:border-transparent
+                  dark:bg-gray-700 dark:text-white
+
+                  placeholder-orange-darker/40
+                  text-orange-darker
+
+                  focus:outline-none
+
+                  focus:border-orange
+                  focus:ring-2
+                  focus:ring-orange-lightest
+
+                  px-3 py-2
+
+                  text-base
+                "                                      
                 placeholder="${i18n.t('enterUsername')}"
                 required
                 ${this.isAddingFriend ? 'disabled' : ''}

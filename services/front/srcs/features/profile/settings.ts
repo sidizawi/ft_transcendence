@@ -448,7 +448,23 @@ export class Settings {
           <input 
             type="text" 
             id="verification-code"
-            class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange dark:focus:ring-nature focus:border-transparent"
+            class="
+              w-full px-4 py-2
+              rounded-lg
+              
+              border border-orange-darker/30
+              dark:border-transparent
+              dark:bg-gray-700 dark:text-white
+
+              placeholder-orange-darker/40
+              text-orange-darker
+
+              focus:outline-none
+
+              focus:border-orange
+              focus:ring-2
+              focus:ring-orange-lightest
+            "
             placeholder="000000"
             maxlength="6"
             pattern="[0-9]*"
@@ -483,6 +499,15 @@ export class Settings {
       messageDiv.textContent = message;
       messageDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400';
       messageDiv.classList.remove('hidden');
+    }
+  }
+
+  private showError(message: string) {
+    const signMessage = document.getElementById('error-message');
+    if (signMessage) {
+      signMessage.textContent = message;
+      signMessage.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 text-center dark:text-red-400';
+      signMessage.classList.remove('hidden');
     }
   }
 
@@ -702,6 +727,7 @@ export class Settings {
                   </div>
                 </div>
               </form>
+              <div id="error-message" class="mt-4 p-4 rounded-lg hidden"></div>
             </div>
           </div>
         </div>
@@ -728,8 +754,8 @@ export class Settings {
     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
 
     avatarUpload?.addEventListener('change', (e) => this.handleAvatarChange(e));
-    updateForm?.addEventListener('submit', (e) => this.handleInfoUpdate(e));
     deleteAccountBtn?.addEventListener('click', () => this.handleDeleteAccount());
+    updateForm?.addEventListener('submit', (e) => this.handleInfoUpdate(e));
 
     // Password visibility toggle
     togglePassword?.addEventListener('click', () => {
@@ -759,7 +785,9 @@ export class Settings {
             confirmPasswordInput.setCustomValidity('');
           }
         } else {
-          confirmPasswordInput.setCustomValidity('');
+          this.showError(i18n.t('emptyPassword'));
+          return;
+          // confirmPasswordInput.setCustomValidity(i18n.t('emptyPassword'));
         }
       };
 
