@@ -180,7 +180,7 @@ export class Profile {
                     <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-orange dark:bg-nature transform scale-x-0 transition-transform"></span>
                   </button>
                 </div>
-                <div class="absolute bottom-0 left-0 w-full h-px bg-gray-300 dark:bg-gray-600"></div>
+                <div class="absolute bottom-0 left-0 w-full h-px bg-orange-light dark:bg-nature-light"></div>
               </div>
 
               <!-- Pong Stats -->
