@@ -187,6 +187,10 @@ export class TranscendenceApp {
 
     const connect4Match = path.match(/^\/connect4\/(.+)$/)
     if (connect4Match) {
+      if (connect4Match[1] === 'friend_list') {
+        new Connect4HomePage("friend_list");
+        return ;
+      }
       new Connect4(connect4Match[1]);
       return ;
     }
@@ -196,6 +200,7 @@ export class TranscendenceApp {
       new Tournament(tournamentMatch[1]);
       return ;
     }
+
 
     switch (path) {
       case '/':

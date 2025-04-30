@@ -38,7 +38,7 @@ function handleNewMessage(fastify, data) {
             sender: data.user,
             text: data.text,
             timestamp: data.timestamp,
-            friend: data.friend
+            friend: data.user
         }));
     }
 

@@ -10,12 +10,11 @@ export class Chat {
     this.friendUserName = decodeURI(friendUserName);
     this.currentUser = TokenManager.getUserFromLocalStorage();
 
-    setTimeout(() => {
-      chatService.addNewChatRoom(this.friendUserName, this.receiveMessage);
-    }, 1000);
+    chatService.addNewChatRoom(this.friendUserName, (data) => this.receiveMessage(data));
   }
 
   receiveMessage(data: any) {
+    console.log("chat received: ", data);
     if (data.type == "message") {
       this.addMessage({
         text: data.text,

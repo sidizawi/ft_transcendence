@@ -12,7 +12,6 @@ export class ChatService {
   public setuped : boolean = false;
 
   constructor() {
-    console.log("ChatService constructor");
     this.currentUser = TokenManager.getUserFromLocalStorage();
 
     if (!this.currentUser) {
@@ -45,7 +44,15 @@ export class ChatService {
         userId: this.currentUser?.id,
         user: this.currentUser?.username,
       }));
-      console.log(this.ws?.readyState);
+
+      this.chatRooms.forEach((fn, friendUserName) => {
+        this.ws?.send(JSON.stringify({
+          type: "newChat",
+          user: this.currentUser?.username,
+          userId: this.currentUser?.id,
+          friend: friendUserName,
+        }));
+      })
     }
 
     this.ws.onmessage = (event) => {
@@ -68,7 +75,6 @@ export class ChatService {
     }
     this.chatRooms.set(friendUserName, callback);
 
-    console.log("Chat room added:", this.ws?.readyState);
     if (this.ws?.readyState !== WebSocket.OPEN) {
       return ;
     }
