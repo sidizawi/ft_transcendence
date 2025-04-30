@@ -20,6 +20,8 @@ fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 export const waitingPlayers = [];
 export const inGameUsers = new Set();
 
+//let sockets = new Map();
+
 // Helper function for creating games
 function setupNewGame(ws, mode, opponent = null) {
   // Check if user is already in a game
@@ -100,8 +102,15 @@ fastify.register((wsRoutes) => {
 
     if (!token)  {
        ws.close();
+       return ;
     }
+
+		fastify.jwt.verify(token);
+
      ws.on('message', (message) => {
+      //if (!(ws in sockets)) {
+      //  sockets.set(ws, {username});
+      //}
       try {
         const data = JSON.parse(message.toString());
         console.log('Received:', data);

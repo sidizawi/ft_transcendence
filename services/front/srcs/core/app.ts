@@ -8,7 +8,7 @@ import { Friends } from '../features/friends/friends';
 import { Router } from '../shared/utils/routing';
 import { User } from '../shared/types/user';
 import { Tournament, TournamentHomePage } from '../features/tournament/tournament';
-import { Pong } from '../features/games/pong';
+import { Pong, PongHomePage } from '../features/games/pong';
 import { Connect4, Connect4HomePage } from '../features/games/connect4';
 import { Header } from '../shared/components/header';
 import { Footer } from '../shared/components/footer';
@@ -31,7 +31,7 @@ export class TranscendenceApp {
   private header: Header;
   private footer: Footer;
   private connect4: Connect4HomePage;
-  private pong: Pong;
+  private pong: PongHomePage;
   //private friendsList: FriendsList | null = null;
 
   constructor() {
@@ -52,7 +52,7 @@ export class TranscendenceApp {
     this.menu = new Menu(this.isLoggedIn(), () => this.handleLogout());
     this.auth = new Auth((user) => this.handleLogin(user));
     this.connect4 = new Connect4HomePage();
-    this.pong = new Pong();
+    this.pong = new PongHomePage();
     this.router = new Router(
       () => this.renderCurrentPage(),
       () => this.isLoggedIn()
@@ -195,6 +195,16 @@ export class TranscendenceApp {
       return ;
     }
 
+    const pongMatch = path.match(/^\/pong\/(.+)$/)
+    if (pongMatch) {
+      if (pongMatch[1] === 'playVsFriend') {
+        new PongHomePage("friend_list");
+        return ;
+      }
+      new Pong(pongMatch[1]);
+      return ;
+    }
+
     const tournamentMatch = path.match(/^\/tournament\/(.+)$/)
     if (tournamentMatch) {
       console.log(tournamentMatch[1]);
@@ -238,7 +248,7 @@ export class TranscendenceApp {
       case '/pong':
       case '/pong/':
         main.innerHTML = this.pong.render();
-        this.pong.pongEventListener();
+        this.pong.setupEventListener();
         break;
       case '/connect4':
       case '/connect4/':

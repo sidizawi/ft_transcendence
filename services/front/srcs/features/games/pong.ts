@@ -1,4 +1,8 @@
+import { app } from '../../main.ts';
+import { ModalManager } from '../../shared/components/modal.ts';
 import { i18n } from '../../shared/i18n';
+import { FriendService } from '../../shared/services/friendService.ts';
+import { Friend } from '../../shared/types/friend.ts';
 import { PongState } from '../../shared/types/pong.ts';
 import { TokenManager } from '../../shared/utils/token';
 import Ball from './pong/Ball';
@@ -42,6 +46,11 @@ export class Pong {
       user: TokenManager.getUserFromLocalStorage(),
   };
 
+  constructor(type: string | null) {
+    this.render();
+    this.pongEventListener(type);
+  }
+
   stopGame(winner: string): void {
     // Game state flags
     this.state.gameStarted = false;
@@ -67,10 +76,13 @@ export class Pong {
     }
     
     // Draw the end game menu
-    this.rerender();
+    app.router.navigateTo("/pong");
   }
 
-  canvasEventListener(type: string | null) {
+  clean() {}
+
+  pongEventListener(type: string | null) {
+    this.clean();
     this.state.canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
     this.state.ctx = this.state.canvas.getContext("2d");
     
@@ -84,7 +96,6 @@ export class Pong {
 
     this.state.ws.onclose = () => {
       console.log("Disconnected from server");
-      this.rerender();
       return ;
     }
 
@@ -177,85 +188,166 @@ export class Pong {
     document.addEventListener("keyup", (event: KeyboardEvent) => handleKeyUp(event, this.state));
   }
 
-  pongEventListener() {
+  render() {
+    const main = document.querySelector("main");
 
-    const playBtn = document.querySelectorAll(".pongPlayBtn");
-
-    playBtn.forEach((btn) => {
-      if (btn.classList.contains("not-connected")) {
-        return;
-      }
-      btn.addEventListener('click', (event) => {
-        const id = (event.target as HTMLElement).getAttribute("data")
-        const main = document.querySelector("main");
-        main!.innerHTML = this.renderCanvas();
-        this.canvasEventListener(id);
-      });
-    });
-  }
-
-  className() : string {
-    const token = TokenManager.getToken();
-    if (!token) {
-      return "not-connected w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors";
-    }
-    return "w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors";
-  }
-
-  playAgain() : string {
-    if (!this.state.gamePlayed) {
-      return "";
-    }
-    this.state.gamePlayed = false;
-    let data = this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
-    return `
-        <button data="${data}" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-          ${i18n.t('games.playAgain')}
-        </button>
-    `;
-  }
-
-  renderCanvas(): string {
-    return `
+    main!.innerHTML = `
       <div class="flex items-center justify-center h-screen">
         <canvas id="pongCanvas" width="800" height="600" class="bg-black block mx-auto">
       </div>
     `;
   }
+}
 
-  rerender() {
-    const main = document.querySelector("main");
-    main!.innerHTML = this.render();
-    this.pongEventListener();
-  }
+export class PongHomePage {
+    private loading = true;
+    private friendList: Friend[] = [];
+  
+    constructor(type: string | null = null) {
+      if (type == "friend_list") {
+        this.loadFriendList();
+        this.renderFriendList();
+        return ;
+      }
+    }
+  
+    setupEventListener() {
+      const playBtn = document.querySelectorAll(".pongPlayBtn");
+  
+      playBtn.forEach((btn) => {
+        if (btn.classList.contains("not-connected")) {
+          return;
+        }
+  
+        btn.addEventListener('click', (event) => {
+          const type = (event.target as HTMLElement).getAttribute("data") || "";
+  
+          if (type == "play_tournament") {
+            app.router.navigateTo("/tournament");
+            return ;
+          }
+          const route = "/pong/" + type;
+          app.router.navigateTo(route);
+        });
+      });
+    }
+  
+    renderFriendList() {
+      const main = document.querySelector("main");
+  
+      if (this.loading) {
+        main!.innerHTML = `
+          <div class="max-w-4xl mx-auto px-4 py-8">
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+              <div class="flex justify-center items-center h-64">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-orange dark:border-nature border-t-transparent"></div>
+              </div>
+            </div>
+          </div>
+        `;
+        return ;
+      }
+  
+      // todo: translate
+      main!.innerHTML = `
+      <div class="max-w-4xl mx-auto px-4 py-8">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <div class="flex justify-start items-center mb-6">
+              <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${i18n.t('friends')}</h1>
+            </div>
+  
+  
+            ${this.friendList.length > 0 ? `
+              <div class="mb-8">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
+                <div class="space-y-3">
+                  ${this.friendList.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
+                        >
+                        <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                      </div>
+                      <div class="space-x-2">
+                        <button 
+                          class="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-white transition-colors"
+                          data-action="play"
+                          data-username="${friend.username2}"
+                        >
+                          play with
+                        </button>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+      </div>
+      `;
+  
+      document.querySelectorAll('[data-action]').forEach(button => {
+        button.addEventListener('click', async (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const username = button.getAttribute('data-username');
+  
+          app.router.navigateTo(`/pong/online?friend=${username}`);
+        });
+      });
+  
+    }
+  
+    async loadFriendList() {
+      try {
+        this.loading = true;
+        this.friendList = await FriendService.getFriendsList();
+        this.friendList = this.friendList.filter((friend) => friend.status == "accepted");
+        this.loading = false;
+        this.renderFriendList();
+      } catch (error) {
+        // todo: translate
+        ModalManager.openModal(i18n.t('games.connect4.title'), "loading friend list failed");
+      }
+    }
 
-  render(): string {
-    return `
-      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
-            ${i18n.t('games.pong.title')}
-          </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
-            ${i18n.t('games.pong.description')}
-          </p>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button data="twoPlayer" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-              ${i18n.t('games.playLocal')}
-            </button>
-            <button data="online" class="pongPlayBtn ${this.className()}">
-              ${i18n.t('games.playVsFriend')}
-            </button>
-            <button data="singlePlayer" class="pongPlayBtn ${this.className()}">
-              ${i18n.t('games.playVsAI')}
-            </button>
-            <button data="online" class="pongPlayBtn ${this.className()}">
-              ${i18n.t('games.playTournament')}
-            </button>
-            ${this.playAgain()}
+    className(token: string | null) : string {
+      if (!token) {
+        return "not-connected w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors";
+      }
+      return "w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors";
+    }
+
+    render(): string {
+      const token = TokenManager.getToken();
+      return `
+        <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+              ${i18n.t('games.pong.title')}
+            </h1>
+            <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+              ${i18n.t('games.pong.description')}
+            </p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button data="twoPlayer" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                ${i18n.t('games.playLocal')}
+              </button>
+              <button data="playVsFriend" class="pongPlayBtn ${this.className(token)}">
+                ${i18n.t('games.playVsFriend')}
+              </button>
+              <button data="singlePlayer" class="pongPlayBtn ${this.className(token)}">
+                ${i18n.t('games.playVsAI')}
+              </button>
+              <button data="play_tournament" class="pongPlayBtn ${this.className(token)}">
+                ${i18n.t('games.playTournament')}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    `;
-  }
+      `;
+    }
 }

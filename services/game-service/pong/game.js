@@ -3,6 +3,13 @@ import Ball from './Ball.js';
 import { createAndUpdateGameRecord } from '../db.js';
 import { inGameUsers } from '../index.js';
 
+/*
+  * TODO:
+  * gameover: handleDisconnect
+  * friend
+  * block keys remote
+*/
+
 
 // Game constants
 export const WINNING_SCORE = 4;
@@ -340,10 +347,10 @@ export const handleDisconnect = (gameId, username) => {
   const game = games[gameId];
   if (!game) return;
   
-  // Remove player from game
-  if (game.players[username]) {
-    delete game.players[username];
-  }
+  //// Remove player from game
+  //if (game.players[username]) {
+  //  delete game.players[username];
+  //}
 
   // Remove from inGameUsers
   inGameUsers.delete(username);
@@ -351,9 +358,9 @@ export const handleDisconnect = (gameId, username) => {
   if (game.status === 'playing') {
     stopGame(gameId);
   }
-  if (game.players[username]) {
-    delete game.players[username];
-  }
+  //if (game.players[username]) {
+  //  delete game.players[username];
+  //}
   // If no players left, clean up the game
   if (Object.keys(game.players).length === 0) {
     if (game.intervalId) {
@@ -362,6 +369,6 @@ export const handleDisconnect = (gameId, username) => {
     if (game.aiInterval) {
       clearInterval(game.aiInterval);
     }
-    delete games[gameId];
   }
+  delete games[gameId];
 };

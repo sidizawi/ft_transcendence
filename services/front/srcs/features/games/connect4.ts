@@ -414,7 +414,6 @@ export class Connect4HomePage {
     if (type == "friend_list") {
       this.loadFriendList();
       this.renderFriendList();
-      // play_vs_friend
       return ;
     }
   }
