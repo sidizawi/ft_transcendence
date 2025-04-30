@@ -1,55 +1,44 @@
-// AI move function that works directly with game structure
-export const aiThink = (ball, aiPlayer, dimensions) => {
+import { WINNING_SCORE } from './game.js';  
+
+export const aiThink = (ball, aiPlayer, dimensions, scores) => {
   const { width, height, paddleWidth, paddleHeight } = dimensions;
-  
-  // Only think if we have an AI player
   if (!aiPlayer) return;
-  
-  // Ball moving toward AI (if AI is on right)
+
+  // 1) compute difficulty from score difference
+  const rawDiff     = scores.left - scores.right;  
+
+  const difficulty  = Math.max(-1, Math.min(1, rawDiff / WINNING_SCORE));
+
   if (ball.speedX > 0 && aiPlayer.side === 'right') {
-    // Calculate time for ball to reach paddle
     const distanceToTravel = width - paddleWidth - ball.x;
-    const timeToReach = distanceToTravel / ball.speedX;
-    
-    // Predict where ball will be
-    let predictedY = predictBallPosition(ball.y, ball.speedY, timeToReach, height);
-    
-    // Add much larger imperfection (50% of paddle height)
-    const imperfection = (Math.random() - 0.5) * paddleHeight * 0.5;
-    
-    // Occasionally miscalculate completely (15% chance)
-    if (Math.random() < 0.15) {
-      predictedY = Math.random() * height;
-    }
-    
-    // Add artificial lag - sometimes use old ball position
-    if (Math.random() < 0.3) {
-      predictedY = ball.y;
-    }
-    
+    const timeToReach      = distanceToTravel / ball.speedX;
+    let   predictedY       = predictBallPosition(ball.y, ball.speedY, timeToReach, height);
+
+    const baseImp       = paddleHeight * 0.5;
+    const impScale      = 1 - 0.5 * difficulty; 
+    const imperfection  = (Math.random() - 0.5) * baseImp * impScale;
+
+    const baseLag       = 0.3;
+    const lagChance     = baseLag * (1 - difficulty);
+
+    if (Math.random() < 0.15)           predictedY = Math.random() * height;
+    if (Math.random() < lagChance)      predictedY = ball.y;
+
     predictedY += imperfection;
-    
-    // Set target position instead of directly moving
-    aiPlayer.targetY = predictedY - paddleHeight / 2;
-    
-    // Keep target in bounds
-    aiPlayer.targetY = Math.max(0, Math.min(height - paddleHeight, aiPlayer.targetY));
-    
-    // CHANGE 4: Limit how far the AI can move at once (30% of screen height)
-    const maxMove = height * 0.3;
-    const currentPos = aiPlayer.y;
+    aiPlayer.targetY = Math.max(0, Math.min(height - paddleHeight, predictedY - paddleHeight/2));
+
+    // 4) scale max move per tick (more when player winning)
+    const baseMaxMove  = height * 0.2;
+    const extraMove    = height * 0.1 * difficulty;
+    const maxMove      = baseMaxMove + extraMove;
+    const currentPos   = aiPlayer.y;
     if (Math.abs(aiPlayer.targetY - currentPos) > maxMove) {
-      if (aiPlayer.targetY > currentPos) {
-        aiPlayer.targetY = currentPos + maxMove;
-      } else {
-        aiPlayer.targetY = currentPos - maxMove;
-      }
+      aiPlayer.targetY = currentPos + Math.sign(aiPlayer.targetY - currentPos) * maxMove;
     }
-  } 
+  }
   else if (aiPlayer.side === 'right') {
-    // Return to center when ball moving away
-    const centerY = height / 2 - paddleHeight / 2;
-    aiPlayer.targetY = centerY;
+    // return to center
+    aiPlayer.targetY = height/2 - paddleHeight/2;
   }
 };
 

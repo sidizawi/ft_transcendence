@@ -75,15 +75,3 @@ export const ONLINE_BUTTON: Button = {
   text: "Online",
   textY: 110
 };
-
-export interface GameMessage {
-  type: string;
-  mode?: string;
-  scores?: { left: number; right: number };
-  ball?: { x: number; y: number };
-  players?: { left?: number; right?: number };
-  winner?: string;
-  side?: string;
-  gameId?: string;
-  playerId?: string;
-}

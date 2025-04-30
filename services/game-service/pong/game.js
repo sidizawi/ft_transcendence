@@ -1,13 +1,13 @@
 import { aiThink, aiMove } from "./ai.js";
 import Ball from './Ball.js';
 import { createAndUpdateGameRecord } from '../db.js';
-import { activePlayerIds } from '../index.js';
+import { inGameUsers } from '../index.js';
 
 
 // Game constants
-const WINNING_SCORE = 4;
-const BALL_SPEED = 5;
-const PADDLE_SPEED = 5;
+export const WINNING_SCORE = 4;
+const BALL_SPEED = 7;
+const PADDLE_SPEED = 7;
 
 // Game store - will hold all active games
 const games = {};
@@ -42,37 +42,25 @@ export const createGame = (gameId, wss, dimensions = null) => {
     wss: wss,
     lastUpdate: Date.now()
   };
-  
+
   return games[gameId];
 };
 
 // Add player to game - update to store usernames
-export const addPlayer = (gameId, playerId, ws) => {
+export const addPlayer = (gameId, username, ws) => {
   const game = games[gameId];
   if (!game) return null;
   
   // Determine which side the player will be on
   const side = Object.keys(game.players).length === 0 ? 'left' : 'right';
   
-  // Get username based on connection type
-  let username = side;
-  if (ws && ws.username) {
-    username = ws.username;
-  } else if (playerId.startsWith('ai-')) {
-    username = "Computer";
-  } else {
-    username = `Player ${side === 'left' ? '1' : '2'}`;
-  }
-  
   // Add player to the game with username info
-  game.players[playerId] = {
-    id: playerId,
+  game.players[username] = {
+    username: username,
     side: side,
     y: game.dimensions.height / 2 - game.dimensions.paddleHeight / 2,
     targetY: game.dimensions.height / 2 - game.dimensions.paddleHeight / 2,
     ws: ws,
-    userId: ws ? ws.userId : null,
-    username: username,
     dbGameId: ws ? ws.dbGameId : null
   };
   
@@ -85,10 +73,10 @@ export const addPlayer = (gameId, playerId, ws) => {
 };
 
 // Update player paddle position
-export const updatePlayerPosition = (gameId, playerId, data) => {
+export const updatePlayerPosition = (gameId, username, data) => {
   const { y, side } = data;
   const game = games[gameId];
-  if (!game || !game.players[playerId]) return;
+  if (!game || !game.players[username]) return;
   
   const player = Object.values(game.players).find(p => p.side === side);
   if (!player) return;
@@ -110,13 +98,13 @@ export const startGame = (gameId) => {
   game.status = 'playing';
 
   // Find AI player if exists
-  const aiPlayer = Object.values(game.players).find(p => p.id.startsWith('ai-'));
+  const aiPlayer = Object.values(game.players).find(p => typeof p.username === 'string' && p.username.startsWith('ai-'));
   
   // Set up AI movement interval
   if (aiPlayer) {
     // Create AI movement interval - once per second
     game.aiInterval = setInterval(() => {
-      aiThink(game.ball, aiPlayer, game.dimensions);
+      aiThink(game.ball, aiPlayer, game.dimensions, game.scores);
     }, 1000); // 1000ms = 1 second
   }
   
@@ -146,10 +134,10 @@ export const stopGame = (gameId, winner = null) => {
   
   // Remove players from active players Set (import this from index.js)
   if (leftPlayer?.userId) {
-    activePlayerIds.delete(leftPlayer.userId);
+    inGameUsers.delete(leftPlayer.userId);
   }
   if (rightPlayer?.userId) {
-    activePlayerIds.delete(rightPlayer.userId);
+    inGameUsers.delete(rightPlayer.userId);
   }
   
   // Get usernames
@@ -158,7 +146,18 @@ export const stopGame = (gameId, winner = null) => {
   
   const winnerName = winnerPlayer?.username || winner;
   const loserName = loserPlayer?.username || (winner === 'left' ? 'right' : 'left');
-  
+
+  // Send game over message to both players
+  Object.values(game.players).forEach(player => {
+    if (player.ws && player.ws.readyState === 1) {
+      player.ws.send(JSON.stringify({
+        type: 'gameOver',
+        winner: winnerName,
+        loser: loserName,
+        scores: game.scores
+      }));
+    }
+  });
   // Write completed game to database
   if ((leftPlayer && leftPlayer.userId) || (rightPlayer && rightPlayer.userId)) {
     createAndUpdateGameRecord(
@@ -173,6 +172,7 @@ export const stopGame = (gameId, winner = null) => {
     );
     
     console.log(`Game ${gameId} saved to DB: ${winnerName} beat ${loserName}`);
+    delete game[gameId];
   }
   
   // Send game over message to both players with usernames
@@ -235,7 +235,7 @@ const updateGame = (gameId) => {
   // Get players
   const leftPlayer = Object.values(players).find(p => p.side === 'left');
   const rightPlayer = Object.values(players).find(p => p.side === 'right');
-  const aiPlayer = Object.values(game.players).find(p => p.id.startsWith('ai-'));
+  const aiPlayer = Object.values(game.players).find(p => typeof p.username === 'string' && p.username.startsWith('ai-'));
 
   if (aiPlayer) {
     aiMove(aiPlayer, PADDLE_SPEED);
@@ -336,25 +336,24 @@ const broadcastGameState = (gameId) => {
 };
 
 // Handle player disconnect
-export const handleDisconnect = (gameId, playerId) => {
+export const handleDisconnect = (gameId, username) => {
   const game = games[gameId];
   if (!game) return;
   
   // Remove player from game
-  if (game.players[playerId]) {
-    delete game.players[playerId];
+  if (game.players[username]) {
+    delete game.players[username];
   }
 
-  const player = game.players[playerId];
-  if (player && player.userId) {
-    activePlayerIds.delete(player.userId);
-  }
-  
+  // Remove from inGameUsers
+  inGameUsers.delete(username);
   // If game is in progress, end it
   if (game.status === 'playing') {
     stopGame(gameId);
   }
-  
+  if (game.players[username]) {
+    delete game.players[username];
+  }
   // If no players left, clean up the game
   if (Object.keys(game.players).length === 0) {
     if (game.intervalId) {
