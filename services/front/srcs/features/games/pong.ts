@@ -1,5 +1,5 @@
 import { i18n } from '../../shared/i18n';
-import { GameMessage, PongState } from '../../shared/types/pong.ts';
+import { PongState } from '../../shared/types/pong.ts';
 import { TokenManager } from '../../shared/utils/token';
 import Ball from './pong/Ball';
 import { drawWaitingScreen, gameLoop } from './pong/draw';
@@ -9,11 +9,11 @@ import Paddle from './pong/Paddle';
 export class Pong {
 
   private BALL_SIZE = 10;
-  private BALL_SPEED_X = 4;
-  private BALL_SPEED_Y = 4;
+  private BALL_SPEED_X = 7;
+  private BALL_SPEED_Y = 7;
   private PADDLE_WIDTH = 10;
   private PADDLE_HEIGHT = 100;
-  private PADDLE_SPEED = 5;
+  private PADDLE_SPEED = 7;
 
   private state : PongState = {
       canvas: null,
@@ -38,7 +38,8 @@ export class Pong {
       aiKeys: {},
       ws: null,
       waitingOpponent: false,
-      animationRunning: false
+      animationRunning: false,
+      user: TokenManager.getUserFromLocalStorage(),
   };
 
   stopGame(winner: string): void {
@@ -92,18 +93,19 @@ export class Pong {
 
         if (this.state.ws) {
             this.state.ws.send(JSON.stringify({
-                type: 'dimensions',
+                type: 'dimensions and username',
                 width: this.state.canvas?.width,
                 height: this.state.canvas?.height,
                 paddleWidth: this.PADDLE_WIDTH,
                 paddleHeight: this.PADDLE_HEIGHT,
-                ballSize: this.BALL_SIZE
+                ballSize: this.BALL_SIZE,
+                username: this.state.user?.username || '',
             }));
         }
     }
 
     this.state.ws.onmessage = (event: MessageEvent): void => {
-        const data: GameMessage = JSON.parse(event.data);
+        const data = JSON.parse(event.data);
         console.log("Received from server:", data);
         
         if (data.type === 'starting') {
@@ -125,7 +127,7 @@ export class Pong {
           } else if (type == "playAgain") {
             this.state.ws!.send(JSON.stringify({
               type: 'startGame',
-              mode: this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
+              mode: this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer' // todo: add online
             }));
           }
         }

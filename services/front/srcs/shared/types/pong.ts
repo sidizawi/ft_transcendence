@@ -1,5 +1,6 @@
 import Ball from "../../features/games/pong/Ball";
 import Paddle from "../../features/games/pong/Paddle";
+import { User } from "./user";
 
 export interface PongState {
 	canvas: HTMLCanvasElement | null;
@@ -26,6 +27,7 @@ export interface PongState {
 	aiInterval: number | null;
 	aiKeys: Record<string, boolean>;
 	scores?: { left: number; right: number };
+  user: User | null;
 }
 
 export const BUTTON_WIDTH = 300;
@@ -73,15 +75,3 @@ export const ONLINE_BUTTON: Button = {
   text: "Online",
   textY: 110
 };
-
-export interface GameMessage {
-  type: string;
-  mode?: string;
-  scores?: { left: number; right: number };
-  ball?: { x: number; y: number };
-  players?: { left?: number; right?: number };
-  winner?: string;
-  side?: string;
-  gameId?: string;
-  playerId?: string;
-}
