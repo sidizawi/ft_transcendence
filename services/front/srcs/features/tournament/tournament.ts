@@ -6,6 +6,24 @@ import { TokenManager } from '../../shared/utils/token';
 
 export class Tournament {
 
+  constructor(path: string) {
+    let name = path.split("/").filter((el) => el.length)[1];
+    let storage = localStorage.getItem(`tournament-${name}`);
+    if (!storage) {
+      app.router.navigateTo("/tournament");
+      return ;
+    }
+
+    let data = JSON.parse(storage);
+
+    if (data.mode == "local") {
+    } else {
+    }
+  }
+}
+
+export class TournamentHomePage {
+
   private user: User | null;
   private ws: WebSocket | null;
   private room: string | null = null;
@@ -80,6 +98,15 @@ export class Tournament {
                 </select>
               </div>
               <div class="mb-4">
+                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  mode
+                </label>
+                <select name="mode" id="game-mode" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <option value="remote" selected>remote</option>
+                  <option value="local">local</option>
+                </select>
+              </div>
+              <div class="mb-4">
                 <label for="tournamentPlayers" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   number of players
                 </label>
@@ -127,6 +154,7 @@ export class Tournament {
       document.getElementById("error-message")?.classList.add("hidden");
 
       const game = (document.getElementById("game-type") as HTMLInputElement).value;
+      const mode = (document.getElementById("game-mode") as HTMLInputElement).value;
       const code = (document.getElementById("tournamentCode") as HTMLInputElement).value;
       const name = (document.getElementById("tournamentName") as HTMLInputElement).value;
       const pub = (document.getElementById("tournamentPublic") as HTMLInputElement).checked;
@@ -149,7 +177,11 @@ export class Tournament {
         return ;
       }
 
-      this.createTournament(name, players, code, game, pub);
+      if (mode == "remote") {
+        this.createRemoteTournament(name, players, code, game, pub);
+      } else {
+        this.createLocalTournament(name, players, code, game, pub);
+      }
     })
 
     form?.addEventListener('change', (event) => {
@@ -167,7 +199,20 @@ export class Tournament {
     })
   }
 
-  createTournament(name: string, players: number, code: string, game: string, pub: boolean) {
+  createLocalTournament(name: string, players: number, code: string, game: string, pub: boolean) {
+    localStorage.setItem(`tournament-${name}`, JSON.stringify({
+      name,
+      players,
+      code,
+      pub,
+      game,
+      mode: "local",
+    }));
+
+    app.router.navigateTo("/tournament/local/"+name);
+  }
+
+  createRemoteTournament(name: string, players: number, code: string, game: string, pub: boolean) {
     const token = TokenManager.getToken();
 
     const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
@@ -197,7 +242,17 @@ export class Tournament {
         this.ws = null;
         // this.renderWaitingTournamentRoom();
         // todo: open new websocket to join a tournament
-        this.renderWaitingRoom("created", true);
+        //this.renderWaitingRoom("created", true);
+        localStorage.setItem(`tournament-${name}`, JSON.stringify({
+          name,
+          players,
+          code,
+          pub,
+          game,
+          mode: "remote",
+        }));
+
+        app.router.navigateTo("/tournament/remote/"+name);
       }
     }
 

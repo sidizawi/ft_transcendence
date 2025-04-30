@@ -7,7 +7,7 @@ import { Settings } from '../features/profile/settings';
 import { Friends } from '../features/friends/friends';
 import { Router } from '../shared/utils/routing';
 import { User } from '../shared/types/user';
-import { Tournament } from '../features/tournament/tournament';
+import { Tournament, TournamentHomePage } from '../features/tournament/tournament';
 import { Pong } from '../features/games/pong';
 import { Connect4, Connect4HomePage } from '../features/games/connect4';
 import { Header } from '../shared/components/header';
@@ -197,10 +197,14 @@ export class TranscendenceApp {
 
     const tournamentMatch = path.match(/^\/tournament\/(.+)$/)
     if (tournamentMatch) {
+      console.log(tournamentMatch[1]);
+      if (tournamentMatch[1] == "join" || tournamentMatch[1] == "create") {
+        new TournamentHomePage(tournamentMatch[1]);
+        return ;
+      }
       new Tournament(tournamentMatch[1]);
       return ;
     }
-
 
     switch (path) {
       case '/':
@@ -229,7 +233,7 @@ export class TranscendenceApp {
         break;
       case '/tournament':
       case '/tournament/':
-        new Tournament();
+        new TournamentHomePage();
         break;
       case '/pong':
       case '/pong/':

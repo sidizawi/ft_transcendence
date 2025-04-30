@@ -29,6 +29,7 @@ export class Router {
       return '/profile';
     }
 
+    // todo: 
     if ((path === '/profile' || path === '/profile/settings') && !this.isLoggedIn()) {
       this.navigateTo('/signin');
       return '/signin';
