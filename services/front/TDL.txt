@@ -3,12 +3,15 @@ To Do:
 ajouter status quand co et deco
 ajouter status friends.ts
 si token non resent (supp ou autre) rediriger vers sign in
+Ajout notif si new message + new demande de connexion
 
 	app/routing:
 		- bloquer toutes les pages HORS home, connect4 et pong si pas login
 
 	friendsTab:
 		- refresh quand chgmnt AMIS (friends.ts)
+		- pourquoi se referme entre profile et reste?
+		- friendprofile pas pas logo accepter????
 
 	auth.ts:
 		- Google logo
@@ -24,6 +27,7 @@ si token non resent (supp ou autre) rediriger vers sign in
 
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
+		- logo unblock
 
 	PARTOUT:
 		- console du navigateur renvoit ERREUR

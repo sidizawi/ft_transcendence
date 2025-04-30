@@ -80,6 +80,11 @@ export class FriendProfile {
           break;
       }
       this.updateView();
+
+      // inform friendList changed
+      window.dispatchEvent(new CustomEvent('friendListChanged', {
+        detail: { username: this.username, newStatus: this.friendshipStatus }
+      }));
     } catch (error) {
       console.error('Error handling friend action:', error);
     }

@@ -248,6 +248,7 @@ export class Friends {
                       ${i18n.t('cancel')}
                     </button>
                   </div>
+                  </div>
                 `).join('')}
               </div>
             </div>
@@ -425,6 +426,11 @@ export class Friends {
           break;
       }
       await this.loadFriends();
+
+      // inform friendList changed
+      window.dispatchEvent(new CustomEvent('friendListChanged', {
+        detail: { username, action }
+      }));
     } catch (error) {
       console.error(`Error handling friend action ${action}:`, error);
     }

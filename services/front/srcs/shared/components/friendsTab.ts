@@ -12,6 +12,9 @@ export class FriendsTab {
     this.container.id = 'friends-tab-container';
     document.body.appendChild(this.container);
     this.loadFriends();
+
+    // receive info if friendList changed
+    window.addEventListener('friendListChanged', () => this.loadFriends())
   }
 
   private async loadFriends() {
