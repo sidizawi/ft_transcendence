@@ -30,33 +30,39 @@ export class FriendsTab {
     }
   }
 
-  // private openChatInNewTab(username: string) {
-  //   const chatUrl = `/chat/${username}`;
-  //   window.location.href = chatUrl;
-  // }
 
   render(): string {
-    const acceptedFriends = this.friends.filter(f => f.status === 'accepted');
-    const onlineFriends = acceptedFriends.filter(f => f.status);
-    const offlineFriends = acceptedFriends.filter(f => !f.status);
-
+    const accepted   = this.friends.filter(f => f.status === 'accepted');
+    const onlineFriends     = accepted.filter(f => f.status);
+    const offlineFriends    = accepted.filter(f => !f.status);
+  
     return `
       <div class="fixed bottom-4 right-4 flex flex-col items-end z-50">
-        <!-- Friends Tab Button -->
-        <button 
-          id="friends-tab-button" 
-          class="w-40 h-10 bg-orange dark:bg-nature rounded-t-md cursor-pointer flex items-center justify-center hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors text-white"
-          aria-expanded="${this.isOpen ? 'true' : 'false'}"
+        <button
+          id="friends-tab-button"
+          class="
+            flex items-center justify-center
+            bg-orange dark:bg-nature
+            transition-colors text-white cursor-pointer
+            hover:bg-orange-darker dark:hover:bg-nature/90
+            ${this.isOpen
+              ? 'w-40 h-10 rounded-t-md'
+              : 'w-10 h-10 rounded-full'}
+          "
+          aria-expanded="${this.isOpen}"
           aria-controls="friends-panel"
         >
-          <span class="flex items-center gap-2">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <span>${i18n.t('friends')}</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+          <span
+            id="friends-tab-label"
+            class="ml-2 ${this.isOpen ? '' : 'hidden'}"
+          >
+            ${i18n.t('friends')}
           </span>
         </button>
-
         <!-- Friends Panel -->
         <div 
           id="friends-panel" 
@@ -194,31 +200,48 @@ export class FriendsTab {
     `;
   }
 
+
   setupEventListeners() {
-    const tabButton = document.getElementById('friends-tab-button');
-    const panel = document.getElementById('friends-panel');
 
-    tabButton?.addEventListener('click', () => {
+    const tabButton = document.getElementById('friends-tab-button')!;
+    const panel     = document.getElementById('friends-panel')!;
+    const label     = document.getElementById('friends-tab-label')!;
+  
+    tabButton.addEventListener('click', (e) => {
+      e.stopPropagation();
       this.isOpen = !this.isOpen;
-      if (panel) {
-        if (this.isOpen) {
-          panel.classList.remove('hidden');
-        } else {
-          panel.classList.add('hidden');
-        }
-        tabButton.setAttribute('aria-expanded', this.isOpen ? 'true' : 'false');
-      }
+  
+      // panel open/close
+      panel.classList.toggle('hidden');
+  
+      // aria
+      tabButton.setAttribute('aria-expanded', String(this.isOpen));
+  
+      // swap width + border shape
+      tabButton.classList.toggle('w-10');
+      tabButton.classList.toggle('w-40');
+      tabButton.classList.toggle('rounded-full');
+      tabButton.classList.toggle('rounded-t-md');
+  
+      // show/hide text
+      label.classList.toggle('hidden');
     });
-
+  
+    // click outside to close
     document.addEventListener('click', (e) => {
-      const target = e.target as HTMLElement;
-      if (this.isOpen && panel && tabButton && !panel.contains(target) && !tabButton.contains(target)) {
+      if (!this.isOpen) return;
+      const tgt = e.target as HTMLElement;
+      if (!panel.contains(tgt) && !tabButton.contains(tgt)) {
         this.isOpen = false;
         panel.classList.add('hidden');
         tabButton.setAttribute('aria-expanded', 'false');
+        tabButton.classList.replace('w-40', 'w-10');
+        tabButton.classList.replace('rounded-t-md', 'rounded-full');
+        label.classList.add('hidden');
       }
     });
 
+    // Open chat
     panel?.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
       const friendItem = target.closest('div[data-username]');
@@ -230,5 +253,6 @@ export class FriendsTab {
         }
       }
     });
+
   }
 }

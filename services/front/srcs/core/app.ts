@@ -200,7 +200,7 @@ export class TranscendenceApp {
           profile.setupEventListeners();
         }
         break;
-      case '/profile/settings':
+        case '/profile/settings':
         if (this.state.user) {
           const settings = new Settings(this.state.user);
           main.innerHTML = settings.render();

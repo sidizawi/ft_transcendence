@@ -2,6 +2,7 @@ To Do:
 
 ajouter status quand co et deco
 ajouter status friends.ts
+si token non resent (supp ou autre) rediriger vers sign in
 
 	friendsTab:
 		- refresh quand chgmnt AMIS (friends.ts)
