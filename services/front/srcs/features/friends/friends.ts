@@ -182,7 +182,7 @@ export class Friends {
             id="friends-search"
             placeholder="${i18n.t('searchFriends')}"
             value="${this.searchQuery}"
-            class="w-full p-3 mb-6 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
+            class="w-full p-3 mb-6 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-orange/60 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
           />
 
           ${receivingRequests.length > 0 ? `
