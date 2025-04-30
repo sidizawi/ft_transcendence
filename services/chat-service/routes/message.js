@@ -1,125 +1,55 @@
-let chatRooms = new Map();
+let sockets = new Map(); // key: username, value: socket
+let users = new Map(); // key: socket, value: {user, userId}
 
-function handleNewConn(fastify, data, socket) {
-    let id, chatRoom;
-    let id1 = `${data.user}-${data.friend}`;
-    let id2 = `${data.friend}-${data.user}`;
-
-    if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
-        id = id1;
-    } else if (chatRooms.get(id1)) {
-        id = id1;
-    } else {
-        id = id2;
-    }
-
-    // todo: update read messages;
-
-    chatRoom = chatRooms.get(id);
-    if (!chatRoom) {
-        let friend = fastify.db.prepare("SELECT * FROM users WHERE username = ?").get(data.friend);
-        chatRooms.set(id, {
-            user1: data.user,
-            user1Id: data.userId,
-            user2: data.friend,
-            user2Id: friend.id,
-            user1ws: socket,
-            user2ws: null
-        });
-        chatRoom = chatRooms.get(id);
-    } else {
-        if (chatRoom.user1 == data.user) {
-            chatRoom.user1ws = socket;
-        } else {
-            chatRoom.user2ws = socket;
-        }
-    }
+function handleNewChatRoom(fastify, data, socket) {
+    let friendId = fastify.db.prepare("SELECT id FROM users WHERE username = ?").get(data.friend).id;
     const dbMessages = fastify.db.prepare("SELECT * FROM messages \
         WHERE (sender_id = ? AND recipient_id = ?) \
         OR (sender_id = ? AND recipient_id = ?)")
-        .all(chatRoom.user1Id, chatRoom.user2Id, chatRoom.user2Id, chatRoom.user1Id);
+        .all(data.userId, friendId, friendId, data.userId);
 
     const messages = dbMessages.map((mess) => {
         return {
             text: mess.content,
-            sender: mess.sender_id == chatRoom.user1Id ? chatRoom.user1 : chatRoom.user2,
+            sender: mess.sender_id == data.userId ? data.user : data.friend,
             timestamp: mess.timestamp
         };
     })
 
     socket.send(JSON.stringify({
         type: "messages",
+        friend: data.friend,
         messages
     }))
 }
 
-function handleClose(data) {
-    let id, chatRoom;
-    let id1 = `${data.user}-${data.friend}`;
-    let id2 = `${data.friend}-${data.user}`;
-
-    if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
-        id = id1;
-    } else if (chatRooms.get(id1)) {
-        id = id1;
-    } else {
-        id = id2;
-    }
-
-    chatRoom = chatRooms.get(id);
-    if (!chatRoom) {
-        return ;
-    }
-    if (id == id1) {
-        chatRoom.user1ws = null
-    } else {
-        chatRoom.user2ws = null;
-    }
+function handleNewConn(data, socket) {
+    sockets[data.user] = socket;
+    users[socket] = {
+        user: data.user,
+        userId: data.userId
+    };
 }
 
 function handleNewMessage(fastify, data) {
-    let id, chatRoom;
-    let id1 = `${data.user}-${data.friend}`;
-    let id2 = `${data.friend}-${data.user}`;
-
-    if (!chatRooms.get(id1) && !chatRooms.get(id2)) {
-        id = id1;
-    } else if (chatRooms.get(id1)) {
-        id = id1;
-    } else {
-        id = id2;
-    }
-
-    chatRoom = chatRooms.get(id);
-    if (!chatRoom) {
-        return ;
-    }
-
-    let is_read = false;
-    if (chatRoom.user1 == data.user && chatRoom.user2ws) {
-        chatRoom.user2ws.send(JSON.stringify({
+    if (data.friend in sockets) {
+        sockets[data.friend].send(JSON.stringify({
             type: "message",
             sender: data.user,
             text: data.text,
-            timestamp: data.timestamp
+            timestamp: data.timestamp,
+            friend: data.user
         }));
-        is_read = true;
-    } else if (chatRoom.user2 == data.user && chatRoom.user1ws) {
-        chatRoom.user1ws.send(JSON.stringify({
-            type: "message",
-            sender: data.user,
-            text: data.text,
-            timestamp: data.timestamp
-        }));
-        is_read = true;
     }
-    let tmp = fastify.db.prepare("INSERT INTO messages (sender_id, recipient_id, content, timestamp, is_read) VALUES (?, ?, ?, ?, ?)");
 
-    if (chatRoom.user1 == data.user) {
-        tmp.run(chatRoom.user1Id, chatRoom.user2Id, data.text, data.timestamp, is_read ? 1 : 0);
+    let friendId;
+    if (data.friend in sockets) {
+        friendId = users[sockets[data.friend]].userId;
     } else {
-        tmp.run(chatRoom.user2Id, chatRoom.user1Id, data.text, data.timestamp, is_read ? 1 : 0);
+        friendId = fastify.db.prepare("SELECT id FROM users WHERE username = ?").get(data.friend).id
     }
+    let tmp = fastify.db.prepare("INSERT INTO messages (sender_id, recipient_id, content, timestamp) VALUES (?, ?, ?, ?)");
+    tmp.run(data.userId, friendId, data.text, data.timestamp);
 }
 
 export default async function messageRoutes(fastify, options) {
@@ -208,19 +138,35 @@ export default async function messageRoutes(fastify, options) {
             
             if (!token) {
                 socket.close();
+                return ;
             }
 
-            // todo: verify token
+    		fastify.jwt.verify(token);
 
             socket.on('message', (message) => {
                 let data = JSON.parse(message.toString());
 
+                console.log("Received message:", data);
+                if (!data.user || !data.userId) {
+                    socket.close();
+                    return ;
+                }
+
                 if (data.type == "new") {
-                    handleNewConn(fastify, data, socket);
-                } else if (data.type == "close") {
-                    handleClose(data);
+                    handleNewConn(data, socket);
+                } else if (data.type == "newChat") {
+                    handleNewChatRoom(fastify, data, socket);
                 } else {
                     handleNewMessage(fastify, data);
+                }
+            });
+
+            socket.on('close', () => {
+                let user = users[socket];
+                if (user) {
+                    delete sockets[user.user];
+                    delete users[socket];
+                    fastify.log.info(`Client disconnected ${user.user}`);
                 }
             });
         });

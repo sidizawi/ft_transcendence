@@ -1,9 +1,11 @@
+import db from './db.js';
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
-import db from './db.js';
+import fastifyJwt 	from '@fastify/jwt';
 import websocket from '@fastify/websocket';
-import { createGame, addPlayer, updatePlayerPosition, handleDisconnect, startGame } from './pong/game.js';
 import { connect4Handler } from './connect4/handler.js'
+import { tournamentHandler } from './tournament/handler.js';
+import { createGame, addPlayer, updatePlayerPosition, handleDisconnect, startGame } from './pong/game.js';
 
 dotenv.config();
 
@@ -11,7 +13,9 @@ const fastify = Fastify({logger: true})
 
 fastify.decorate('db', db);
 
-fastify.register(websocket);
+await fastify.register(websocket);
+
+fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 
 export const waitingPlayers = [];
 export const inGameUsers = new Set();
@@ -168,6 +172,7 @@ fastify.register((wsRoutes) => {
 });
 
 fastify.register(connect4Handler);
+fastify.register(tournamentHandler);
 
 fastify.listen({ port: 3002, host: '0.0.0.0' }, (err, address) => {
   if (err) {

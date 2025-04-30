@@ -1,5 +1,8 @@
+import { app, chatService } from '../../main';
 import { ModalManager } from '../../shared/components/modal';
 import { i18n } from '../../shared/i18n';
+import { FriendService } from '../../shared/services/friendService';
+import { Friend } from '../../shared/types/friend';
 import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
 
@@ -19,6 +22,7 @@ export class Connect4 {
   private user : User | null;
   private room: string | null;
   private ws : WebSocket | null;
+  private friend: string | null;
   private opponent: string | null;
   private opponentColor: string | null;
   private data = new Array(42).fill('X');
@@ -27,14 +31,35 @@ export class Connect4 {
   private ctx = null as CanvasRenderingContext2D | null;
   private coinRadius = (this.cellSize - this.coinPadding * 2) / 2;
 
-  constructor() {
+  constructor(type : string | null) {
     const urlParams = new URLSearchParams(window.location.search);
     this.room = urlParams.get("room");
+    this.friend = urlParams.get("friend");
     this.ws = null;
     this.opponent = null;
     this.opponentColor = null;
     this.user = TokenManager.getUserFromLocalStorage();
-    console.log(this.user);
+  
+    if (type == "play_vs_friend" && !this.friend && !this.room) {
+      // todo: check the error: app initialized
+      app.router.navigateTo("/connect4");
+      // todo: translate
+      ModalManager.openModal(i18n.t('games.connect4.title'), "you need to select a friend");
+      return ;
+    }
+
+    const main = document.querySelector('main');
+
+    if (type == "play_local") {
+      this.myTurn = true;
+      main!.innerHTML = this.renderCanvas();
+      this.setupCanvasEventListener();
+    } else {
+      this.canPlay = false;
+      this.online = true;
+      this.setupWebSocket(type);
+      main!.innerHTML = this.renderWaitingRoom();
+    }
   }
 
   drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {
@@ -61,6 +86,7 @@ export class Connect4 {
         this.renderBackBtn();
         this.won = true;
       }
+      this.toggleColors();
       if (!this.online && this.data.every((elem) => elem != 'X')) {
         ModalManager.openModal(i18n.t('games.connect4.title'), "No winner this time, it's a tie!");
       }
@@ -171,6 +197,7 @@ export class Connect4 {
           color: this.player == this.red ? 'R' : 'Y',
           room: this.room,
           id: this.user?.id,
+          username: this.user?.username
         }));
       }
       this.animateCoin(col, this.columns[col]);
@@ -204,36 +231,12 @@ export class Connect4 {
       }
     }
   }
-  
-  setupConnect4FirstPageEventListener() {
-    const playBtn = document.querySelectorAll(".connect4Btn");
-
-    playBtn.forEach((btn) => {
-      if (btn.classList.contains("not-connected")) {
-        return;
-      }
-      btn.addEventListener('click', (event) => {
-        const type = (event.target as HTMLElement).getAttribute("data");
-
-        const main = document.querySelector('main');
-        if (type == "playLocal") {
-          this.myTurn = true;
-          main!.innerHTML = this.renderCanvas();
-          this.setupCanvasEventListener();
-        } else {
-          this.canPlay = false;
-          this.online = true;
-          this.setupWebSocket(type);
-          main!.innerHTML = this.renderWaitingRoom();
-        }
-      });
-    });
-  }
 
   setupWebSocket(type : string | null) {
     const token = TokenManager.getToken();
 
-    this.ws = new WebSocket(`ws://${window.location.hostname}:3000/game/connect4/friend${token ? "?token="+token : ""}`);
+    const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
+    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/connect4/friend${token ? "?token="+token : ""}`);
 
     this.ws.onopen = () => {
       this.ws?.send(JSON.stringify({
@@ -252,12 +255,20 @@ export class Connect4 {
       if (message.mode == "created") {
         // todo: send message to the friend
         // check if they are friend
+        // traduction
         this.room = message.room;
-        console.log(message);
-        ModalManager.openModal(i18n.t('games.connect4.title'), `here is the link to the game: http://${window.location.hostname}:8000/connect4?room=${message.room}`);
+        //ModalManager.openModal(i18n.t('games.connect4.title'), `here is the link to the game: http://${window.location.hostname}:8000/connect4/play_vs_friend?room=${message.room}`);
+        chatService.sendMessage(JSON.stringify({
+          type: "message",
+          text: `${this.user} is inviting you to a connect 4 game: http://${window.location.hostname}:8000/connect4/play_vs_friend?room=${message.room}`,
+          user: this.user?.username,
+          userId: this.user?.id,
+          friend: this.friend,
+          timestamp: new Date(),
+        }));
       } else if (message.mode == "connected") {
         ModalManager.openModal(i18n.t('games.connect4.title'), `you play ${message.color == 'R' ? 'first with red' : 'second with yellow'}`);
-        if (type == "playVsAI") {
+        if (type == "play_vs_AI") {
           this.room = message.room;
         }
         this.canPlay = message.color == 'R';
@@ -266,9 +277,11 @@ export class Connect4 {
         this.opponentColor = message.color == 'R' ? "yellow" : "red";
         const main = document.querySelector("main");
         main!.innerHTML = this.renderCanvas();
+        this.toggleColor(this.canPlay ? "player1" : "player2");
         this.setupCanvasEventListener();
       } else if (message.mode == "win") {
         this.won = true;
+        this.cleanWs()
         // todo: check translation
         ModalManager.openModal(i18n.t('games.connect4.title'), message.winner ? "you're the winner" : "you're THE loser");
         this.renderBackBtn();
@@ -277,18 +290,44 @@ export class Connect4 {
         this.animateCoin(message.col, this.columns[message.col]);
         this.columns[message.col]--;
       } else if (message.mode == "tie") {
+        this.cleanWs()
         ModalManager.openModal(i18n.t('games.connect4.title'), "No winner this time, it's a tie!");
         this.renderBackBtn();
       } else if (message.mode == "close") {
-        this.rerender();
+        this.cleanWs()
+        app.router.navigateTo("/connect4");
         ModalManager.openModal(i18n.t('games.connect4.title'), message.message);
       }
     }
 
     this.ws.onclose = () => {
-      this.rerender();
+      if (!this.ws) {
+        return ;
+      }
+      app.router.navigateTo("/connect4");
       ModalManager.openModal(i18n.t('games.connect4.title'), "connection lost");
     }
+  }
+
+  clean() {
+    let ws = this.ws;
+    this.ws = null;
+    ws?.close();
+    this.won = false;
+    this.online = false;
+    this.myTurn = false;
+    this.opponent = null;
+    this.player = this.red;
+    this.opponentColor = null;
+    this.data.fill('X');
+    this.columns.fill(5);
+  }
+
+  cleanWs() {
+    this.room = null;
+    let ws = this.ws;
+    this.ws = null;
+    ws?.close();
   }
 
   renderWaitingRoom() : string {
@@ -306,16 +345,33 @@ export class Connect4 {
     `
   }
 
+  toggleColors() {
+    this.toggleColor("player1");
+    this.toggleColor("player2");
+  }
+
+  toggleColor(player: string) {
+    let id = `${player}Name`;
+    let div = document.getElementById(id);
+
+    if (div) {
+      div.classList.toggle("bg-orange");
+      div.classList.toggle("bg-orange-darker");
+      div.classList.toggle("dark:bg-nature");
+      div.classList.toggle("dark:bg-nature/90");
+    }
+  }
+
   renderCanvas(): string {
     if (this.online) {
-      // todo: check for the width
+      // todo: check for the width, and translate
       return `
         <div class="flex flex-col items-center justify-center h-screen">
           <div class="mb-1 flex" style="width: 700px;">
-            <div class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg transition-colors">
+            <div id="player1Name" class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg transition-colors">
               <strong>${this.user?.username}</strong>  -  <p>${this.opponentColor == 'red' ? 'yellow' : 'red'}</p>
             </div>
-            <div class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg transition-colors">
+            <div id="player2Name" class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg transition-colors">
               <strong>${this.opponent}</strong>  -  <p>${this.opponentColor}</p>
             </div>
           </div>
@@ -347,6 +403,124 @@ export class Connect4 {
       </a>
     `
   }
+}
+
+export class Connect4HomePage {
+
+  private loading = true;
+  private friendList: Friend[] = [];
+
+  constructor(type: string | null = null) {
+    if (type == "friend_list") {
+      this.loadFriendList();
+      this.renderFriendList();
+      // play_vs_friend
+      return ;
+    }
+  }
+
+  setupEventListener() {
+    const playBtn = document.querySelectorAll(".connect4Btn");
+
+    playBtn.forEach((btn) => {
+      if (btn.classList.contains("not-connected")) {
+        return;
+      }
+
+      btn.addEventListener('click', (event) => {
+        const type = (event.target as HTMLElement).getAttribute("data") || "";
+
+        if (type == "play_tournament") {
+          app.router.navigateTo("/tournament");
+          return ;
+        }
+        const route = "/connect4/" + type;
+        app.router.navigateTo(route);
+      });
+    });
+  }
+
+  renderFriendList() {
+    const main = document.querySelector("main");
+
+    if (this.loading) {
+      main!.innerHTML = `
+        <div class="max-w-4xl mx-auto px-4 py-8">
+          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <div class="flex justify-center items-center h-64">
+              <div class="animate-spin rounded-full h-12 w-12 border-4 border-orange dark:border-nature border-t-transparent"></div>
+            </div>
+          </div>
+        </div>
+      `;
+      return ;
+    }
+
+    // todo: translate
+    main!.innerHTML = `
+    <div class="max-w-4xl mx-auto px-4 py-8">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <div class="flex justify-start items-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${i18n.t('friends')}</h1>
+          </div>
+
+
+          ${this.friendList.length > 0 ? `
+            <div class="mb-8">
+              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
+              <div class="space-y-3">
+                ${this.friendList.map(friend => `
+                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
+                      <img 
+                        src="${friend.avatar}" 
+                        alt="${friend.username2}" 
+                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
+                      >
+                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                    </div>
+                    <div class="space-x-2">
+                      <button 
+                        class="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-white transition-colors"
+                        data-action="play"
+                        data-username="${friend.username2}"
+                      >
+                        play with
+                      </button>
+                    </div>
+                  </div>
+                `).join('')}
+              </div>
+            </div>
+          ` : ''}
+        </div>
+    </div>
+    `;
+
+    document.querySelectorAll('[data-action]').forEach(button => {
+      button.addEventListener('click', async (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const username = button.getAttribute('data-username');
+
+        app.router.navigateTo(`/connect4/play_vs_friend?friend=${username}`);
+      });
+    });
+
+  }
+
+  async loadFriendList() {
+    try {
+      this.loading = true;
+      this.friendList = await FriendService.getFriendsList();
+      this.friendList = this.friendList.filter((friend) => friend.status == "accepted");
+      this.loading = false;
+      this.renderFriendList();
+    } catch (error) {
+      // todo: translate
+      ModalManager.openModal(i18n.t('games.connect4.title'), "loading friend list failed");
+    }
+  }
 
   renderBtnConn(data: string, name: string): string {
     const token = TokenManager.getToken();
@@ -361,12 +535,6 @@ export class Connect4 {
     `;
   }
 
-  rerender() {
-    const main = document.querySelector('main');
-    main!.innerHTML = this.render();
-    this.setupConnect4FirstPageEventListener();
-  }
-
   render(): string {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
@@ -378,12 +546,12 @@ export class Connect4 {
             ${i18n.t('games.connect4.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button data="playLocal" class="connect4Btn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            <button data="play_local" class="connect4Btn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
               ${i18n.t('games.playLocal')}
             </button>
-            ${this.renderBtnConn("playVsFriend", i18n.t('games.playVsFriend'))}
-            ${this.renderBtnConn("playVsAI", i18n.t('games.playVsAI'))}
-            ${this.renderBtnConn("playTournament", i18n.t('games.playTournament'))}
+            ${this.renderBtnConn("friend_list", i18n.t('games.playVsFriend'))}
+            ${this.renderBtnConn("play_vs_AI", i18n.t('games.playVsAI'))}
+            ${this.renderBtnConn("play_tournament", i18n.t('games.playTournament'))}
           </div>
         </div>
       </div>

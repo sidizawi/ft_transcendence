@@ -1,56 +1,38 @@
+import { chatService } from '../../main';
 import { User } from '../types/user';
 import { TokenManager } from '../utils/token';
 
 export class Chat {
   private friendUserName: string;
   private currentUser: User | null;
-  private ws: WebSocket | null;
 
   constructor(friendUserName: string) {
-    this.friendUserName = friendUserName;
+    this.friendUserName = decodeURI(friendUserName);
     this.currentUser = TokenManager.getUserFromLocalStorage();
 
-    const token = TokenManager.getToken();
+    chatService.addNewChatRoom(this.friendUserName, (data) => this.receiveMessage(data));
+  }
 
-    this.ws = new WebSocket(`ws://${window.location.hostname}:3000/chat/message${token ? '?token=' + token : ''}`);
-
-    this.ws.onopen = () => {
-      this.ws!.send(JSON.stringify({
-        type: "new",
-        userId: this.currentUser?.id,
-        user: this.currentUser?.username,
-        friend: this.friendUserName
-      }));
-    };
-
-    this.ws.onmessage = (event: MessageEvent) => {
-      let data = JSON.parse(event.data.toString());
-
-
-      console.log("data received:", data);
-      if (data.type == "message") {
+  receiveMessage(data: any) {
+    console.log("chat received: ", data);
+    if (data.type == "message") {
+      this.addMessage({
+        text: data.text,
+        sender: data.sender,
+        timestamp: new Date(data.timestamp)
+      });
+    } else if (data.type == "messages") {
+      data.messages.map((message: any) => {
         this.addMessage({
-          text: data.text,
-          sender: data.sender,
-          timestamp: new Date(data.timestamp)
+          text: message.text,
+          sender: message.sender,
+          timestamp: new Date(message.timestamp),
         });
-      } else if (data.type == "messages") {
-        data.messages.map((message: any) => {
-          this.addMessage({
-            text: message.text,
-            sender: message.sender,
-            timestamp: new Date(message.timestamp),
-          });
-        })
-      }
-
-    };
-    this.ws.onclose = () => {
-      console.log("connection closed"); 
+      })
     }
   }
 
-  public render(): string {
+  render(): string {
     return `
       <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md">
         <div class="p-4 border-b border-gray-200 dark:border-gray-700">
@@ -81,7 +63,7 @@ export class Chat {
     `;
   }
 
-  public setupEventListeners(): void {
+  setupEventListeners(): void {
     const form = document.getElementById('chat-form');
     const input = document.getElementById('message-input') as HTMLInputElement;
 
@@ -96,24 +78,16 @@ export class Chat {
         timestamp: timestamp
       });
 
-      this.ws?.send(JSON.stringify({
+      chatService.sendMessage(JSON.stringify({
         type: "message",
         text: input.value,
         user: this.currentUser?.username,
+        userId: this.currentUser?.id,
         friend: this.friendUserName,
         timestamp
       }));
 
       input.value = '';
-    });
-
-    window.addEventListener("beforeunload", () => {
-      this.ws?.send(JSON.stringify({
-        type: 'close',
-        user: this.currentUser?.username,
-        friend: this.friendUserName
-      }));
-      this.ws?.close();
     });
   }
 
