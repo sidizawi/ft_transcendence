@@ -10,7 +10,7 @@ export class Footer {
 
   render(): string {
     return `
-      <footer class="bg-white dark:bg-gray-800 border-t dark:border-gray-700">
+      <footer class="bg-white dark:bg-gray-800">
         <div class="container mx-auto px-4 py-4 flex items-center justify-between">
           <div id="language-selector-container" class="w-1/4">
             ${this.languageManager.renderSelector()}

@@ -150,7 +150,7 @@ export class TranscendenceApp {
           </div>
         </div>
 
-        <main id="main-content" class="container mx-auto px-4 py-8 flex-grow">
+        <main id="main-content" class="pt-16 container mx-auto px-4 py-8 flex-grow">
         </main>
 
         ${this.footer.render()}
@@ -251,7 +251,7 @@ export class TranscendenceApp {
   private renderHomePage(main: Element) {
     main.innerHTML = `
       <div class="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-        <h1 class="text-4xl font-bold mb-6 text-gray-800 dark:text-white">${i18n.t('welcome')}</h1>
+        <h1 class="text-4xl font-bold mb-6 text-orange-darker dark:text-white">${i18n.t('welcome')}</h1>
         <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 text-center max-w-2xl">
           ${i18n.t('description')}
         </p>

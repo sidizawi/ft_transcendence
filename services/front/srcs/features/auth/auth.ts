@@ -197,7 +197,7 @@ export class Auth {
           </p>
 
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">${i18n.t('signIn')}</h2>
+            <h2 class="text-2xl font-bold text-center mb-6 text-orange-darker dark:text-white">${i18n.t('signIn')}</h2>
             
             <form id="signIn-form" class="space-y-4">
               <div>
@@ -247,7 +247,7 @@ export class Auth {
                   <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                  <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">${i18n.t('or')}</span>
+                  <span class="px-2 bg-white dark:bg-gray-800 text-orange-light">${i18n.t('or')}</span>
                 </div>
               </div>
 
@@ -271,7 +271,7 @@ export class Auth {
           </p>
 
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white">${i18n.t('createAccount')}</h2>
+            <h2 class="text-2xl font-bold text-center mb-6 text-orange-darker dark:text-white">${i18n.t('createAccount')}</h2>
             
             <form id="signUp-form" class="space-y-4">
               <div>
@@ -333,7 +333,7 @@ export class Auth {
                   <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                  <span class="px-2 bg-white dark:bg-gray-800 text-gray-500">${i18n.t('or')}</span>
+                  <span class="px-2 bg-white dark:bg-gray-800 text-orange-light">${i18n.t('or')}</span>
                 </div>
               </div>
 

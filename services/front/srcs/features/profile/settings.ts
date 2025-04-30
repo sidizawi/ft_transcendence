@@ -472,7 +472,7 @@ export class Settings {
               <!-- Update Form -->
               <form id="update-info-form" class="space-y-6">
                 <div>
-                  <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  <label for="username" class="block text-base font-medium text-gray-700 dark:text-gray-300">
                     ${i18n.t('username')}
                   </label>
                   <input
@@ -480,13 +480,34 @@ export class Settings {
                     id="username"
                     name="username"
                     placeholder="${this.user.username}"
-                    class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="
+                        mt-1 block w-full
+                        rounded-md
+
+                        border border-transparent
+                        dark:border-transparent
+                        dark:bg-gray-700 dark:text-white
+
+                        shadow-sm
+                        placeholder-orange-darker/40
+                        text-orange-darker
+
+                        focus:outline-none
+
+                        focus:border-orange
+                        focus:ring-2
+                        focus:ring-orange-lightest
+
+                        px-3 py-2
+
+                        text-sm
+                      "
                   />
                 </div>
 
                 ${!this.user.google ? `
                   <div>
-                    <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="email" class="block text-base font-medium text-gray-700 dark:text-gray-300">
                       ${i18n.t('email')}
                     </label>
                     <input
@@ -494,12 +515,33 @@ export class Settings {
                       id="email"
                       name="email"
                       placeholder="${this.user.email}"
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
-                    />
+                      class="
+                          mt-1 block w-full
+                          rounded-md
+
+                          border border-transparent
+                          dark:border-transparent
+                          dark:bg-gray-700 dark:text-white
+
+                          shadow-sm
+                          placeholder-orange-darker/40
+                          text-orange-darker
+
+                          focus:outline-none
+
+                          focus:border-orange
+                          focus:ring-2
+                          focus:ring-orange-lightest
+
+                          px-3 py-2
+
+                          text-sm
+                        "
+                      />
                   </div>
 
                   <div>
-                    <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300">
                       ${i18n.t('newPassword')}
                     </label>
                     <input
@@ -507,12 +549,33 @@ export class Settings {
                       id="password"
                       name="password"
                       placeholder="••••••••"
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="
+                        mt-1 block w-full
+                        rounded-md
+
+                        border border-transparent
+                        dark:border-transparent
+                        dark:bg-gray-700 dark:text-white
+
+                        shadow-sm
+                        placeholder-orange-darker/40
+                        text-orange-darker
+
+                        focus:outline-none
+
+                        focus:border-orange
+                        focus:ring-2
+                        focus:ring-orange-lightest
+
+                        px-3 py-2
+
+                        text-sm
+                      "
                     />
                   </div>
 
                   <div>
-                    <label for="confirmPassword" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label for="confirmPassword" class="block text-base font-medium text-gray-700 dark:text-gray-300">
                       ${i18n.t('confirmPassword')}
                     </label>
                     <input
@@ -520,7 +583,28 @@ export class Settings {
                       id="confirmPassword"
                       name="confirmPassword"
                       placeholder="••••••••"
-                      class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    class="
+                        mt-1 block w-full
+                        rounded-md
+
+                        border border-transparent
+                        dark:border-transparent
+                        dark:bg-gray-700 dark:text-white
+
+                        shadow-sm
+                        placeholder-orange-darker/40
+                        text-orange-darker
+
+                        focus:outline-none
+
+                        focus:border-orange
+                        focus:ring-2
+                        focus:ring-orange-lightest
+
+                        px-3 py-2
+
+                        text-sm
+                      "
                     />
                   </div>
                 ` : `

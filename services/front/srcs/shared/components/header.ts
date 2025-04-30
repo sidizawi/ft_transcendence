@@ -10,7 +10,7 @@ export class Header {
 
   render(pageTitle: string): string {
     return `
-      <nav class="bg-white dark:bg-gray-800 shadow-sm">
+      <nav class="fixed top-0 left-0 right-0 z-50 bg-white dark:bg-gray-800 shadow-sm">
         <div class="container mx-auto px-2 py-2.5">
           <div class="flex items-center">
             <button 
@@ -22,7 +22,7 @@ export class Header {
               </svg>
             </button>
             <div class="flex-1 text-center">
-              <span id="page-title" class="text-lg font-bold text-gray-800 dark:text-white">
+              <span id="page-title" class="text-lg font-bold text-orange-darker dark:text-white">
                 ${pageTitle}
               </span>
             </div>
