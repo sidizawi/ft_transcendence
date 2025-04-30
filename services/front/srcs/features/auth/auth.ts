@@ -3,7 +3,7 @@ import { GoogleAuth } from '../../shared/utils/googleAuth';
 import { i18n } from '../../shared/i18n';
 import { TokenManager } from '../../shared/utils/token';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
-import { ModalManager } from '../../shared/components/modal';
+import { SVGIcons } from '../../shared/components/svg';
 
 const host = window.location.hostname;
 const AUTH_API_URL = `http://${host}:3000/auth`;
@@ -174,26 +174,13 @@ export class Auth {
     }
   }
 
-  private getEyeIcon(isVisible: boolean): string {
-    return isVisible ? `
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-      </svg>
-    ` : `
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-      </svg>
-    `;
-  }
-
   renderSignIn(): string {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-md">
-          <p class="text-right mb-4 text-gray-600 dark:text-gray-400">
+          <p class="text-right mb-4 text-sm text-gray-600 dark:text-gray-400">
             ${i18n.t('newHere')}
-            <a href="/signup" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ml-2">${i18n.t('createAccount')}</a>
+            <a href="/signup" class="text-base text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ml-2">${i18n.t('createAccount')}</a>
           </p>
 
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
@@ -201,34 +188,70 @@ export class Auth {
             
             <form id="signIn-form" class="space-y-4">
               <div>
-                <label for="user-identifier" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="user-identifier" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
                   ${i18n.t('username')} ${i18n.t('or')} ${i18n.t('email')}
                 </label>
                 <input 
                   type="text" 
                   id="user-identifier"
-                  class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
+                  class="
+                  mt-1 block w-full
+                  rounded-md
+
+                  border border-orange-darker/30
+                  dark:border-transparent
+                  dark:bg-gray-700 dark:text-white
+
+                  text-orange-darker
+
+                  focus:outline-none
+
+                  focus:border-orange
+                  focus:ring-2
+                  focus:ring-orange-lightest
+
+                  px-3 py-2
+
+                  text-sm
+                "
                 >
               </div>
 
               <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
                   ${i18n.t('password')}
                 </label>
                 <div class="relative">
                   <input 
                     type="password" 
                     id="password"
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                    required
+                    class="
+                      mt-1 block w-full
+                      rounded-md
+
+                      border border-orange-darker/30
+                      dark:border-transparent
+                      dark:bg-gray-700 dark:text-white
+
+                      text-orange-darker
+
+                      focus:outline-none
+
+                      focus:border-orange
+                      focus:ring-2
+                      focus:ring-orange-lightest
+
+                      px-3 py-2
+
+                      text-sm
+                    "
                   >
                   <button 
                     type="button"
                     id="toggle-password"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   >
-                    ${this.getEyeIcon(false)}
+                    ${SVGIcons.getEyeIcon(false)}
                   </button>
                 </div>
               </div>
@@ -265,9 +288,9 @@ export class Auth {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-md">
-          <p class="text-right mb-4 text-gray-600 dark:text-gray-400">
+          <p class="text-right mb-4 text-sm text-gray-600 dark:text-gray-400">
             ${i18n.t('alreadyHaveAccount')}
-            <a href="/signin" class="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ml-2">${i18n.t('signIn')}</a>
+            <a href="/signin" class="text-base text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ml-2">${i18n.t('signIn')}</a>
           </p>
 
           <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
@@ -275,48 +298,142 @@ export class Auth {
             
             <form id="signUp-form" class="space-y-4">
               <div>
-                <label for="username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="username" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
                   ${i18n.t('username')}
                 </label>
                 <input 
                   type="text" 
                   id="username"
-                  class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  
+                  class="
+                    mt-1 block w-full
+                    rounded-md
+
+                    border border-orange-darker/30
+                    dark:border-transparent
+                    dark:bg-gray-700 dark:text-white
+
+                    text-orange-darker
+
+                    focus:outline-none
+
+                    focus:border-orange
+                    focus:ring-2
+                    focus:ring-orange-lightest
+
+                    px-3 py-2
+
+                    text-sm
+                  "                  
                 >
               </div>
 
               <div>
-                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="email" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
                   ${i18n.t('email')}
                 </label>
                 <input 
                   type="email" 
                   id="email"
-                  class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  
+                  class="
+                    mt-1 block w-full
+                    rounded-md
+
+                    border border-orange-darker/30
+                    dark:border-transparent
+                    dark:bg-gray-700 dark:text-white
+
+                    text-orange-darker
+
+                    focus:outline-none
+
+                    focus:border-orange
+                    focus:ring-2
+                    focus:ring-orange-lightest
+
+                    px-3 py-2
+
+                    text-sm
+                  "                                    
                 >
               </div>
 
               <div>
-                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
                   ${i18n.t('password')}
                 </label>
                 <div class="relative">
                   <input 
                     type="password" 
                     id="password"
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
-                    
+                    class="
+                      mt-1 block w-full
+                      rounded-md
+
+                      border border-orange-darker/30
+                      dark:border-transparent
+                      dark:bg-gray-700 dark:text-white
+
+                      text-orange-darker
+
+                      focus:outline-none
+
+                      focus:border-orange
+                      focus:ring-2
+                      focus:ring-orange-lightest
+
+                      px-3 py-2
+
+                      text-sm
+                    "                                      
                   >
                   <button 
                     type="button"
                     id="toggle-password"
                     class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                   >
-                    ${this.getEyeIcon(false)}
+                    ${SVGIcons.getEyeIcon(false)}
                   </button>
                 </div>
+              </div>
+
+                <div>
+                  <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    ${i18n.t('confirmPassword')}
+                  </label>
+                  <div class="relative">
+                    <input 
+                      type="password" 
+                      id="confirmPassword"
+                      class="
+                        mt-1 block w-full
+                        rounded-md
+
+                        border border-orange-darker/30
+                        dark:border-transparent
+                        dark:bg-gray-700 dark:text-white
+
+                        text-orange-darker
+
+                        focus:outline-none
+
+                        focus:border-orange
+                        focus:ring-2
+                        focus:ring-orange-lightest
+
+                        px-3 py-2
+
+                        text-sm
+                      "
+                    >
+                    <button 
+                      type="button"
+                      id="toggle-confirm-password"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    >
+                      ${SVGIcons.getEyeIcon(false)}
+                    </button>
+                </div>
+
               </div>
 
               <button 
@@ -350,15 +467,31 @@ export class Auth {
   setupAuthEventListeners(isSignUp: boolean) {
     const form = document.getElementById(isSignUp ? 'signUp-form' : 'signIn-form') as HTMLFormElement;
     const togglePassword = document.getElementById('toggle-password');
+    const toggleConfirmPassword = document.getElementById('toggle-confirm-password');
     const passwordInput = document.getElementById('password') as HTMLInputElement;
+    const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
 
     if (!form || !togglePassword || !passwordInput) return;
 
-    togglePassword.addEventListener('click', () => {
+    // Password visibility toggle for main password
+    togglePassword?.addEventListener('click', () => {
       const isPassword = passwordInput.type === 'password';
       passwordInput.type = isPassword ? 'text' : 'password';
-      togglePassword.innerHTML = this.getEyeIcon(isPassword);
+      if (togglePassword instanceof HTMLElement) {
+        togglePassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
+      }
     });
+
+    // Password visibility toggle for confirm password
+    if (isSignUp && toggleConfirmPassword) {
+      toggleConfirmPassword.addEventListener('click', () => {
+        const isPassword = confirmPasswordInput.type === 'password';
+        confirmPasswordInput.type = isPassword ? 'text' : 'password';
+        if (toggleConfirmPassword instanceof HTMLElement) {
+          toggleConfirmPassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
+        }
+      });
+    }
 
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -367,13 +500,15 @@ export class Auth {
         const usernameInput = document.getElementById('username') as HTMLInputElement;
         const emailInput = document.getElementById('email') as HTMLInputElement;
         const passwordInput = document.getElementById('password') as HTMLInputElement;
+        const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
 
         if (usernameInput && emailInput && passwordInput) {
           const username = usernameInput.value.trim(); //space allowed?
           const email = emailInput.value.trim();
           const password = passwordInput.value;
+          const confirmPassword = confirmPasswordInput.value;
 
-          if (!username && !email && !password) {
+          if (!username && !email && !password && !confirmPassword) {
             this.showError(i18n.t('emptyAllFields'));
             return;
           }
@@ -393,6 +528,11 @@ export class Auth {
 
           if (!password) {
             this.showError(i18n.t('emptyPassword'));
+            return;
+          }
+
+          if (password !== confirmPassword) {
+            this.showError(i18n.t('passwordMismatch'));
             return;
           }
 

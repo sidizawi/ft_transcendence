@@ -481,28 +481,27 @@ export class Settings {
                     name="username"
                     placeholder="${this.user.username}"
                     class="
-                        mt-1 block w-full
-                        rounded-md
+                      mt-1 block w-full
+                      rounded-md
 
-                        border border-transparent
-                        dark:border-transparent
-                        dark:bg-gray-700 dark:text-white
+                      border border-orange-darker/30
+                      dark:border-transparent
+                      dark:bg-gray-700 dark:text-white
 
-                        shadow-sm
-                        placeholder-orange-darker/40
-                        text-orange-darker
+                      placeholder-orange-darker/40
+                      text-orange-darker
 
-                        focus:outline-none
+                      focus:outline-none
 
-                        focus:border-orange
-                        focus:ring-2
-                        focus:ring-orange-lightest
+                      focus:border-orange
+                      focus:ring-2
+                      focus:ring-orange-lightest
 
-                        px-3 py-2
+                      px-3 py-2
 
-                        text-sm
-                      "
-                  />
+                      text-sm
+                    "                                      
+                  >
                 </div>
 
                 ${!this.user.google ? `
@@ -516,28 +515,27 @@ export class Settings {
                       name="email"
                       placeholder="${this.user.email}"
                       class="
-                          mt-1 block w-full
-                          rounded-md
+                        mt-1 block w-full
+                        rounded-md
 
-                          border border-transparent
-                          dark:border-transparent
-                          dark:bg-gray-700 dark:text-white
+                        border border-orange-darker/30
+                        dark:border-transparent
+                        dark:bg-gray-700 dark:text-white
 
-                          shadow-sm
-                          placeholder-orange-darker/40
-                          text-orange-darker
+                        placeholder-orange-darker/40
+                        text-orange-darker
 
-                          focus:outline-none
+                        focus:outline-none
 
-                          focus:border-orange
-                          focus:ring-2
-                          focus:ring-orange-lightest
+                        focus:border-orange
+                        focus:ring-2
+                        focus:ring-orange-lightest
 
-                          px-3 py-2
+                        px-3 py-2
 
-                          text-sm
-                        "
-                      />
+                        text-sm
+                      "                                      
+                    >
                   </div>
 
                   <div>
@@ -549,15 +547,14 @@ export class Settings {
                       id="password"
                       name="password"
                       placeholder="••••••••"
-                    class="
+                      class="
                         mt-1 block w-full
                         rounded-md
 
-                        border border-transparent
+                        border border-orange-darker/30
                         dark:border-transparent
                         dark:bg-gray-700 dark:text-white
 
-                        shadow-sm
                         placeholder-orange-darker/40
                         text-orange-darker
 
@@ -570,8 +567,8 @@ export class Settings {
                         px-3 py-2
 
                         text-sm
-                      "
-                    />
+                      "                                      
+                    >
                   </div>
 
                   <div>
@@ -583,15 +580,14 @@ export class Settings {
                       id="confirmPassword"
                       name="confirmPassword"
                       placeholder="••••••••"
-                    class="
+                      class="
                         mt-1 block w-full
                         rounded-md
 
-                        border border-transparent
+                        border border-orange-darker/30
                         dark:border-transparent
                         dark:bg-gray-700 dark:text-white
 
-                        shadow-sm
                         placeholder-orange-darker/40
                         text-orange-darker
 
@@ -604,8 +600,8 @@ export class Settings {
                         px-3 py-2
 
                         text-sm
-                      "
-                    />
+                      "                                      
+                    >
                   </div>
                 ` : `
                   <div>
