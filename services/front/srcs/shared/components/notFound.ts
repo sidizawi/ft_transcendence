@@ -5,16 +5,16 @@ export class NotFound {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="text-center">
-          <h1 class="text-9xl font-bold text-orange dark:text-nature">404</h1>
-          <p class="mt-4 text-2xl font-semibold text-gray-800 dark:text-white">
+          <h1 class="text-9xl font-bold text-light-3 dark:text-dark-2">404</h1>
+          <p class="mt-4 text-2xl font-semibold text-gray-800 dark:text-dark-0">
             ${i18n.t('pageNotFound')}
           </p>
-          <p class="mt-2 text-gray-600 dark:text-gray-400">
+          <p class="mt-2 text-light-4/80 dark:text-dark-2">
             ${i18n.t('pageNotFoundDesc')}
           </p>
           <a 
             href="/"
-            class="inline-block mt-8 px-6 py-3 bg-orange dark:bg-nature text-white dark:text-nature-lightest rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+            class="inline-block mt-8 px-6 py-3 bg-light-3 dark:bg-dark-2 text-dark-0 dark:text-dark-0 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors"
           >
             ${i18n.t('backToHome')}
           </a>

@@ -19,7 +19,7 @@
     background-color: theme('colors.cream');
   }
 
-  .bg-white:not(.menu-box *) {
+  /* .bg-white:not(.menu-box *) {
     @apply bg-orange-lightest;
   }
 
@@ -45,44 +45,44 @@
 
   .bg-gray-100:not(.menu-box *) {
     @apply bg-orange-lighter;
-  }
+  } */
 
   /* Dark mode overrides */
   .dark body {
-    @apply bg-forest-darkest;
+    @apply bg-dark-4;
   }
 
-  .dark .bg-gray-800:not(.menu-box *) {
-    @apply bg-forest-darker;
+  /* .dark .bg-gray-800:not(.menu-box *) {
+    @apply bg-dark-4;
   }
 
   .dark .bg-gray-700:not(.menu-box *) {
-    @apply bg-forest;
+    @apply bg-dark-3;
   }
 
   .dark .bg-gray-900:not(.menu-box *) {
-    @apply bg-forest-darkest;
+    @apply bg-dark-5;
   }
 
   .dark .text-white:not(.menu-box *) {
-    @apply text-nature-lightest;
+    @apply text-dark-0;
   }
 
   .dark .text-gray-300:not(.menu-box *) {
-    @apply text-nature-light;
+    @apply text-dark-1;
   }
 
   .dark .text-gray-400:not(.menu-box *) {
-    @apply text-nature;
+    @apply text-dark-2;
   }
 
   .dark .border-gray-600:not(.menu-box *) {
-    @apply border-forest;
+    @apply border-dark-3;
   }
 
   .dark .border-gray-700:not(.menu-box *) {
-    @apply border-forest-darker;
-  }
+    @apply border-dark-4;
+  } */
 }
 
 /* Tab Transitions */
@@ -105,11 +105,11 @@
 }
 
 #google-signin-button div[role="button"] {
-  @apply !bg-orange dark:!bg-nature !text-white dark:!text-nature-lightest transition-colors !border-2 !border-orange/20 dark:!border-nature/20 !shadow-none !rounded-full !h-11;
+  @apply !bg-light-3 dark:!bg-dark-2 !text-white dark:!text-dark-0 transition-colors !border-2 !border-light-3/20 dark:!border-dark-2/20 !shadow-none !rounded-full !h-11;
 }
 
 #google-signin-button div[role="button"]:hover {
-  @apply !bg-orange-darker dark:!bg-nature/90;
+  @apply !bg-light-4 dark:!bg-dark-2/90;
 }
 
 #google-signin-button div[role="button"] > div {
@@ -163,23 +163,23 @@
 
 /* Menu Link Colors - Using theme palette in gradient order (darkest to lightest) */
 .menu-box a:nth-child(1) {
-  @apply bg-orange-darker text-white hover:bg-orange-darker/90 dark:bg-forest-darkest dark:text-nature-lightest dark:hover:bg-forest-darkest/90;
+  @apply bg-light-4 text-white hover:bg-light-4/90 dark:bg-dark-4 dark:text-dark-0 dark:hover:bg-dark-4/90;
 }
 
 .menu-box a:nth-child(2) {
-  @apply bg-orange text-white hover:bg-orange/90 dark:bg-forest-darker dark:text-nature-lightest dark:hover:bg-forest-darker/90;
+  @apply bg-light-3 text-white hover:bg-light-3/90 dark:bg-dark-3 dark:text-dark-0 dark:hover:bg-dark-3/90;
 }
 
 .menu-box a:nth-child(3) {
-  @apply bg-orange-light text-white hover:bg-orange-light/90 dark:bg-forest dark:text-nature-lightest dark:hover:bg-forest/90;
+  @apply bg-light-2 text-white hover:bg-light-2/90 dark:bg-dark-2 dark:text-dark-0 dark:hover:bg-dark-2/90;
 }
 
 .menu-box a:nth-child(4) {
-  @apply bg-orange-lighter text-orange-darker hover:bg-orange-lighter/90 dark:bg-nature dark:text-nature-lightest dark:hover:bg-nature/90;
+  @apply bg-light-1 text-light-4 hover:bg-light-1/90 dark:bg-dark-1 dark:text-white dark:hover:bg-dark-1/90;
 }
 
 .menu-box a:nth-child(5) {
-  @apply bg-orange-lightest text-orange-darker hover:bg-orange-lightest/90 dark:bg-nature-light dark:text-white dark:hover:bg-nature-light/90;
+  @apply bg-light-0 text-light-4 hover:bg-light-0/90 dark:bg-dark-0 dark:text-white dark:hover:bg-dark-0/90;
 }
 
 /* Form Inputs */

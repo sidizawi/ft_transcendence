@@ -138,7 +138,7 @@ export class TranscendenceApp {
 
   private initializeApp() {
     document.body.innerHTML = `
-      <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <div class="min-h-screen flex flex-col bg-light-1 dark:bg-dark-3">
         ${this.header.render(this.getPageTitle(window.location.pathname))}
 
         <div 
@@ -251,14 +251,14 @@ export class TranscendenceApp {
   private renderHomePage(main: Element) {
     main.innerHTML = `
       <div class="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-        <h1 class="text-4xl font-bold mb-6 text-orange-darker dark:text-white">${i18n.t('welcome')}</h1>
-        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 text-center max-w-2xl">
+        <h1 class="text-4xl font-bold mb-6 text-light-4 dark:text-dark-0">${i18n.t('welcome')}</h1>
+        <p class="text-lg text-light-4/80 dark:text-dark-0 mb-8 text-center max-w-2xl">
           ${i18n.t('description')}
         </p>
         <div class="space-y-4">
           <button 
             id="getStartedBtn" 
-            class="bg-orange dark:bg-nature text-white dark:text-nature-lightest px-6 py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+            class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-6 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
           >
             ${i18n.t('getStarted')}
           </button>

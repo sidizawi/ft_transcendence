@@ -80,18 +80,18 @@ export class TwoFactorAuth {
   private static async verifyEmailCode(type: 'switch' | 'connection'): Promise<boolean> {
     return new Promise((resolve) => {
       const modal = this.createModal(`
-        <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-          <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+        <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
             ${i18n.t('2FAVerification')}
           </h3>
-          <p class="text-gray-600 dark:text-gray-400 mb-6">
+          <p class="text-light-4/80 dark:text-dark-2 mb-6">
             ${i18n.t('checkEmailForCode')}
           </p>
           <div class="mb-4">
             <input 
               type="text" 
               id="2fa-verification-code"
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-1 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
+              class="w-full px-4 py-2 rounded-lg border border-light-2 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 focus:ring-1 focus:outline-none focus:ring-2 focus:ring-light-3 dark:focus:ring-dark-2"
               placeholder="000000"
               maxlength="6"
               pattern="[0-9]*"
@@ -102,13 +102,13 @@ export class TwoFactorAuth {
           <div class="flex justify-end space-x-4">
             <button 
               id="cancel-2fa-verification"
-              class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+              class="px-4 py-2 text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0"
             >
               ${i18n.t('cancel')}
             </button>
             <button 
               id="verify-2fa-code"
-              class="px-4 py-2 bg-orange dark:bg-nature text-white dark:text-nature-lightest rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 relative"
+              class="px-4 py-2 bg-light-3 dark:bg-dark-2 text-dark-0 dark:text-dark-0 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 relative"
               disabled
             >
               <span class="verify-text">${i18n.t('verify')}</span>

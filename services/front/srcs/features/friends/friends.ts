@@ -78,8 +78,8 @@ export class Friends {
 
     return `
       <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-          <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+        <div class="bg-light-0 dark:bg-dark-4 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
             ${i18n.t('addFriend')}
           </h3>
           <form id="add-friend-form" class="space-y-4">
@@ -91,18 +91,18 @@ export class Friends {
                   mt-1 block w-full
                   rounded-md
 
-                  border border-orange-darker/30
+                  border border-light-4/30
                   dark:border-transparent
-                  dark:bg-gray-700 dark:text-white
+                  dark:bg-dark-3 dark:text-dark-0
 
-                  placeholder-orange-darker/40
-                  text-orange-darker
+                  placeholder-light-4/40
+                  text-light-4
 
                   focus:outline-none
 
-                  focus:border-orange
+                  focus:border-light-3
                   focus:ring-2
-                  focus:ring-orange-lightest
+                  focus:ring-light-0
 
                   px-3 py-2
 
@@ -118,14 +118,14 @@ export class Friends {
               <button 
                 type="button"
                 id="cancel-add-friend"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                class="px-4 py-2 text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 ${i18n.t('cancel')}
               </button>
               <button 
                 type="submit"
-                class="px-4 py-2 bg-orange dark:bg-nature text-white dark:text-nature-lightest rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 relative"
+                class="px-4 py-2 bg-light-3 dark:bg-dark-2 text-dark-0 dark:text-dark-0 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 relative"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 <span class="add-friend-text ${this.isAddingFriend ? 'invisible' : ''}">${i18n.t('add')}</span>
@@ -149,9 +149,9 @@ export class Friends {
     if (this.isLoading) {
       return `
         <div class="max-w-4xl mx-auto px-4 py-8">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
             <div class="flex justify-center items-center h-64">
-              <div class="animate-spin rounded-full h-12 w-12 border-4 border-orange dark:border-nature border-t-transparent"></div>
+              <div class="animate-spin rounded-full h-12 w-12 border-4 border-light-3 dark:border-dark-2 border-t-transparent"></div>
             </div>
           </div>
         </div>
@@ -166,12 +166,12 @@ export class Friends {
 
     return `
       <div class="max-w-4xl mx-auto px-4 py-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
           <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${i18n.t('friends')}</h1>
+            <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0">${i18n.t('friends')}</h1>
             <button 
               id="add-friend-button"
-              class="bg-orange dark:bg-nature text-white dark:text-nature-lightest px-4 py-2 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+              class="bg-light-3 dark:bg-dark-2 text-dark-0 dark:text-dark-0 px-4 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors"
             >
               ${i18n.t('addFriend')}
             </button>
@@ -182,35 +182,35 @@ export class Friends {
             id="friends-search"
             placeholder="${i18n.t('searchFriends')}"
             value="${this.searchQuery}"
-            class="w-full p-3 mb-6 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-orange/60 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
+            class="w-full p-3 mb-6 rounded-lg bg-light-1 dark:bg-dark-3 text-light-4 dark:text-dark-0 placeholder-light-3/60 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-light-3 dark:focus:ring-dark-2"
           />
 
           ${receivingRequests.length > 0 ? `
             <div class="mb-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('incomingRequests')}</h3>
+              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('incomingRequests')}</h3>
               <div class="space-y-3">
                 ${receivingRequests.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3/50 rounded-lg">
                     <div class="flex items-center space-x-3 cursor-pointer max-w-[70%]" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
                       >
-                      <span class="text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap block">
+                      <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
                         ${friend.username2}
                       </span>
                     </div>
                     <div class="space-x-2">
                       <button 
-                        class="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-white transition-colors"
+                        class="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-dark-0 transition-colors"
                         data-action="accept"
                         data-username="${friend.username2}"
                       >
                         ${i18n.t('accept')}
                       </button>
                       <button 
-                        class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-white transition-colors"
+                        class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-dark-0 transition-colors"
                         data-action="reject"
                         data-username="${friend.username2}"
                       >
@@ -225,23 +225,23 @@ export class Friends {
 
           ${sendingRequests.length > 0 ? `
             <div class="mb-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('outgoingRequests')}</h3>
+              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('outgoingRequests')}</h3>
               <div class="space-y-3">
                 ${sendingRequests.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3/50 rounded-lg">
                     <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
                       >
-                      <span class="text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap block">
+                      <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
                         ${friend.username2}
                       </span>
                     </div>
                     <div class="flex items-center space-x-3">
                     <button 
-                      class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-white transition-colors"
+                      class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-dark-0 transition-colors"
                       data-action="cancel"
                       data-username="${friend.username2}"
                     >
@@ -255,24 +255,24 @@ export class Friends {
           ` : ''}
 
           <div class="mb-8">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
+            <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('friendsList')}</h3>
             ${acceptedFriends.length > 0 ? `
               <div class="space-y-3">
                 ${acceptedFriends.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3/50 rounded-lg">
                     <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
                       >
-                      <span class="text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap block">
+                      <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
                         ${friend.username2}
                       </span>
                     </div>
                     <div class="flex items-center space-x-3">
                       <button 
-                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        class="text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
                         data-action="block"
                         data-username="${friend.username2}"
                         title="${i18n.t('block')}"
@@ -282,7 +282,7 @@ export class Friends {
                         </svg>
                       </button>
                       <button 
-                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        class="text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
                         data-action="delete"
                         data-username="${friend.username2}"
                         title="${i18n.t('delete')}"
@@ -292,7 +292,7 @@ export class Friends {
                         </svg>
                       </button>
                       <button 
-                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        class="text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
                         data-action="chat"
                         data-username="${friend.username2}"
                         title="${i18n.t('chat')}"
@@ -306,7 +306,7 @@ export class Friends {
                 `).join('')}
               </div>
             ` : `
-              <p class="text-gray-600 dark:text-gray-400 text-center py-8">
+              <p class="text-light-4/80 dark:text-dark-2 text-center py-8">
                 ${i18n.t('noFriendsYet')}
               </p>
             `}
@@ -314,22 +314,22 @@ export class Friends {
 
           ${blockedFriends.length > 0 ? `
             <div class="mt-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('blockedUsers')}</h3>
+              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('blockedUsers')}</h3>
               <div class="space-y-3">
                 ${blockedFriends.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3/50 rounded-lg">
                     <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
                       >
-                      <span class="text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap block">
+                      <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
                         ${friend.username2}
                       </span>
                     </div>
                     <button 
-                      class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600"
+                      class="text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0 transition-colors px-3 py-1.5 rounded border border-light-2 dark:border-gray-600"
                       data-action="unblock"
                       data-username="${friend.username2}"
                     >
@@ -346,7 +346,7 @@ export class Friends {
         <div class="mt-8 flex justify-center">
           <a 
             href="/profile"
-            class="px-6 py-2 text-orange-darker dark:text-nature-lightest rounded-lg transition-colors"
+            class="px-6 py-2 text-light-4 dark:text-dark-0 rounded-lg transition-colors"
           >
             ${i18n.t('back')}
           </a>

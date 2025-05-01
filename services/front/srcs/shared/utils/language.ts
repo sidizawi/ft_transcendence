@@ -50,23 +50,23 @@ export class LanguageManager {
         <button
           type="button"
           id="language-selector"
-          class="inline-flex items-center justify-center gap-x-2 rounded-lg bg-orange dark:bg-nature px-3 py-2 text-sm text-orange-lightest dark:text-nature-lightest hover:bg-orange-darker dark:hover:bg-nature/90"
+          class="inline-flex items-center justify-center gap-x-2 rounded-lg bg-light-3 dark:bg-dark-2 px-3 py-2 text-sm text-light-0 dark:text-dark-0 hover:bg-light-4 dark:hover:bg-dark-2/90"
         >
           <span>${currentLang?.name}</span>
-          <svg class="h-5 w-5 text-orange-lightest dark:text-nature-light" viewBox="0 0 20 20" fill="currentColor">
+          <svg class="h-5 w-5 text-light-0 dark:text-dark-1" viewBox="0 0 20 20" fill="currentColor">
             <path fill-rule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clip-rule="evenodd" />
           </svg>
         </button>
 
         <div
           id="language-dropdown"
-          class="hidden absolute bottom-full mb-2 left-0 z-10 w-40 origin-bottom-left rounded-lg bg-white dark:bg-gray-700 shadow-lg focus:outline-none transform"
+          class="hidden absolute bottom-full mb-2 left-0 z-10 w-40 origin-bottom-left rounded-lg bg-light-0 dark:bg-dark-3 shadow-lg focus:outline-none transform"
           role="menu"
         >
           <div class="py-1" role="none">
             ${this.languages.map(lang => `
               <button
-                class="flex w-full items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 ${lang.code === this.currentLanguage ? 'bg-gray-50 dark:bg-gray-600' : ''}"
+                class="flex w-full items-center px-4 py-2 text-sm text-light-4 dark:text-gray-200 hover:bg-light-1 dark:hover:bg-gray-600 ${lang.code === this.currentLanguage ? 'bg-light-1 dark:bg-gray-600' : ''}"
                 role="menuitem"
                 data-lang="${lang.code}"
               >

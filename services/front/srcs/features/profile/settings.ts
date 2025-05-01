@@ -207,24 +207,24 @@ export class Settings {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
-      <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+      <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
           ${i18n.t('deleteAccountVerification')}
         </h3>
         <p class="text-red-600 dark:text-red-400 mb-4">
           ${i18n.t('deleteAccountWarning')}
         </p>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">
+        <p class="text-light-4/80 dark:text-dark-2 mb-6">
           ${i18n.t('deleteAccountConfirm')}
         </p>
         <div class="mb-4">
-          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+          <label class="block text-sm font-medium text-light-4 dark:text-dark-1 mb-1">
             ${i18n.t('enterPassword')}
           </label>
 
 
           <div>
-            <label for="username" class="block text-base font-medium text-gray-700 dark:text-gray-300">
+            <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-1">
               ${i18n.t('username')}
             </label>
             <input
@@ -236,18 +236,18 @@ export class Settings {
                 mt-1 block w-full
                 rounded-md
 
-                border border-orange-darker/30
+                border border-light-4/30
                 dark:border-transparent
-                dark:bg-gray-700 dark:text-white
+                dark:bg-dark-3 dark:text-dark-0
 
-                placeholder-orange-darker/40
-                text-orange-darker
+                placeholder-light-4/40
+                text-light-4
 
                 focus:outline-none
 
-                focus:border-orange
+                focus:border-light-3
                 focus:ring-2
-                focus:ring-orange-lightest
+                focus:ring-light-0
 
                 px-3 py-2
 
@@ -261,12 +261,12 @@ export class Settings {
             <input 
               type="password" 
               id="delete-account-password"
-              class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent pr-10"
+              class="w-full px-4 py-2 rounded-lg border border-light-2 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 focus:ring-2 focus:ring-red-500 focus:border-transparent pr-10"
             >
             <button 
               type="button"
               id="toggle-delete-password"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-1 hover:text-light-4 dark:hover:text-dark-0"
             >
               ${SVGIcons.getEyeIcon(false)}
             </button>
@@ -282,13 +282,13 @@ export class Settings {
         <div class="flex justify-end space-x-4">
           <button 
             id="cancel-delete"
-            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            class="px-4 py-2 text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0"
           >
             ${i18n.t('cancel')}
           </button>
           <button 
             id="confirm-delete"
-            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            class="px-4 py-2 bg-red-600 text-dark-0 rounded-lg hover:bg-red-700 transition-colors"
           >
             ${i18n.t('deleteAccount')}
           </button>
@@ -342,18 +342,18 @@ export class Settings {
         const verificationModal = document.createElement('div');
         verificationModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
         verificationModal.innerHTML = `
-          <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+          <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
               ${i18n.t('deleteAccountVerification')}
             </h3>
-            <p class="text-gray-600 dark:text-gray-400 mb-6">
+            <p class="text-light-4/80 dark:text-dark-2 mb-6">
               ${i18n.t('checkEmailForCode')}
             </p>
             <div class="mb-4">
               <input 
                 type="text" 
                 id="verification-code"
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-red-500 focus:border-transparent"
+                class="w-full px-4 py-2 rounded-lg border border-light-2 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 focus:ring-2 focus:ring-red-500 focus:border-transparent"
                 placeholder="000000"
                 maxlength="6"
                 pattern="[0-9]*"
@@ -364,13 +364,13 @@ export class Settings {
             <div class="flex justify-end space-x-4">
               <button 
                 id="cancel-verification"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                class="px-4 py-2 text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0"
               >
                 ${i18n.t('cancel')}
               </button>
               <button 
                 id="verify-code"
-                class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                class="px-4 py-2 bg-red-600 text-dark-0 rounded-lg hover:bg-red-700 transition-colors"
               >
                 ${i18n.t('verify')}
               </button>
@@ -437,11 +437,11 @@ export class Settings {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
-      <div class="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+      <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
           ${title}
         </h3>
-        <p class="text-gray-600 dark:text-gray-400 mb-6">
+        <p class="text-light-4/80 dark:text-dark-2 mb-6">
           ${i18n.t('checkEmailForCode')}
         </p>
         <div class="mb-4">
@@ -452,18 +452,18 @@ export class Settings {
               w-full px-4 py-2
               rounded-lg
               
-              border border-orange-darker/30
+              border border-light-4/30
               dark:border-transparent
-              dark:bg-gray-700 dark:text-white
+              dark:bg-dark-3 dark:text-dark-0
 
-              placeholder-orange-darker/40
-              text-orange-darker
+              placeholder-light-4/40
+              text-light-4
 
               focus:outline-none
 
-              focus:border-orange
+              focus:border-light-3
               focus:ring-2
-              focus:ring-orange-lightest
+              focus:ring-light-0
             "
             placeholder="000000"
             maxlength="6"
@@ -475,13 +475,13 @@ export class Settings {
         <div class="flex justify-end space-x-4">
           <button 
             id="cancel-verification"
-            class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+            class="px-4 py-2 text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0"
           >
             ${i18n.t('cancel')}
           </button>
           <button 
             id="verify-code"
-            class="px-4 py-2 bg-orange dark:bg-nature text-white dark:text-nature-lightest rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 relative"
+            class="px-4 py-2 bg-light-3 dark:bg-dark-2 text-dark-0 dark:text-dark-0 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 relative"
             disabled
           >
             ${i18n.t('verify')}
@@ -515,7 +515,7 @@ export class Settings {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-2xl">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg overflow-hidden">
             <div class="p-8">
               <!-- Avatar Section -->
               <div class="flex flex-col items-center mb-8">
@@ -527,10 +527,10 @@ export class Settings {
                   >
                   <label 
                     for="settings-avatar-upload" 
-                    class="absolute bottom-0 right-0 bg-gray-100 dark:bg-gray-700 p-2 rounded-full shadow-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    class="absolute bottom-0 right-0 bg-light-1 dark:bg-dark-3 p-2 rounded-full shadow-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
                     title="${i18n.t('changePhoto')}"
                   >
-                    <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5 text-light-4/80 dark:text-dark-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
                     </svg>
@@ -547,7 +547,7 @@ export class Settings {
               <!-- Update Form -->
               <form id="update-info-form" class="space-y-6">
                 <div>
-                  <label for="username" class="block text-base font-medium text-gray-700 dark:text-gray-300">
+                  <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-1">
                     ${i18n.t('username')}
                   </label>
                   <input
@@ -559,18 +559,18 @@ export class Settings {
                       mt-1 block w-full
                       rounded-md
 
-                      border border-orange-darker/30
+                      border border-light-4/30
                       dark:border-transparent
-                      dark:bg-gray-700 dark:text-white
+                      dark:bg-dark-3 dark:text-dark-0
 
-                      placeholder-orange-darker/40
-                      text-orange-darker
+                      placeholder-light-4/40
+                      text-light-4
 
                       focus:outline-none
 
-                      focus:border-orange
+                      focus:border-light-3
                       focus:ring-2
-                      focus:ring-orange-lightest
+                      focus:ring-light-0
 
                       px-3 py-2
 
@@ -581,7 +581,7 @@ export class Settings {
 
                 ${!this.user.google ? `
                   <div>
-                    <label for="email" class="block text-base font-medium text-gray-700 dark:text-gray-300">
+                    <label for="email" class="block text-base font-medium text-light-4 dark:text-dark-1">
                       ${i18n.t('email')}
                     </label>
                     <input
@@ -593,18 +593,18 @@ export class Settings {
                         mt-1 block w-full
                         rounded-md
 
-                        border border-orange-darker/30
+                        border border-light-4/30
                         dark:border-transparent
-                        dark:bg-gray-700 dark:text-white
+                        dark:bg-dark-3 dark:text-dark-0
 
-                        placeholder-orange-darker/40
-                        text-orange-darker
+                        placeholder-light-4/40
+                        text-light-4
 
                         focus:outline-none
 
-                        focus:border-orange
+                        focus:border-light-3
                         focus:ring-2
-                        focus:ring-orange-lightest
+                        focus:ring-light-0
 
                         px-3 py-2
 
@@ -614,7 +614,7 @@ export class Settings {
                   </div>
 
                   <div>
-                    <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300">
+                    <label for="password" class="block text-base font-medium text-light-4 dark:text-dark-1">
                       ${i18n.t('newPassword')}
                     </label>
                     <div class="relative">
@@ -627,18 +627,18 @@ export class Settings {
                         mt-1 block w-full
                         rounded-md
 
-                        border border-orange-darker/30
+                        border border-light-4/30
                         dark:border-transparent
-                        dark:bg-gray-700 dark:text-white
+                        dark:bg-dark-3 dark:text-dark-0
 
-                        placeholder-orange-darker/40
-                        text-orange-darker
+                        placeholder-light-4/40
+                        text-light-4
 
                         focus:outline-none
 
-                        focus:border-orange
+                        focus:border-light-3
                         focus:ring-2
-                        focus:ring-orange-lightest
+                        focus:ring-light-0
 
                         px-3 py-2
 
@@ -648,7 +648,7 @@ export class Settings {
                       <button 
                         type="button"
                         id="toggle-password"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-1 hover:text-light-4 dark:hover:text-dark-0"
                       >
                         ${SVGIcons.getEyeIcon(false)}
                       </button>
@@ -656,7 +656,7 @@ export class Settings {
                   </div>
 
                   <div>
-                    <label for="confirmPassword" class="block text-base font-medium text-gray-700 dark:text-gray-300">
+                    <label for="confirmPassword" class="block text-base font-medium text-light-4 dark:text-dark-1">
                       ${i18n.t('confirmPassword')}
                     </label>
                     <div class="relative">
@@ -669,18 +669,18 @@ export class Settings {
                           mt-1 block w-full
                           rounded-md
 
-                          border border-orange-darker/30
+                          border border-light-4/30
                           dark:border-transparent
-                          dark:bg-gray-700 dark:text-white
+                          dark:bg-dark-3 dark:text-dark-0
 
-                          placeholder-orange-darker/40
-                          text-orange-darker
+                          placeholder-light-4/40
+                          text-light-4
 
                           focus:outline-none
 
-                          focus:border-orange
+                          focus:border-light-3
                           focus:ring-2
-                          focus:ring-orange-lightest
+                          focus:ring-light-0
 
                           px-3 py-2
 
@@ -690,7 +690,7 @@ export class Settings {
                       <button 
                         type="button"
                         id="toggle-confirm-password"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-1 hover:text-light-4 dark:hover:text-dark-0"
                       >
                         ${SVGIcons.getEyeIcon(false)}
                       </button>
@@ -698,10 +698,10 @@ export class Settings {
                   </div>
                 ` : `
                   <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <label class="block text-sm font-medium text-light-4 dark:text-dark-1">
                       ${i18n.t('email')}
                     </label>
-                    <div class="mt-1 block w-full px-4 py-2 rounded-md bg-gray-100 dark:bg-gray-600 text-gray-500 dark:text-gray-400">
+                    <div class="mt-1 block w-full px-4 py-2 rounded-md bg-light-1 dark:bg-gray-600 text-gray-500 dark:text-dark-2">
                       ${this.user.email}
                       <span class="ml-2 text-xs">(${i18n.t('googleAccount')})</span>
                     </div>
@@ -720,7 +720,7 @@ export class Settings {
                   <div class="flex justify-center space-x-4">
                     <button
                       type="submit"
-                      class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-orange dark:bg-nature hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+                      class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-dark-0 bg-light-3 dark:bg-dark-2 hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors"
                     >
                       ${i18n.t('saveChanges')}
                     </button>
@@ -735,7 +735,7 @@ export class Settings {
         <div class="mt-8 flex justify-center">
           <a
             href="/profile"
-            class="px-6 py-2 text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
+            class="px-6 py-2 text-light-4 dark:text-dark-0 rounded-lg hover:bg-light-1/90 dark:hover:bg-dark-3/90 transition-colors"
           >
             ${i18n.t('back')}
           </a>

@@ -178,17 +178,17 @@ export class Auth {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-md">
-          <p class="text-right mb-4 text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-right mb-4 text-sm text-light-4/80 dark:text-dark-0/80">
             ${i18n.t('newHere')}
-            <a href="/signup" class="text-base text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ml-2">${i18n.t('createAccount')}</a>
+            <a href="/signup" class="text-base text-light-4 dark:text-dark-0 hover:text-light-4 dark:hover:text-dark-0 ml-2">${i18n.t('createAccount')}</a>
           </p>
 
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-center mb-6 text-orange-darker dark:text-white">${i18n.t('signIn')}</h2>
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-light-4 dark:text-dark-0">${i18n.t('signIn')}</h2>
             
             <form id="signIn-form" class="space-y-4">
               <div>
-                <label for="user-identifier" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="user-identifier" class="block text-base font-medium text-light-4 dark:text-dark-0 mb-1">
                   ${i18n.t('username')} ${i18n.t('or')} ${i18n.t('email')}
                 </label>
                 <input 
@@ -198,17 +198,20 @@ export class Auth {
                   mt-1 block w-full
                   rounded-md
 
-                  border border-orange-darker/30
-                  dark:border-transparent
-                  dark:bg-gray-700 dark:text-white
-
-                  text-orange-darker
+                  border border-light-4/30
+                  dark:border-dark-0/30
+                  dark:bg-dark-4 <!-- pas de bg light -->
+                  
+                  text-light-4
+                  dark:text-dark-0
 
                   focus:outline-none
 
-                  focus:border-orange
+                  focus:border-light-3
+                  dark:focus:border-dark-1
                   focus:ring-2
-                  focus:ring-orange-lightest
+                  focus:ring-light-0
+                  dark:focus:ring-dark-4
 
                   px-3 py-2
 
@@ -218,7 +221,7 @@ export class Auth {
               </div>
 
               <div>
-                <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="password" class="block text-base font-medium text-light-4 dark:text-dark-0 mb-1">
                   ${i18n.t('password')}
                 </label>
                 <div class="relative">
@@ -229,17 +232,20 @@ export class Auth {
                       mt-1 block w-full
                       rounded-md
 
-                      border border-orange-darker/30
-                      dark:border-transparent
-                      dark:bg-gray-700 dark:text-white
-
-                      text-orange-darker
+                      border border-light-4/30
+                      dark:border-dark-0/30
+                      dark:bg-dark-4 <!-- pas de bg light -->
+                      
+                      text-light-4
+                      dark:text-dark-0
 
                       focus:outline-none
 
-                      focus:border-orange
+                      focus:border-light-3
+                      dark:focus:border-dark-1
                       focus:ring-2
-                      focus:ring-orange-lightest
+                      focus:ring-light-0
+                      dark:focus:ring-dark-4
 
                       px-3 py-2
 
@@ -249,7 +255,7 @@ export class Auth {
                   <button 
                     type="button"
                     id="toggle-password"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
                   >
                     ${SVGIcons.getEyeIcon(false)}
                   </button>
@@ -258,7 +264,7 @@ export class Auth {
 
               <button 
                 type="submit"
-                class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-2 px-4 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors mt-6"
+                class="w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-2 px-4 rounded-lg hover:bg-light-4 dark:hover:bg-dark-1/90 transition-colors mt-6"
               >
                 ${i18n.t('signIn')}
               </button>
@@ -267,10 +273,10 @@ export class Auth {
             <div class="mt-6">
               <div class="relative">
                 <div class="absolute inset-0 flex items-center">
-                  <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                  <div class="w-full border-t border-light-2 dark:border-dark-2"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                  <span class="px-2 bg-white dark:bg-gray-800 text-orange-light">${i18n.t('or')}</span>
+                  <span class="px-2 bg-light-0 dark:bg-dark-4 text-light-2 dark:text-dark-2">${i18n.t('or')}</span>
                 </div>
               </div>
 
@@ -288,17 +294,17 @@ export class Auth {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="w-full max-w-md">
-          <p class="text-right mb-4 text-sm text-gray-600 dark:text-gray-400">
+          <p class="text-right mb-4 text-sm text-light-4/80 dark:text-dark-4/80">
             ${i18n.t('alreadyHaveAccount')}
-            <a href="/signin" class="text-base text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ml-2">${i18n.t('signIn')}</a>
+            <a href="/signin" class="text-base text-light-4 dark:text-dark-4 hover:text-light-4 dark:hover:text-dark-4 ml-2">${i18n.t('signIn')}</a>
           </p>
 
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-            <h2 class="text-2xl font-bold text-center mb-6 text-orange-darker dark:text-white">${i18n.t('createAccount')}</h2>
+          <div class="bg-light-0 dark:bg-dark-0 rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold text-center mb-6 text-light-4 dark:text-dark-4">${i18n.t('createAccount')}</h2>
             
             <form id="signUp-form" class="space-y-4">
               <div>
-                <label for="username" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-4 mb-1">
                   ${i18n.t('username')}
                 </label>
                 <input 
@@ -308,17 +314,20 @@ export class Auth {
                     mt-1 block w-full
                     rounded-md
 
-                    border border-orange-darker/30
-                    dark:border-transparent
-                    dark:bg-gray-700 dark:text-white
-
-                    text-orange-darker
+                    border border-light-4/30
+                    dark:border-dark-4/30
+                    dark:bg-dark-4/0.01 <!-- pas de bg light -->
+                    
+                    text-light-4
+                    dark:text-dark-4
 
                     focus:outline-none
 
-                    focus:border-orange
+                    focus:border-light-3
+                    dark:focus:border-dark-3
                     focus:ring-2
-                    focus:ring-orange-lightest
+                    focus:ring-light-0
+                    dark:focus:ring-dark-0
 
                     px-3 py-2
 
@@ -328,7 +337,7 @@ export class Auth {
               </div>
 
               <div>
-                <label for="email" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="email" class="block text-base font-medium text-light-4 dark:text-dark-4 mb-1">
                   ${i18n.t('email')}
                 </label>
                 <input 
@@ -338,17 +347,20 @@ export class Auth {
                     mt-1 block w-full
                     rounded-md
 
-                    border border-orange-darker/30
-                    dark:border-transparent
-                    dark:bg-gray-700 dark:text-white
-
-                    text-orange-darker
+                    border border-light-4/30
+                    dark:border-dark-4/30
+                    dark:bg-dark-4/0.01 <!-- pas de bg light -->
+                    
+                    text-light-4
+                    dark:text-dark-4
 
                     focus:outline-none
 
-                    focus:border-orange
+                    focus:border-light-3
+                    dark:focus:border-dark-3
                     focus:ring-2
-                    focus:ring-orange-lightest
+                    focus:ring-light-0
+                    dark:focus:ring-dark-0
 
                     px-3 py-2
 
@@ -358,7 +370,7 @@ export class Auth {
               </div>
 
               <div>
-                <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <label for="password" class="block text-base font-medium text-light-4 dark:text-dark-4 mb-1">
                   ${i18n.t('password')}
                 </label>
                 <div class="relative">
@@ -369,17 +381,20 @@ export class Auth {
                       mt-1 block w-full
                       rounded-md
 
-                      border border-orange-darker/30
-                      dark:border-transparent
-                      dark:bg-gray-700 dark:text-white
-
-                      text-orange-darker
-
+                      border border-light-4/30
+                      dark:border-dark-4/30
+                      dark:bg-dark-4/0.01 <!-- pas de bg light -->
+                      
+                      text-light-4
+                      dark:text-dark-4
+                      
                       focus:outline-none
 
-                      focus:border-orange
+                      focus:border-light-3
+                      dark:focus:border-dark-3
                       focus:ring-2
-                      focus:ring-orange-lightest
+                      focus:ring-light-0
+                      dark:focus:ring-dark-0
 
                       px-3 py-2
 
@@ -389,7 +404,7 @@ export class Auth {
                   <button 
                     type="button"
                     id="toggle-password"
-                    class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                    class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-4/80 hover:text-light-4 dark:hover:text-dark-4"
                   >
                     ${SVGIcons.getEyeIcon(false)}
                   </button>
@@ -397,7 +412,7 @@ export class Auth {
               </div>
 
                 <div>
-                  <label for="password" class="block text-base font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  <label for="password" class="block text-base font-medium text-light-4 dark:text-dark-4 mb-1">
                     ${i18n.t('confirmPassword')}
                   </label>
                   <div class="relative">
@@ -408,17 +423,20 @@ export class Auth {
                         mt-1 block w-full
                         rounded-md
 
-                        border border-orange-darker/30
-                        dark:border-transparent
-                        dark:bg-gray-700 dark:text-white
-
-                        text-orange-darker
-
+                        border border-light-4/30
+                        dark:border-dark-4/30
+                        dark:bg-dark-4/0.01 <!-- pas de bg light -->
+                        
+                        text-light-4
+                        dark:text-dark-4
+                        
                         focus:outline-none
 
-                        focus:border-orange
+                        focus:border-light-3
+                        dark:focus:border-dark-3
                         focus:ring-2
-                        focus:ring-orange-lightest
+                        focus:ring-light-0
+                        dark:focus:ring-dark-0
 
                         px-3 py-2
 
@@ -428,7 +446,7 @@ export class Auth {
                     <button 
                       type="button"
                       id="toggle-confirm-password"
-                      class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                      class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-4/80 hover:text-light-4 dark:hover:text-dark-4"
                     >
                       ${SVGIcons.getEyeIcon(false)}
                     </button>
@@ -438,7 +456,7 @@ export class Auth {
 
               <button 
                 type="submit"
-                class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-2 px-4 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors mt-6"
+                class="w-full bg-light-3 dark:bg-dark-3 text-white dark:text-black py-2 px-4 rounded-lg hover:bg-light-4 dark:hover:bg-dark-4 transition-colors mt-6"
               >
                 ${i18n.t('signUp')}
               </button>
@@ -447,10 +465,10 @@ export class Auth {
             <div class="mt-6">
               <div class="relative">
                 <div class="absolute inset-0 flex items-center">
-                  <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
+                  <div class="w-full border-t border-light-2 dark:border-dark-2"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                  <span class="px-2 bg-white dark:bg-gray-800 text-orange-light">${i18n.t('or')}</span>
+                  <span class="px-2 bg-light-0 dark:bg-dark-0 text-light-2 dark:text-dark-2">${i18n.t('or')}</span>
                 </div>
               </div>
 

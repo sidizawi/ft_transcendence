@@ -107,7 +107,7 @@ export class FriendProfile {
       buttons.push(`
         <button 
           id="messageBtn"
-          class="bg-orange dark:bg-nature text-white dark:text-nature-lightest px-4 py-2 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors flex items-center gap-2"
+          class="bg-light-3 dark:bg-dark-2 text-dark-0 dark:text-dark-0 px-4 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -116,7 +116,7 @@ export class FriendProfile {
         </button>
         <button 
           id="deleteFriendBtn"
-          class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+          class="bg-red-500 text-dark-0 px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -125,7 +125,7 @@ export class FriendProfile {
         </button>
         <button 
           id="blockUserBtn"
-          class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
+          class="bg-red-500 text-dark-0 px-4 py-2 rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
@@ -137,7 +137,7 @@ export class FriendProfile {
       buttons.push(`
         <button 
           id="unblockBtn"
-          class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+          class="bg-light-10 text-dark-0 px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A13.916 13.916 0 008 11a4 4 0 118 0c0 1.017-.07 2.019-.203 3m-2.118 6.844A21.88 21.88 0 0015.171 17m3.839 1.132c.645-2.266.99-4.659.99-7.132A8 8 0 008 4.07M3 15.364c.64-1.319 1-2.8 1-4.364 0-1.457.39-2.823 1.07-4" />
@@ -149,7 +149,7 @@ export class FriendProfile {
       buttons.push(`
         <button 
           id="cancelRequestBtn"
-          class="bg-gray-500 text-white px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
+          class="bg-light-10 text-dark-0 px-4 py-2 rounded-lg hover:bg-gray-600 transition-colors flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -161,7 +161,7 @@ export class FriendProfile {
       buttons.push(`
         <button 
           id="addFriendBtn"
-          class="bg-green-500 text-white px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
+          class="bg-green-500 text-dark-0 px-4 py-2 rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -181,7 +181,7 @@ export class FriendProfile {
   render(): string {
     return `
       <div class="max-w-4xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg overflow-hidden">
 
           <!-- Profile Header -->
           <div class="relative">
@@ -194,7 +194,7 @@ export class FriendProfile {
                 >
               </div>
               <div class="ml-6 flex-1 min-w-0">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white truncate overflow-hidden whitespace-nowrap">
+                <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap">
                   ${this.username}
                 </h1>
               </div>
@@ -209,38 +209,38 @@ export class FriendProfile {
               <div class="relative">
                 <div class="flex -mb-px space-x-8">
                   <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-gray-600 dark:text-gray-400 font-medium"
+                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-2 font-medium"
                     data-tab="pong"
                     data-active="true"
                   >
                     <span class="flex items-center space-x-2">
                       <span>${i18n.t('pong')}</span>
                     </span>
-                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-orange dark:bg-nature transform scale-x-0 transition-transform"></span>
+                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-2 transform scale-x-0 transition-transform"></span>
                   </button>
                   <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-gray-600 dark:text-gray-400 font-medium"
+                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-2 font-medium"
                     data-tab="connect4"
                     data-active="false"
                   >
                     <span class="flex items-center space-x-2">
                       <span>${i18n.t('connect4')}</span>
                     </span>
-                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-orange dark:bg-nature transform scale-x-0 transition-transform"></span>
+                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-2 transform scale-x-0 transition-transform"></span>
                   </button>
                 </div>
-                <div class="absolute bottom-0 left-0 w-full h-px bg-orange-light dark:bg-nature-light"></div>
+                <div class="absolute bottom-0 left-0 w-full h-px bg-light-2 dark:bg-dark-1"></div>
               </div>
 
               <!-- Pong Stats -->
               <div class="tab-content active" data-tab="pong">
-                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Pong Dashboard</h3>
+                <h3 class="text-3xl font-semibold text-light-4 dark:text-dark-0 text-center mt-6 mb-8">Pong Dashboard</h3>
                 ${this.renderGameStats(this.pongStats)}
               </div>
 
               <!-- Connect4 Stats -->
               <div class="tab-content hidden" data-tab="connect4">
-                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Connect 4 Dashboard</h3>
+                <h3 class="text-3xl font-semibold text-light-4 dark:text-dark-0 text-center mt-6 mb-8">Connect 4 Dashboard</h3>
                 ${this.renderGameStats(this.connect4Stats)}
               </div>
             </div>
@@ -250,7 +250,7 @@ export class FriendProfile {
         <div class="mt-8 flex justify-center">
           <a 
             href="/friends"
-            class="px-6 py-2 text-orange-darker dark:text-nature-lightest rounded-lg transition-colors"
+            class="px-6 py-2 text-light-4 dark:text-dark-0 rounded-lg transition-colors"
           >
             ${i18n.t('back')}
           </a>
@@ -262,7 +262,7 @@ export class FriendProfile {
   private renderGameStats(stats: FriendGameStats | null): string {
     if (!stats) {
       return `
-        <div class="text-center text-gray-600 dark:text-gray-400 py-8">
+        <div class="text-center text-light-4/80 dark:text-dark-2 py-8">
           ${i18n.t('noGamesPlayed')}
         </div>
       `;
@@ -293,45 +293,45 @@ export class FriendProfile {
         <!-- Additional Stats -->
         <div class="grid grid-cols-3 gap-4">
           <!-- Rank & ELO -->
-          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-4/30 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.rank')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">#${stats.rank || '-'}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.rank')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">#${stats.rank || '-'}</p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.elo')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.elo || '-'}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.elo')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.elo || '-'}</p>
               </div>
             </div>
           </div>
 
           <!-- Tournaments -->
-          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-4/30 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.wonTournaments')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.won || '-'}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.wonTournaments')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.tournaments?.won || '-'}</p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.playedTournaments')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.total || '-'}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.playedTournaments')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.tournaments?.total || '-'}</p>
               </div>
             </div>
           </div>
 
           <!-- Streak -->
-          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-4/30 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.currentStreak')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">
+                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.currentStreak')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">
                   ${stats.totalGames === 0 ? '-' : stats.streak?.current || '-'}
                 </p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.bestStreak')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">
+                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.bestStreak')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">
                   ${stats.totalGames === 0 ? '-' : stats.streak?.best || '-'}
                 </p>
               </div>
@@ -342,10 +342,10 @@ export class FriendProfile {
         ${stats.history && stats.history.length > 0 ? `
           <!-- Recent Games -->
           <div class="mt-6">
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">${i18n.t('stats.recentGames')}</h4>
+            <h4 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-3">${i18n.t('stats.recentGames')}</h4>
             <div class="space-y-2">
               ${stats.history.map(game => `
-                <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg">
+                <div class="flex items-center justify-between bg-light-1 dark:bg-dark-4/30 p-3 rounded-lg">
                   <div class="flex items-center space-x-3">
                     <span class="w-2 h-2 rounded-full ${game.playerWin === this.username ? 'bg-green-500' : 'bg-red-500'}"></span>
                     <div class="flex items-center space-x-2">
@@ -354,12 +354,12 @@ export class FriendProfile {
                         alt="${game.opponent}"
                         class="w-8 h-8 rounded-full object-cover"
                       >
-                      <span class="text-gray-900 dark:text-white">${game.opponent}</span>
+                      <span class="text-light-4 dark:text-dark-0">${game.opponent}</span>
                     </div>
                   </div>
                   <div class="flex items-center space-x-4">
-                    ${game.score ? `<span class="text-gray-600 dark:text-gray-400">${game.score}</span>` : ''}
-                    <span class="text-sm text-gray-500 dark:text-gray-400">${game.date}</span>
+                    ${game.score ? `<span class="text-light-4/80 dark:text-dark-2">${game.score}</span>` : ''}
+                    <span class="text-sm text-gray-500 dark:text-dark-2">${game.date}</span>
                   </div>
                 </div>
               `).join('')}
@@ -382,8 +382,8 @@ export class FriendProfile {
         // Reset all buttons
         tabButtons.forEach(btn => {
           btn.setAttribute('data-active', 'false');
-          btn.classList.remove('text-orange-500', 'font-bold');
-          btn.classList.add('text-orange-500/50', 'font-medium'); // orange but lighter when inactive
+          btn.classList.remove('text-light-3-500', 'font-bold');
+          btn.classList.add('text-light-3-500/50', 'font-medium'); // light-3 but lighter when inactive
   
           btn.querySelector('.tab-indicator')?.classList.remove('scale-x-100');
           btn.querySelector('.tab-indicator')?.classList.add('scale-x-0');
@@ -391,8 +391,8 @@ export class FriendProfile {
   
         // Set clicked button as active
         button.setAttribute('data-active', 'true');
-        button.classList.remove('text-orange-500/50', 'font-medium');
-        button.classList.add('text-orange-500', 'font-bold');
+        button.classList.remove('text-light-3-500/50', 'font-medium');
+        button.classList.add('text-light-3-500', 'font-bold');
   
         button.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
         button.querySelector('.tab-indicator')?.classList.add('scale-x-100');
@@ -418,8 +418,8 @@ export class FriendProfile {
   
     if (initialTab) {
       initialTab.setAttribute('data-active', 'true');
-      initialTab.classList.remove('text-orange-500/50', 'font-medium');
-      initialTab.classList.add('text-orange-500', 'font-bold');
+      initialTab.classList.remove('text-light-3-500/50', 'font-medium');
+      initialTab.classList.add('text-light-3-500', 'font-bold');
   
       initialTab.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
       initialTab.querySelector('.tab-indicator')?.classList.add('scale-x-100');
