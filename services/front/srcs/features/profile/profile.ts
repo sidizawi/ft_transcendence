@@ -4,6 +4,7 @@ import { i18n } from '../../shared/i18n';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 import { AvatarService } from '../../shared/services/avatarService';
 import { StatsService } from '../../shared/services/statsService';
+import { SVGIcons } from '../../shared/components/svg';
 
 export class Profile {
   private pongStats: GameStats | null = null;
@@ -83,8 +84,8 @@ export class Profile {
 
   private get2FAButtonClasses(): string {
     return this.user.twoFactorEnabled
-      ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600/80 dark:hover:bg-red-600'
-      : 'bg-green-500 hover:bg-green-600 dark:bg-green-600/80 dark:hover:bg-green-600';
+      ? 'bg-desactivate-btn-light-0 hover:bg-desactivate-btn-light-1 dark:bg-desactivate-btn-dark-1 dark:hover:bg-desactivate-btn-dark-0'
+      : 'bg-activate-btn-light-0 hover:bg-activate-btn-light-1 dark:bg-activate-btn-dark-1 dark:hover:bg-activate-btn-dark-0';
   }
 
   render(): string {
@@ -96,6 +97,7 @@ export class Profile {
     return `
       <div class="max-w-4xl mx-auto">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg overflow-hidden">
+
           <!-- Profile Header -->
           <div class="relative">
             <div class="flex items-center px-8 pt-6">
@@ -108,43 +110,39 @@ export class Profile {
                 >
                 <label 
                   for="avatar-upload" 
-                  class="absolute bottom-0 right-0 bg-light-1 dark:bg-dark-3 p-2 rounded-full shadow-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                  class="
+                    absolute bottom-0 right-0 p-2 rounded-full shadow-lg
+                    bg-light-1 dark:bg-dark-3
+                    hover:bg-black hover:dark:bg-yellow
+                    <!-- where is text changing colour -->
+                    transition-colors cursor-pointer"
                   title="${i18n.t('changePhoto')}"
                 >
-                  <svg class="w-5 h-5 text-light-4/80 dark:text-dark-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
+                  ${SVGIcons.getCameraIcon()}
                 </label>
                 <input 
-                  type="file" 
-                  id="avatar-upload" 
-                  accept="image/*"
-                  class="hidden"
+                  type="file" id="avatar-upload" accept="image/*" class="hidden"
                 >
               </div>
               <div class="ml-6 max-w-[60%]">
                 <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap">
                   ${this.user.username}
                 </h1>
-                <p class="text-light-4/80 dark:text-dark-2 truncate overflow-hidden whitespace-nowrap">
+                <p class="text-light-4/80 dark:text-dark-0/80 truncate overflow-hidden whitespace-nowrap">
                   ${this.user.email}
                 </p>
               </div>
               <div class="ml-auto flex items-center space-x-2">
                 <a 
                   href="/profile/settings"
-                  class="text-light-4/80 dark:text-dark-2"
+                  class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 hover:dark:text-dark-0"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
+                  ${SVGIcons.getGearIcon()}
                 </a>
                 ${!this.user.google ? `
                   <button 
                     id="toggle2FA"
-                    class="${this.get2FAButtonClasses()} text-dark-0 dark:text-dark-0/90 px-4 py-2 rounded-lg transition-colors"
+                    class="${this.get2FAButtonClasses()} text-light-0 dark:text-dark-4 px-4 py-2 rounded-lg transition-colors"
                   >
                     ${this.user.twoFactorEnabled ? i18n.t('disable2FA') : i18n.t('enable2FA')}
                   </button>
@@ -160,27 +158,27 @@ export class Profile {
               <div class="relative">
                 <div class="flex -mb-px space-x-8">
                   <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-2 font-medium"
+                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-0/80 font-medium"
                     data-tab="pong"
                     data-active="true"
                   >
                     <span class="flex items-center space-x-2">
                       <span>${i18n.t('pong')}</span>
                     </span>
-                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-2 transform scale-x-0 transition-transform"></span>
+                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-1 transform scale-x-0 transition-transform"></span>
                   </button>
                   <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-2 font-medium"
+                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-0/80 font-medium"
                     data-tab="connect4"
                     data-active="false"
                   >
                     <span class="flex items-center space-x-2">
                       <span>${i18n.t('connect4')}</span>
                     </span>
-                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-2 transform scale-x-0 transition-transform"></span>
+                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-1 transform scale-x-0 transition-transform"></span>
                   </button>
                 </div>
-                <div class="absolute bottom-0 left-0 w-full h-px bg-light-2 dark:bg-dark-1"></div>
+                <div class="absolute bottom-0 left-0 w-full h-px bg-light-2 dark:bg-dark-2"></div>
               </div>
 
               <!-- Pong Stats -->
@@ -190,7 +188,7 @@ export class Profile {
 
                 <!-- Tournament Button - Only in Pong tab -->
                 <div class="mt-8">
-                  <button class="w-full bg-light-2 dark:bg-dark-2 text-dark-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-2/90 dark:hover:bg-dark-2/90 shadow-md transition-colors">
+                  <button class="w-full bg-light-2 dark:bg-dark-2 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-2/90 dark:hover:bg-dark-2/90 shadow-md transition-colors">
                     ${i18n.t('joinTournament')}
                   </button>
                 </div>
@@ -204,16 +202,21 @@ export class Profile {
             </div>
 
             <!-- Friends and Logout -->
-            <div class="mt-8 pt-8 border-t border-light-2 dark:text-dark-3 flex justify-center space-x-4">
+            <div class="mt-8 pt-8 border-t border-light-2 dark:border-dark-2 flex justify-center space-x-4">
               <a 
                 href="/friends"
-                class="px-8 bg-light-2 dark:bg-dark-2 text-dark-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-2/90 dark:hover:bg-dark-2/90 shadow-md transition-colors"
+                class="px-8 bg-light-2 dark:bg-dark-2 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-2/90 dark:hover:bg-dark-2/90 shadow-md transition-colors"
               >
                 ${i18n.t('friends')}
               </a>
               <button 
                 id="logoutBtn"
-                class="px-8 bg-red-500 dark:bg-red-600/80 hover:bg-red-600 dark:hover:bg-red-600 text-dark-0 dark:text-dark-0/90 py-3 rounded-lg transition-colors"
+                class="
+                  px-8 py-3 rounded-lg transition-colors
+                  bg-desactivate-btn-light-0 dark:bg-desactivate-btn-dark-1
+                  text-light-0 dark:text-dark-4
+                  hover:bg-desactivate-btn-light-1 dark:hover:bg-desactivate-btn-dark-0
+                "
               >
                 ${i18n.t('logout')}
               </button>
@@ -258,44 +261,44 @@ export class Profile {
         <!-- Additional Stats -->
         <div class="grid grid-cols-3 gap-4">
           <!-- Rank & ELO -->
-          <div class="bg-light-1 dark:bg-dark-4/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-3 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.rank')}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.rank')}</p>
                 <p class="text-xl font-bold text-light-4 dark:text-dark-0">#${stats.rank || '-'}</p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.elo')}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.elo')}</p>
                 <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.elo || '-'}</p>
               </div>
             </div>
           </div>
 
           <!-- Tournaments -->
-          <div class="bg-light-1 dark:bg-dark-4/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-3 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.wonTournaments')}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.wonTournaments')}</p>
                 <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.tournaments?.won || '-'}</p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.playedTournaments')}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.playedTournaments')}</p>
                 <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.tournaments?.total || '-'}</p>
               </div>
             </div>
           </div>
 
           <!-- Streak -->
-          <div class="bg-light-1 dark:bg-dark-4/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-3 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.currentStreak')}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.currentStreak')}</p>
                 <p class="text-xl font-bold text-light-4 dark:text-dark-0">
                   ${stats.totalGames === 0 ? '-' : stats.streak?.current || '-'}
                 </p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-light-4/80 dark:text-dark-2">${i18n.t('stats.bestStreak')}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.bestStreak')}</p>
                 <p class="text-xl font-bold text-light-4 dark:text-dark-0">
                   ${stats.totalGames === 0 ? '-' : stats.streak?.best || '-'}
                 </p>
@@ -310,7 +313,7 @@ export class Profile {
             <h4 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-3">${i18n.t('stats.recentGames')}</h4>
             <div class="space-y-2">
               ${stats.history.map(game => `
-                <div class="flex items-center justify-between bg-light-1 dark:bg-dark-4/30 p-3 rounded-lg">
+                <div class="flex items-center justify-between bg-light-1 dark:bg-dark-3 p-3 rounded-lg">
                   <div class="flex items-center space-x-3">
                     <span class="w-2 h-2 rounded-full ${game.result === 'win' ? 'bg-green-500' : 'bg-red-500'}"></span>
                     <div class="flex items-center space-x-2">
@@ -319,12 +322,12 @@ export class Profile {
                         alt="${game.opponent}"
                         class="w-8 h-8 rounded-full object-cover"
                       >
-                      <span class="text-light-4 dark:text-dark-0">${game.opponent}</span>
+                      <span class="text-light-4/80 dark:text-dark-0">${game.opponent}</span>
                     </div>
                   </div>
                   <div class="flex items-center space-x-4">
-                    ${game.score ? `<span class="text-light-4/80 dark:text-dark-2">${game.score}</span>` : ''}
-                    <span class="text-sm text-gray-500 dark:text-dark-2">${game.date}</span>
+                    ${game.score ? `<span class="text-light-4 dark:text-dark-0">${game.score}</span>` : ''}
+                    <span class="text-sm text-light-4/80 dark:text-dark-0/80">${game.date}</span>
                   </div>
                 </div>
               `).join('')}

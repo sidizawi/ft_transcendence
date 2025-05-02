@@ -5,6 +5,12 @@ ajouter status friends.ts
 si token non resent (supp ou autre) rediriger vers sign in
 Ajout notif si new message + new demande de connexion
 
+
+	profile.ts:
+	- apd 233 -> render background stats
+	- refaire tout affichage hame history
+	- Activate button DARKMODE
+
 	app/routing:
 		- bloquer toutes les pages HORS home, connect4 et pong si pas login
 

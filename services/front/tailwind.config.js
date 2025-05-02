@@ -32,6 +32,14 @@ export default {
         'dark-2': '#3A5A40',
         'dark-3': '#344E41',
         'dark-4': '#2B3F35',
+        'activate-btn-light-0': '#9dc44b',
+        'activate-btn-light-1': '#8eb045',
+        'activate-btn-dark-0': '#96bd89',
+        'activate-btn-dark-1': '#96bd89',
+        'desactivate-btn-light-0': '#e15325',
+        'desactivate-btn-light-1': '#d34f25',
+        'desactivate-btn-dark-0': '#d75012',
+        'desactivate-btn-dark-1': '#b0410e'
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'Helvetica Neue', 'Arial', 'sans-serif'],

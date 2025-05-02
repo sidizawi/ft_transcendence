@@ -358,14 +358,14 @@ export class Friends {
                     </div>
                     <button 
                       class="
-                          text-light-4/80 dark:text-dark-0/80
-                          px-3 py-1.5 rounded
-                          border border-light-4/80 dark:border-dark-0/80
-                          hover:text-light-0 dark:hover:text-dark-4
-                          hover:border-light-0 dark:hover:border-dark-4
-                          hover:bg-light-4 dark:hover:bg-dark-0
-                          transition-colors
-                        "
+                        text-light-4/80 dark:text-dark-0/80
+                        px-3 py-1.5 rounded
+                        border border-light-4/80 dark:border-dark-0/80
+                        hover:text-light-0 dark:hover:text-dark-4
+                        hover:border-light-0 dark:hover:border-dark-4
+                        hover:bg-light-4 dark:hover:bg-dark-0
+                        transition-colors
+                      "
                       data-action="unblock"
                       data-username="${friend.username2}"
                     >
