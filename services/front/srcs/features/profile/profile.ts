@@ -84,8 +84,8 @@ export class Profile {
 
   private get2FAButtonClasses(): string {
     return this.user.twoFactorEnabled
-      ? 'bg-desactivate-btn-light-0 hover:bg-desactivate-btn-light-1 dark:bg-desactivate-btn-dark-1 dark:hover:bg-desactivate-btn-dark-0'
-      : 'bg-activate-btn-light-0 hover:bg-activate-btn-light-1 dark:bg-activate-btn-dark-1 dark:hover:bg-activate-btn-dark-0';
+      ? 'bg-off-btn-light-0 hover:bg-off-btn-light-1 dark:bg-off-btn-dark-1 dark:hover:bg-off-btn-dark-0'
+      : 'bg-on-btn-light-0 hover:bg-on-btn-light-1 dark:bg-on-btn-dark-1 dark:hover:bg-on-btn-dark-0';
   }
 
   render(): string {
@@ -213,9 +213,9 @@ export class Profile {
                 id="logoutBtn"
                 class="
                   px-8 py-3 rounded-lg transition-colors
-                  bg-desactivate-btn-light-0 dark:bg-desactivate-btn-dark-1
+                  bg-off-btn-light-0 dark:bg-off-btn-dark-1
                   text-light-0 dark:text-dark-4
-                  hover:bg-desactivate-btn-light-1 dark:hover:bg-desactivate-btn-dark-0
+                  hover:bg-off-btn-light-1 dark:hover:bg-off-btn-dark-0
                 "
               >
                 ${i18n.t('logout')}

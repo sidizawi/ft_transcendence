@@ -131,7 +131,7 @@ export class Friends {
               </button>
               <button 
                 type="submit"
-                class="px-4 py-2 bg-light-3 dark:bg-dark-1 text-white dark:text-dark-4 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 relative"
+                class="px-4 py-2 bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 relative"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 <span class="add-friend-text ${this.isAddingFriend ? 'invisible' : ''}">${i18n.t('add')}</span>
@@ -174,9 +174,9 @@ export class Friends {
             <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0">${i18n.t('friends')}</h1>
             <button 
               id="add-friend-button"
-              class="bg-light-3 dark:bg-dark-1 text-white dark:text-dark-4 px-4 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
+              class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-4 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
             >
-              ${i18n.t('addFriend')}
+              ${i18n.t('add')}
             </button>
           </div>
 

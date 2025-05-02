@@ -117,7 +117,7 @@ export class FriendProfile {
           id="deleteFriendBtn"
           class="
             px-4 py-2 rounded-lg
-            bg-desactivate-btn-light-0 hover:bg-desactivate-btn-light-1 dark:bg-desactivate-btn-dark-1 dark:hover:bg-desactivate-btn-dark-0
+            bg-off-btn-light-0 hover:bg-off-btn-light-1 dark:bg-off-btn-dark-1 dark:hover:bg-off-btn-dark-0
             text-light-0 dark:text-dark-4
             transition-colors flex items-center gap-2"
         >
@@ -128,7 +128,7 @@ export class FriendProfile {
           id="blockUserBtn"
           class="
             px-4 py-2 rounded-lg
-            bg-desactivate-btn-light-0 hover:bg-desactivate-btn-light-1 dark:bg-desactivate-btn-dark-1 dark:hover:bg-desactivate-btn-dark-0
+            bg-off-btn-light-0 hover:bg-off-btn-light-1 dark:bg-off-btn-dark-1 dark:hover:bg-off-btn-dark-0
             text-light-0 dark:text-dark-4
             transition-colors flex items-center gap-2"
         >
@@ -174,15 +174,11 @@ export class FriendProfile {
       buttons.push(`
         <button 
           id="addFriendBtn"
-          class="
-            text-light-4/80 dark:text-dark-0/80
-            px-3 py-1.5 rounded
-            border border-light-4/80 dark:border-dark-0/80
-            hover:text-light-0 dark:hover:text-dark-4
-            hover:border-light-0 dark:hover:border-dark-4
-            hover:bg-light-4 dark:hover:bg-dark-0
-            transition-colors
-          "
+          class="px-4 py-2 rounded-lg transition-colors flex items-center gap-2
+          bg-on-btn-light-0 dark:bg-on-btn-dark-1 
+          hover:bg-on-btn-light-1 dark:hover:bg-on-btn-dark-0
+          text-light-0 dark:text-dark-4"
+          
         >
           ${i18n.t('addFriend')}
         </button>
@@ -268,7 +264,7 @@ export class FriendProfile {
         <div class="mt-8 flex justify-center">
           <a 
             href="/friends"
-            class="px-6 py-2 text-light-4 dark:text-dark-0 rounded-lg transition-colors"
+            class="px-6 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 rounded-lg transition-colors"
           >
             ${i18n.t('back')}
           </a>

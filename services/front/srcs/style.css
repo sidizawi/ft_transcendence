@@ -14,75 +14,6 @@
       font-size: 24px; /* Base font size for 4K */
     }
   }
-
-  body:not(.dark) {
-    background-color: theme('colors.cream');
-  }
-
-  /* .bg-white:not(.menu-box *) {
-    @apply bg-orange-lightest;
-  }
-
-  .text-gray-900:not(.menu-box *) {
-    @apply text-orange-darker;
-  }
-
-  .text-gray-600:not(.menu-box *) {
-    @apply text-orange-darker/80;
-  }
-
-  .text-gray-700:not(.menu-box *) {
-    @apply text-orange-darker;
-  }
-
-  .border-gray-300:not(.menu-box *) {
-    @apply border-orange-light;
-  }
-
-  .bg-gray-50:not(.menu-box *) {
-    @apply bg-orange-lighter;
-  }
-
-  .bg-gray-100:not(.menu-box *) {
-    @apply bg-orange-lighter;
-  } */
-
-  /* Dark mode overrides */
-  .dark body {
-    @apply bg-dark-4;
-  }
-
-  /* .dark .bg-gray-800:not(.menu-box *) {
-    @apply bg-dark-4;
-  }
-
-  .dark .bg-gray-700:not(.menu-box *) {
-    @apply bg-dark-3;
-  }
-
-  .dark .bg-gray-900:not(.menu-box *) {
-    @apply bg-dark-5;
-  }
-
-  .dark .text-white:not(.menu-box *) {
-    @apply text-dark-0;
-  }
-
-  .dark .text-gray-300:not(.menu-box *) {
-    @apply text-dark-1;
-  }
-
-  .dark .text-gray-400:not(.menu-box *) {
-    @apply text-dark-2;
-  }
-
-  .dark .border-gray-600:not(.menu-box *) {
-    @apply border-dark-3;
-  }
-
-  .dark .border-gray-700:not(.menu-box *) {
-    @apply border-dark-4;
-  } */
 }
 
 /* Tab Transitions */
@@ -163,15 +94,15 @@
 
 /* Menu Link Colors - Using theme palette in gradient order (darkest to lightest) */
 .menu-box a:nth-child(1) {
-  @apply bg-light-4 text-white hover:bg-light-4/90 dark:bg-dark-4 dark:text-dark-0 dark:hover:bg-dark-4/90;
+  @apply bg-light-4 text-light-0 hover:bg-light-4/90 dark:bg-dark-4 dark:text-dark-0 dark:hover:bg-dark-4/90;
 }
 
 .menu-box a:nth-child(2) {
-  @apply bg-light-3 text-white hover:bg-light-3/90 dark:bg-dark-3 dark:text-dark-0 dark:hover:bg-dark-3/90;
+  @apply bg-light-3 text-light-0 hover:bg-light-3/90 dark:bg-dark-3 dark:text-dark-0 dark:hover:bg-dark-3/90;
 }
 
 .menu-box a:nth-child(3) {
-  @apply bg-light-2 text-white hover:bg-light-2/90 dark:bg-dark-2 dark:text-dark-0 dark:hover:bg-dark-2/90;
+  @apply bg-light-2 text-light-0 hover:bg-light-2/90 dark:bg-dark-2 dark:text-dark-0 dark:hover:bg-dark-2/90;
 }
 
 .menu-box a:nth-child(4) {
@@ -278,4 +209,8 @@ h2 {
   button:active {
     @apply opacity-70 transform scale-95;
   }
+}
+
+.bg-input {
+  background: #ffd000;
 }

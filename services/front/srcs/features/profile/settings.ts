@@ -527,13 +527,10 @@ export class Settings {
                   >
                   <label 
                     for="settings-avatar-upload" 
-                    class="absolute bottom-0 right-0 bg-light-1 dark:bg-dark-3 p-2 rounded-full shadow-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
+                    class="absolute bottom-0 right-0 bg-light-1 dark:bg-dark-3 p-2 rounded-full shadow-lg hover:bg-black dark:hover:bg-yellow transition-colors cursor-pointer"
                     title="${i18n.t('changePhoto')}"
                   >
-                    <svg class="w-5 h-5 text-light-4/80 dark:text-dark-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                    </svg>
+                    ${SVGIcons.getCameraIcon()}
                   </label>
                   <input 
                     type="file" 
@@ -547,7 +544,7 @@ export class Settings {
               <!-- Update Form -->
               <form id="update-info-form" class="space-y-6">
                 <div>
-                  <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-1">
+                  <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-0">
                     ${i18n.t('username')}
                   </label>
                   <input
@@ -556,32 +553,31 @@ export class Settings {
                     name="username"
                     placeholder="${this.user.username}"
                     class="
-                      mt-1 block w-full
-                      rounded-md
+                      mt-1 block w-full rounded-md px-3 py-2 text-sm
 
                       border border-light-4/30
-                      dark:border-transparent
-                      dark:bg-dark-3 dark:text-dark-0
-
+                      dark:border-dark-0/30
+                      dark:bg-dark-4 <!-- pas de bg light -->
+                      
                       placeholder-light-4/40
+                      dark:placeholder-dark-0/40
                       text-light-4
-
+                      dark:text-dark-0
+                      
                       focus:outline-none
 
                       focus:border-light-3
+                      dark:focus:border-dark-1
                       focus:ring-2
                       focus:ring-light-0
-
-                      px-3 py-2
-
-                      text-sm
+                      dark:focus:ring-dark-4
                     "                                      
                   >
                 </div>
 
                 ${!this.user.google ? `
                   <div>
-                    <label for="email" class="block text-base font-medium text-light-4 dark:text-dark-1">
+                    <label for="email" class="block text-base font-medium text-light-4 dark:text-dark-0">
                       ${i18n.t('email')}
                     </label>
                     <input
@@ -590,31 +586,30 @@ export class Settings {
                       name="email"
                       placeholder="${this.user.email}"
                       class="
-                        mt-1 block w-full
-                        rounded-md
+                        mt-1 block w-full rounded-md px-3 py-2 text-sm
 
                         border border-light-4/30
-                        dark:border-transparent
-                        dark:bg-dark-3 dark:text-dark-0
-
+                        dark:border-dark-0/30
+                        dark:bg-dark-4 <!-- pas de bg light -->
+                        
                         placeholder-light-4/40
+                        dark:placeholder-dark-0/40
                         text-light-4
-
+                        dark:text-dark-0
+                        
                         focus:outline-none
 
                         focus:border-light-3
+                        dark:focus:border-dark-1
                         focus:ring-2
                         focus:ring-light-0
-
-                        px-3 py-2
-
-                        text-sm
-                      "                                      
+                        dark:focus:ring-dark-4
+                      "                                   
                     >
                   </div>
 
                   <div>
-                    <label for="password" class="block text-base font-medium text-light-4 dark:text-dark-1">
+                    <label for="password" class="block text-base font-medium text-light-4 dark:text-dark-0">
                       ${i18n.t('newPassword')}
                     </label>
                     <div class="relative">
@@ -624,31 +619,30 @@ export class Settings {
                         name="password"
                         placeholder="••••••••"
                         class="
-                        mt-1 block w-full
-                        rounded-md
+                          mt-1 block w-full rounded-md px-3 py-2 text-sm
 
-                        border border-light-4/30
-                        dark:border-transparent
-                        dark:bg-dark-3 dark:text-dark-0
+                          border border-light-4/30
+                          dark:border-dark-0/30
+                          dark:bg-dark-4 <!-- pas de bg light -->
+                          
+                          placeholder-light-4/40
+                          dark:placeholder-dark-0/40
+                          text-light-4
+                          dark:text-dark-0
+                          
+                          focus:outline-none
 
-                        placeholder-light-4/40
-                        text-light-4
-
-                        focus:outline-none
-
-                        focus:border-light-3
-                        focus:ring-2
-                        focus:ring-light-0
-
-                        px-3 py-2
-
-                        text-sm
-                        "                                      
+                          focus:border-light-3
+                          dark:focus:border-dark-1
+                          focus:ring-2
+                          focus:ring-light-0
+                          dark:focus:ring-dark-4
+                        "                                 
                       >
                       <button 
                         type="button"
                         id="toggle-password"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-1 hover:text-light-4 dark:hover:text-dark-0"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
                       >
                         ${SVGIcons.getEyeIcon(false)}
                       </button>
@@ -656,7 +650,7 @@ export class Settings {
                   </div>
 
                   <div>
-                    <label for="confirmPassword" class="block text-base font-medium text-light-4 dark:text-dark-1">
+                    <label for="confirmPassword" class="block text-base font-medium text-light-4 dark:text-dark-0">
                       ${i18n.t('confirmPassword')}
                     </label>
                     <div class="relative">
@@ -666,31 +660,30 @@ export class Settings {
                         name="confirmPassword"
                         placeholder="••••••••"
                         class="
-                          mt-1 block w-full
-                          rounded-md
+                          mt-1 block w-full rounded-md px-3 py-2 text-sm
 
                           border border-light-4/30
-                          dark:border-transparent
-                          dark:bg-dark-3 dark:text-dark-0
-
+                          dark:border-dark-0/30
+                          dark:bg-dark-4 <!-- pas de bg light -->
+                          
                           placeholder-light-4/40
+                          dark:placeholder-dark-0/40
                           text-light-4
-
+                          dark:text-dark-0
+                          
                           focus:outline-none
 
                           focus:border-light-3
+                          dark:focus:border-dark-1
                           focus:ring-2
                           focus:ring-light-0
-
-                          px-3 py-2
-
-                          text-sm
-                        "                                      
+                          dark:focus:ring-dark-4
+                        "
                       >
                       <button 
                         type="button"
                         id="toggle-confirm-password"
-                        class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-1 hover:text-light-4 dark:hover:text-dark-0"
+                        class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
                       >
                         ${SVGIcons.getEyeIcon(false)}
                       </button>
@@ -698,10 +691,10 @@ export class Settings {
                   </div>
                 ` : `
                   <div>
-                    <label class="block text-sm font-medium text-light-4 dark:text-dark-1">
+                    <label class="block text-sm font-medium text-light-4 dark:text-dark-0">
                       ${i18n.t('email')}
                     </label>
-                    <div class="mt-1 block w-full px-4 py-2 rounded-md bg-light-1 dark:bg-gray-600 text-gray-500 dark:text-dark-2">
+                    <div class="mt-1 block w-full px-4 py-2 rounded-md bg-light-1 dark:bg-dark-3 text-light-4 dark:text-light-0">
                       ${this.user.email}
                       <span class="ml-2 text-xs">(${i18n.t('googleAccount')})</span>
                     </div>
@@ -720,7 +713,7 @@ export class Settings {
                   <div class="flex justify-center space-x-4">
                     <button
                       type="submit"
-                      class="px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-dark-0 bg-light-3 dark:bg-dark-2 hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors"
+                      class="px-6 py-2 rounded-lg shadow-sm text-sm font-medium text-light-0 dar:text-dark-4 bg-light-3 dark:bg-dark-1 hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
                     >
                       ${i18n.t('saveChanges')}
                     </button>
@@ -735,7 +728,7 @@ export class Settings {
         <div class="mt-8 flex justify-center">
           <a
             href="/profile"
-            class="px-6 py-2 text-light-4 dark:text-dark-0 rounded-lg hover:bg-light-1/90 dark:hover:bg-dark-3/90 transition-colors"
+            class="px-6 py-2 rounded-lg text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
           >
             ${i18n.t('back')}
           </a>

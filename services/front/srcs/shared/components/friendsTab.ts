@@ -1,6 +1,7 @@
 import { Friend } from '../types/friend';
 import { FriendService } from '../services/friendService';
 import { i18n } from '../i18n';
+import { SVGIcons } from '../../shared/components/svg';
 
 export class FriendsTab {
   private isOpen = false;
@@ -45,9 +46,9 @@ export class FriendsTab {
           id="friends-tab-button"
           class="
             flex items-center justify-center
-            bg-light-3 dark:bg-dark-2
-            transition-colors text-dark-0 cursor-pointer
-            hover:bg-light-4 dark:hover:bg-dark-2/90
+            bg-light-3 dark:bg-dark-1
+            transition-colors text-light-0 dark:text-dark-3 cursor-pointer
+            hover:bg-light-4 dark:hover:bg-dark-0
             ${this.isOpen
               ? 'w-40 h-10 rounded-t-md'
               : 'w-10 h-10 rounded-full'}
@@ -55,10 +56,7 @@ export class FriendsTab {
           aria-expanded="${this.isOpen}"
           aria-controls="friends-panel"
         >
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-          </svg>
+          ${SVGIcons.getFriendIcon()}
           <span
             id="friends-tab-label"
             class="ml-2 ${this.isOpen ? '' : 'hidden'}"
@@ -69,7 +67,7 @@ export class FriendsTab {
         <!-- Friends Panel -->
         <div 
           id="friends-panel" 
-          class="w-40 bg-light-0 dark:bg-dark-3 shadow-lg ${this.isOpen ? '' : 'hidden'}"
+          class="w-40 bg-light-0 dark:bg-dark-4 shadow-lg ${this.isOpen ? '' : 'hidden'}"
           role="region"
           aria-labelledby="friends-tab-button"
         >
@@ -78,13 +76,13 @@ export class FriendsTab {
             ? `
               <!-- Online Friends -->
               <div class="p-4 border-b border-gray-200 dark:text-dark-4">
-                <h3 class="text-sm font-medium text-light-4 dark:text-dark-1 mb-3">
+                <h3 class="text-sm font-medium text-light-4 dark:text-dark-0 mb-3">
                   ${i18n.t('onlineFriends')} (${onlineFriends.length})
                 </h3>
                 <div class="space-y-2">
                   ${onlineFriends.map(friend => `
                       <div 
-                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-4/50 cursor-pointer group"
+                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
                         data-username="${friend.username2}"
                       >
                         <div class="flex items-center space-x-3">
@@ -94,7 +92,7 @@ export class FriendsTab {
                               alt="${friend.username2}"
                               class="w-8 h-8 rounded-full object-cover"
                             >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border-2 border-light-1 dark:border-dark-3"></span>
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-light-1 dark:border-dark-3"></span>
                           </div>
 
                           <div class="text-left flex-1 min-w-0">
@@ -110,13 +108,13 @@ export class FriendsTab {
 
               <!-- Offline Friends -->
               <div class="p-4">
-                <h3 class="text-sm font-medium text-light-4 dark:text-dark-1 mb-3">
+                <h3 class="text-sm font-medium text-light-4 dark:text-dark-0 mb-3">
                   ${i18n.t('offlineFriends')} (${offlineFriends.length})
                 </h3>
                 <div class="space-y-2">
                   ${offlineFriends.map(friend => `
                       <div 
-                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-4/50 cursor-pointer group"
+                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
                         data-username="${friend.username2}"
                       >
                         <div class="flex items-center space-x-3">
@@ -126,7 +124,7 @@ export class FriendsTab {
                               alt="${friend.username2}"
                               class="w-8 h-8 rounded-full object-cover"
                             >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border-2 border-light-1 dark:border-dark-3"></span>
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-light-1 dark:border-dark-3"></span>
                           </div>
 
                           <div class="text-left flex-1 min-w-0">
@@ -147,7 +145,7 @@ export class FriendsTab {
                   ${
                     (onlineFriends.length > 0 ? onlineFriends.map(friend => `
                       <div 
-                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-4/50 cursor-pointer group"
+                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
                         data-username="${friend.username2}"
                       >
                         <div class="flex items-center space-x-3">
@@ -157,7 +155,7 @@ export class FriendsTab {
                               alt="${friend.username2}"
                               class="w-8 h-8 rounded-full object-cover"
                             >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border-2 border-light-1 dark:border-dark-3"></span>
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-light-1 dark:border-dark-3"></span>
                           </div>
 
                           <div class="text-left flex-1 min-w-0">
@@ -171,7 +169,7 @@ export class FriendsTab {
                     ||
                     (offlineFriends.length > 0 ? offlineFriends.map(friend => `
                       <div 
-                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-4/50 cursor-pointer group"
+                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
                         data-username="${friend.username2}"
                       >
                         <div class="flex items-center space-x-3">
@@ -181,7 +179,7 @@ export class FriendsTab {
                               alt="${friend.username2}"
                               class="w-8 h-8 rounded-full object-cover"
                             >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-green-500 border-2 border-light-1 dark:border-dark-3"></span>
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-light-1 dark:border-dark-3"></span>
                           </div>
 
                           <div class="text-left flex-1 min-w-0">
