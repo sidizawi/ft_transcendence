@@ -94,23 +94,23 @@
 
 /* Menu Link Colors - Using theme palette in gradient order (darkest to lightest) */
 .menu-box a:nth-child(1) {
-  @apply bg-light-4 text-light-0 hover:bg-light-4/90 dark:bg-dark-4 dark:text-dark-0 dark:hover:bg-dark-4/90;
+  @apply text-light-0 bg-light-4 hover:bg-light-4/90 dark:text-dark-0 dark:bg-dark-4 dark:hover:bg-dark-4/90;
 }
 
 .menu-box a:nth-child(2) {
-  @apply bg-light-3 text-light-0 hover:bg-light-3/90 dark:bg-dark-3 dark:text-dark-0 dark:hover:bg-dark-3/90;
+  @apply text-light-0 bg-light-3 hover:bg-light-3/90 dark:text-dark-0 dark:bg-dark-3 dark:hover:bg-dark-3/90;
 }
 
 .menu-box a:nth-child(3) {
-  @apply bg-light-2 text-light-0 hover:bg-light-2/90 dark:bg-dark-2 dark:text-dark-0 dark:hover:bg-dark-2/90;
+  @apply text-light-0 bg-light-2 hover:bg-light-2/90 dark:text-dark-0 dark:bg-dark-2 dark:hover:bg-dark-2/90;
 }
 
 .menu-box a:nth-child(4) {
-  @apply bg-light-1 text-light-4 hover:bg-light-1/90 dark:bg-dark-1 dark:text-white dark:hover:bg-dark-1/90;
+  @apply text-light-4 bg-light-1 hover:bg-light-1/90 dark:text-dark-4 dark:bg-dark-1 dark:hover:bg-dark-1/90;
 }
 
 .menu-box a:nth-child(5) {
-  @apply bg-light-0 text-light-4 hover:bg-light-0/90 dark:bg-dark-0 dark:text-white dark:hover:bg-dark-0/90;
+  @apply text-light-4 bg-light-0 hover:bg-light-0/90 dark:text-dark-4 dark:bg-dark-0 dark:hover:bg-dark-0/90;
 }
 
 /* Form Inputs */
@@ -212,5 +212,5 @@ h2 {
 }
 
 .bg-input {
-  background: #ffd000;
+  background: #FFFF;
 }

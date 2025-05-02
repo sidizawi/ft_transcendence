@@ -25,7 +25,12 @@ export class Menu {
         ${this.isLoggedIn 
           ? `<button 
               id="logoutMenuBtn" 
-              class="w-full text-center font-bold py-3 px-5 rounded-lg transform transition-all duration-200 shadow-lg bg-red-500/90 hover:bg-red-500 text-light-0 dark:bg-red-700/90 dark:hover:bg-red-700"
+              class="
+                w-full text-center font-bold py-3 sm:py-3.5 px-6 sm:px-8 rounded-lg transform transition-all duration-200 shadow-lg min-w-[200px] text-sm sm:text-base
+                text-light-0 dark:text-dark-0
+                bg-off-btn-light-0  dark:bg-off-btn-dark-1
+                hover:scale-[1.02] hover:opacity-90
+              "
             >
               ${i18n.t('logout')}
             </button>`

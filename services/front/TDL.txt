@@ -13,8 +13,6 @@ Ajout notif si new message + new demande de connexion
 	(fill/stroke)
 	icone retour
 
-	Menu:
-		- attention pas tout pareil
 	Auth:
 		-Hover on signUp/In ??
 
@@ -71,10 +69,6 @@ Ajout notif si new message + new demande de connexion
 			- SCROLL ?????
 		- Other:
 			- enlever le hover 2FA quand code pas entier?
-			- SVG friendsProfile.ts
-			- ADD/DELETE buttons
-			- Change colour Dark Mode (?)
-
 
 
 	Functionnality to check at the END:
