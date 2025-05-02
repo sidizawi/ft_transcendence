@@ -200,6 +200,8 @@ export class Auth {
 
                   border border-light-4/30
                   dark:border-dark-0/30
+
+                  bg-white
                   dark:bg-dark-4 <!-- pas de bg light -->
                   
                   text-light-4
