@@ -129,7 +129,7 @@ export const stopGame = (gameId, winner = null) => {
   if (game.aiInterval) clearInterval(game.aiInterval);
   
   game.status = 'gameOver';
-  
+  handleDisconnect(gameId, game.players[gameId]?.username);
   // Determine winner if not specified
   if (!winner) {
     winner = game.scores.left > game.scores.right ? 'left' : 'right';
@@ -140,13 +140,14 @@ export const stopGame = (gameId, winner = null) => {
   const rightPlayer = Object.values(game.players).find(p => p.side === 'right');
   
   // Remove players from active players Set (import this from index.js)
-  if (leftPlayer?.userId) {
-    inGameUsers.delete(leftPlayer.userId);
+  if (leftPlayer?.username) {
+    inGameUsers.delete(leftPlayer.username);
   }
-  if (rightPlayer?.userId) {
-    inGameUsers.delete(rightPlayer.userId);
+  if (rightPlayer?.username) {
+    inGameUsers.delete(rightPlayer.username);
   }
-  
+  console.log(`leftPlayer: ${leftPlayer?.username}, rightPlayer: ${rightPlayer?.username}`);
+  console.log(`Game ${gameId} stopped. Winner: ${winner}`);
   // Get usernames
   const winnerPlayer = winner === 'left' ? leftPlayer : rightPlayer;
   const loserPlayer = winner === 'left' ? rightPlayer : leftPlayer;

@@ -25,6 +25,7 @@ export const inGameUsers = new Set();
 // Helper function for creating games
 function setupNewGame(ws, mode, opponent = null) {
   // Check if user is already in a game
+  console.log(`Checking if user is already in a game: ${ws.username} ${inGameUsers.has(ws.username)}`);
   if (ws.username && inGameUsers.has(ws.username)) {
     return ws.send(JSON.stringify({
       type: 'error',
@@ -113,7 +114,6 @@ fastify.register((wsRoutes) => {
       //}
       try {
         const data = JSON.parse(message.toString());
-        console.log('Received:', data);
 
         if (data.type === 'dimensions and username') {
           ws.canvasDimensions = {
