@@ -5,7 +5,6 @@ import Fastify from 'fastify';
 import fastifyJwt from '@fastify/jwt';
 import websocket from '@fastify/websocket';
 import cors from '@fastify/cors'; // Import the CORS plugin
-import db from './db.js';
 import friendRoutes from './routes/friend.js';
 import messageRoutes from './routes/message.js';
 

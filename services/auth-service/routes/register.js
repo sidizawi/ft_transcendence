@@ -1,7 +1,10 @@
 import bcrypt from 'bcrypt';
 
 import { XSSanitizer } from "../utils/sanitize.js";
-import { queryGet, queryPost} from '../services/query.js'
+import { getUserByUsername,
+    getUserByEmail,
+    insertUser
+ } from '../services/userService.js';
 
 async function registerRoutes(fastify) {
 
@@ -13,9 +16,7 @@ async function registerRoutes(fastify) {
             return { error: 'Tous les champs sont requis' };
         }
         
-        let query = 'SELECT * FROM users WHERE username = ?';
-        let params = username;
-        const userExists = await queryGet(query, params);
+        const userExists = await getUserByUsername(username);
 
         if (userExists !== undefined && userExists !== null) {
             console.log('Userexist exit\n');
@@ -23,9 +24,7 @@ async function registerRoutes(fastify) {
             return { error: 'Cet username est déjà utilisé.' };
         }
 
-        query = "SELECT * FROM users WHERE email = ?";
-        params = email;
-        const emailExists = await queryGet(query, params);
+        const emailExists = await getUserByEmail(email);
 
         if (emailExists) {
             console.log('emailExist exit\n');
@@ -34,13 +33,9 @@ async function registerRoutes(fastify) {
         }
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        query = "INSERT INTO users (username, email, password, is_two_factor_enabled, status, google) VALUES (?, ?, ?, ?, ?, ?)";
-        params = [username, email, hashedPassword, 0, 1, 0];
-        await queryPost(query, params);
+        await insertUser(username, email, hashedPassword, null, 0, 1, 0);
     
-        query = "SELECT * FROM users WHERE username = ?";
-        params = username;
-        const user = await queryGet(query, params);
+        const user = await getUserByUsername(username);
 
         const token = fastify.jwt.sign({
           id: user.id

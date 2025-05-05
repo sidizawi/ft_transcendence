@@ -1,3 +1,8 @@
+import { getUserById,
+    get2faById,
+    update2faById
+ } from "../services/userService.js";
+
 async function twofaRoutes(fastify) {
  
     const otpCache = {};
@@ -7,9 +12,7 @@ async function twofaRoutes(fastify) {
             await request.jwtVerify();
             const userId = request.user.id;
       
-            const query = 'SELECT * FROM users WHERE id = ?';
-            const params = userId
-            const user = await queryGet(query, params);
+            const user = await getUserById(userId);
             if (!user) {
                 reply.code(404);
                 return { error: 'Utilisateur non trouvé' };
@@ -57,9 +60,7 @@ async function twofaRoutes(fastify) {
             return { error: 'Le code OTP est incorrect.' };
           }
           
-          const query = 'UPDATE users SET is_two_factor_enabled = 1 WHERE id = ?';
-          const params = userId;
-          await queryPost(query, params);
+          await update2faById(1, userId);
           
           delete otpCache[userId];
           reply.code(200);
@@ -91,9 +92,8 @@ async function twofaRoutes(fastify) {
           return { error: 'Le code OTP est incorrect.' };
         }
 
-        const query = 'SELECT is_two_factor_enabled FROM users WHERE id = ?';
-        const params = userId;
-        const user = await queryGet(query, params);
+        const user = await get2faById(userId);
+
         if (!user) {
           reply.code(404);
           return { error: 'Utilisateur non trouvé' };
@@ -102,9 +102,7 @@ async function twofaRoutes(fastify) {
         const currentTwoFactorState = user.is_two_factor_enabled;
         const newTwoFactorState = currentTwoFactorState === 1 ? 0 : 1;
 
-        const queryUpdate = 'UPDATE users SET is_two_factor_enabled = ? WHERE id = ?';
-        const paramsUpdate = [newTwoFactorState, userId];
-        await queryPost(queryUpdate, paramsUpdate);
+        await update2faById(newTwoFactorState, userId);
 
         delete otpCache[userId];
         const message = newTwoFactorState ? '2FA activé avec succès.' : '2FA désactivé avec succès.';

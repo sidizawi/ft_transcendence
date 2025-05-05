@@ -1,6 +1,5 @@
 import Fastify    from 'fastify';
 import fastifyCors from '@fastify/cors';
-import db         from './db.js';
 import fastifyJwt from '@fastify/jwt';
 import dotenv from 'dotenv';
 import { OAuth2Client } from 'google-auth-library';

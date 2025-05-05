@@ -1,7 +1,9 @@
 import bcrypt from 'bcrypt';
 
 import { googleClient } from "../index.js";
-import { queryGet } from '../services/query.js';
+import { getUserByEmail,
+  insertUser
+ } from '../services/userService.js';
 
 async function googleRoutes(fastify) {
 
@@ -20,22 +22,13 @@ async function googleRoutes(fastify) {
           const payload = ticket.getPayload();
           const { email, name, picture } = payload;
       
-          const query = 'SELECT * FROM users WHERE email = ?';
-          const params = email;
-          let user = await queryGet(query, params);
-          // let user = fastify.db.prepare("SELECT * FROM users WHERE email = ?").get(email);
+          let user = await getUserByEmail(email);
+
           if (!user) {
             const randomPassword = Math.random().toString(36).slice(-8);
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
-            const initialGameData = {
-              games_played: 0,
-              games_won: 0,
-              games_lost: 0,
-              total_points: 0
-            };
       
-            const stmt = fastify.db.prepare("INSERT INTO users (username, email, password, game_data, is_two_factor_enabled, avatar, google) VALUES (?, ?, ?, ?, ?, ?, ?)");
-            const result = stmt.run(name, email, hashedPassword, JSON.stringify(initialGameData), 0, picture, 1);
+            await insertUser(name, email, hashedPassword, picture, 0, 1, 1);
             user = { id: result.lastInsertRowid, username: name, email };
           }
       

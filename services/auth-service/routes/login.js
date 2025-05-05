@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 
-import { queryGet} from '../services/query.js'
 import { XSSanitizer } from "../utils/sanitize.js";
+import { getUserByEmailAndUsername } from '../services/userService.js';
 
 async function loginRoutes(fastify) {
 
@@ -13,9 +13,7 @@ async function loginRoutes(fastify) {
             return { error: 'Login (email ou username) et mot de passe requis' };
         }
         
-        const query = 'SELECT * FROM users WHERE email = ? OR username = ?';
-        const params = [login, login];
-        const user = await queryGet(query, params);
+        const user = await getUserByEmailAndUsername(login);
 
         if (!user) {
             reply.code(401);
