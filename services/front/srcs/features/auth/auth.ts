@@ -490,9 +490,21 @@ export class Auth {
     const toggleConfirmPassword = document.getElementById('toggle-confirm-password');
     const passwordInput = document.getElementById('password') as HTMLInputElement;
     const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
-
+    const signMessage = document.getElementById('sign-message');
+  
     if (!form || !togglePassword || !passwordInput) return;
-
+  
+    // Hide error message on page load
+    signMessage?.classList.add('hidden');
+  
+    // Hide error message when any input is focused
+    const inputs = form.querySelectorAll('input');
+    inputs.forEach(input => {
+      input.addEventListener('focus', () => {
+        signMessage?.classList.add('hidden');
+      });
+    });
+  
     // Password visibility toggle for main password
     togglePassword?.addEventListener('click', () => {
       const isPassword = passwordInput.type === 'password';
@@ -501,7 +513,7 @@ export class Auth {
         togglePassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
       }
     });
-
+  
     // Password visibility toggle for confirm password
     if (isSignUp && toggleConfirmPassword) {
       toggleConfirmPassword.addEventListener('click', () => {
@@ -512,50 +524,50 @@ export class Auth {
         }
       });
     }
-
+  
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
-
+  
       if (isSignUp) {
         const usernameInput = document.getElementById('username') as HTMLInputElement;
         const emailInput = document.getElementById('email') as HTMLInputElement;
         const passwordInput = document.getElementById('password') as HTMLInputElement;
         const confirmPasswordInput = document.getElementById('confirmPassword') as HTMLInputElement;
-
+  
         if (usernameInput && emailInput && passwordInput) {
-          const username = usernameInput.value.trim(); //space allowed?
+          const username = usernameInput.value.trim();
           const email = emailInput.value.trim();
           const password = passwordInput.value;
           const confirmPassword = confirmPasswordInput.value;
-
+  
           if (!username && !email && !password && !confirmPassword) {
             this.showError(i18n.t('emptyAllFields'));
             return;
           }
-
+  
           // Email regex pattern
           const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+  
           if (!username || username.includes(' ')) {
             this.showError(i18n.t('usernameFormatError'));
             return;
           }
-
+  
           if (!email || !emailPattern.test(email)) {
             this.showError(i18n.t('emailFormatError'));
             return;
           }
-
+  
           if (!password) {
             this.showError(i18n.t('emptyPassword'));
             return;
           }
-
+  
           if (password !== confirmPassword) {
             this.showError(i18n.t('passwordMismatch'));
             return;
           }
-
+  
           // // Password validation: minimum 8 characters, one uppercase, one special character
           // const passwordPattern = /^(?=.*[A-Z])(?=.*[!@#$%^&*()_\-+=\[\]{};':"\\|,.<>\/?]).{8,}$/;
 
@@ -569,7 +581,7 @@ export class Auth {
       } else {
         const identifierInput = document.getElementById('user-identifier') as HTMLInputElement;
         const passwordInput = document.getElementById('password') as HTMLInputElement;
-
+  
         if (identifierInput && passwordInput) {
           await this.handleLogin(
             identifierInput.value,
@@ -578,7 +590,7 @@ export class Auth {
         }
       }
     });
-
+  
     GoogleAuth.renderButton('google-signin-button');
   }
 }

@@ -328,7 +328,12 @@ export class Profile {
                       <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
                       <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
                     </div>
-                    <span class="text-light-4/80 dark:text-dark-0/80">${game.opponent}</span>
+                    <a 
+                      href="/users/${game.opponent}" 
+                      class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
+                    >
+                      ${game.opponent}
+                    </a>
                   </div>
 
                   <!-- Result / Score (centered) -->

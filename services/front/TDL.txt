@@ -14,16 +14,14 @@ SVG:	(fill/stroke)
 
 	friendsTab:
 		- pourquoi se referme entre profile et reste?
+		- Bon comportement sur friendProfile quand chqngement de friendStatus faire pareil partout
+			-> ne se ferme pas, rafraichit
 
 	auth.ts:
 		- Google logo
 
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
-		- ok si meme mdp????
-
-
-
 
 
 
