@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DB_PATH="/app/data/management.db"
+DB_PATH="/app/data/database.db"
 
 sqlite3 "$DB_PATH" <<EOF
 CREATE TABLE IF NOT EXISTS users (
@@ -92,5 +92,6 @@ EOF
 
 # Pour garder le conteneur en vie:
 #exec tail -f /dev/null
+echo "Database tables created successfully"
 
 sh /init.sh

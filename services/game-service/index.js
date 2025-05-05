@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
-import db         	from './db.js';
 import websocket from '@fastify/websocket';
 import { createGame, addPlayer, updatePlayerPosition, handleDisconnect, startGame } from './pong/game.js';
 import { connect4Handler } from './connect4/handler.js'
@@ -8,8 +7,6 @@ import { connect4Handler } from './connect4/handler.js'
 dotenv.config();
 
 const fastify = Fastify({ logger: true });
-
-fastify.decorate('db', db);
 
 fastify.register(websocket);
 

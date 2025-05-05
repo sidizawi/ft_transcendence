@@ -1,6 +1,5 @@
 import dotenv 		from 'dotenv';
 import Fastify    	from 'fastify';
-import db         	from './db.js';
 import fastifyJwt 	from '@fastify/jwt';
 import fastifyCors 	from '@fastify/cors';
 import fastifyStatic from '@fastify/static';

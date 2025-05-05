@@ -3,6 +3,6 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ0ZXN0IiwiZW1haWwiOiJ0ZXN0QDE5LmJlIiwiaWF0IjoxNzQzMTc3NzYwfQ.9Blvnk_dfN579o5wnXCPaNmxriWThUH2O7Qx-tj9fxQ
 
 {
-    "query": "NSERT INTO users (username, email, password, is_two_factor_enabled, status, google) VALUES (?, ?, ?, ?, ?, ?)",
-    "params": ["ab", "abdefg", "ab", "0", "1", "0"]
+    "query": "INSERT INTO users (username, email, password, avatar, privacy, is_two_factor_enabled, status, google) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+    "params": ["ab", "abdefg", "ab", "/img/default-avatar.jpg", "{}", "0", "1", "0"]
 }

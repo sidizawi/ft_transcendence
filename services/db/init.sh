@@ -1,6 +1,6 @@
 #!/bin/bash
 
-DB_PATH="/app/data/management.db"
+DB_PATH="/app/data/database.db"
 
 # Generate SQL script for test data
 cat > /tmp/populate_test_data.sql << 'EOF'

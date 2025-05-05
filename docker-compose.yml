@@ -16,7 +16,7 @@ services:
     ports:
       - "2999:2999"
     volumes:
-      - ./database:/app/data
+      - database:/app/data
     develop:
       watch:
         - action: sync
@@ -35,9 +35,6 @@ services:
     depends_on:
       - auth-service
       - game-service
-    volumes:
-      - ./services/front:/app/front
-      # - ./database:/app/data/
     develop:
       watch:
         - action: sync
@@ -53,9 +50,6 @@ services:
     container_name: auth-service
     ports:
       - "3001:3001"
-    volumes:
-      - ./services/front:/app/front
-      - database:/app/data
     develop:
       watch:
         - action: sync
@@ -91,8 +85,6 @@ services:
     container_name: game-service
     ports:
       - "3002:3002"
-    volumes:
-      - database:/app/data
     develop:
       watch:
         - action: sync
@@ -110,9 +102,6 @@ services:
    container_name: chat-service
    ports:
      - "3003:3003"
-   volumes:
-     - ./services/front:/app/front
-     - database:/app/data
    develop:
      watch:
        - action: sync
@@ -131,8 +120,6 @@ services:
     ports:
       - "3004:3004"
     volumes:
-      - ./services/front:/app/front
-      - database:/app/data
       - shared-avatars:/app/uploads/avatars
     develop:
       watch:
@@ -152,7 +139,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: './database'
+      device: ${PWD}/services/db/database
   shared-avatars:
     driver: local
     driver_opts:
