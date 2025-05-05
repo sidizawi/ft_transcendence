@@ -71,130 +71,123 @@ export class FriendsTab {
           role="region"
           aria-labelledby="friends-tab-button"
         >
-          ${
-            onlineFriends.length > 0 && offlineFriends.length > 0
-            ? `
-              <!-- Online Friends -->
-              <div class="p-4 border-b border-gray-200 dark:text-dark-4">
-                <h3 class="text-sm font-medium text-light-4 dark:text-dark-0 mb-3">
-                  ${i18n.t('onlineFriends')} (${onlineFriends.length})
-                </h3>
-                <div class="space-y-2">
-                  ${onlineFriends.map(friend => `
-                      <div 
-                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
-                        data-username="${friend.username2}"
-                      >
-                        <div class="flex items-center space-x-3">
-                          <div class="relative">
-                            <img 
-                              src="${friend.avatar}" 
-                              alt="${friend.username2}"
-                              class="w-8 h-8 rounded-full object-cover"
-                            >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
-                          </div>
+        ${
+          (onlineFriends.length > 0 || offlineFriends.length > 0)
+            ? (
+                (onlineFriends.length > 0 && offlineFriends.length > 0)
+                  ? `
+                    <!-- Online Friends -->
 
-                          <div class="text-left flex-1 min-w-0">
-                            <span class="text-light-4 dark:text-dark-0 truncate block">
-                              ${friend.username2}
-                            </span>
+                    <div class="p-4 border-b border-gray-200 dark:text-dark-4">
+                      <h3 class="text-sm font-medium text-light-4 dark:text-dark-0 mb-3">
+                        ${i18n.t('onlineFriends')} (${onlineFriends.length})
+                      </h3>
+                      <div class="space-y-2">
+                        ${onlineFriends.map(friend => `
+                          <div 
+                            class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
+                            data-username="${friend.username2}"
+                          >
+                            <div class="flex items-center space-x-3">
+                              <div class="relative">
+                                <img 
+                                  src="${friend.avatar}" 
+                                  alt="${friend.username2}"
+                                  class="w-8 h-8 rounded-full object-cover"
+                                >
+                                <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
+                              </div>
+                              <div class="text-left flex-1 min-w-0">
+                                <span class="text-light-4 dark:text-dark-0 truncate block">
+                                  ${friend.username2}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-                        </div>
+                        `).join('')}
                       </div>
-                  `).join('')}
-                </div>
-              </div>
+                    </div>
+        
+                    <!-- Offline Friends -->
 
-              <!-- Offline Friends -->
-              <div class="p-4">
-                <h3 class="text-sm font-medium text-light-4 dark:text-dark-0 mb-3">
-                  ${i18n.t('offlineFriends')} (${offlineFriends.length})
-                </h3>
-                <div class="space-y-2">
-                  ${offlineFriends.map(friend => `
-                      <div 
-                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
-                        data-username="${friend.username2}"
-                      >
-                        <div class="flex items-center space-x-3">
-                          <div class="relative">
-                            <img 
-                              src="${friend.avatar}" 
-                              alt="${friend.username2}"
-                              class="w-8 h-8 rounded-full object-cover"
-                            >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
+                    <div class="p-4">
+                      <h3 class="text-sm font-medium text-light-4 dark:text-dark-0 mb-3">
+                        ${i18n.t('offlineFriends')} (${offlineFriends.length})
+                      </h3>
+                      <div class="space-y-2">
+                        ${offlineFriends.map(friend => `
+                          <div 
+                            class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
+                            data-username="${friend.username2}"
+                          >
+                            <div class="flex items-center space-x-3">
+                              <div class="relative">
+                                <img 
+                                  src="${friend.avatar}" 
+                                  alt="${friend.username2}"
+                                  class="w-8 h-8 rounded-full object-cover"
+                                >
+                                <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
+                              </div>
+                              <div class="text-left flex-1 min-w-0">
+                                <span class="text-light-4 dark:text-dark-0 truncate block">
+                                  ${friend.username2}
+                                </span>
+                              </div>
+                            </div>
                           </div>
-
-                          <div class="text-left flex-1 min-w-0">
-                            <span class="text-light-4 dark:text-dark-0 truncate block">
-                              ${friend.username2}
-                            </span>
-                          </div>
-                        </div>
+                        `).join('')}
                       </div>
-                  `).join('')}
-                </div>
-              </div>
-            `
+                    </div>
+                  `
+                  : `
+                    <!-- Unified Friends List -->
+
+                    <div class="p-4">
+                      <div class="space-y-2">
+                        ${
+                          (onlineFriends.length > 0
+                            ? onlineFriends
+                            : offlineFriends
+                          ).map(friend => `
+                            <div 
+                              class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
+                              data-username="${friend.username2}"
+                            >
+                              <div class="flex items-center space-x-3">
+                                <div class="relative">
+                                  <img 
+                                    src="${friend.avatar}" 
+                                    alt="${friend.username2}"
+                                    class="w-8 h-8 rounded-full object-cover"
+                                  >
+                                  <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full ${
+                                    onlineFriends.length > 0
+                                      ? 'bg-on-btn-light-0 dark:bg-on-btn-dark-0'
+                                      : 'bg-off-btn-light-0 dark:bg-off-btn-dark-0'
+                                  }"></span>
+                                </div>
+                                <div class="text-left flex-1 min-w-0">
+                                  <span class="text-light-4 dark:text-dark-0 truncate block">
+                                    ${friend.username2}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          `).join('')
+                        }
+                      </div>
+                    </div>
+                  `
+              )
             : `
-              <!-- Unified Friends List (either online or offline) -->
-              <div class="p-4">
-                <div class="space-y-2">
-                  ${
-                    (onlineFriends.length > 0 ? onlineFriends.map(friend => `
-                      <div 
-                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
-                        data-username="${friend.username2}"
-                      >
-                        <div class="flex items-center space-x-3">
-                          <div class="relative">
-                            <img 
-                              src="${friend.avatar}" 
-                              alt="${friend.username2}"
-                              class="w-8 h-8 rounded-full object-cover"
-                            >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
-                          </div>
-
-                          <div class="text-left flex-1 min-w-0">
-                            <span class="text-light-4 dark:text-dark-0 truncate block">
-                              ${friend.username2}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    `).join('') : '')
-                    ||
-                    (offlineFriends.length > 0 ? offlineFriends.map(friend => `
-                      <div 
-                        class="-mx-4 px-4 py-2 hover:bg-light-1 dark:hover:bg-dark-3 cursor-pointer group"
-                        data-username="${friend.username2}"
-                      >
-                        <div class="flex items-center space-x-3">
-                          <div class="relative">
-                            <img 
-                              src="${friend.avatar}" 
-                              alt="${friend.username2}"
-                              class="w-8 h-8 rounded-full object-cover"
-                            >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
-                          </div>
-
-                          <div class="text-left flex-1 min-w-0">
-                            <span class="text-light-4 dark:text-dark-0 truncate block">
-                              ${friend.username2}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    `).join('') : '')
-                  }
-                </div>
+              <!-- No Friends Yet -->
+              <div class="p-4 text-center text-light-4/80 dark:text-dark-0/80">
+                ${i18n.t('noFriendsYet')}
               </div>
             `
-          }
+        }
+        
         </div>
 
       </div>

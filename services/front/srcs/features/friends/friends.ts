@@ -60,7 +60,7 @@ export class Friends {
   }
 
   private navigateToProfile(username: string) {
-    window.history.pushState(null, '', `/users/${username}`); //////// TO check
+    window.history.pushState(null, '', `/users/${username}`);
     const friendProfile = new FriendProfile(username, this.getFriendAvatar(username));
     const main = document.querySelector('main');
     if (main) {
@@ -218,7 +218,7 @@ export class Friends {
                         <button 
                         class="
                             text-light-4/80 dark:text-dark-0/80
-                            px-3 py-1.5 rounded
+                            px-3 py-1.5 rounded-lg
                             border border-light-4/80 dark:border-dark-0/80
                             hover:text-light-0 dark:hover:text-dark-4
                             hover:border-light-0 dark:hover:border-dark-4
@@ -233,7 +233,7 @@ export class Friends {
                         <button 
                           class="
                             text-light-4/80 dark:text-dark-0/80
-                            px-3 py-1.5 rounded
+                            px-3 py-1.5 rounded-lg
                             border border-light-4/80 dark:border-dark-0/80
                             hover:text-light-0 dark:hover:text-dark-4
                             hover:border-light-0 dark:hover:border-dark-4
@@ -272,7 +272,7 @@ export class Friends {
                       <button 
                         class="
                             text-light-4/80 dark:text-dark-0/80
-                            px-3 py-1.5 rounded
+                            px-3 py-1.5 rounded-lg
                             border border-light-4/80 dark:border-dark-0/80
                             hover:text-light-0 dark:hover:text-dark-4
                             hover:border-light-0 dark:hover:border-dark-4
@@ -362,7 +362,7 @@ export class Friends {
                       <button 
                         class="
                           text-light-4/80 dark:text-dark-0/80
-                          px-3 py-1.5 rounded
+                          px-3 py-1.5 rounded-lg
                           border border-light-4/80 dark:border-dark-0/80
                           hover:text-light-0 dark:hover:text-dark-4
                           hover:border-light-0 dark:hover:border-dark-4
