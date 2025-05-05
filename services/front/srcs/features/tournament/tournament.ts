@@ -10,7 +10,9 @@ export class Tournament {
     let name = path.split("/").filter((el) => el.length)[1];
     let storage = localStorage.getItem(`tournament-${name}`);
     if (!storage) {
-      app.router.navigateTo("/tournament");
+      setTimeout(() => {
+        app.router.navigateTo("/tournament");
+      }, 500);
       return ;
     }
 

@@ -17,6 +17,7 @@ import { TokenManager } from '../shared/utils/token';
 import { Chat } from '../shared/components/chat';
 import { NotFound } from '../shared/components/notFound';
 import { FriendProfile } from '../features/profile/friendProfile';
+import { chatService } from '../main';
 
 export class TranscendenceApp {
   private state = {
@@ -83,8 +84,7 @@ export class TranscendenceApp {
   }
 
   private handleLogout() {
-    // this.chat.clean();
-    // todo
+    chatService.clean();
     TokenManager.removeToken();
     localStorage.removeItem('user');
     this.state.user = null;
@@ -207,7 +207,6 @@ export class TranscendenceApp {
 
     const tournamentMatch = path.match(/^\/tournament\/(.+)$/)
     if (tournamentMatch) {
-      console.log(tournamentMatch[1]);
       if (tournamentMatch[1] == "join" || tournamentMatch[1] == "create") {
         new TournamentHomePage(tournamentMatch[1]);
         return ;

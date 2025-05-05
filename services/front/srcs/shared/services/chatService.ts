@@ -8,6 +8,7 @@ export class ChatService {
   private ws: WebSocket | null = null;
   private currentUser: User | null = null;
   private chatRooms : Map<string, (data: any) => void> = new Map();
+  private chatMessages : any[] = [];
 
   public setuped : boolean = false;
 
@@ -34,7 +35,11 @@ export class ChatService {
     if (this.setuped) {
       return;
     }
+
     const token = TokenManager.getToken();
+    if (!token) {
+      return;
+    }
 
     this.ws = new WebSocket(`${CHAT_WS}${token ? `?token=${token}` : ""}`);
 
@@ -91,9 +96,15 @@ export class ChatService {
     if (!this.setuped) {
       return;
     }
-
     if (this.ws?.readyState !== WebSocket.OPEN) {
+      this.chatMessages.push(data);
       return ;
+    }
+    if (this.chatMessages.length > 0) {
+      this.chatMessages.forEach((message) => {
+        this.ws?.send(message);
+      });
+      this.chatMessages = [];
     }
     this.ws.send(data);
   }
