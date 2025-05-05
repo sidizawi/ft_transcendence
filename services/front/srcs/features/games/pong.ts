@@ -230,15 +230,15 @@ export class Pong {
   render(): string {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('games.pong.title')}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p class="text-light-4 dark:text-dark-0 text-center mb-8">
             ${i18n.t('games.pong.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button data="twoPlayer" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            <button data="twoPlayer" class="pongPlayBtn w-full bg-light-2 dark:bg-dark-2 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-3 transition-colors">
               ${i18n.t('games.playLocal')}
             </button>
             <button data="online" class="pongPlayBtn ${this.className()}">

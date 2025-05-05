@@ -1,13 +1,8 @@
 import { User } from '../../shared/types/user';
 import { i18n } from '../../shared/i18n';
-import { TokenManager } from '../../shared/utils/token';
 import { AvatarService } from '../../shared/services/avatarService';
-import { Router } from '../../shared/utils/routing';
+import { AccountService } from '../../shared/services/accountService';
 import { SVGIcons } from '../../shared/components/svg';
-
-const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user/settings`;
-const PROFILE_API_URL = `http://${host}:3000/user/profile`;
 
 export class Settings {
   constructor(private user: User) {}
@@ -21,41 +16,6 @@ export class Settings {
     window.location.href = '/profile';
   }
 
-  private async fetchAndUpdateUserProfile() {
-    try {
-      const response = await fetch(PROFILE_API_URL, {
-        method: 'GET',
-        headers: TokenManager.getAuthHeaders(),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch user profile');
-      }
-
-      const profile = await response.json();
-      if (!profile) {
-        throw new Error('Profile data not found');
-      }
-
-      this.user = {
-        ...this.user,
-        username: profile.username,
-        email: profile.email,
-        avatar: profile.avatar || '/img/default-avatar.jpg',
-        twoFactorEnabled: profile.is_two_factor_enabled,
-        google: profile.google || false,
-      };
-
-      localStorage.setItem('user', JSON.stringify(this.user));
-      
-      this.updateView();
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-      throw error;
-    }
-  }
-
   private async handleAvatarChange(event: Event) {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
@@ -64,7 +24,8 @@ export class Settings {
 
     try {
       await AvatarService.uploadAvatar(file);
-      await this.fetchAndUpdateUserProfile();
+      this.user = await AccountService.fetchAndUpdateUserProfile();
+      this.updateView();
     } catch (error) {
       console.error('Avatar upload error:', error);
       throw new Error(error || i18n.t('uploadAvatar'));
@@ -107,47 +68,17 @@ export class Settings {
       }
     }
   
-    if (Object.keys(payload).length === 0)
-      return;
+    if (Object.keys(payload).length === 0) return;
   
-    if (Object.keys(payload).length === 1 && payload.newUsername) {
-      try {
-        const response = await fetch(`${USER_API_URL}/username`, {
-          method: 'PUT',
-          headers: TokenManager.getAuthHeaders(),
-          body: JSON.stringify({ newUsername: payload.newUsername })
-        });
-
-        if (!response.ok) {
-          const data = await response.json();
-          throw new Error(data.error || i18n.t('updateError'));
-        }
-
-        const data = await response.json();
-        TokenManager.setToken(data.token);
-        
-        await this.fetchAndUpdateUserProfile();
-
-        return true;
-      } catch (error) {
-        console.error('Username update error:', error);
-        throw error;
-      }
-    }
-
     try {
-      const requestResponse = await fetch(`${USER_API_URL}/update-request`, {
-        method: 'POST',
-        headers: TokenManager.getAuthHeaders(),
-        body: JSON.stringify(payload)
-      });
+      if (Object.keys(payload).length === 1 && payload.newUsername) {
+        await AccountService.updateUsername(payload.newUsername);
+        this.updateView();
+        return;
+      }
 
-      if (!requestResponse.ok) {
-          const data = await requestResponse.json();
-          throw new Error(data.error || i18n.t('updateError'));
-        }
-  
-      return new Promise((resolve) => {
+      const requestSuccess = await AccountService.requestProfileUpdate(payload);
+      if (requestSuccess) {
         const modal = this.createVerificationModal(i18n.t('emailVerification'));
         const verifyButton = document.getElementById('verify-code') as HTMLButtonElement;
         const cancelButton = document.getElementById('cancel-verification');
@@ -162,32 +93,18 @@ export class Settings {
           }
 
           try {
-            const verifyResponse = await fetch(`${USER_API_URL}/update-confirm`, {
-              method: 'PUT',
-              headers: TokenManager.getAuthHeaders(),
-              body: JSON.stringify({ verificationCode: code })
-            });
-
-            if (verifyResponse.ok) {
-              const data = await verifyResponse.json();
-              TokenManager.setToken(data.token);
-              
-              await this.fetchAndUpdateUserProfile();
-
+            const success = await AccountService.confirmProfileUpdate(code);
+            if (success) {
               modal.remove();
-              resolve(true);
-            } else {
-              const data = await verifyResponse.json();
-              this.showVerificationError(messageDiv, data.error || i18n.t('invalid2FACode'));
-              codeInput.value = '';
-              codeInput.focus();
+              this.updateView();
             }
           } catch (error) {
-            console.error('Email verification error:', error);
-            this.showVerificationError(messageDiv, i18n.t('verificationError'));
+            this.showVerificationError(messageDiv, error instanceof Error ? error.message : i18n.t('verificationError'));
+            codeInput.value = '';
+            codeInput.focus();
           }
         };
-  
+
         codeInput?.addEventListener('input', () => {
           const code = codeInput.value.trim();
           verifyButton.disabled = !code || code.length !== 6 || !/^\d+$/.test(code);
@@ -203,167 +120,18 @@ export class Settings {
 
         cancelButton?.addEventListener('click', () => {
           modal.remove();
-          resolve(false);
         });
-      });
+      }
     } catch (error) {
-      console.error('Email update error:', error);
-      throw error;
+      console.error('Profile update error:', error);
+      this.showError(error instanceof Error ? error.message : i18n.t('updateError'));
     }
   }
   
   private async handleDeleteAccount() {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    modal.innerHTML = `
-      <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-        <h3 class="text-xl text-center font-bold mb-4 text-light-4 dark:text-dark-0">
-          ${i18n.t('deleteAccountVerification')}
-        </h3>
-        <div class="mb-6 mt-6">
-          <p class="text-red-600 dark:text-red-400 ">
-            ${i18n.t('deleteAccountWarning')}
-          </p>
-          <p class="text-light-4/80 dark:text-dark-0/80">
-            ${i18n.t('deleteAccountConfirm')}
-          </p>
-        </div>
-        <div class="mb-4">
-          <div class="mb-4">
-            <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-0">
-              ${i18n.t('username')}
-            </label>
-            <input
-              type="text"
-              id="username"
-              name="username"
-              placeholder="${this.user.username}"
-              class="
-                mt-1 block w-full rounded-md px-3 py-2 text-sm
-
-                border border-light-4/30
-                dark:border-dark-0/30
-                dark:bg-dark-4 <!-- pas de bg light -->
-                
-                placeholder-light-4/40
-                dark:placeholder-dark-0/40
-                text-light-4
-                dark:text-dark-0
-                
-                focus:outline-none
-
-                focus:border-light-3
-                dark:focus:border-dark-1
-                focus:ring-2
-                focus:ring-light-0
-                dark:focus:ring-dark-4
-              "                                     
-            >
-          </div>
-          <div class="mb-4">
-            <label class="block text-base font-medium text-light-4 dark:text-dark-0">
-              ${i18n.t('enterPassword')}
-            </label>
-            <div class="relative">
-              <input 
-                type="password" 
-                id="delete-account-password"
-                placeholder="••••••••"
-                class="
-                  mt-1 block w-full rounded-md px-3 py-2 text-sm
-
-                  border border-light-4/30
-                  dark:border-dark-0/30
-                  dark:bg-dark-4
-                  
-                  placeholder-light-4/40
-                  dark:placeholder-dark-0/40
-                  text-light-4
-                  dark:text-dark-0
-                  
-                  focus:outline-none
-
-                  focus:border-light-3
-                  dark:focus:border-dark-1
-                  focus:ring-2
-                  focus:ring-light-0
-                  dark:focus:ring-dark-4
-                "
-              >
-              <button 
-                type="button"
-                id="toggle-delete-password"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
-              >
-                ${SVGIcons.getEyeIcon(false)}
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label for="confirmPassword" class="block text-base font-medium text-light-4 dark:text-dark-0">
-              ${i18n.t('confirmPassword')}
-            </label>
-            <div class="relative">
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirmPassword"
-                placeholder="••••••••"
-                class="
-                  mt-1 block w-full rounded-md px-3 py-2 text-sm
-
-                  border border-light-4/30
-                  dark:border-dark-0/30
-                  dark:bg-dark-4 <!-- pas de bg light -->
-                  
-                  placeholder-light-4/40
-                  dark:placeholder-dark-0/40
-                  text-light-4
-                  dark:text-dark-0
-                  
-                  focus:outline-none
-
-                  focus:border-light-3
-                  dark:focus:border-dark-1
-                  focus:ring-2
-                  focus:ring-light-0
-                  dark:focus:ring-dark-4
-                "
-              >
-              <button 
-                type="button"
-                id="toggle-confirm-password"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
-              >
-                ${SVGIcons.getEyeIcon(false)}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex justify-end space-x-4">
-          <button 
-            id="cancel-delete"
-            class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
-          >
-            ${i18n.t('cancel')}
-          </button>
-          <button 
-            id="confirm-delete"
-            class="
-              px-4 py-2 rounded-lg transition-colors
-              bg-off-btn-light-0 dark:bg-off-btn-dark-1
-              text-light-0 dark:text-dark-4
-              hover:bg-off-btn-light-1 dark:hover:bg-off-btn-dark-0
-            "
-          >
-            ${i18n.t('deleteAccount')}
-          </button>
-        </div>
-        <div id="delete-account-error" class="mt-4 hidden"></div>
-      </div>
-    `;
+    modal.innerHTML = this.renderDeleteAccountModal();
     document.body.appendChild(modal);
 
     const cancelButton = modal.querySelector('#cancel-delete');
@@ -394,133 +162,51 @@ export class Settings {
 
     confirmButton?.addEventListener('click', async () => {
       try {
-        const requestResponse = await fetch(`${USER_API_URL}/delete/request`, {
-          method: 'POST',
-          headers: TokenManager.getAuthHeaders(),
-          body: JSON.stringify({ password: passwordInput.value })
-        });
+        const success = await AccountService.requestAccountDeletion(passwordInput.value);
+        if (success) {
+          modal.remove();
+          const verificationModal = document.createElement('div');
+          verificationModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+          verificationModal.innerHTML = this.renderVerificationModal(i18n.t('deleteAccountVerification'));
+          document.body.appendChild(verificationModal);
 
-        if (!requestResponse.ok) {
-          const data = await requestResponse.json();
-          showError(data.error || i18n.t('deleteAccountError'));
-          return;
+          const verifyButton = verificationModal.querySelector('#verify-code');
+          const cancelVerification = verificationModal.querySelector('#cancel-verification');
+          const codeInput = verificationModal.querySelector('#verification-code') as HTMLInputElement;
+          const verificationError = verificationModal.querySelector('#verification-error');
+
+          const showVerificationError = (message: string) => {
+            if (verificationError) {
+              verificationError.textContent = message;
+              verificationError.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400';
+              verificationError.classList.remove('hidden');
+            }
+          };
+
+          cancelVerification?.addEventListener('click', () => {
+            verificationModal.remove();
+          });
+
+          verifyButton?.addEventListener('click', async () => {
+            try {
+              const verificationCode = codeInput.value.trim();
+              
+              if (!verificationCode || verificationCode.length !== 6 || !/^\d+$/.test(verificationCode)) {
+                showVerificationError(i18n.t('invalid2FACode'));
+                return;
+              }
+
+              const success = await AccountService.confirmAccountDeletion(verificationCode);
+              if (success) {
+                window.location.href = '/signin';
+              }
+            } catch (error) {
+              showVerificationError(error instanceof Error ? error.message : i18n.t('deleteAccountError'));
+            }
+          });
         }
-
-        modal.remove();
-        const verificationModal = document.createElement('div');
-        verificationModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-        verificationModal.innerHTML = `
-          <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <h3 class="text-xl text-center font-bold mb-4 text-light-4 dark:text-dark-0">
-              ${i18n.t('deleteAccountVerification')}
-            </h3>
-            <p class="text-light-4/80 dark:text-dark-0/80 mb-6">
-              ${i18n.t('checkEmailForCode')}
-            </p>
-            <div class="mb-4">
-              <input 
-                type="text" 
-                id="verification-code"
-                class="
-                  mt-1 block w-full rounded-md px-3 py-2 text-base
-
-                  border border-light-4/30
-                  dark:border-dark-0/30
-                  dark:bg-dark-4 <!-- pas de bg light -->
-                  
-                  placeholder-light-4/40
-                  dark:placeholder-dark-0/40
-                  text-light-4
-                  dark:text-dark-0
-                  
-                  focus:outline-none
-
-                  focus:border-light-3
-                  dark:focus:border-dark-1
-                  focus:ring-2
-                  focus:ring-light-0
-                  dark:focus:ring-dark-4
-                  "
-                  placeholder="000000"
-                  maxlength="6"
-                  pattern="[0-9]*"
-                  inputmode="numeric"
-                  autocomplete="one-time-code"
-                >
-            </div>
-            <div class="flex justify-end space-x-4">
-              <button 
-                id="cancel-verification"
-                class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
-              >
-                ${i18n.t('cancel')}
-              </button>
-              <button 
-                id="verify-code"
-                class="
-                  px-4 py-2 rounded-lg transition-colors
-                  bg-off-btn-light-0 dark:bg-off-btn-dark-1
-                  text-light-0 dark:text-dark-4
-                  hover:bg-off-btn-light-1 dark:hover:bg-off-btn-dark-0
-                "
-              >
-                ${i18n.t('verify')}
-              </button>
-            </div>
-            <div id="verification-error" class="mt-4 hidden"></div>
-          </div>
-        `;
-        document.body.appendChild(verificationModal);
-
-        const verifyButton = verificationModal.querySelector('#verify-code');
-        const cancelVerification = verificationModal.querySelector('#cancel-verification');
-        const codeInput = verificationModal.querySelector('#verification-code') as HTMLInputElement;
-        const verificationError = verificationModal.querySelector('#verification-error');
-
-        const showVerificationError = (message: string) => {
-          if (verificationError) {
-            verificationError.textContent = message;
-            verificationError.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400';
-            verificationError.classList.remove('hidden');
-          }
-        };
-
-        cancelVerification?.addEventListener('click', () => {
-          verificationModal.remove();
-        });
-
-        verifyButton?.addEventListener('click', async () => {
-          try {
-            const verificationCode = codeInput.value.trim();
-            
-            if (!verificationCode || verificationCode.length !== 6 || !/^\d+$/.test(verificationCode)) {
-              showVerificationError(i18n.t('invalid2FACode'));
-              return;
-            }
-
-            const deleteResponse = await fetch(`${USER_API_URL}/delete/confirm`, {
-              method: 'DELETE',
-              headers: TokenManager.getAuthHeaders(),
-              body: JSON.stringify({ verificationCode })
-            });
-
-            if (deleteResponse.ok) {
-              TokenManager.removeToken();
-              localStorage.removeItem('user');
-              window.location.href = '/signin';
-            } else {
-              const data = await deleteResponse.json();
-              showVerificationError(data.error || i18n.t('deleteAccountError'));
-            }
-          } catch (error) {
-            console.error('Account deletion error:', error);
-            showVerificationError(i18n.t('deleteAccountError'));
-          }
-        });
-
       } catch (error) {
-        console.error('Delete account error:', error);
-        showError(i18n.t('deleteAccountError'));
+        showError(error instanceof Error ? error.message : i18n.t('deleteAccountError'));
       }
     });
   }
@@ -528,59 +214,7 @@ export class Settings {
   private createVerificationModal(title: string): HTMLDivElement {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-    modal.innerHTML = `
-      <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
-          ${title}
-        </h3>
-        <p class="text-light-4/80 dark:text-dark-0/80 mb-6">
-          ${i18n.t('checkEmailForCode')}
-        </p>
-        <div class="mb-4">
-          <input 
-            type="text" 
-            id="verification-code"
-            class="
-              w-full px-4 py-2
-              rounded-lg
-              
-              border border-light-4/30 dark:border-dark-0/30
-              dark:bg-dark-3
-
-              placeholder-light-4/40 dark:placeholder-dark-0/40
-              text-light-4 dark:text-dark-0
-
-              focus:outline-none
-
-              focus:border-light-3 dark:focus:border-dark-1
-              focus:ring-2
-              focus:ring-light-0 dark:focus:ring-dark-4
-            "
-            placeholder="000000"
-            maxlength="6"
-            pattern="[0-9]*"
-            inputmode="numeric"
-            autocomplete="one-time-code"
-          >
-        </div>
-        <div class="flex justify-end space-x-4">
-          <button 
-            id="cancel-verification"
-            class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
-          >
-            ${i18n.t('cancel')}
-          </button>
-          <button 
-            id="verify-code"
-            class="px-4 py-2 bg-light-3 dark:bg-dark-2 text-dark-0 dark:text-dark-0 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 relative"
-            disabled
-          >
-            ${i18n.t('verify')}
-          </button>
-        </div>
-        <div id="verification-message" class="mt-4 hidden"></div>
-      </div>
-    `;
+    modal.innerHTML = this.renderVerificationModal(title);
     document.body.appendChild(modal);
     return modal;
   }
@@ -847,6 +481,214 @@ export class Settings {
             ${i18n.t('back')}
           </a>
         </div>
+      </div>
+    `;
+  }
+
+  private renderDeleteAccountModal(): string {
+    return `
+      <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <h3 class="text-xl text-center font-bold mb-4 text-light-4 dark:text-dark-0">
+          ${i18n.t('deleteAccountVerification')}
+        </h3>
+        <div class="mb-6 mt-6">
+          <p class="text-red-600 dark:text-red-400 ">
+            ${i18n.t('deleteAccountWarning')}
+          </p>
+          <p class="text-light-4/80 dark:text-dark-0/80">
+            ${i18n.t('deleteAccountConfirm')}
+          </p>
+        </div>
+        <div class="mb-4">
+          <div class="mb-4">
+            <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-0">
+              ${i18n.t('username')}
+            </label>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="${this.user.username}"
+              class="
+                mt-1 block w-full rounded-md px-3 py-2 text-sm
+
+                border border-light-4/30
+                dark:border-dark-0/30
+                dark:bg-dark-4 <!-- pas de bg light -->
+                
+                placeholder-light-4/40
+                dark:placeholder-dark-0/40
+                text-light-4
+                dark:text-dark-0
+                
+                focus:outline-none
+
+                focus:border-light-3
+                dark:focus:border-dark-1
+                focus:ring-2
+                focus:ring-light-0
+                dark:focus:ring-dark-4
+              "                                     
+            >
+          </div>
+          <div class="mb-4">
+            <label class="block text-base font-medium text-light-4 dark:text-dark-0">
+              ${i18n.t('enterPassword')}
+            </label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="delete-account-password"
+                placeholder="••••••••"
+                class="
+                  mt-1 block w-full rounded-md px-3 py-2 text-sm
+
+                  border border-light-4/30
+                  dark:border-dark-0/30
+                  dark:bg-dark-4
+                  
+                  placeholder-light-4/40
+                  dark:placeholder-dark-0/40
+                  text-light-4
+                  dark:text-dark-0
+                  
+                  focus:outline-none
+
+                  focus:border-light-3
+                  dark:focus:border-dark-1
+                  focus:ring-2
+                  focus:ring-light-0
+                  dark:focus:ring-dark-4
+                "
+              >
+              <button 
+                type="button"
+                id="toggle-delete-password"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
+              >
+                ${SVGIcons.getEyeIcon(false)}
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label for="confirmPassword" class="block text-base font-medium text-light-4 dark:text-dark-0">
+              ${i18n.t('confirmPassword')}
+            </label>
+            <div class="relative">
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="••••••••"
+                class="
+                  mt-1 block w-full rounded-md px-3 py-2 text-sm
+
+                  border border-light-4/30
+                  dark:border-dark-0/30
+                  dark:bg-dark-4 <!-- pas de bg light -->
+                  
+                  placeholder-light-4/40
+                  dark:placeholder-dark-0/40
+                  text-light-4
+                  dark:text-dark-0
+                  
+                  focus:outline-none
+
+                  focus:border-light-3
+                  dark:focus:border-dark-1
+                  focus:ring-2
+                  focus:ring-light-0
+                  dark:focus:ring-dark-4
+                "
+              >
+              <button 
+                type="button"
+                id="toggle-confirm-password"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
+              >
+                ${SVGIcons.getEyeIcon(false)}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end space-x-4">
+          <button 
+            id="cancel-delete"
+            class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
+          >
+            ${i18n.t('cancel')}
+          </button>
+          <button 
+            id="confirm-delete"
+            class="
+              px-4 py-2 rounded-lg transition-colors
+              bg-off-btn-light-0 dark:bg-off-btn-dark-1
+              text-light-0 dark:text-dark-4
+              hover:bg-off-btn-light-1 dark:hover:bg-off-btn-dark-0
+            "
+          >
+            ${i18n.t('deleteAccount')}
+          </button>
+        </div>
+        <div id="delete-account-error" class="mt-4 hidden"></div>
+      </div>
+    `;
+  }
+
+  private renderVerificationModal(title: string): string {
+    return `
+      <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+        <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
+          ${title}
+        </h3>
+        <p class="text-light-4/80 dark:text-dark-0/80 mb-6">
+          ${i18n.t('checkEmailForCode')}
+        </p>
+        <div class="mb-4">
+          <input 
+            type="text" 
+            id="verification-code"
+            class="
+              w-full px-4 py-2
+              rounded-lg
+              
+              border border-light-4/30 dark:border-dark-0/30
+              dark:bg-dark-3
+
+              placeholder-light-4/40 dark:placeholder-dark-0/40
+              text-light-4 dark:text-dark-0
+
+              focus:outline-none
+
+              focus:border-light-3 dark:focus:border-dark-1
+              focus:ring-2
+              focus:ring-light-0 dark:focus:ring-dark-4
+            "
+            placeholder="000000"
+            maxlength="6"
+            pattern="[0-9]*"
+            inputmode="numeric"
+            autocomplete="one-time-code"
+          >
+        </div>
+        <div class="flex justify-end space-x-4">
+          <button 
+            id="cancel-verification"
+            class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
+          >
+            ${i18n.t('cancel')}
+          </button>
+          <button 
+            id="verify-code"
+            class="px-4 py-2 bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 relative"
+            disabled
+          >
+            ${i18n.t('verify')}
+          </button>
+        </div>
+        <div id="verification-message" class="mt-4 hidden"></div>
       </div>
     `;
   }
