@@ -348,6 +348,39 @@ async function friendRoutes(fastify, options) {
 		return { message: 'Successfully retrieve blocked list', onlyUsername };
     });
 
+	fastify.get('/check-blocked/:friendUsername', async (request, reply) => {
+		const friendUsername = request.params.friendUsername;
+		if (!friendUsername){
+			reply.code(400);
+			return { error: 'Friendusername needed'};
+		}
+
+		await request.jwtVerify();
+		const userId = request.user.id;
+
+		const friendExists = await getUserByUsername(friendUsername);
+
+		if (!friendExists) {
+			reply.code(400);
+			return { error: 'Username doesnt exist'};
+		}
+
+		const friendid = friendExists.id;
+
+		const query = `
+			SELECT f.*, u.id, u.username, u.avatar 
+			FROM friend f 
+			JOIN users u ON f.userid2 = u.id 
+			WHERE f.userid1 = ? AND f.status = 'blocked'`;
+		const params = friendid;
+		const blockedlist = await queryAll(query, params);
+
+		if (blockedlist.length > 0) {
+			return { message: 'User is blocked', isBlocked: true };
+		} else {
+			return { message: 'User is not blocked', isBlocked: false };
+		}
+	});
 }
 
 export default friendRoutes;
