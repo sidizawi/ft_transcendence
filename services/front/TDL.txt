@@ -2,26 +2,21 @@ To Do:
 
 ajouter status quand co et deco
 ajouter status partout
-si token non resent (supp ou autre) rediriger vers sign in
 Ajout notif si new message + new demande de connexion
 icone retour
 SVG:	(fill/stroke)
 
+
+
+
 	Profile:
 		- peut-on acceder au profil de notre adversaire via gameHistory?
 
-	Auth:
-		-Hover on signUp/In ??
-
 	friendsTab:
 		- pourquoi se referme entre profile et reste?
-		- ligne 78???
 
 	auth.ts:
 		- Google logo
-
-	twoFactorAuth/translations
-		- langue des mails
 
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
@@ -31,14 +26,6 @@ SVG:	(fill/stroke)
 
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
-		- attention si add qqn qui nous a block pb -> error messag "already in friendList" NO MUST BE "unknown user"
-
-	PARTOUT:
-		- console du navigateur renvoit ERREUR
-		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
-		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
-		-	Attention message erreur quand vient du back -> ne peut traduire
-		- / accepeter comme URL?
 
 	FriendsProfile:
 		- Erreur avatar quand NULL
@@ -47,7 +34,24 @@ SVG:	(fill/stroke)
 	BACK:
 		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
 		- ajouter dans db /img/default.jpg si rien
+		twoFactorAuth/translations:
+			- langue des mails
+
+	PARTOUT:
+		- console du navigateur renvoit ERREUR
+		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
+		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
+		- Attention message erreur quand vient du back -> ne peut traduire
+			- si token non re-sent (supp ou autre) rediriger vers sign in
+		- / accepter comme URL?
 	
+
+
+
+
+
+
+
 	Visuel:
 		-Footer:
 			- group name or names
@@ -65,6 +69,13 @@ SVG:	(fill/stroke)
 
 	Files:
 		- Clean up unused datas
+
+
+
+
+
+
+
 
 	connect 4:
 		- create AI algo

@@ -180,7 +180,7 @@ export class Auth {
         <div class="w-full max-w-md">
           <p class="text-right mb-4 text-sm text-light-4/80 dark:text-dark-0/80">
             ${i18n.t('newHere')}
-            <a href="/signup" class="text-base text-light-4 dark:text-dark-0 ml-2">${i18n.t('createAccount')}</a>
+            <a href="/signup" class="text-base text-light-4 dark:text-dark-0 hover:opacity-80 transition-opacity ml-2">${i18n.t('createAccount')}</a>
           </p>
 
           <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8">
@@ -298,7 +298,7 @@ export class Auth {
         <div class="w-full max-w-md">
           <p class="text-right mb-4 text-sm text-light-4/80 dark:text-dark-0/80">
             ${i18n.t('alreadyHaveAccount')}
-            <a href="/signin" class="text-base text-light-4 dark:text-dark-0 ml-2">${i18n.t('signIn')}</a>
+            <a href="/signin" class="text-base text-light-4 dark:text-dark-0 hover:opacity-80 transition-opacity ml-2">${i18n.t('signIn')}</a>
           </p>
 
           <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8">

@@ -41,7 +41,7 @@ export class FriendsTab {
     const offlineFriends    = accepted.filter(f => !f.status);
   
     return `
-      <div class="fixed bottom-4 right-4 flex flex-col items-end z-40">
+      <div class="fixed bottom-10 right-10 flex flex-col items-end z-40">
         <button
           id="friends-tab-button"
           class="
