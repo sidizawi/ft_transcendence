@@ -35,7 +35,7 @@ export default {
         'on-btn-light-0': '#9dc44b',
         'on-btn-light-1': '#8eb045',
         'on-btn-dark-0': '#96bd89',
-        'on-btn-dark-1': '#96bd89',
+        'on-btn-dark-1': '#7d9973',
         'off-btn-light-0': '#e15325',
         'off-btn-light-1': '#d34f25',
         'off-btn-dark-0': '#d75012',

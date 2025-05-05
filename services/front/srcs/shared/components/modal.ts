@@ -30,9 +30,9 @@ export class ModalManager {
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="text-2xl font-bold text-light-4 dark:text-dark-0 text-center">${title}</h2>
 				</div>
-				<p class="text-light-4/80 dark:text-dark-2 mb-6">${message}</p>
+				<p class="text-light-4/80 dark:text-dark-0/80 mb-6">${message}</p>
 				<div class="mt-4 flex justify-end">
-					<button id="closeModal" class="bg-light-3 dark:bg-dark-2 text-dark-0 dark:text-dark-0 py-3 px-5 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
+					<button id="closeModal" class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 px-5 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
 					${i18n.t('close')}
 					</button>
 				</div>

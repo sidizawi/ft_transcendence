@@ -151,10 +151,12 @@ export class Friends {
   render(): string {
     if (this.isLoading) {
       return `
-        <div class="max-w-4xl mx-auto px-4 py-8">
-          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
-            <div class="flex justify-center items-center h-64">
-              <div class="animate-spin rounded-full h-12 w-12 border-4 border-light-3 dark:border-dark-1 border-t-transparent"></div>
+        <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+          <div class="max-w-4xl mx-auto px-4 py-8">
+            <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
+              <div class="flex justify-center items-center h-64">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-light-3 dark:border-dark-1 border-t-transparent"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -168,65 +170,195 @@ export class Friends {
     const blockedFriends = filteredFriends.filter(f => f.status === 'blocked');
 
     return `
-      <div class="max-w-4xl mx-auto px-4 py-8">
-        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
-          <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0">${i18n.t('friends')}</h1>
-            <button 
-              id="add-friend-button"
-              class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-4 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
-            >
-              ${i18n.t('add')}
-            </button>
-          </div>
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="max-w-4xl mx-auto px-4 py-8">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0">${i18n.t('friends')}</h1>
+              <button 
+                id="add-friend-button"
+                class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-4 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
+              >
+                ${i18n.t('add')}
+              </button>
+            </div>
 
-          <input
-            type="text"
-            id="friends-search"
-            placeholder="${i18n.t('searchFriends')}"
-            value="${this.searchQuery}"
-            class="
-              w-full p-3 mb-6 rounded-lg
-              bg-light-1 dark:bg-dark-3
-              text-light-4 dark:text-dark-0
-              placeholder-light-3/60 dark:placeholder-dark-1/60
-              focus:outline-none focus:ring-2
-              focus:ring-light-3 dark:focus:ring-dark-1
-            "
-          />
+            <input
+              type="text"
+              id="friends-search"
+              placeholder="${i18n.t('searchFriends')}"
+              value="${this.searchQuery}"
+              class="
+                w-full p-3 mb-6 rounded-lg
+                bg-light-1 dark:bg-dark-3
+                text-light-4 dark:text-dark-0
+                placeholder-light-3/60 dark:placeholder-dark-1/60
+                focus:outline-none focus:ring-2
+                focus:ring-light-3 dark:focus:ring-dark-1
+              "
+            />
 
-          ${receivingRequests.length > 0 ? `
-            <div class="mb-8">
-              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('receivedRequests')}</h3>
-              <div class="space-y-3">
-                ${receivingRequests.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer max-w-[70%]" data-action="view-profile" data-username="${friend.username2}">
-                      <img 
-                        src="${friend.avatar}" 
-                        alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
-                      >
-                      <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
-                        ${friend.username2}
-                      </span>
+            ${receivingRequests.length > 0 ? `
+              <div class="mb-8">
+                <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('receivedRequests')}</h3>
+                <div class="space-y-3">
+                  ${receivingRequests.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer max-w-[70%]" data-action="view-profile" data-username="${friend.username2}">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
+                        >
+                        <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
+                          ${friend.username2}
+                        </span>
+                      </div>
+                      <div class="space-x-2">
+                        <button 
+                        class="
+                            text-light-4/80 dark:text-dark-0/80
+                            px-3 py-1.5 rounded
+                            border border-light-4/80 dark:border-dark-0/80
+                            hover:text-light-0 dark:hover:text-dark-4
+                            hover:border-light-0 dark:hover:border-dark-4
+                            hover:bg-light-4 dark:hover:bg-dark-0
+                            transition-colors
+                          "
+                          data-action="accept"
+                          data-username="${friend.username2}"
+                        >
+                          ${SVGIcons.getAcceptIcon()}
+                        </button>
+                        <button 
+                          class="
+                            text-light-4/80 dark:text-dark-0/80
+                            px-3 py-1.5 rounded
+                            border border-light-4/80 dark:border-dark-0/80
+                            hover:text-light-0 dark:hover:text-dark-4
+                            hover:border-light-0 dark:hover:border-dark-4
+                            hover:bg-light-4 dark:hover:bg-dark-0
+                            transition-colors
+                          "
+                          data-action="reject"
+                          data-username="${friend.username2}"
+                        >
+                          ${SVGIcons.getRejectIcon()}
+                        </button>
+                      </div>
                     </div>
-                    <div class="space-x-2">
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            ${sendingRequests.length > 0 ? `
+              <div class="mb-8">
+                <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('sentRequests')}</h3>
+                <div class="space-y-3">
+                  ${sendingRequests.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
+                        >
+                        <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
+                          ${friend.username2}
+                        </span>
+                      </div>
+                      <div class="flex items-center space-x-3">
                       <button 
-                      class="
-                          text-light-4/80 dark:text-dark-0/80
-                          px-3 py-1.5 rounded
-                          border border-light-4/80 dark:border-dark-0/80
-                          hover:text-light-0 dark:hover:text-dark-4
-                          hover:border-light-0 dark:hover:border-dark-4
-                          hover:bg-light-4 dark:hover:bg-dark-0
-                          transition-colors
-                        "
-                        data-action="accept"
+                        class="
+                            text-light-4/80 dark:text-dark-0/80
+                            px-3 py-1.5 rounded
+                            border border-light-4/80 dark:border-dark-0/80
+                            hover:text-light-0 dark:hover:text-dark-4
+                            hover:border-light-0 dark:hover:border-dark-4
+                            hover:bg-light-4 dark:hover:bg-dark-0
+                            transition-colors
+                          "
+                        data-action="cancel"
                         data-username="${friend.username2}"
                       >
-                        ${SVGIcons.getAcceptIcon()}
+                        ${i18n.t('cancel')}
                       </button>
+                    </div>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+
+            <div class="mb-8">
+              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('friendsList')}</h3>
+              ${acceptedFriends.length > 0 ? `
+                <div class="space-y-3">
+                  ${acceptedFriends.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
+                        >
+                        <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
+                          ${friend.username2}
+                        </span>
+                      </div>
+                      <div class="flex items-center space-x-3">
+                        <button 
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
+                          data-action="block"
+                          data-username="${friend.username2}"
+                          title="${i18n.t('block')}"
+                        >
+                          ${SVGIcons.getBlockIcon()}
+                        </button>
+                        <button 
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
+                          data-action="delete"
+                          data-username="${friend.username2}"
+                          title="${i18n.t('delete')}"
+                        >
+                          ${SVGIcons.getDeleteIcon()}
+                        </button>
+                        <button 
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
+                          data-action="chat"
+                          data-username="${friend.username2}"
+                          title="${i18n.t('chat')}"
+                        >
+                          ${SVGIcons.getChatIcon()}
+                        </button>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <p class="text-light-4/80 dark:text-dark-0/80 text-center py-8">
+                  ${i18n.t('noFriendsYet')}
+                </p>
+              `}
+            </div>
+
+            ${blockedFriends.length > 0 ? `
+              <div class="mt-8">
+                <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('blockedUsers')}</h3>
+                <div class="space-y-3">
+                  ${blockedFriends.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
+                        >
+                        <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
+                          ${friend.username2}
+                        </span>
+                      </div>
                       <button 
                         class="
                           text-light-4/80 dark:text-dark-0/80
@@ -237,158 +369,29 @@ export class Friends {
                           hover:bg-light-4 dark:hover:bg-dark-0
                           transition-colors
                         "
-                        data-action="reject"
+                        data-action="unblock"
                         data-username="${friend.username2}"
                       >
-                        ${SVGIcons.getRejectIcon()}
+                        ${i18n.t('unblock')}
                       </button>
                     </div>
-                  </div>
-                `).join('')}
+                  `).join('')}
+                </div>
               </div>
-            </div>
-          ` : ''}
-
-          ${sendingRequests.length > 0 ? `
-            <div class="mb-8">
-              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('sentRequests')}</h3>
-              <div class="space-y-3">
-                ${sendingRequests.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
-                      <img 
-                        src="${friend.avatar}" 
-                        alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
-                      >
-                      <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
-                        ${friend.username2}
-                      </span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                    <button 
-                      class="
-                          text-light-4/80 dark:text-dark-0/80
-                          px-3 py-1.5 rounded
-                          border border-light-4/80 dark:border-dark-0/80
-                          hover:text-light-0 dark:hover:text-dark-4
-                          hover:border-light-0 dark:hover:border-dark-4
-                          hover:bg-light-4 dark:hover:bg-dark-0
-                          transition-colors
-                        "
-                      data-action="cancel"
-                      data-username="${friend.username2}"
-                    >
-                      ${i18n.t('cancel')}
-                    </button>
-                  </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-
-          <div class="mb-8">
-            <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('friendsList')}</h3>
-            ${acceptedFriends.length > 0 ? `
-              <div class="space-y-3">
-                ${acceptedFriends.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
-                      <img 
-                        src="${friend.avatar}" 
-                        alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
-                      >
-                      <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
-                        ${friend.username2}
-                      </span>
-                    </div>
-                    <div class="flex items-center space-x-3">
-                      <button 
-                        class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
-                        data-action="block"
-                        data-username="${friend.username2}"
-                        title="${i18n.t('block')}"
-                      >
-                        ${SVGIcons.getBlockIcon()}
-                      </button>
-                      <button 
-                        class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
-                        data-action="delete"
-                        data-username="${friend.username2}"
-                        title="${i18n.t('delete')}"
-                      >
-                        ${SVGIcons.getDeleteIcon()}
-                      </button>
-                      <button 
-                        class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
-                        data-action="chat"
-                        data-username="${friend.username2}"
-                        title="${i18n.t('chat')}"
-                      >
-                        ${SVGIcons.getChatIcon()}
-                      </button>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            ` : `
-              <p class="text-light-4/80 dark:text-dark-0/80 text-center py-8">
-                ${i18n.t('noFriendsYet')}
-              </p>
-            `}
+            ` : ''}
           </div>
-
-          ${blockedFriends.length > 0 ? `
-            <div class="mt-8">
-              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('blockedUsers')}</h3>
-              <div class="space-y-3">
-                ${blockedFriends.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
-                      <img 
-                        src="${friend.avatar}" 
-                        alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity shrink-0"
-                      >
-                      <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
-                        ${friend.username2}
-                      </span>
-                    </div>
-                    <button 
-                      class="
-                        text-light-4/80 dark:text-dark-0/80
-                        px-3 py-1.5 rounded
-                        border border-light-4/80 dark:border-dark-0/80
-                        hover:text-light-0 dark:hover:text-dark-4
-                        hover:border-light-0 dark:hover:border-dark-4
-                        hover:bg-light-4 dark:hover:bg-dark-0
-                        transition-colors
-                      "
-                      data-action="unblock"
-                      data-username="${friend.username2}"
-                    >
-                      ${i18n.t('unblock')}
-                    </button>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
-        </div>
-        
-        <!-- Back Button -->
-        <div class="mt-8 flex justify-center">
-          <a 
-            href="/profile"
-            class="px-6 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 rounded-lg transition-colors"
-          >
-            ${i18n.t('back')}
-          </a>
+          
+          <!-- Back Button -->
+          <div class="mt-8 flex justify-center">
+            <a 
+              href="/profile"
+              class="px-6 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 rounded-lg transition-colors"
+            >
+              ${i18n.t('back')}
+            </a>
+          </div>
         </div>
       </div>
-
       ${this.renderAddFriendModal()}
     `;
   }

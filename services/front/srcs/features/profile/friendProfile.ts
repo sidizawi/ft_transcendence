@@ -159,7 +159,7 @@ export class FriendProfile {
           id="cancelRequestBtn"
           class="
             text-light-4/80 dark:text-dark-0/80
-            px-3 py-1.5 rounded
+            px-4 py-2 rounded-lg
             border border-light-4/80 dark:border-dark-0/80
             hover:text-light-0 dark:hover:text-dark-4
             hover:border-light-0 dark:hover:border-dark-4
@@ -194,80 +194,82 @@ export class FriendProfile {
 
   render(): string {
     return `
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg overflow-hidden">
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="max-w-4xl mx-auto">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg overflow-hidden">
 
-          <!-- Profile Header -->
-          <div class="relative">
-            <div class="flex items-center px-8 pt-6">
-              <div class="relative shrink-0">
-                <img 
-                  src="/${this.avatar}" 
-                  alt="${this.username}" 
-                  class="w-32 h-32 rounded-full object-cover"
-                >
-              </div>
-              <div class="ml-6 flex-1 min-w-0">
-                <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap">
-                  ${this.username}
-                </h1>
-              </div>
-              ${this.renderActionButtons()}
-            </div>
-          </div>
-
-          <!-- Profile Info -->
-          <div class="px-8 pb-8 mt-12">
-            <!-- Stats Tabs -->
-            <div class="mt-4">
-              <div class="relative">
-                <div class="flex -mb-px space-x-8">
-                  <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-0/80 font-medium"
-                    data-tab="pong"
-                    data-active="true"
+            <!-- Profile Header -->
+            <div class="relative">
+              <div class="flex items-center px-8 pt-6">
+                <div class="relative shrink-0">
+                  <img 
+                    src="/${this.avatar}" 
+                    alt="${this.username}" 
+                    class="w-32 h-32 rounded-full object-cover"
                   >
-                    <span class="flex items-center space-x-2">
-                      <span>${i18n.t('pong')}</span>
-                    </span>
-                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-1 transform scale-x-0 transition-transform"></span>
-                  </button>
-                  <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-0/80 font-medium"
-                    data-tab="connect4"
-                    data-active="false"
-                  >
-                    <span class="flex items-center space-x-2">
-                      <span>${i18n.t('connect4')}</span>
-                    </span>
-                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-1 transform scale-x-0 transition-transform"></span>
-                  </button>
                 </div>
-                <div class="absolute bottom-0 left-0 w-full h-px bg-light-2 dark:bg-dark-2"></div>
+                <div class="ml-6 flex-1 min-w-0">
+                  <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap">
+                    ${this.username}
+                  </h1>
+                </div>
+                ${this.renderActionButtons()}
               </div>
+            </div>
 
-              <!-- Pong Stats -->
-              <div class="tab-content active" data-tab="pong">
-                <h3 class="text-3xl font-semibold text-light-4 dark:text-dark-0 text-center mt-6 mb-8">Pong Dashboard</h3>
-                ${this.renderGameStats(this.pongStats)}
-              </div>
+            <!-- Profile Info -->
+            <div class="px-8 pb-8 mt-12">
+              <!-- Stats Tabs -->
+              <div class="mt-4">
+                <div class="relative">
+                  <div class="flex -mb-px space-x-8">
+                    <button 
+                      class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-0/80 font-medium"
+                      data-tab="pong"
+                      data-active="true"
+                    >
+                      <span class="flex items-center space-x-2">
+                        <span>${i18n.t('pong')}</span>
+                      </span>
+                      <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-1 transform scale-x-0 transition-transform"></span>
+                    </button>
+                    <button 
+                      class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-0/80 font-medium"
+                      data-tab="connect4"
+                      data-active="false"
+                    >
+                      <span class="flex items-center space-x-2">
+                        <span>${i18n.t('connect4')}</span>
+                      </span>
+                      <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-1 transform scale-x-0 transition-transform"></span>
+                    </button>
+                  </div>
+                  <div class="absolute bottom-0 left-0 w-full h-px bg-light-2 dark:bg-dark-2"></div>
+                </div>
 
-              <!-- Connect4 Stats -->
-              <div class="tab-content hidden" data-tab="connect4">
-                <h3 class="text-3xl font-semibold text-light-4 dark:text-dark-0 text-center mt-6 mb-8">Connect 4 Dashboard</h3>
-                ${this.renderGameStats(this.connect4Stats)}
+                <!-- Pong Stats -->
+                <div class="tab-content active" data-tab="pong">
+                  <h3 class="text-3xl font-semibold text-light-4 dark:text-dark-0 text-center mt-6 mb-8">Pong Dashboard</h3>
+                  ${this.renderGameStats(this.pongStats)}
+                </div>
+
+                <!-- Connect4 Stats -->
+                <div class="tab-content hidden" data-tab="connect4">
+                  <h3 class="text-3xl font-semibold text-light-4 dark:text-dark-0 text-center mt-6 mb-8">Connect 4 Dashboard</h3>
+                  ${this.renderGameStats(this.connect4Stats)}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-        <!-- Back Button -->
-        <div class="mt-8 flex justify-center">
-          <a 
-            href="/friends"
-            class="px-6 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 rounded-lg transition-colors"
-          >
-            ${i18n.t('back')}
-          </a>
+          <!-- Back Button -->
+          <div class="mt-8 flex justify-center">
+            <a 
+              href="/friends"
+              class="px-6 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 rounded-lg transition-colors"
+            >
+              ${i18n.t('back')}
+            </a>
+          </div>
         </div>
       </div>
     `;
@@ -359,20 +361,26 @@ export class FriendProfile {
             <h4 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-3">${i18n.t('stats.recentGames')}</h4>
             <div class="space-y-2">
               ${stats.history.map(game => `
-                <div class="flex items-center justify-between bg-light-1 dark:bg-dark-3 p-3 rounded-lg">
+                <div class="grid grid-cols-3 items-center bg-light-1 dark:bg-dark-3 p-3 rounded-lg">
+
+                  <!-- Opponent (left) -->
                   <div class="flex items-center space-x-3">
-                    <span class="w-2 h-2 rounded-full ${game.playerWin === this.username ? 'bg-green-500' : 'bg-red-500'}"></span>
-                    <div class="flex items-center space-x-2">
-                      <img 
-                        src="/${game.avatar}" 
-                        alt="${game.opponent}"
-                        class="w-8 h-8 rounded-full object-cover"
-                      >
-                      <span class="text-light-4 dark:text-dark-0">${game.opponent}</span>
-                    </div>
+                    <img 
+                      src="${game.avatar}" 
+                      alt="${game.opponent}"
+                      class="w-8 h-8 rounded-full object-cover"
+                    >
+                    <span class="text-light-4/80 dark:text-dark-0/80">${game.opponent}</span>
                   </div>
-                  <div class="flex items-center space-x-4">
-                    ${game.score ? `<span class="text-light-4/80 dark:text-dark-0/80">${game.score}</span>` : ''}
+
+                  <!-- Result / Score (centered) -->
+                  <div class="flex justify-center items-center space-x-2 text-light-4 dark:text-dark-0">
+                    <span>${game.playerWin === this.username ? i18n.t('victory') : i18n.t('defeat')}</span>
+                    ${game.score ? `<span class="font-bold">${game.score}</span>` : ''}
+                  </div>
+
+                  <!-- Date (right) -->
+                  <div class="flex items-center justify-end space-x-4">
                     <span class="text-sm text-light-4/80 dark:text-dark-0/80">${game.date}</span>
                   </div>
                 </div>

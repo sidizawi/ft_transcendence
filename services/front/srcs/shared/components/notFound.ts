@@ -9,7 +9,7 @@ export class NotFound {
           <p class="mt-4 text-2xl font-semibold text-gray-800 dark:text-dark-0">
             ${i18n.t('pageNotFound')}
           </p>
-          <p class="mt-2 text-light-4/80 dark:text-dark-2">
+          <p class="mt-2 text-light-4/80 dark:text-dark-0/80">
             ${i18n.t('pageNotFoundDesc')}
           </p>
           <a 

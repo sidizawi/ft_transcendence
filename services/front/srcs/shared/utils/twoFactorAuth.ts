@@ -81,69 +81,71 @@ export class TwoFactorAuth {
   private static async verifyEmailCode(type: 'switch' | 'connection'): Promise<boolean> {
     return new Promise((resolve) => {
       const modal = this.createModal(`
-        <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-          <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
-            ${i18n.t('verification2FA')}
-          </h3>
-          <p class="text-light-4/80 dark:text-dark-0/80 mb-6">
-            ${i18n.t('checkEmailForCode')}
-          </p>
-          <div class="mb-4">
-            <input 
-              type="text" 
-              id="2fa-verification-code"
-              class="
-                mt-1 block w-full
-                rounded-md
+        <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 class="text-xl text-center font-bold mb-4 text-light-4 dark:text-dark-0">
+              ${i18n.t('verification2FA')}
+            </h3>
+            <p class="text-light-4/80 dark:text-dark-0/80 mb-6">
+              ${i18n.t('checkEmailForCode')}
+            </p>
+            <div class="mb-4">
+              <input 
+                type="text" 
+                id="2fa-verification-code"
+                class="
+                  mt-1 block w-full
+                  rounded-md
 
-                border border-light-4/30
-                dark:border-dark-0/30
-                bg-white <!-- why not working>
-                dark:bg-dark-4
-                
-                placeholder-light-4/40
-                dark:placeholder-dark-0/40
-                text-light-4
-                dark:text-dark-0
+                  border border-light-4/30
+                  dark:border-dark-0/30
+                  bg-white <!-- why not working>
+                  dark:bg-dark-4
+                  
+                  placeholder-light-4/40
+                  dark:placeholder-dark-0/40
+                  text-light-4
+                  dark:text-dark-0
 
-                focus:outline-none
+                  focus:outline-none
 
-                focus:border-light-3
-                dark:focus:border-dark-1
-                focus:ring-2
-                focus:ring-light-0
-                dark:focus:ring-dark-4
+                  focus:border-light-3
+                  dark:focus:border-dark-1
+                  focus:ring-2
+                  focus:ring-light-0
+                  dark:focus:ring-dark-4
 
-                px-3 py-2
+                  px-3 py-2
 
-                text-base
-              "
-              placeholder="000000"
-              maxlength="6"
-              pattern="[0-9]*"
-              inputmode="numeric"
-              autocomplete="one-time-code"
-            >
+                  text-base
+                "
+                placeholder="000000"
+                maxlength="6"
+                pattern="[0-9]*"
+                inputmode="numeric"
+                autocomplete="one-time-code"
+              >
+            </div>
+            <div class="flex justify-end space-x-4">
+              <button 
+                id="cancel-2fa-verification"
+                class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
+              >
+                ${i18n.t('cancel')}
+              </button>
+              <button 
+                id="verify-2fa-code"
+                class="px-4 py-2 bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 relative"
+                disabled
+              >
+                <span class="verify-text">${i18n.t('verify')}</span>
+                <span class="loading-spinner hidden">
+                  ${SVGIcons.getLoadingIcon()}
+                </span>
+              </button>
+            </div>
+            <div id="verification-message" class="mt-4 hidden"></div>
           </div>
-          <div class="flex justify-end space-x-4">
-            <button 
-              id="cancel-2fa-verification"
-              class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
-            >
-              ${i18n.t('cancel')}
-            </button>
-            <button 
-              id="verify-2fa-code"
-              class="px-4 py-2 bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 relative"
-              disabled
-            >
-              <span class="verify-text">${i18n.t('verify')}</span>
-              <span class="loading-spinner hidden">
-                 ${SVGIcons.getLoadingIcon()}
-              </span>
-            </button>
-          </div>
-          <div id="verification-message" class="mt-4 hidden"></div>
         </div>
       `);
 

@@ -252,7 +252,7 @@ export class TranscendenceApp {
     main.innerHTML = `
       <div class="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
         <h1 class="text-4xl font-bold mb-6 text-light-4 dark:text-dark-0">${i18n.t('welcome')}</h1>
-        <p class="text-lg text-light-4/80 dark:text-dark-0 mb-8 text-center max-w-2xl">
+        <p class="text-lg text-light-4/80 dark:text-dark-0/80 mb-8 text-center max-w-2xl">
           ${i18n.t('description')}
         </p>
         <div class="space-y-4">

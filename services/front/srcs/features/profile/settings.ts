@@ -208,23 +208,20 @@ export class Settings {
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = `
       <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-        <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
+        <h3 class="text-xl text-center font-bold mb-4 text-light-4 dark:text-dark-0">
           ${i18n.t('deleteAccountVerification')}
         </h3>
-        <p class="text-red-600 dark:text-red-400 mb-4">
-          ${i18n.t('deleteAccountWarning')}
-        </p>
-        <p class="text-light-4/80 dark:text-dark-2 mb-6">
-          ${i18n.t('deleteAccountConfirm')}
-        </p>
+        <div class="mb-6 mt-6">
+          <p class="text-red-600 dark:text-red-400 ">
+            ${i18n.t('deleteAccountWarning')}
+          </p>
+          <p class="text-light-4/80 dark:text-dark-0/80">
+            ${i18n.t('deleteAccountConfirm')}
+          </p>
+        </div>
         <div class="mb-4">
-          <label class="block text-sm font-medium text-light-4 dark:text-dark-1 mb-1">
-            ${i18n.t('enterPassword')}
-          </label>
-
-
-          <div>
-            <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-1">
+          <div class="mb-4">
+            <label for="username" class="block text-base font-medium text-light-4 dark:text-dark-0">
               ${i18n.t('username')}
             </label>
             <input
@@ -233,62 +230,124 @@ export class Settings {
               name="username"
               placeholder="${this.user.username}"
               class="
-                mt-1 block w-full
-                rounded-md
+                mt-1 block w-full rounded-md px-3 py-2 text-sm
 
                 border border-light-4/30
-                dark:border-transparent
-                dark:bg-dark-3 dark:text-dark-0
-
+                dark:border-dark-0/30
+                dark:bg-dark-4 <!-- pas de bg light -->
+                
                 placeholder-light-4/40
+                dark:placeholder-dark-0/40
                 text-light-4
-
+                dark:text-dark-0
+                
                 focus:outline-none
 
                 focus:border-light-3
+                dark:focus:border-dark-1
                 focus:ring-2
                 focus:ring-light-0
-
-                px-3 py-2
-
-                text-sm
-              "                                      
+                dark:focus:ring-dark-4
+              "                                     
             >
           </div>
+          <div class="mb-4">
+            <label class="block text-base font-medium text-light-4 dark:text-dark-0">
+              ${i18n.t('enterPassword')}
+            </label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="delete-account-password"
+                placeholder="••••••••"
+                class="
+                  mt-1 block w-full rounded-md px-3 py-2 text-sm
 
+                  border border-light-4/30
+                  dark:border-dark-0/30
+                  dark:bg-dark-4
+                  
+                  placeholder-light-4/40
+                  dark:placeholder-dark-0/40
+                  text-light-4
+                  dark:text-dark-0
+                  
+                  focus:outline-none
 
-          <div class="relative">
-            <input 
-              type="password" 
-              id="delete-account-password"
-              class="w-full px-4 py-2 rounded-lg border border-light-2 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 focus:ring-2 focus:ring-red-500 focus:border-transparent pr-10"
-            >
-            <button 
-              type="button"
-              id="toggle-delete-password"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-1 hover:text-light-4 dark:hover:text-dark-0"
-            >
-              ${SVGIcons.getEyeIcon(false)}
-            </button>
+                  focus:border-light-3
+                  dark:focus:border-dark-1
+                  focus:ring-2
+                  focus:ring-light-0
+                  dark:focus:ring-dark-4
+                "
+              >
+              <button 
+                type="button"
+                id="toggle-delete-password"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
+              >
+                ${SVGIcons.getEyeIcon(false)}
+              </button>
+            </div>
           </div>
 
+          <div>
+            <label for="confirmPassword" class="block text-base font-medium text-light-4 dark:text-dark-0">
+              ${i18n.t('confirmPassword')}
+            </label>
+            <div class="relative">
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirmPassword"
+                placeholder="••••••••"
+                class="
+                  mt-1 block w-full rounded-md px-3 py-2 text-sm
 
+                  border border-light-4/30
+                  dark:border-dark-0/30
+                  dark:bg-dark-4 <!-- pas de bg light -->
+                  
+                  placeholder-light-4/40
+                  dark:placeholder-dark-0/40
+                  text-light-4
+                  dark:text-dark-0
+                  
+                  focus:outline-none
 
-
-
-
-
+                  focus:border-light-3
+                  dark:focus:border-dark-1
+                  focus:ring-2
+                  focus:ring-light-0
+                  dark:focus:ring-dark-4
+                "
+              >
+              <button 
+                type="button"
+                id="toggle-confirm-password"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
+              >
+                ${SVGIcons.getEyeIcon(false)}
+              </button>
+            </div>
+          </div>
         </div>
+
         <div class="flex justify-end space-x-4">
           <button 
             id="cancel-delete"
-            class="px-4 py-2 text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0"
+            class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
           >
             ${i18n.t('cancel')}
           </button>
           <button 
             id="confirm-delete"
-            class="px-4 py-2 bg-red-600 text-dark-0 rounded-lg hover:bg-red-700 transition-colors"
+            class="
+              px-4 py-2 rounded-lg transition-colors
+              bg-off-btn-light-0 dark:bg-off-btn-dark-1
+              text-light-0 dark:text-dark-4
+              hover:bg-off-btn-light-1 dark:hover:bg-off-btn-dark-0
+            "
           >
             ${i18n.t('deleteAccount')}
           </button>
@@ -343,10 +402,10 @@ export class Settings {
         verificationModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
         verificationModal.innerHTML = `
           <div class="bg-light-0 dark:bg-dark-4 p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
+            <h3 class="text-xl text-center font-bold mb-4 text-light-4 dark:text-dark-0">
               ${i18n.t('deleteAccountVerification')}
             </h3>
-            <p class="text-light-4/80 dark:text-dark-2 mb-6">
+            <p class="text-light-4/80 dark:text-dark-0/80 mb-6">
               ${i18n.t('checkEmailForCode')}
             </p>
             <div class="mb-4">
@@ -364,7 +423,7 @@ export class Settings {
             <div class="flex justify-end space-x-4">
               <button 
                 id="cancel-verification"
-                class="px-4 py-2 text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0"
+                class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
               >
                 ${i18n.t('cancel')}
               </button>
@@ -441,7 +500,7 @@ export class Settings {
         <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
           ${title}
         </h3>
-        <p class="text-light-4/80 dark:text-dark-2 mb-6">
+        <p class="text-light-4/80 dark:text-dark-0/80 mb-6">
           ${i18n.t('checkEmailForCode')}
         </p>
         <div class="mb-4">
@@ -475,7 +534,7 @@ export class Settings {
         <div class="flex justify-end space-x-4">
           <button 
             id="cancel-verification"
-            class="px-4 py-2 text-light-4/80 dark:text-dark-2 hover:text-light-4 dark:hover:text-dark-0"
+            class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
           >
             ${i18n.t('cancel')}
           </button>

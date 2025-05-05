@@ -1,44 +1,36 @@
 To Do:
 
 ajouter status quand co et deco
-ajouter status friends.ts
+ajouter status partout
 si token non resent (supp ou autre) rediriger vers sign in
 Ajout notif si new message + new demande de connexion
+icone retour
+SVG:	(fill/stroke)
 
-
-	profile.ts:
-	- apd 233 -> render background stats
-	- refaire tout affichage hame history
-	- Activate button DARKMODE
-	(fill/stroke)
-	icone retour
+	Profilte:
+		- peut-on accder au profil de notre adversaire?
 
 	Auth:
 		-Hover on signUp/In ??
-
-	Settings:
-		- DELETE ACCOUNT MODALE????????
 
 	app/routing:
 		- bloquer toutes les pages HORS home, connect4 et pong si pas login
 
 	friendsTab:
-		- refresh quand chgmnt AMIS (friends.ts)
 		- pourquoi se referme entre profile et reste?
-		- friendprofile pas pas logo accepter????
 		- ligne 78???
 
 	auth.ts:
 		- Google logo
 
 	twoFactorAuth/translations
-		- title -> 2FAVerification (pop up dans profile ex)
 		- langue des mails
 
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
 		- ok si meme mdp????
 		- message d'erreur si un mdp vide + bloquer
+		- delete Account/save changes buttons visu
 
 	Friends page:
 		- hover sur username?
@@ -50,19 +42,17 @@ Ajout notif si new message + new demande de connexion
 		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
 		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
 		-	Attention message erreur quand vient du back -> ne peut traduire
-		- taille des "box" idem partout??
 		- / accepeter comme URL?
 
-	
 	FriendsProfile:
 		- Erreur avatar quand NULL
+		- si qqn nous a bloquer, alors son profile donne 404
+
 	BACK:
 		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
 		- ajouter dans db /img/default.jpg si rien
 	
 	Visuel:
-		-Settings.ts:
-			- Visuel delete account button + place
 		-Footer:
 			- group name or names
 		-Random Page:
@@ -76,7 +66,6 @@ Ajout notif si new message + new demande de connexion
 		- Browsers Compatibility
 		- Accessibility (?)
 		- SSR (?)
-		- when reload on page it should load that page: /profile and reload => go to profile, not home
 
 	Files:
 		- Clean up unused datas
