@@ -1,7 +1,23 @@
-import { queryPost } from "./query.js";
+import { queryPost, queryAll } from "./query.js";
 
 export async function getGameByPlayerIdAndGameType(params) {
 	const query = `SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?) AND game_type = ?`;
+	const result = await queryAll(query, params);
+
+	return result;
+}
+
+export async function getGameByPlayerId(id) {
+	const query = `SELECT * FROM game WHERE playerid_1 = ? OR playerid_2 = ?`;
+	const params = [id, id];
+	const result = await queryAll(query, params);
+
+	return result;
+}
+
+export async function getCountGameByPlayerId(id) {
+	const query = `SELECT COUNT(*) AS count FROM game WHERE playerid_1 = ? OR playerid_2 = ?`;
+	const params = [id, id];
 	const result = await queryPost(query, params);
 
 	return result;

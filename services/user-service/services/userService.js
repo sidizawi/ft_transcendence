@@ -77,6 +77,21 @@ export async function getIdUsernameEmailAvatarById(id) {
     return result;
 }
 
+export async function getPrivacyById(id) {
+    const query = `SELECT privacy FROM users WHERE id = ?`;
+    const result = await queryGet(query, id);
+
+    return result;
+}
+
+export async function updateUserById(username, email, password, id) {
+    const query = `UPDATE users 
+    SET username = ?, email = ?, password = ?, avatar = NULL, privacy = '{}', is_two_factor_enabled = 0
+    WHERE id = ?`;
+    const params = [username, email, password, id];
+    await queryPost(query, params);
+}
+
 export async function updateUsernameById(username, id) {
     const query = `UPDATE users SET username = ? WHERE id = ?`;
     const params = [username, id];
@@ -93,6 +108,12 @@ export async function updateAvatarById(avatar, id) {
 
 export async function updateSomeById(updates, params) {
     const query = `UPDATE users SET ${updates} WHERE id = ?`;
+    await queryPost(query, params);
+}
+
+export async function updatePrivacyById(privacy, id) {
+    const query = `UPDATE users SET privacy = ? WHERE id = ?`;
+    const params = [privacy, id];
     await queryPost(query, params);
 }
 

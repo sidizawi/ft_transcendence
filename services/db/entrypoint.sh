@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     avatar TEXT DEFAULT NULL,
+    privacy TEXT DEFAULT '{}',
     is_two_factor_enabled BOOLEAN DEFAULT 0,
     status BOOLEAN NOT NULL CHECK (status IN (0, 1)) DEFAULT 0,
     google BOOLEAN DEFAULT 0

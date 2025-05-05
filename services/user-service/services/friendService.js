@@ -1,4 +1,20 @@
-import { queryPost } from "./query.js";
+import { queryPost, queryAll, queryGet } from "./query.js";
+
+export async function getFriendById(id) {
+	const query = `SELECT * FROM friend WHERE userid1 = ? OR userid2 = ?`;
+	const params = [id, id];
+	const result = await queryAll(query, params);
+
+	return result;
+}
+
+export async function getCountFriendById(id) {
+	const query = `SELECT COUNT(*) AS count FROM friend WHERE userid1 = ? OR userid2 = ?`;
+	const params = [id, id];
+	const result = await queryGet(query, params);
+
+	return result;
+}
 
 export async function updateFriendUsernameById(username, columnToUpdate, id) {
 	const query = `UPDATE friend SET username1 = ? WHERE userid${columnToUpdate} = ?`;
