@@ -36,9 +36,14 @@ export class Router {
     }
 
     // Redirect to signin if trying to access protected pages while logged out
-    if ((path === '/profile' || path === '/profile/settings') && !this.isLoggedIn()) {
-      this.navigateTo('/signin');
-      return '/signin';
+    if (!this.isLoggedIn()) {
+      if (path === '/profile' || path === '/tournament')
+      {
+        this.navigateTo('/signin');
+        return '/signin';
+      } else if (path !== '/' && path !== '/pong' && path !== '/connect4' && path !== '/signin' && path !== '/signup') {
+        return '/404';
+      }
     }
 
     // Check username for user profile pages

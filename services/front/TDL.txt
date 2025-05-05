@@ -7,14 +7,11 @@ Ajout notif si new message + new demande de connexion
 icone retour
 SVG:	(fill/stroke)
 
-	Profilte:
-		- peut-on accder au profil de notre adversaire?
+	Profile:
+		- peut-on acceder au profil de notre adversaire via gameHistory?
 
 	Auth:
 		-Hover on signUp/In ??
-
-	app/routing:
-		- bloquer toutes les pages HORS home, connect4 et pong si pas login
 
 	friendsTab:
 		- pourquoi se referme entre profile et reste?

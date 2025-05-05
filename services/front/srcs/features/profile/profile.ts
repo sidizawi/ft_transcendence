@@ -319,11 +319,15 @@ export class Profile {
 
                   <!-- Opponent (left) -->
                   <div class="flex items-center space-x-3">
-                    <img 
-                      src="${game.avatar}" 
-                      alt="${game.opponent}"
-                      class="w-8 h-8 rounded-full object-cover"
-                    >
+                    <div class="relative">
+                      <img 
+                        src="${game.avatar}" 
+                        alt="${game.opponent}"
+                        class="w-8 h-8 rounded-full object-cover"
+                      >
+                      <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
+                      <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
+                    </div>
                     <span class="text-light-4/80 dark:text-dark-0/80">${game.opponent}</span>
                   </div>
 
