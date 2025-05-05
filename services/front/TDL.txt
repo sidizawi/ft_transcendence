@@ -30,7 +30,6 @@ SVG:	(fill/stroke)
 		- delete Account/save changes buttons visu
 
 	Friends page:
-		- hover sur username?
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
 		- attention si add qqn qui nous a block pb -> error messag "already in friendList" NO MUST BE "unknown user"
 
