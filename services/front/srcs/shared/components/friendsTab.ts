@@ -92,7 +92,7 @@ export class FriendsTab {
                               alt="${friend.username2}"
                               class="w-8 h-8 rounded-full object-cover"
                             >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-light-1 dark:border-dark-3"></span>
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
                           </div>
 
                           <div class="text-left flex-1 min-w-0">
@@ -124,7 +124,7 @@ export class FriendsTab {
                               alt="${friend.username2}"
                               class="w-8 h-8 rounded-full object-cover"
                             >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-light-1 dark:border-dark-3"></span>
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
                           </div>
 
                           <div class="text-left flex-1 min-w-0">
@@ -155,7 +155,7 @@ export class FriendsTab {
                               alt="${friend.username2}"
                               class="w-8 h-8 rounded-full object-cover"
                             >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-light-1 dark:border-dark-3"></span>
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
                           </div>
 
                           <div class="text-left flex-1 min-w-0">
@@ -179,7 +179,7 @@ export class FriendsTab {
                               alt="${friend.username2}"
                               class="w-8 h-8 rounded-full object-cover"
                             >
-                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full border-2 border-light-1 dark:border-dark-3"></span>
+                            <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
                           </div>
 
                           <div class="text-left flex-1 min-w-0">
