@@ -2,6 +2,7 @@ import bcrypt from 'bcrypt';
 
 import { googleClient } from "../index.js";
 import { getUserByEmail,
+  getCountAllUsers,
   insertUser
  } from '../services/userService.js';
 
@@ -28,8 +29,9 @@ async function googleRoutes(fastify) {
             const randomPassword = Math.random().toString(36).slice(-8);
             const hashedPassword = await bcrypt.hash(randomPassword, 10);
       
-            await insertUser(name, email, hashedPassword, picture, 0, 1, 1);
-            user = { id: result.lastInsertRowid, username: name, email };
+            await insertUser(name, email, hashedPassword, picture, "{}", 0, 1, 1);
+            const lastInsertRowid = await getCountAllUsers();
+            user = { id: lastInsertRowid, username: name, email };
           }
       
           const token = fastify.jwt.sign({

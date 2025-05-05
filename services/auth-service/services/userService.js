@@ -36,9 +36,16 @@ export async function get2faById(id) {
     return result;
 }
 
-export async function insertUser(username, email, hashedPassword, avatar, twofa, status, google) {
-    const query = 'INSERT INTO users (username, email, password, avatar, is_two_factor_enabled, status, google) VALUES (?, ?, ?, ?, ?, ?, ?)';
-    const params = [username, email, hashedPassword, avatar, twofa, status, google];
+export async function getCountAllUsers() {
+    const query = `SELECT COUNT(*) AS count FROM users`;
+    const result = await queryGet(query);
+
+    return result;
+}
+
+export async function insertUser(username, email, hashedPassword, avatar, privacy, twofa, status, google) {
+    const query = 'INSERT INTO users (username, email, password, avatar, privacy, is_two_factor_enabled, status, google) VALUES (?, ?, ?, ?, ?, ?, ?, ?)';
+    const params = [username, email, hashedPassword, avatar, privacy, twofa, status, google];
     await queryPost(query, params);
 }
 
