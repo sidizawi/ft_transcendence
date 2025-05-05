@@ -263,12 +263,12 @@ export class FriendProfile {
           </div>
           <!-- Back Button -->
           <div class="mt-8 flex justify-center">
-            <a 
-              href="/friends"
+            <button 
+              id="backButton"
               class="px-6 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 rounded-lg transition-colors"
             >
               ${i18n.t('back')}
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -466,5 +466,16 @@ export class FriendProfile {
     unblockBtn?.addEventListener('click', () => this.handleFriendAction('unblock'));
     deleteFriendBtn?.addEventListener('click', () => this.handleFriendAction('delete'));
     cancelRequestBtn?.addEventListener('click', () => this.handleFriendAction('cancel'));
+
+    // Back button
+    const backButton = document.getElementById('backButton');
+    backButton?.addEventListener('click', () => {
+      console.log('previous', window.history.back);
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/friends'; // Fallback if no history
+      }
+    });
   }
 }

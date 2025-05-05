@@ -383,12 +383,12 @@ export class Friends {
           
           <!-- Back Button -->
           <div class="mt-8 flex justify-center">
-            <a 
-              href="/profile"
+            <button 
+              id="backButton"
               class="px-6 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 rounded-lg transition-colors"
             >
               ${i18n.t('back')}
-            </a>
+            </button>
           </div>
         </div>
       </div>
@@ -523,6 +523,17 @@ export class Friends {
           await this.handleFriendAction(action, username);
         }
       });
+    });
+
+    // Back button
+    const backButton = document.getElementById('backButton');
+    backButton?.addEventListener('click', () => {
+      console.log('previous', window.history.back);
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/friends'; // Fallback if no history
+      }
     });
   }
 }
