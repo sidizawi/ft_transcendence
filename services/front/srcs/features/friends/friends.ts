@@ -476,7 +476,6 @@ export class Friends {
   }
 
   setupEventListeners() {
-    const friendsTab = document.getElementById('friends-tab');
     const addFriendButton = document.getElementById('add-friend-button');
     const searchInput = document.getElementById('friends-search') as HTMLInputElement;
 
@@ -519,7 +518,6 @@ export class Friends {
         e.stopPropagation();
         const action = button.getAttribute('data-action');
         const username = button.getAttribute('data-username');
-        // const userId = button.getAttribute('data-userid');
 
         if (action && username) {
           await this.handleFriendAction(action, username);

@@ -37,6 +37,9 @@ async function friendRoutes(fastify, options) {
 		const actualUserRow = fastify.db.prepare("SELECT * FROM friend WHERE (userid1, userid2) = (?, ?)").get(actualid, friendid);
 		const friendRow = fastify.db.prepare("SELECT * FROM friend WHERE (userid1, userid2) = (?, ?)").get(friendid, actualid);
 
+		console.log('actualUserRow', actualUserRow);
+		console.log('friendRow', friendRow);
+
 		if (!actualUserRow && !friendRow){
 			fastify.db.prepare("INSERT INTO friend (userid1, userid2, username1, username2, status) VALUES (?, ?, ?, ?, ?)").run(
 				actualid,
@@ -54,6 +57,9 @@ async function friendRoutes(fastify, options) {
 			);
 			reply.code(201);
 			return { message: 'User successfully added'};
+		} else if (!actualUserRow && friendRow) {
+			reply.code(400);
+			return { error: 'Unknown user'}; //when you're blocked, you cannot add this person
 		}
 		else{
 			reply.code(500);
