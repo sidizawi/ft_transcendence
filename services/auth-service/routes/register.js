@@ -33,7 +33,7 @@ async function registerRoutes(fastify) {
         }
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await insertUser(username, email, hashedPassword, null, 0, 1, 0);
+        await insertUser(username, email, hashedPassword, '/img/default-avatar.jpg', 0, 1, 0);
     
         const user = await getUserByUsername(username);
 
