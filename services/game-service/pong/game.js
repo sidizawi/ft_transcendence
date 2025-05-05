@@ -1,13 +1,13 @@
 import { aiThink, aiMove } from "./ai.js";
 import Ball from './Ball.js';
 import { createAndUpdateGameRecord } from '../db.js';
-import { inGameUsers } from '../index.js';
+import { inGameUsers, waitingPlayers } from '../index.js';
 
 /*
   * TODO:
-  * gameover: handleDisconnect
-  * friend
-  * block keys remote
+  * gameover: handleDisconnect --> should be good 
+  * friend 
+  * block keys remote --> should be good
 */
 
 
@@ -71,27 +71,33 @@ export const addPlayer = (gameId, username, ws) => {
     dbGameId: ws ? ws.dbGameId : null
   };
   
+  if (ws) {
+  inGameUsers.add(username);
+  return ws.send(JSON.stringify({
+    type: 'gameJoined',
+    gameId,
+    username: ws.username,
+    side
+    }));
+  }
+
   // If we have two players, start the game
   if (Object.keys(game.players).length === 2) {
     startGame(gameId);
   }
-  
-  return side;
 };
 
 // Update player paddle position
-export const updatePlayerPosition = (gameId, username, data) => {
-  const { y, side } = data;
+export const updatePlayerPosition = (gameId, side, y) => {
   const game = games[gameId];
-  if (!game || !game.players[username]) return;
-  
-  const player = Object.values(game.players).find(p => p.side === side);
+  if (!game) return;
+
+  const player = Object.values(game.players)
+                       .find(p => p.side === side);
   if (!player) return;
-  const paddleHeight = game.dimensions.paddleHeight;
-  const canvasHeight = game.dimensions.height;
-  
-  // Keep paddle within canvas bounds
-  player.y = Math.max(0, Math.min(canvasHeight - paddleHeight, y));
+
+  const maxY = game.dimensions.height - game.dimensions.paddleHeight;
+  player.y = Math.max(0, Math.min(maxY, y));
 };
 
 // Start game
@@ -347,11 +353,6 @@ const broadcastGameState = (gameId) => {
 export const handleDisconnect = (gameId, username) => {
   const game = games[gameId];
   if (!game) return;
-  
-  //// Remove player from game
-  //if (game.players[username]) {
-  //  delete game.players[username];
-  //}
 
   // Remove from inGameUsers
   inGameUsers.delete(username);
@@ -359,9 +360,7 @@ export const handleDisconnect = (gameId, username) => {
   if (game.status === 'playing') {
     stopGame(gameId);
   }
-  //if (game.players[username]) {
-  //  delete game.players[username];
-  //}
+
   // If no players left, clean up the game
   if (Object.keys(game.players).length === 0) {
     if (game.intervalId) {

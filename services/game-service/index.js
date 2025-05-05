@@ -32,33 +32,16 @@ function setupNewGame(ws, mode, opponent = null) {
       message: 'You are already in a game'
     }));
   }
-  inGameUsers.add(ws.username);
   // Generate a unique game ID
   const gameId = `game-${Date.now()}`;
   // Create a new game with the client dimensions
   createGame(gameId, ws, ws.canvasDimensions);
   
   // Add the main player to the game
-  const side = addPlayer(gameId, ws.username, ws);
+  addPlayer(gameId, ws.username, ws);
   
   // Store game ID with the connection
   ws.gameId = gameId;
-  
-  console.log(`New game created: gameId=${gameId}, username=${ws.username}`);
-  
-  // Send confirmation to client
-  ws.send(JSON.stringify({
-    type: 'gameJoined',
-    gameId,
-    username: ws.username,
-    side
-  }));
-  
-  // Tell client game is started
-  ws.send(JSON.stringify({
-    type: 'gameStarted',
-    mode
-  }));
   
   // Handle different opponent types based on mode
   if (mode === 'singlePlayer') {
@@ -73,17 +56,8 @@ function setupNewGame(ws, mode, opponent = null) {
   }
   else if (mode === 'online' && opponent) {
     // Add the opponent and notify them
-    const oppSide = side === 'left' ? 'right' : 'left';
+    opponent.gameId = gameId; 
     addPlayer(gameId, opponent.username, opponent);
-    opponent.gameId = gameId;
-    inGameUsers.add(opponent.username);
-    opponent.send(JSON.stringify({
-      type: 'gameJoined',
-      gameId,
-      username: opponent.username,
-      side: oppSide
-    }));
-    
     opponent.send(JSON.stringify({
       type: 'gameStarted',
       mode: 'online'
@@ -92,8 +66,11 @@ function setupNewGame(ws, mode, opponent = null) {
   
   // Start the game
   startGame(gameId);
-  
-  return gameId;
+  // Tell client game is started
+  return ws.send(JSON.stringify({
+    type: 'gameStarted',
+    mode
+  }));
 }
 
 fastify.register((wsRoutes) => {
@@ -109,9 +86,6 @@ fastify.register((wsRoutes) => {
 		fastify.jwt.verify(token);
 
      ws.on('message', (message) => {
-      //if (!(ws in sockets)) {
-      //  sockets.set(ws, {username});
-      //}
       try {
         const data = JSON.parse(message.toString());
 
@@ -163,7 +137,7 @@ fastify.register((wsRoutes) => {
         }
         else if (data.type === 'paddleMove') {
           if (ws.gameId && ws.username) {
-            updatePlayerPosition(ws.gameId, ws.username, data);
+            updatePlayerPosition(ws.gameId, data.side, data.y);
           }
         }
       } catch (error) {
@@ -172,10 +146,13 @@ fastify.register((wsRoutes) => {
     });
     // Handle disconnections
     ws.on('close', () => {
-      console.log('Player disconnected');
+      const idx = waitingPlayers.indexOf(ws);
+      if (idx !== -1) waitingPlayers.splice(idx, 1);
+
       if (ws.gameId && ws.username) {
         handleDisconnect(ws.gameId, ws.username);
       }
+      console.log('Player disconnected');
     });
   });
 });

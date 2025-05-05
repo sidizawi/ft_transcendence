@@ -27,6 +27,7 @@ export class Pong {
       rightPlayer: null,
       leftPlayerScore: 0,
       rightPlayerScore: 0,
+      playerSide: null,
       keys: {},
       singlePlayer: false,
       gameStarted: false,
@@ -142,7 +143,13 @@ export class Pong {
             }));
           }
         }
+        else if (data.type === 'gameJoined') {
+            this.state.playerSide = data.side;
+        }
         else if (data.type === 'gameStarted') {
+            if (data.mode !== 'online' && data.mode !== 'singlePlayer') {
+              this.state.playerSide = null;
+            }
             this.state.gameStarted = true;
             this.state.singlePlayer = data.mode === 'singlePlayer';
             this.state.leftPlayerScore = 0;
@@ -156,7 +163,8 @@ export class Pong {
             if (data.scores) {
                 this.state.leftPlayerScore = data.scores.left;
                 this.state.rightPlayerScore = data.scores.right;
-            }            
+            }
+
             if (data.ball && this.state.ball) {
                 this.state.ball.x = data.ball.x;
                 this.state.ball.y = data.ball.y;
