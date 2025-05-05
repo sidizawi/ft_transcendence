@@ -21,8 +21,14 @@ SVG:	(fill/stroke)
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
 		- ok si meme mdp????
-		- message d'erreur si un mdp vide + bloquer
+
+		- enlever message erreur, sinon toujours la?
 		- delete Account/save changes buttons visu
+
+
+
+
+
 
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((

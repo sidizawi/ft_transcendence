@@ -155,7 +155,7 @@ export const translations = {
       required: 'Erforderlich',
       invalidEmail: 'Ungültige E-Mail-Adresse',
       passwordMismatch: 'Passwörter stimmen nicht überein',
-      updateSuccess: 'Erfolgreich aktualisiert',
+      updateSuccess: 'ErfolgreAich aktualisiert',
       updateError: 'Aktualisierung fehlgeschlagen',
       
       // Notes & Descriptions

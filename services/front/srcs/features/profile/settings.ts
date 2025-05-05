@@ -79,6 +79,7 @@ export class Settings {
     const newUsername = formData.get('username') as string;
     const newEmail = !this.user.google ? formData.get('email') as string : null;
     const newPassword = !this.user.google ? formData.get('password') as string : '';
+    const confirmPassword = !this.user.google ? formData.get('confirmPassword') as string : '';
   
     const payload: {
       newUsername?: string;
@@ -94,7 +95,15 @@ export class Settings {
         payload.newEmail = newEmail;
       }
       if (newPassword) {
-        payload.newPassword = newPassword;
+        if (confirmPassword && newPassword === confirmPassword)
+          payload.newPassword = newPassword;
+        else if (confirmPassword && newPassword !== confirmPassword) {
+          this.showError(i18n.t('passwordMismatch'));
+          return;
+        } else {
+          this.showError(i18n.t('emptyPassword'));
+          return;
+        }
       }
     }
   
@@ -361,9 +370,9 @@ export class Settings {
     const confirmButton = modal.querySelector('#confirm-delete');
     const passwordInput = modal.querySelector('#delete-account-password') as HTMLInputElement;
     const toggleDeletePassword = modal.querySelector('#toggle-delete-password');
-    const errorDiv = modal.querySelector('#delete-account-error');
-
+    
     const showError = (message: string) => {
+      const errorDiv = modal.querySelector('#delete-account-error');
       if (errorDiv) {
         errorDiv.textContent = message;
         errorDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400';
@@ -511,18 +520,17 @@ export class Settings {
               w-full px-4 py-2
               rounded-lg
               
-              border border-light-4/30
-              dark:border-transparent
-              dark:bg-dark-3 dark:text-dark-0
+              border border-light-4/30 dark:border-dark-0/30
+              dark:bg-dark-3
 
-              placeholder-light-4/40
-              text-light-4
+              placeholder-light-4/40 dark:placeholder-dark-0/40
+              text-light-4 dark:text-dark-0
 
               focus:outline-none
 
-              focus:border-light-3
+              focus:border-light-3 dark:focus:border-dark-1
               focus:ring-2
-              focus:ring-light-0
+              focus:ring-light-0 dark:focus:ring-dark-4
             "
             placeholder="000000"
             maxlength="6"
@@ -760,26 +768,49 @@ export class Settings {
                   </div>
                 `}
 
-                <div class="flex flex-col space-y-4 pt-6">
+                <div class="flex justify-center space-x-4">
                   <button
-                    type="button"
-                    id="deleteAccountBtn"
-                    class="w-full px-6 py-2 border border-red-500 dark:border-red-600 text-red-500 dark:text-red-400 rounded-md shadow-sm text-sm font-medium hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    type="submit"
+                    class="px-6 py-2 rounded-lg shadow-sm text-base font-medium text-light-0 dar:text-dark-4 bg-light-3 dark:bg-dark-1 hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
                   >
-                    ${i18n.t('deleteAccount')}
+                    ${i18n.t('saveChanges')}
                   </button>
+                </div>
 
-                  <div class="flex justify-center space-x-4">
+                <div id="error-message" class="mt-4 p-4 rounded-lg hidden"></div>
+
+                <div class="relative pt-4">
+                  <div class="absolute top-1/2 right-0 transform -translate-y-1/2 inline-block group text-base">
                     <button
-                      type="submit"
-                      class="px-6 py-2 rounded-lg shadow-sm text-sm font-medium text-light-0 dar:text-dark-4 bg-light-3 dark:bg-dark-1 hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
+                      type="button"
+                      id="deleteAccountBtn"
+                      class="
+                        rounded-lg p-2
+                        flex items-center justify-center
+                        text-off-btn-light-0 dark:text-off-btn-dark-0
+                        hover:text-light-0 dark:hover:text-dark-4
+                        hover:bg-off-btn-light-0 dark:hover:bg-off-btn-dark-0
+                        transition-all         /* animate any change smoothly */
+                        duration-200
+                        transform              /* enable transforms */
+                        hover:scale-110        /* optional: slight zoom on hover */
+                      "
                     >
-                      ${i18n.t('saveChanges')}
+                      <!-- SVG: visible by default, hidden on hover -->
+                      <span class="block group-hover:hidden">
+                        ${SVGIcons.getDeleteIcon()}
+                      </span>
+
+                      <!-- Text: hidden by default, shown on hover -->
+                      <span class="hidden group-hover:inline">
+                        ${i18n.t('deleteAccount')}
+                      </span>
                     </button>
                   </div>
                 </div>
+
+                  
               </form>
-              <div id="error-message" class="mt-4 p-4 rounded-lg hidden"></div>
             </div>
           </div>
         </div>
@@ -807,8 +838,7 @@ export class Settings {
 
     avatarUpload?.addEventListener('change', (e) => this.handleAvatarChange(e));
     deleteAccountBtn?.addEventListener('click', () => this.handleDeleteAccount());
-    updateForm?.addEventListener('submit', (e) => this.handleInfoUpdate(e));
-
+    
     // Password visibility toggle
     togglePassword?.addEventListener('click', () => {
       const isPassword = passwordInput.type === 'password';
@@ -826,25 +856,19 @@ export class Settings {
         toggleConfirmPassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
       }
     });
-
+    
+    updateForm?.addEventListener('submit', (e) => this.handleInfoUpdate(e));
     // Add password confirmation validation
     if (!this.user.google) {
-      const validatePasswords = () => {
         if (passwordInput.value && confirmPasswordInput.value) {
           if (passwordInput.value !== confirmPasswordInput.value) {
-            confirmPasswordInput.setCustomValidity(i18n.t('passwordMismatch'));
-          } else {
-            confirmPasswordInput.setCustomValidity('');
+            this.showError(i18n.t('passwordMismatch'));
+            return;
           }
         } else {
           this.showError(i18n.t('emptyPassword'));
           return;
-          // confirmPasswordInput.setCustomValidity(i18n.t('emptyPassword'));
         }
-      };
-
-      passwordInput?.addEventListener('input', validatePasswords);
-      confirmPasswordInput?.addEventListener('input', validatePasswords);
     }
   }
 }
