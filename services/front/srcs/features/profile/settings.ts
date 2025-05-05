@@ -65,6 +65,9 @@ export class Settings {
           this.showError(i18n.t('emptyPassword'));
           return;
         }
+      } else {
+        this.showError(i18n.t('emptyPassword'));
+        return;
       }
     }
   
@@ -133,21 +136,33 @@ export class Settings {
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
     modal.innerHTML = this.renderDeleteAccountModal();
     document.body.appendChild(modal);
-
+  
     const cancelButton = modal.querySelector('#cancel-delete');
     const confirmButton = modal.querySelector('#confirm-delete');
+    const usernameInput = modal.querySelector('#username') as HTMLInputElement;
     const passwordInput = modal.querySelector('#delete-account-password') as HTMLInputElement;
+    const confirmPasswordInput = modal.querySelector('#confirmPassword') as HTMLInputElement;
     const toggleDeletePassword = modal.querySelector('#toggle-delete-password');
+    const toggleConfirmPassword = modal.querySelector('#toggle-confirm-password');
+    const errorDiv = modal.querySelector('#delete-account-error');
     
     const showError = (message: string) => {
-      const errorDiv = modal.querySelector('#delete-account-error');
       if (errorDiv) {
         errorDiv.textContent = message;
         errorDiv.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400';
         errorDiv.classList.remove('hidden');
       }
     };
-
+  
+    const hideError = () => {
+      errorDiv?.classList.add('hidden');
+    };
+  
+    // Hide error on input focus
+    [usernameInput, passwordInput, confirmPasswordInput].forEach(input => {
+      input?.addEventListener('focus', hideError);
+    });
+  
     toggleDeletePassword?.addEventListener('click', () => {
       const isPassword = passwordInput.type === 'password';
       passwordInput.type = isPassword ? 'text' : 'password';
@@ -155,13 +170,39 @@ export class Settings {
         toggleDeletePassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
       }
     });
-
+  
+    toggleConfirmPassword?.addEventListener('click', () => {
+      const isPassword = confirmPasswordInput.type === 'password';
+      confirmPasswordInput.type = isPassword ? 'text' : 'password';
+      if (toggleConfirmPassword instanceof HTMLElement) {
+        toggleConfirmPassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
+      }
+    });
+  
     cancelButton?.addEventListener('click', () => {
       modal.remove();
     });
-
+  
     confirmButton?.addEventListener('click', async () => {
       try {
+        // Verify all fields are completed
+        if (!usernameInput.value || !passwordInput.value || !confirmPasswordInput.value) {
+          showError(i18n.t('emptyAllFields'));
+          return;
+        }
+  
+        // Verify username matches
+        if (usernameInput.value !== this.user.username) {
+          showError(i18n.t('usernameFormatError'));
+          return;
+        }
+  
+        // Verify passwords match
+        if (passwordInput.value !== confirmPasswordInput.value) {
+          showError(i18n.t('passwordMismatch'));
+          return;
+        }
+  
         const success = await AccountService.requestAccountDeletion(passwordInput.value);
         if (success) {
           modal.remove();
@@ -169,12 +210,12 @@ export class Settings {
           verificationModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
           verificationModal.innerHTML = this.renderVerificationModal(i18n.t('deleteAccountVerification'));
           document.body.appendChild(verificationModal);
-
+  
           const verifyButton = verificationModal.querySelector('#verify-code');
           const cancelVerification = verificationModal.querySelector('#cancel-verification');
           const codeInput = verificationModal.querySelector('#verification-code') as HTMLInputElement;
           const verificationError = verificationModal.querySelector('#verification-error');
-
+  
           const showVerificationError = (message: string) => {
             if (verificationError) {
               verificationError.textContent = message;
@@ -182,11 +223,11 @@ export class Settings {
               verificationError.classList.remove('hidden');
             }
           };
-
+  
           cancelVerification?.addEventListener('click', () => {
             verificationModal.remove();
           });
-
+  
           verifyButton?.addEventListener('click', async () => {
             try {
               const verificationCode = codeInput.value.trim();
@@ -195,7 +236,7 @@ export class Settings {
                 showVerificationError(i18n.t('invalid2FACode'));
                 return;
               }
-
+  
               const success = await AccountService.confirmAccountDeletion(verificationCode);
               if (success) {
                 window.location.href = '/signin';
@@ -209,7 +250,7 @@ export class Settings {
         showError(error instanceof Error ? error.message : i18n.t('deleteAccountError'));
       }
     });
-  }
+  }  
 
   private createVerificationModal(title: string): HTMLDivElement {
     const modal = document.createElement('div');
@@ -701,7 +742,16 @@ export class Settings {
     const togglePassword = document.getElementById('toggle-password');
     const toggleConfirmPassword = document.getElementById('toggle-confirm-password');
     const deleteAccountBtn = document.getElementById('deleteAccountBtn');
-
+    const errorMessage = document.getElementById('error-message');
+  
+    // Hide error message on input focus
+    const inputs = updateForm?.querySelectorAll('input');
+    inputs?.forEach(input => {
+      input.addEventListener('focus', () => {
+        errorMessage?.classList.add('hidden');
+      });
+    });
+  
     avatarUpload?.addEventListener('change', (e) => this.handleAvatarChange(e));
     deleteAccountBtn?.addEventListener('click', () => this.handleDeleteAccount());
     
@@ -713,7 +763,7 @@ export class Settings {
         togglePassword.innerHTML = SVGIcons.getEyeIcon(isPassword);
       }
     });
-
+  
     // Confirm password visibility toggle
     toggleConfirmPassword?.addEventListener('click', () => {
       const isPassword = confirmPasswordInput.type === 'password';
@@ -724,17 +774,5 @@ export class Settings {
     });
     
     updateForm?.addEventListener('submit', (e) => this.handleInfoUpdate(e));
-    // Add password confirmation validation
-    if (!this.user.google) {
-        if (passwordInput.value && confirmPasswordInput.value) {
-          if (passwordInput.value !== confirmPasswordInput.value) {
-            this.showError(i18n.t('passwordMismatch'));
-            return;
-          }
-        } else {
-          this.showError(i18n.t('emptyPassword'));
-          return;
-        }
-    }
   }
 }
