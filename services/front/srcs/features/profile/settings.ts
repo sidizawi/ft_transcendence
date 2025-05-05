@@ -56,16 +56,27 @@ export class Settings {
         payload.newEmail = newEmail;
       }
       if (newPassword) {
-        if (confirmPassword && newPassword === confirmPassword)
-          payload.newPassword = newPassword;
-        else if (confirmPassword && newPassword !== confirmPassword) {
+        if (confirmPassword && newPassword === confirmPassword) {
+          try {
+            const matches = await AccountService.checkPassword(newPassword);
+            if (matches) {
+              this.showError(i18n.t('samePasswordError'));
+              return;
+            }
+            payload.newPassword = newPassword;
+          } catch (error) {
+            console.error('Password check error:', error);
+            this.showError(i18n.t('updateError'));
+            return;
+          }
+        } else if (confirmPassword && newPassword !== confirmPassword) {
           this.showError(i18n.t('passwordMismatch'));
           return;
         } else {
           this.showError(i18n.t('emptyPassword'));
           return;
         }
-      } else {
+      } else if (!newPassword && confirmPassword) {
         this.showError(i18n.t('emptyPassword'));
         return;
       }
@@ -79,7 +90,7 @@ export class Settings {
         this.updateView();
         return;
       }
-
+  
       const requestSuccess = await AccountService.requestProfileUpdate(payload);
       if (requestSuccess) {
         const modal = this.createVerificationModal(i18n.t('emailVerification'));
@@ -87,14 +98,14 @@ export class Settings {
         const cancelButton = document.getElementById('cancel-verification');
         const codeInput = document.getElementById('verification-code') as HTMLInputElement;
         const messageDiv = document.getElementById('verification-message');
-
+  
         const handleVerify = async () => {
           const code = codeInput.value.trim();
           if (!code || code.length !== 6 || !/^\d+$/.test(code)) {
             this.showVerificationError(messageDiv, i18n.t('invalid2FACode'));
             return;
           }
-
+  
           try {
             const success = await AccountService.confirmProfileUpdate(code);
             if (success) {
@@ -107,12 +118,12 @@ export class Settings {
             codeInput.focus();
           }
         };
-
+  
         codeInput?.addEventListener('input', () => {
           const code = codeInput.value.trim();
           verifyButton.disabled = !code || code.length !== 6 || !/^\d+$/.test(code);
         });
-
+  
         verifyButton?.addEventListener('click', handleVerify);
         codeInput?.addEventListener('keypress', (e) => {
           if (e.key === 'Enter' && !verifyButton.disabled) {
@@ -120,7 +131,7 @@ export class Settings {
             handleVerify();
           }
         });
-
+  
         cancelButton?.addEventListener('click', () => {
           modal.remove();
         });
@@ -130,7 +141,7 @@ export class Settings {
       this.showError(error instanceof Error ? error.message : i18n.t('updateError'));
     }
   }
-  
+    
   private async handleDeleteAccount() {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';

@@ -65,6 +65,28 @@ export class AccountService {
     }
   }
 
+  static async checkPassword(password: string): Promise<boolean> {
+    try {
+      const response = await fetch(`${USER_API_URL}/check-password`, {
+        method: 'POST',
+        headers: TokenManager.getAuthHeaders(),
+        body: JSON.stringify({ password })
+      });
+  
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || i18n.t('updateError'));
+      }
+  
+      const { matches } = await response.json();
+      return matches;
+    } catch (error) {
+      console.error('Password check error:', error);
+      throw error;
+    }
+  }
+  
+
   static async requestProfileUpdate(payload: {
     newUsername?: string;
     newEmail?: string;

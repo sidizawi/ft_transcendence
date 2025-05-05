@@ -22,9 +22,6 @@ SVG:	(fill/stroke)
 		- changer window.href.location ----> refresh pour rediriger
 		- ok si meme mdp????
 
-		- enlever message erreur, sinon toujours la?
-		- delete Account/save changes buttons visu
-
 
 
 
@@ -34,10 +31,12 @@ SVG:	(fill/stroke)
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
 
 	FriendsProfile:
-		- Erreur avatar quand NULL
 		- si qqn nous a bloquer, alors son profile donne 404
 
+
+
 	BACK:
+		- ${USER_API_URL}/check-password (accountService)
 		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
 		- ajouter dans db /img/default.jpg si rien
 		twoFactorAuth/translations:
