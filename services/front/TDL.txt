@@ -1,35 +1,31 @@
-To Do:
-
 ajouter status quand co et deco
 ajouter status partout
+
 Ajout notif si new message + new demande de connexion
+
 icone retour
 SVG:	(fill/stroke)
 
 
 
 
-	Profile:
-		- peut-on acceder au profil de notre adversaire via gameHistory?
+
+	FriendsProfile:
+		- si qqn nous a bloque, alors son profile donne 404 (attendback)
 
 	friendsTab:
 		- pourquoi se referme entre profile et reste?
 		- Bon comportement sur friendProfile quand chqngement de friendStatus faire pareil partout
 			-> ne se ferme pas, rafraichit
 
-	auth.ts:
-		- Google logo
-
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
 
-
+	auth.ts:
+		- Google logo
 
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
-
-	FriendsProfile:
-		- si qqn nous a bloquer, alors son profile donne 404
 
 
 
@@ -37,8 +33,8 @@ SVG:	(fill/stroke)
 		- ${USER_API_URL}/check-password (accountService)
 		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
 		- ajouter dans db /img/default.jpg si rien
-		twoFactorAuth/translations:
-			- langue des mails
+			twoFactorAuth/translations:
+				- langue des mails
 
 	PARTOUT:
 		- console du navigateur renvoit ERREUR
@@ -48,10 +44,6 @@ SVG:	(fill/stroke)
 			- si token non re-sent (supp ou autre) rediriger vers sign in
 		- / accepter comme URL?
 	
-
-
-
-
 
 
 

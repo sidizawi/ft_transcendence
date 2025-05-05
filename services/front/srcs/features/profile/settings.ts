@@ -481,7 +481,7 @@ export class Settings {
                 <div class="flex justify-center space-x-4">
                   <button
                     type="submit"
-                    class="px-6 py-2 rounded-lg shadow-sm text-base font-medium text-light-0 dar:text-dark-4 bg-light-3 dark:bg-dark-1 hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
+                    class="px-6 py-2 rounded-lg shadow-sm text-base bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-4 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
                   >
                     ${i18n.t('saveChanges')}
                   </button>
