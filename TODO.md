@@ -14,3 +14,5 @@ PoC XSS
 
 
 Possible de changer son mdp avec le meme mdp
+
+Route param username, check if the user is blocked

@@ -14,7 +14,7 @@
 - [ ] **Security**
   - ✅ Passwords hashed
   - ✅ Protection against SQL injections/XSS
-  - ❌ HTTPS (wss for WebSocket)
+  - ✅ HTTPS (wss for WebSocket)
   - ✅ Validation on user inputs
   - ✅ Sensitive data in `.env`, ignored by Git
 
