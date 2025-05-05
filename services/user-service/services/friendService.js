@@ -13,3 +13,10 @@ export async function updateFriendUsernameByIdUsername(columnUser, username, col
 	const params = [username, id, username2];
 	await queryPost(query, params);
 }
+
+export async function deleteFriendById(id) {
+	const query = `DELETE FROM friend WHERE userid1 = ? OR userid2 = ?`;
+	const params = [id, id];
+	await queryPost(query, params);
+}
+

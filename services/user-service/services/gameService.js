@@ -1,5 +1,12 @@
 import { queryPost } from "./query.js";
 
+export async function getGameByPlayerIdAndGameType(params) {
+	const query = `SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?) AND game_type = ?`;
+	const result = await queryPost(query, params);
+
+	return result;
+}
+
 export async function updateUsernameByPlayerAndUsername(columnUser, newUsername, columnId, id, username) {
 	const query = `UPDATE game SET username_${columnUser} = ? 
 		WHERE playerid_${columnId} = ? 
@@ -13,5 +20,11 @@ export async function updatePlayerwinByPlayerwinAndPlayerid(columnVic, newUserna
 		WHERE player_${columnVic} = ? 
 		AND (playerid_1 = ? OR playerid_2 = ?)`;
 	const params = [newUsername, username, id, id];
+	await queryPost(query, params);
+}
+
+export async function deleteGameByPlayerId(id) {
+	const query = `DELETE FROM game WHERE playerid_1 = ? OR playerid_2 = ?`;
+	const params = [id, id];
 	await queryPost(query, params);
 }

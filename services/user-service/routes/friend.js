@@ -1,5 +1,6 @@
 import { queryGet, queryAll, queryPost } from "../services/query.js";
 import { getUserByUsername } from "../services/userService.js";
+import { getGameByPlayerIdAndGameType } from "../services/gameService.js";
 
 async function friendRoutes(fastify, options) {
     fastify.get('/gamestats/:game/:username', async (request, reply) => {
@@ -16,9 +17,8 @@ async function friendRoutes(fastify, options) {
 
         const userId = userExists.id;
 
-        const query = 'SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?) AND game_type = ?';
         const params = [userId, userId, game];
-        const games = await queryAll(query, params);
+        const games = await getGameByPlayerIdAndGameType(params);
 
         if (!games || games.length === 0){
             return reply.code(204).send({msg: 'No content'});

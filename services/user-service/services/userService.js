@@ -95,3 +95,8 @@ export async function updateSomeById(updates, params) {
     const query = `UPDATE users SET ${updates} WHERE id = ?`;
     await queryPost(query, params);
 }
+
+export async function deleteUserById(id) {
+    const query = `DELETE FROM users WHERE id = ?`;
+    await queryPost(query, id);
+}
