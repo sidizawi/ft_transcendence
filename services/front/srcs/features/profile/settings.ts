@@ -421,13 +421,32 @@ export class Settings {
               <input 
                 type="text" 
                 id="verification-code"
-                class="w-full px-4 py-2 rounded-lg border border-light-2 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                placeholder="000000"
-                maxlength="6"
-                pattern="[0-9]*"
-                inputmode="numeric"
-                autocomplete="one-time-code"
-              >
+                class="
+                  mt-1 block w-full rounded-md px-3 py-2 text-base
+
+                  border border-light-4/30
+                  dark:border-dark-0/30
+                  dark:bg-dark-4 <!-- pas de bg light -->
+                  
+                  placeholder-light-4/40
+                  dark:placeholder-dark-0/40
+                  text-light-4
+                  dark:text-dark-0
+                  
+                  focus:outline-none
+
+                  focus:border-light-3
+                  dark:focus:border-dark-1
+                  focus:ring-2
+                  focus:ring-light-0
+                  dark:focus:ring-dark-4
+                  "
+                  placeholder="000000"
+                  maxlength="6"
+                  pattern="[0-9]*"
+                  inputmode="numeric"
+                  autocomplete="one-time-code"
+                >
             </div>
             <div class="flex justify-end space-x-4">
               <button 
@@ -438,7 +457,12 @@ export class Settings {
               </button>
               <button 
                 id="verify-code"
-                class="px-4 py-2 bg-red-600 text-dark-0 rounded-lg hover:bg-red-700 transition-colors"
+                class="
+                  px-4 py-2 rounded-lg transition-colors
+                  bg-off-btn-light-0 dark:bg-off-btn-dark-1
+                  text-light-0 dark:text-dark-4
+                  hover:bg-off-btn-light-1 dark:hover:bg-off-btn-dark-0
+                "
               >
                 ${i18n.t('verify')}
               </button>
