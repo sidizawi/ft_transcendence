@@ -514,7 +514,7 @@ export class Settings {
                       "
                     >
                       <!-- SVG: visible by default, hidden on hover -->
-                      <span class="block group-hover:hidden">
+                      <span class="block group-hover:hidden w-7 h-7">
                         ${SVGIcons.getDeleteIcon()}
                       </span>
 

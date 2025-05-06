@@ -143,7 +143,7 @@ export class Profile {
                 <div class="ml-auto flex items-center space-x-2">
                   <a 
                     href="/profile/settings"
-                    class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 hover:dark:text-dark-0"
+                    class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 hover:dark:text-dark-0 w-6 h-6"
                   >
                     ${SVGIcons.getGearIcon()}
                   </a>

@@ -309,7 +309,7 @@ export class Friends {
                       </div>
                       <div class="flex items-center space-x-3">
                         <button 
-                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors w-5 h-5"
                           data-action="block"
                           data-username="${friend.username2}"
                           title="${i18n.t('block')}"
@@ -317,7 +317,7 @@ export class Friends {
                           ${SVGIcons.getBlockIcon()}
                         </button>
                         <button 
-                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors w-5 h-5"
                           data-action="delete"
                           data-username="${friend.username2}"
                           title="${i18n.t('delete')}"
@@ -325,7 +325,7 @@ export class Friends {
                           ${SVGIcons.getDeleteIcon()}
                         </button>
                         <button 
-                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors w-5 h-5"
                           data-action="chat"
                           data-username="${friend.username2}"
                           title="${i18n.t('chat')}"
