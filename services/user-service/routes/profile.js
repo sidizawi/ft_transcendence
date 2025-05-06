@@ -1,4 +1,5 @@
-import { getUserById, getUserByUsername, getAllUsersByUsername } from "../services/userService.js";
+import { stat } from "fs";
+import { getUserById, getUserByUsername, getAllUsersByUsername, updateStatusById } from "../services/userService.js";
 
 import bcrypt from 'bcrypt';
 
@@ -63,6 +64,22 @@ async function profileRoutes(fastify ,options) {
         }
         const usernames = allUsers.map(user => user.username);
         return reply.code(200).send({ usernames });
+    });
+
+    fastify.post('/toggle-status', async (request, reply) => {
+        await request.jwtVerify();
+        const userId = request.user.id;
+
+        const user = await getUserById(userId);
+        if (!user){
+            return reply.code(404).send({ error: 'User doesnt exist'});
+        }
+
+        const newStatus = !user.status;
+
+        await updateStatusById(newStatus, userId);
+
+        return reply.code(200).send({ message: 'Status updated successfully', status: newStatus });
     });
 }
 

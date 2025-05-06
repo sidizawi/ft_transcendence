@@ -95,9 +95,7 @@ export async function updateUserById(username, email, password, id) {
 export async function updateUsernameById(username, id) {
     const query = `UPDATE users SET username = ? WHERE id = ?`;
     const params = [username, id];
-    const result = await queryPost(query, params);
-
-    return result;
+    await queryPost(query, params);
 }
 
 export async function updateAvatarById(avatar, id) {
@@ -114,6 +112,12 @@ export async function updateSomeById(updates, params) {
 export async function updatePrivacyById(privacy, id) {
     const query = `UPDATE users SET privacy = ? WHERE id = ?`;
     const params = [privacy, id];
+    await queryPost(query, params);
+}
+
+export async function updateStatusById(status, id) {
+    const query = `UPDATE users SET status = ? WHERE id = ?`;
+    const params = [status, id];
     await queryPost(query, params);
 }
 
