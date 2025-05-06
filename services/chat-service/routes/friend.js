@@ -48,6 +48,9 @@ async function friendRoutes(fastify, options) {
 
 			reply.code(201);
 			return { message: 'User successfully added'};
+		} else if (!actualUserRow && friendRow) {
+			reply.code(400);
+			return { error: 'Unknown user'}; //when you're blocked, you cannot add this person
 		}
 		else{
 			reply.code(500);

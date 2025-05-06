@@ -299,10 +299,10 @@ export class Connect4 {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-white text-center mb-6">
             ${i18n.t('games.connect4.title')}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p class="text-light-4 dark:text-gray-400 text-center mb-8">
             waiting for your friend
           </p>
         </div>
@@ -375,10 +375,10 @@ export class Connect4 {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-white text-center mb-6">
             ${i18n.t('games.connect4.title')}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p class="text-light-4 dark:text-gray-400 text-center mb-8">
             ${i18n.t('games.connect4.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

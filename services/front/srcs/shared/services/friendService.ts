@@ -132,7 +132,6 @@ export class FriendService {
 
       return await response.json();
     } catch (error) {
-      console.error('Add friend error:', error);
       throw error;
     }
   }
