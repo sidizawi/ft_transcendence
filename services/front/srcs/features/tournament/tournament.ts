@@ -6,20 +6,103 @@ import { TokenManager } from '../../shared/utils/token';
 
 export class Tournament {
 
+  private mode4: boolean = true;
+  private room: string | null = null;
+  private ws : WebSocket | null = null;
+
   constructor(path: string) {
-    let name = path.split("/").filter((el) => el.length)[1];
+    let name = decodeURI(path.split("/").filter((el) => el.length)[1]);
     let storage = localStorage.getItem(`tournament-${name}`);
     if (!storage) {
+      // todo: translate
+      ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
       setTimeout(() => {
         app.router.navigateTo("/tournament");
-      }, 500);
+      }, 100);
       return ;
     }
+    // localStorage.removeItem(`tournament-${name}`);
 
     let data = JSON.parse(storage);
-
+    //   name,
+    //   players,
+    //   code,
+    //   pub,
+    //   game,
+    //   mode,
+    //   room,
     if (data.mode == "local") {
+      this.mode4 = data.players % 4 == 0;
+      this.renderWaitingRoom("Creating tournament", true);
+      // createPlayers, display creating players
+      // display matches
+      // play
     } else {
+      this.room = data.room;
+      this.renderWaitingRoom("Joining tournament", true);
+      // connect to the server
+      // display waiting room
+      // display players
+      // display matches
+      // play
+    }
+  }
+
+  clean() {
+    this.ws?.close();
+    this.ws = null;
+    this.room = null;
+  }
+
+  shufflePlayers(players: number[]) {
+    for (let i = players.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [players[i], players[j]] = [players[j], players[i]];
+    }
+    return players;
+  }
+
+  generatePlayers(players: number) {
+    let pl = [...Array(players).keys()];
+
+    pl = this.shufflePlayers(pl);
+
+    let matches = [];
+  }
+
+  renderWaitingRoom(message: string, leave: boolean = false) {
+    const main = document.querySelector("main");
+
+    // todo: add translate
+    // add previous btn
+    main!.innerHTML = `
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+            ${i18n.t('tournaments.title')}
+          </h1>
+          <p id="waitingTournamentText" class="text-gray-600 dark:text-gray-400 text-center mb-8">
+            ${message}
+          </p>
+          ${leave ? `
+            <div class="flex items-center justify-center">
+              <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                Leave
+              </button>
+            </div>
+            `
+          : ""}
+        </div>
+      </div>
+    `;
+
+    if (leave) {
+      const leave = document.getElementById("leave");
+
+      leave?.addEventListener('click', () => {
+        this.clean();
+        app.router.navigateTo("/tournament");
+      });
     }
   }
 }
@@ -28,7 +111,6 @@ export class TournamentHomePage {
 
   private user: User | null;
   private ws: WebSocket | null;
-  private room: string | null = null;
 
   constructor(path: string | null = null) {
     this.ws = null;
@@ -179,6 +261,7 @@ export class TournamentHomePage {
         return ;
       }
 
+      console.log("mode", mode);
       if (mode == "remote") {
         this.createRemoteTournament(name, players, code, game, pub);
       } else {
@@ -187,15 +270,28 @@ export class TournamentHomePage {
     })
 
     form?.addEventListener('change', (event) => {
-      if ((event.target as HTMLElement)!.matches('input[name="privacy"]')) {
-        const value = (event.target as HTMLElement).getAttribute("value");
+      const target = event.target as HTMLInputElement;
+      if (target!.matches('input[name="privacy"]')) {
+        const value = target.value;
 
         const code = document.getElementById("tournamentCode") as HTMLInputElement;
+        const mode = (document.getElementById("game-mode") as HTMLInputElement).value;
+
         code!.value = "";
         if (value == "public") {
           code?.setAttribute("disabled", "");
-        } else {
+        } else if (mode == "remote") {
           code?.removeAttribute("disabled");
+        }
+      }
+      if (target!.matches('#game-mode')) {
+        const pub = document.getElementById("tournamentPublic") as HTMLInputElement;
+        const code = document.getElementById("tournamentCode") as HTMLInputElement;
+        if (target.value == "local") {
+          pub.checked = true;
+          code.setAttribute("disabled", "");
+        } else if (!pub.checked) {
+          code.removeAttribute("disabled");
         }
       }
     })
@@ -239,22 +335,19 @@ export class TournamentHomePage {
 
       console.log("create message received:", message);
       if (message.mode == "created") {
-        this.room = message.room;
         this.ws?.close();
         this.ws = null;
-        // this.renderWaitingTournamentRoom();
-        // todo: open new websocket to join a tournament
-        //this.renderWaitingRoom("created", true);
-        localStorage.setItem(`tournament-${name}`, JSON.stringify({
+        localStorage.setItem(`tournament-${message.room}`, JSON.stringify({
           name,
           players,
           code,
           pub,
           game,
           mode: "remote",
+          room: message.room
         }));
 
-        app.router.navigateTo("/tournament/remote/"+name);
+        app.router.navigateTo("/tournament/remote/"+message.room);
       }
     }
 
@@ -300,7 +393,6 @@ export class TournamentHomePage {
   clean() {
     this.ws?.close();
     this.ws = null;
-    this.room = null;
   }
 
   renderJoinTournamentRoom(data : any = null) {
@@ -418,9 +510,8 @@ export class TournamentHomePage {
       if (data.mode == "list") {
         this.renderJoinTournamentRoom(data.lst);
       } else if (data.mode == "joined") {
-        // todo
+        // todo: send to tournament remote page
         this.clean();
-        this.room = data.room;
         this.renderWaitingRoom("joined", true);
       } else if (data.mode == "cant_join") {
         this.ws?.send(JSON.stringify({
@@ -439,24 +530,6 @@ export class TournamentHomePage {
     });
 
     this.renderJoinTournamentRoom();
-  }
-
-  setupTournamentRoom() {
-    if (!this.room) {
-      this.clean();
-      app.router.navigateTo("/tournament/join");
-      return ;
-    }
-
-    const main = document.querySelector("main");
-  
-    main!.innerHTML = `
-      <div>
-        <h1>welcome</h1>
-      </div>
-    `;
-
-    //this.ws = 
   }
 
   renderBtnConn(data: string, name: string, token: string | null): string {

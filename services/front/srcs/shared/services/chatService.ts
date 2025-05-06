@@ -44,6 +44,7 @@ export class ChatService {
     this.ws = new WebSocket(`${CHAT_WS}${token ? `?token=${token}` : ""}`);
 
     this.ws.onopen = () => {
+      this.setuped = true;
       this.ws!.send(JSON.stringify({
         type: "new",
         userId: this.currentUser?.id,
@@ -70,8 +71,6 @@ export class ChatService {
         this.chatRooms.get(data.friend)?.(data);
       }
     }
-
-    this.setuped = true;
   }
 
   addNewChatRoom(friendUserName: string, callback: (data: any) => void) {
