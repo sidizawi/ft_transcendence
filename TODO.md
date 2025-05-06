@@ -15,6 +15,6 @@ PoC XSS
 
 Possible de changer son mdp avec le meme mdp
 
-Route param username, check if the user is blocked
-
 Pas de message qand on veut modifier son username par un username déjà pris
+
+Online status 
