@@ -28,7 +28,7 @@ export class AccountService {
         ...TokenManager.getUserFromLocalStorage()!,
         username: profile.username,
         email: profile.email,
-        avatar: profile.avatar || '/img/default-avatar.jpg',
+        avatar: profile.avatar,
         twoFactorEnabled: profile.is_two_factor_enabled,
         google: profile.google || false,
       };

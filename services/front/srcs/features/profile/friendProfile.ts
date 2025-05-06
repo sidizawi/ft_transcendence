@@ -209,7 +209,7 @@ export class FriendProfile {
               <div class="flex items-center px-8 pt-6">
                 <div class="relative shrink-0">
                   <img 
-                    src="/${this.avatar}" 
+                    src="${this.avatar}" 
                     alt="${this.username}" 
                     class="w-32 h-32 rounded-full object-cover"
                   >

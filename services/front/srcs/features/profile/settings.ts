@@ -298,7 +298,7 @@ export class Settings {
               <div class="flex flex-col items-center mb-8">
                 <div class="relative mb-4">
                   <img 
-                    src="/${this.user.avatar}" 
+                    src="${this.user.avatar}" 
                     alt="${i18n.t('avatar')}" 
                     class="w-32 h-32 rounded-full object-cover"
                   >

@@ -109,7 +109,7 @@ export class StatsService {
           result: game.playerWin === game.opponent ? 'loss' : 'win',
           opponent: game.opponent,
           score: game.score || '',
-          avatar: game.avatar || '/img/default-avatar.jpg'
+          avatar: game.avatar
         }))
       };
     } catch (error) {
@@ -240,7 +240,7 @@ export class StatsService {
             month: '2-digit',
             year: '2-digit'
           }),
-          avatar: game.avatar || '/img/default-avatar.jpg'
+          avatar: game.avatar
         }))
       };
     } catch (error) {

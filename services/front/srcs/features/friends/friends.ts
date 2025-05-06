@@ -71,7 +71,7 @@ export class Friends {
 
   private getFriendAvatar(username: string): string {
     const friend = this.friends.find(f => f.username2 === username);
-    return friend?.avatar || '/img/default-avatar.jpg';
+    return friend!.avatar || '/img/default-avatar.jpg';
   }
 
   private renderAddFriendModal(): string {
