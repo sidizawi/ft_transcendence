@@ -91,7 +91,7 @@ export class FriendsTab {
                             <div class="flex items-center space-x-3">
                               <div class="relative">
                                 <img 
-                                  src="${friend.avatar}" 
+                                  src="/${friend.avatar}" 
                                   alt="${friend.username2}"
                                   class="w-8 h-8 rounded-full object-cover"
                                 >
@@ -123,7 +123,7 @@ export class FriendsTab {
                             <div class="flex items-center space-x-3">
                               <div class="relative">
                                 <img 
-                                  src="${friend.avatar}" 
+                                  src="/${friend.avatar}" 
                                   alt="${friend.username2}"
                                   class="w-8 h-8 rounded-full object-cover"
                                 >
@@ -157,7 +157,7 @@ export class FriendsTab {
                               <div class="flex items-center space-x-3">
                                 <div class="relative">
                                   <img 
-                                    src="${friend.avatar}" 
+                                    src="/${friend.avatar}" 
                                     alt="${friend.username2}"
                                     class="w-8 h-8 rounded-full object-cover"
                                   >

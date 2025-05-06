@@ -53,8 +53,8 @@ export class Chat {
   public render(): string {
     return `
       <div class="max-w-2xl mx-auto bg-light-0 dark:bg-dark-4 rounded-lg shadow-md">
-      <div class="p-4 border-b border-gray-200 dark:text-dark-4">
-        <h2 class="text-xl font-semibold text-gray-800 dark:text-dark-0 text-center">
+      <div class="p-4 border-b border-light-4/40 dark:border-dark-0/40">
+        <h2 class="text-xl font-semibold text-light-4 dark:text-dark-0 text-center">
           <a 
             href="/users/${this.friendUserName}"
             class="mx-auto max-w-full truncate overflow-hidden whitespace-nowrap block"
@@ -69,17 +69,35 @@ export class Chat {
           <!-- Messages will be populated here -->
         </div>
 
-        <div class="p-4 border-t border-gray-200 dark:text-dark-4">
+        <div class="p-4 border-t border-light-4/40 dark:border-dark-0/40">
           <form id="chat-form" class="flex gap-2">
             <input 
               type="text" 
               id="message-input"
-              class="flex-1 rounded-lg border border-light-2 dark:text-dark-3 p-2 bg-light-0 dark:bg-dark-3 text-light-4 dark:text-dark-0"
+              class="
+                flex-1 rounded-lg p-2
+                border border-light-4/30
+                dark:border-dark-0/30
+                dark:bg-dark-4 <!-- pas de bg light -->
+                
+                placeholder-light-4/40
+                dark:placeholder-dark-0/40
+                text-light-4
+                dark:text-dark-0
+                
+                focus:outline-none
+
+                focus:border-light-3
+                dark:focus:border-dark-1
+                focus:ring-2
+                focus:ring-light-0
+                dark:focus:ring-dark-4
+              "
               placeholder="Type your message..."
             >
             <button 
               type="submit"
-              class="px-4 py-2 bg-light-3 dark:bg-dark-2 text-dark-0 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors"
+              class="px-4 py-2 bg-light-3 dark:bg-dark-1 text-light-0 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
             >
               Send
             </button>

@@ -8,7 +8,8 @@ SVG:	(fill/stroke)
 
 
 
-
+	Profile:
+		- Game History -> si on est bloque -> username == unknown/player x
 
 	FriendsProfile:
 		- si qqn nous a bloque, alors son profile donne 404 (attendback)
@@ -35,6 +36,7 @@ SVG:	(fill/stroke)
 		- ajouter dans db /img/default.jpg si rien
 			twoFactorAuth/translations:
 				- langue des mails
+		- errror code unifie qu'on peut traduire dans dico
 
 	PARTOUT:
 		- console du navigateur renvoit ERREUR
