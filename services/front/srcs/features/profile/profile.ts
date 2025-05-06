@@ -119,9 +119,10 @@ export class Profile {
                     for="avatar-upload" 
                     class="
                       absolute bottom-0 right-0 p-2 rounded-full shadow-lg
+                      text-light-4 dark:text-dark-0
+                      hover:text-light-1 dark:hover:text-dark-3
                       bg-light-1 dark:bg-dark-3
-                      hover:bg-black hover:dark:bg-yellow
-                      <!-- where is text changing colour -->
+                      hover:bg-light-4 hover:dark:bg-dark-0
                       transition-colors cursor-pointer"
                     title="${i18n.t('changePhoto')}"
                   >

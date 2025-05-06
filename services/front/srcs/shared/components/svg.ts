@@ -71,7 +71,7 @@ export class SVGIcons {
 
   static getCameraIcon(): string {
     return `
-      <svg class="w-5 h-5 text-light-4/80 dark:text-dark-0/80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
       </svg>
@@ -97,7 +97,7 @@ export class SVGIcons {
   
   static getLanguageIcon(): string {
     return `
-      <svg class="h-5 w-5 text-light-0 dark:text-dark-4" viewBox="0 0 20 20" fill="currentColor">
+      <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
         <path fill-rule="evenodd" d="M14.77 12.79a.75.75 0 01-1.06-.02L10 8.832 6.29 12.77a.75.75 0 11-1.08-1.04l4.25-4.5a.75.75 0 011.08 0l4.25 4.5a.75.75 0 01-.02 1.06z" clip-rule="evenodd" />
       </svg>
     `;

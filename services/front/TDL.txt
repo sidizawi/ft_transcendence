@@ -4,9 +4,9 @@ ajouter status partout
 Ajout notif si new message + new demande de connexion
 
 icone retour
-SVG:	(fill/stroke)
 
 
+ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
 	friendsTab:
 		- pourquoi se referme entre profile et reste?
 		- Bon comportement sur friendProfile quand chqngement de friendStatus faire pareil partout
@@ -14,6 +14,7 @@ SVG:	(fill/stroke)
 
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
+		- agrandir SVG delete
 
 	auth.ts:
 		- Google logo
