@@ -5,28 +5,83 @@ import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
 
 class Match {
-  private player1: string;
-  private player2: string;
-  private winner: string | null = null;
+	left: Match | null = null;
+	right: Match | null = null;
+	winner: number | null = null;
+	player1: number | null = null;
+	player2: number | null = null;
 
-  private left : Match | null = null;
-  private right : Match | null = null;
-  private parent : Match | null = null;
-  
-  constructor(player1: number, player2: number) {
-    this.player1 = `player #${player1}`;
-    this.player2 = `player #${player2}`;
-  }
+	round: number = 1;
 
-  setWinner(winner: string) {
-    this.winner = winner;
-  }
+	constructor(left: Match | null = null, right: Match | null = null) {
+		this.left = left;
+		this.right = right;
+	}
+
+	static createMatches(players: number[]) : Match | null {
+		if (players.length <= 1) {
+			return null;
+		} else if (players.length === 2) {
+			let match = new Match();
+			match.player1 = players[0];
+			match.player2 = players[1];
+			return match;
+		}
+		let match = new Match();
+		match.left = Match.createMatches(players.slice(0, Math.floor(players.length / 2)));
+		match.right = Match.createMatches(players.slice(Math.floor(players.length / 2)));
+		match.round = (match.left?.round || 0) + 1;
+		return match
+	}
+
+	// static displayMatches(match: Match | null, depth: number = 0) : void {
+	// 	if (match === null) {
+	// 		return;
+	// 	}
+	// 	console.log(Array(depth).join("  ") + "Match:");
+	// 	if (match.player1 !== null && match.player2 !== null) {
+	// 		console.log(Array(depth + 1).join("  ") + "Player 1: " + match.player1);
+	// 		console.log(Array(depth + 1).join("  ") + "Player 2: " + match.player2);
+	// 		console.log(Array(depth + 1).join("  ") + "Winner: " + match.winner);
+	// 		console.log(Array(depth + 1).join("  ") + "round: " + match.round);
+	// 	}
+	// 	Match.displayMatches(match.left, depth + 1);
+	// 	Match.displayMatches(match.right, depth + 1);
+	// }
+
+	static playMatch(match: Match, round : number = 1) : boolean {
+    // todo: add game to choose the right one
+		let ret = false;
+		if (match.player1 !== null 
+			&& match.player2 !== null
+			&& match.winner === null 
+			&& round === match.round) {
+			match.winner = Math.random() < 0.5 ? match.player1 : match.player2;
+			console.log("Match between " + match.player1 + " vs " + match.player2 + " won by " + match.winner, "round: " + match.round);
+			return (true);
+		} else {
+			if (match.left !== null && !ret) {
+				ret = Match.playMatch(match.left, round);
+				if (match.left.winner !== null) {
+					match.player1 = match.left.winner;
+				}
+			}
+			if (match.right !== null && !ret) {
+				ret = Match.playMatch(match.right, round);
+				if (match.right.winner !== null) {
+					match.player2 = match.right.winner;
+				}
+			}
+		}
+		return (ret);
+	}
 }
+
 
 export class Tournament {
 
   private name: string;
-  private mode4: boolean = true;
+  private game: Match | null = null;
   private room: string | null = null;
   private ws : WebSocket | null = null;
 
@@ -52,7 +107,6 @@ export class Tournament {
     //   mode,
     //   room,
     if (data.mode == "local") {
-      this.mode4 = data.players % 4 == 0;
       this.renderWaitingRoom("Creating tournament", true);
       // createPlayers, display creating players
       // display matches
@@ -82,26 +136,10 @@ export class Tournament {
     return players;
   }
 
-  generateMatches(players: number[]) {
-    if (players.length == 1) {
-      return null;
-    }
-    if (players.length == 2) {
-      return new Match(players[0], players[1]);
-    }
-
-    let left = players.slice(0, players.length / 2);
-    let right = players.slice(players.length / 2, players.length);
-
-    return Match(left, right);
-  }
-
   generatePlayers(players: number) {
-    let pl = [...Array(players).keys()];
+    let pl = this.shufflePlayers([...Array(players).keys()]);
 
-    pl = this.shufflePlayers(pl);
-
-    let matches = [];
+    this.game = Match.createMatches(pl);
   }
 
   renderWaitingRoom(message: string, leave: boolean = false) {
@@ -292,8 +330,8 @@ export class TournamentHomePage {
         showError("tournament code shouldn't be empty");
         return ;
       }
-      if (players < 4 || players > 16 || players % 2 != 0) {
-        showError("numbers of players should be even and between 4 and 16");
+      if (players < 4 || players > 32 || players % 4 != 0) {
+        showError("numbers of players should be a multiple of 4 and between 4 and 32");
         return ;
       }
       if (!game.length || (game != "p4" && game != "pong")) {

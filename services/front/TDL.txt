@@ -3,6 +3,8 @@ To Do:
 	Login:
 		- check 401, token expired
 
+	change status of the user: connected or not, via chatService
+
 	FriendProfile page:
 		- URL !!!!@ /users/
 
