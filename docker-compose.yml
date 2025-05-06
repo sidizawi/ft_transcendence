@@ -6,15 +6,16 @@ services:
     container_name: nginx
     ports:
       - "8080:8080"
+    networks:
+      - transnet
     depends_on:
-      - api-gateway
       - front
 
   db:
     build: ./services/db
     container_name: db
-    ports:
-      - "2999:2999"
+    networks:
+      - transnet
     volumes:
       - database:/app/data
     develop:
@@ -26,30 +27,12 @@ services:
             - node_modules/
     env_file:
       - .env
-      
-  api-gateway:
-    build: ./services/api-gateway
-    container_name: api-gateway
-    ports:
-      - "4000:4000"
-    depends_on:
-      - auth-service
-      - game-service
-    develop:
-      watch:
-        - action: sync
-          path: ./services/api-gateway
-          target: /app
-          ignore:
-            - node_modules/
-    env_file:
-      - .env
 
   auth-service:
     build: ./services/auth-service
     container_name: auth-service
-    ports:
-      - "3001:3001"
+    networks:
+      - transnet
     develop:
       watch:
         - action: sync
@@ -65,12 +48,11 @@ services:
   front:
     build: ./services/front
     container_name: front
-    ports:
-      - 8000:8000
+    networks:
+      - transnet
     volumes:
       - shared-avatars:/app/uploads/avatars
     depends_on:
-      - api-gateway
       - auth-service
     develop:
       watch:
@@ -83,8 +65,8 @@ services:
   game-service:
     build: ./services/game-service
     container_name: game-service
-    ports:
-      - "3002:3002"
+    networks:
+      - transnet
     develop:
       watch:
         - action: sync
@@ -100,8 +82,8 @@ services:
   chat-service:
    build: ./services/chat-service
    container_name: chat-service
-   ports:
-     - "3003:3003"
+   networks:
+      - transnet
    develop:
      watch:
        - action: sync
@@ -117,8 +99,8 @@ services:
   user-service:
     build: ./services/user-service
     container_name: user-service
-    ports:
-      - "3004:3004"
+    networks:
+      - transnet
     volumes:
       - shared-avatars:/app/uploads/avatars
     develop:
@@ -146,3 +128,6 @@ volumes:
       type: none
       o: bind
       device: ${PWD}/shared/avatars
+
+networks:
+  transnet:
