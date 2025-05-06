@@ -1,4 +1,4 @@
-import { queryGet, queryPost } from "../services/query.js";
+import { queryAll, queryGet, queryPost } from "../services/query.js";
 
 let chatRooms = new Map();
   
@@ -43,7 +43,7 @@ async function handleNewConn(fastify, data, socket) {
         WHERE (sender_id = ? AND recipient_id = ?) \
         OR (sender_id = ? AND recipient_id = ?)'
     const params = [chatRoom.user1Id, chatRoom.user2Id, chatRoom.user2Id, chatRoom.user1Id];
-    const dbChatRoom = await queryGet(query, params);
+    const dbChatRoom = await queryAll(query, params);
     if (!dbChatRoom) {
         socket.send(JSON.stringify({
             type: "messages",
