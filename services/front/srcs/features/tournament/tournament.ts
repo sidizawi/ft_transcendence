@@ -4,15 +4,35 @@ import { i18n } from '../../shared/i18n';
 import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
 
+class Match {
+  private player1: string;
+  private player2: string;
+  private winner: string | null = null;
+
+  private left : Match | null = null;
+  private right : Match | null = null;
+  private parent : Match | null = null;
+  
+  constructor(player1: number, player2: number) {
+    this.player1 = `player #${player1}`;
+    this.player2 = `player #${player2}`;
+  }
+
+  setWinner(winner: string) {
+    this.winner = winner;
+  }
+}
+
 export class Tournament {
 
+  private name: string;
   private mode4: boolean = true;
   private room: string | null = null;
   private ws : WebSocket | null = null;
 
   constructor(path: string) {
-    let name = decodeURI(path.split("/").filter((el) => el.length)[1]);
-    let storage = localStorage.getItem(`tournament-${name}`);
+    this.name = decodeURI(path.split("/").filter((el) => el.length)[1]);
+    let storage = localStorage.getItem(`tournament-${this.name}`);
     if (!storage) {
       // todo: translate
       ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
@@ -62,6 +82,20 @@ export class Tournament {
     return players;
   }
 
+  generateMatches(players: number[]) {
+    if (players.length == 1) {
+      return null;
+    }
+    if (players.length == 2) {
+      return new Match(players[0], players[1]);
+    }
+
+    let left = players.slice(0, players.length / 2);
+    let right = players.slice(players.length / 2, players.length);
+
+    return Match(left, right);
+  }
+
   generatePlayers(players: number) {
     let pl = [...Array(players).keys()];
 
@@ -101,6 +135,7 @@ export class Tournament {
 
       leave?.addEventListener('click', () => {
         this.clean();
+        localStorage.removeItem(`tournament-${this.name}`);
         app.router.navigateTo("/tournament");
       });
     }
@@ -194,7 +229,12 @@ export class TournamentHomePage {
                 <label for="tournamentPlayers" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   number of players
                 </label>
-                <input id="tournamentPlayers" type="number" min="4" max="16" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-900"/>
+                <select name="players" id="tournamentPlayers" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                  <option value="4" selected>4</option>
+                  <option value="8">8</option>
+                  <option value="16">16</option>
+                  <option value="32">32</option>
+                </select>
               </div>
               <div class="flex items-center justify-start space-x-2 mb-4">
                 <input id="tournamentPrivate" type="radio" name="privacy" value="private"/>
@@ -287,11 +327,22 @@ export class TournamentHomePage {
       if (target!.matches('#game-mode')) {
         const pub = document.getElementById("tournamentPublic") as HTMLInputElement;
         const code = document.getElementById("tournamentCode") as HTMLInputElement;
+        const options = (document.querySelector("#tournamentPlayers") as HTMLSelectElement).getElementsByTagName("option");
         if (target.value == "local") {
           pub.checked = true;
           code.setAttribute("disabled", "");
+          for (let i = 0; i < options.length; i++) {
+            if (options[i].value != "4") {
+              options[i].setAttribute("disabled", "");
+            }
+          }
         } else if (!pub.checked) {
           code.removeAttribute("disabled");
+          for (let i = 0; i < options.length; i++) {
+            if (options[i].value != "4") {
+              options[i].removeAttribute("disabled");
+            }
+          }
         }
       }
     })
