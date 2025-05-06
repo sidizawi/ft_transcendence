@@ -258,7 +258,7 @@ export class Connect4 {
         // check if they are friend
         this.room = message.room;
         console.log(message);
-        ModalManager.openModal(i18n.t('games.connect4.title'), `here is the link to the game: http://${window.location.hostname}:8000/connect4?room=${message.room}`);
+        ModalManager.openModal(i18n.t('games.connect4.title'), `here is the link to the game: https://${window.location.hostname}:8000/connect4?room=${message.room}`);
       } else if (message.mode == "connected") {
         ModalManager.openModal(i18n.t('games.connect4.title'), `you play ${message.color == 'R' ? 'first with red' : 'second with yellow'}`);
         if (type == "playVsAI") {

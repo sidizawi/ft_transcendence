@@ -42,7 +42,7 @@ const __dirname = path.dirname(__filename);
 
 await fastify.register(fastifyStatic, {
 	root: path.join(__dirname, '../../uploads/avatars'),
-	prefix: '/avatars/'					 // URL prefix (e.g., http://localhost:3000/avatars/)
+	prefix: '/avatars/'					 // URL prefix (e.g., http://localhost:8080/api/avatars/)
 });
 
 await fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})

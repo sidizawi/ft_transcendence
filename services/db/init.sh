@@ -4,10 +4,10 @@ DB_PATH="/app/data/database.db"
 
 # Generate SQL script for test data
 cat > /tmp/populate_test_data.sql << 'EOF'
-INSERT INTO users (id, username, email, password, status) VALUES
-  (1, 'guest', 'guest@example.com', '$2a$10$xVqYLhNEMayfBU6KYH5O8.Yw7P/BxGlv7QKQSUh7mQHxEUflA3qfG', 1),
-  (2, 'test', 'test@test.com', '$2b$10$PSbKYCGgiuf03Py0aFU4sO1cvpQUG2YtI0/owHwTQV/FiipARwnwi', 1),
-  (3, 'leo', 'leo@19.be', '$2b$10$5v.v8ZNhVepVYTFlZintZOiUEFaJC44tbh9WHo1kz4p48oa3YEpWy', 0);
+INSERT INTO users (id, username, email, password, status, avatar) VALUES
+  (1, 'guest', 'guest@example.com', '$2a$10$xVqYLhNEMayfBU6KYH5O8.Yw7P/BxGlv7QKQSUh7mQHxEUflA3qfG', 1, '/img/default-avatar.jpg'),
+  (2, 'test', 'test@test.com', '$2b$10$PSbKYCGgiuf03Py0aFU4sO1cvpQUG2YtI0/owHwTQV/FiipARwnwi', 1, '/img/default-avatar.jpg'),
+  (3, 'leo', 'leo@19.be', '$2b$10$5v.v8ZNhVepVYTFlZintZOiUEFaJC44tbh9WHo1kz4p48oa3YEpWy', 0, '/img/default-avatar.jpg');
 
 INSERT INTO friend (userid1, userid2, username1, username2, status) VALUES
   (2, 3, 'player2', 'player4', 'accepted'),

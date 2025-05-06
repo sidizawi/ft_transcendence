@@ -1,27 +1,26 @@
 import { TokenManager } from '../utils/token';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user`;
+const USER_API_URL = `https://${host}:8080/api/user/profile`;
+const FRIEND_API_URL = `https://${host}:8080/api/chat/friend`;
 
 // Common fields between GameStats.history and FriendGameStats.history
 type GameBase = { opponent: string; avatar: string };
 
 async function isOpponentValid(username: string): Promise<boolean> {
   try {
-    const existRes = await fetch(`${USER_API_URL}/profile/check-username/${username}`, {
+    const existRes = await fetch(`${USER_API_URL}/check-username/${username}`, {
       headers: TokenManager.getAuthHeaders(),
     });
-    if (!existRes.ok) return false;
-    const existData = await existRes.json();
-    if (existData.message !== 'Username exists') return false;
-
-    const blockedRes = await fetch(`${USER_API_URL}/profile/check-blocked/${username}`, {
+    if (!existRes.ok)
+      return false;
+    
+    const blockedRes = await fetch(`${FRIEND_API_URL}/check-blocked/${username}`, {
       headers: TokenManager.getAuthHeaders(),
     });
-    if (!blockedRes.ok) return false;
-    const blockedData = await blockedRes.json();
-    if (blockedData.blocked) return false;
-
+    if (!blockedRes.ok)
+      return false;
+    
     return true;
   } catch (error) {
     console.error('Error checking opponent validity:', error);

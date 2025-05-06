@@ -295,7 +295,7 @@ async function settingsRoutes(fastify, options) {
 		}
 	
 		const originalFileName = request.file.originalname;
-		const newFilePath = path.join('/uploads/avatars', originalFileName);
+		const newFilePath = path.join('uploads/avatars', originalFileName);
 	
 		if (fs.existsSync(newFilePath)) {
 			fs.unlinkSync(newFilePath);

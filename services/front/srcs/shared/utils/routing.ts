@@ -1,7 +1,8 @@
 import { TokenManager } from './token';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user`;
+const USER_API_URL = `https://${host}:8080/api/user`;
+const FRIEND_API_URL = `https://${host}:8080/api/chat/friend`;
 
 export class Router {
   constructor(
@@ -82,17 +83,13 @@ export class Router {
       }
 
       try {
-        const response = await fetch(`${USER_API_URL}/profile/check-blocked/${username}`, {
+        const response = await fetch(`${FRIEND_API_URL}/check-blocked/${username}`, {
           method: 'GET',
           headers: TokenManager.getAuthHeaders()
         });
-
-        if (!response.ok) {
-          return '/404';
-        }
-
         const data = await response.json();
-        if (!data.message || data.message === 'Blocked') {
+
+        if (!data.message || data.message === 'User is blocked') {
           return '/404';
         }
       } catch (error) {

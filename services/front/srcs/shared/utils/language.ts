@@ -59,13 +59,13 @@ export class LanguageManager {
 
         <div
           id="language-dropdown"
-          class="hidden absolute bottom-full mb-2 left-0 z-10 w-40 origin-bottom-left rounded-lg bg-light-0 dark:bg-dark-3 shadow-lg focus:outline-none transform"
+          class="hidden absolute bottom-full mb-2 left-0 z-10 w-40 origin-bottom-left rounded-lg bg-light-0 dark:bg-dark-4 shadow-lg focus:outline-none transform"
           role="menu"
         >
           <div class="py-1" role="none">
             ${this.languages.map(lang => `
               <button
-                class="flex w-full items-center px-4 py-2 text-sm text-light-4 dark:text-gray-200 hover:bg-light-1 dark:hover:bg-gray-600 ${lang.code === this.currentLanguage ? 'bg-light-1 dark:bg-gray-600' : ''}"
+                class="flex w-full items-center px-4 py-2 text-sm text-light-4 dark:text-dark-0 hover:bg-light-1 dark:hover:bg-dark-3 ${lang.code === this.currentLanguage ? 'bg-light-1 dark:bg-dark-3' : ''}"
                 role="menuitem"
                 data-lang="${lang.code}"
               >

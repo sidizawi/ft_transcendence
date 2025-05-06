@@ -41,7 +41,7 @@ export class GoogleAuth {
         auto_select: false,
         cancel_on_tap_outside: true,
         ux_mode: 'popup',
-        allowed_parent_origin: ['http://localhost:8000'],
+        allowed_parent_origin: ['https://localhost:8000'],
         context: 'signin'
       });
       this.initialized = true;

@@ -3,8 +3,8 @@ import { i18n } from '../i18n';
 import { TokenManager } from '../utils/token';
 
 const host = window.location.hostname;
-const USER_API_URL = `http://${host}:3000/user/settings`;
-const PROFILE_API_URL = `http://${host}:3000/user/profile`;
+const USER_API_URL = `https://${host}:8080/api/user/settings`;
+const PROFILE_API_URL = `https://${host}:8080/api/user/profile`;
 
 export class AccountService {
   static async fetchAndUpdateUserProfile(): Promise<User> {
