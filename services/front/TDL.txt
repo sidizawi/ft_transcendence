@@ -7,13 +7,6 @@ icone retour
 SVG:	(fill/stroke)
 
 
-
-	Profile:
-		- Game History -> si on est bloque -> username == unknown/player x
-
-	FriendsProfile:
-		- si qqn nous a bloque, alors son profile donne 404 (attendback)
-
 	friendsTab:
 		- pourquoi se referme entre profile et reste?
 		- Bon comportement sur friendProfile quand chqngement de friendStatus faire pareil partout
@@ -32,6 +25,7 @@ SVG:	(fill/stroke)
 
 	BACK:
 		- ${USER_API_URL}/check-password (accountService)
+		- ${USER_API_URL}/check-blocked (accountService)
 		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
 		- ajouter dans db /img/default.jpg si rien
 			twoFactorAuth/translations:

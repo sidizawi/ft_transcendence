@@ -5,6 +5,7 @@ import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 import { AvatarService } from '../../shared/services/avatarService';
 import { StatsService } from '../../shared/services/statsService';
 import { SVGIcons } from '../../shared/components/svg';
+import { processGames } from '../../shared/services/opponentService';
 
 export class Profile {
   private pongStats: GameStats | null = null;
@@ -20,6 +21,11 @@ export class Profile {
         StatsService.getGameStats('pong'),
         StatsService.getGameStats('p4')
       ]);
+
+      if (pongStats.history)
+        pongStats.history = await processGames(pongStats.history);
+      if (connect4Stats.history)
+        connect4Stats.history = await processGames(connect4Stats.history);
 
       this.pongStats = pongStats;
       this.connect4Stats = connect4Stats;
@@ -325,8 +331,10 @@ export class Profile {
                         alt="${game.opponent}"
                         class="w-8 h-8 rounded-full object-cover"
                       >
-                      <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
-                      <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
+                      ${game.opponent !== 'Unknown_user' ? `
+                        <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
+                        <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
+                      ` : ''}
                     </div>
                     <a 
                       href="/users/${game.opponent}" 

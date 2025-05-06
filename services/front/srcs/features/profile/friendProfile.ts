@@ -4,6 +4,7 @@ import { i18n } from '../../shared/i18n';
 import { StatsService } from '../../shared/services/statsService';
 import { FriendService } from '../../shared/services/friendService';
 import { SVGIcons } from '../../shared/components/svg';
+import { processGames } from '../../shared/services/opponentService';
 
 export class FriendProfile {
   private pongStats: FriendGameStats | null = null;
@@ -22,6 +23,11 @@ export class FriendProfile {
         StatsService.getFriendGameStats('pong', this.username),
         StatsService.getFriendGameStats('p4', this.username)
       ]);
+
+      if (pongStats.history)
+        pongStats.history = await processGames(pongStats.history);
+      if (connect4Stats.history)
+        connect4Stats.history = await processGames(connect4Stats.history);
 
       this.pongStats = pongStats;
       this.connect4Stats = connect4Stats;

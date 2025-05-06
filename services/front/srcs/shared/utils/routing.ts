@@ -80,6 +80,25 @@ export class Router {
         console.error('Error checking username:', error);
         return '/404';
       }
+
+      try {
+        const response = await fetch(`${USER_API_URL}/profile/check-blocked/${username}`, {
+          method: 'GET',
+          headers: TokenManager.getAuthHeaders()
+        });
+
+        if (!response.ok) {
+          return '/404';
+        }
+
+        const data = await response.json();
+        if (!data.message || data.message === 'Blocked') {
+          return '/404';
+        }
+      } catch (error) {
+        console.error('Error checking username:', error);
+        return '/404';
+      }
     }
 
     return path;
