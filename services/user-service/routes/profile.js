@@ -35,7 +35,7 @@ async function profileRoutes(fastify ,options) {
         return reply.code(200).send({ message: 'Username exists'});
     });
 
-    fastify.get('/check-password', async (request, reply) => {
+    fastify.post('/check-password', async (request, reply) => {
         const { password } = request.body;
         if (!password){
             return reply.code(400).send({ error: 'Password is required'});
@@ -48,10 +48,9 @@ async function profileRoutes(fastify ,options) {
         if (!userExists){
             return reply.code(404).send({ error: 'User doesnt exist'});
         }
-
         const isPasswordValid = await bcrypt.compare(password, userExists.password);
         if (isPasswordValid){
-            return reply.code(400).send({ error: 'Passwords must be different' });
+            return reply.code(403).send({ error: 'Passwords must be different' });
         }
         return reply.code(200).send({ message: 'Passwords are different' });
     });

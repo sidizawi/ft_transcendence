@@ -58,15 +58,21 @@ export class Settings {
       if (newPassword) {
         if (confirmPassword && newPassword === confirmPassword) {
           try {
-            const matches = await AccountService.checkPassword(newPassword);
-            if (matches) {
-              this.showError(i18n.t('samePasswordError'));
-              return;
-            }
+            await AccountService.checkPassword(newPassword);
             payload.newPassword = newPassword;
+
           } catch (error) {
-            console.error('Password check error:', error);
-            this.showError(i18n.t('updateError'));
+
+            if (error instanceof Error) {
+              if (error.message === i18n.t('passwordIdentical')) {
+                this.showError(i18n.t('passwordIdentical'));
+              } else {
+                this.showError(i18n.t('updateError'));
+              }
+            }
+            else
+              this.showError(i18n.t('updateError'));
+
             return;
           }
         } else if (confirmPassword && newPassword !== confirmPassword) {
@@ -796,7 +802,6 @@ export class Settings {
     // Back button
     const backButton = document.getElementById('backButton');
     backButton?.addEventListener('click', () => {
-      console.log('previous', window.history.back);
       if (window.history.length > 1) {
         window.history.back();
       } else {

@@ -12,6 +12,9 @@ import { deleteFriendById } from "../services/friendService.js";
 import { deleteMessageById } from "../services/messageService.js";
 import { deleteConversationById } from "../services/conversationService.js";
 
+import { XSSanitizer } from "../utils/sanitize.js";
+import bcrypt from 'bcrypt';
+
 async function deleteRoutes(fastify) {
 
     // Cette route check le mot de passe entre puis envois un code 2FA s'il est correct

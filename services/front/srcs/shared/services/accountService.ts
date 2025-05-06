@@ -3,7 +3,7 @@ import { i18n } from '../i18n';
 import { TokenManager } from '../utils/token';
 
 const host = window.location.hostname;
-const USER_API_URL = `https://${host}:8080/api/user/settings`;
+const USER_API_URL = `https://${host}:8080/api/user`;
 const PROFILE_API_URL = `https://${host}:8080/api/user/profile`;
 
 export class AccountService {
@@ -43,7 +43,7 @@ export class AccountService {
 
   static async updateUsername(newUsername: string): Promise<boolean> {
     try {
-      const response = await fetch(`${USER_API_URL}/username`, {
+      const response = await fetch(`${USER_API_URL}/settings/username`, {
         method: 'PUT',
         headers: TokenManager.getAuthHeaders(),
         body: JSON.stringify({ newUsername })
@@ -67,21 +67,18 @@ export class AccountService {
 
   static async checkPassword(password: string): Promise<boolean> {
     try {
-      const response = await fetch(`${USER_API_URL}/check-password`, {
+      const response = await fetch(`${PROFILE_API_URL}/check-password`, {
         method: 'POST',
         headers: TokenManager.getAuthHeaders(),
         body: JSON.stringify({ password })
       });
-  
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || i18n.t('updateError'));
-      }
-  
+
+      if (response.status === 403)
+        throw new Error(i18n.t('passwordIdentical'));
+
       const { matches } = await response.json();
       return matches;
     } catch (error) {
-      console.error('Password check error:', error);
       throw error;
     }
   }
@@ -93,7 +90,7 @@ export class AccountService {
     newPassword?: string;
   }): Promise<boolean> {
     try {
-      const requestResponse = await fetch(`${USER_API_URL}/update-request`, {
+      const requestResponse = await fetch(`${USER_API_URL}/settings/update-request`, {
         method: 'POST',
         headers: TokenManager.getAuthHeaders(),
         body: JSON.stringify(payload)
@@ -113,7 +110,7 @@ export class AccountService {
 
   static async confirmProfileUpdate(verificationCode: string): Promise<boolean> {
     try {
-      const verifyResponse = await fetch(`${USER_API_URL}/update-confirm`, {
+      const verifyResponse = await fetch(`${USER_API_URL}/settings/update-confirm`, {
         method: 'PUT',
         headers: TokenManager.getAuthHeaders(),
         body: JSON.stringify({ verificationCode })
@@ -150,7 +147,6 @@ export class AccountService {
 
       return true;
     } catch (error) {
-      console.error('Account deletion request error:', error);
       throw error;
     }
   }

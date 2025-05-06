@@ -197,9 +197,9 @@ export class Pong {
   className() : string {
     const token = TokenManager.getToken();
     if (!token) {
-      return "not-connected w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors";
+      return "not-connected w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors";
     }
-    return "w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors";
+    return "w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors";
   }
 
   playAgain() : string {
@@ -209,7 +209,7 @@ export class Pong {
     this.state.gamePlayed = false;
     let data = this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer'
     return `
-        <button data="${data}" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+        <button data="${data}" class="pongPlayBtn w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
           ${i18n.t('games.playAgain')}
         </button>
     `;
@@ -240,7 +240,7 @@ export class Pong {
             ${i18n.t('games.pong.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button data="twoPlayer" class="pongPlayBtn w-full bg-light-2 dark:bg-dark-2 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-3 transition-colors">
+            <button data="twoPlayer" class="pongPlayBtn w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
               ${i18n.t('games.playLocal')}
             </button>
             <button data="online" class="pongPlayBtn ${this.className()}">

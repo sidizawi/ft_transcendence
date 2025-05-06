@@ -12,10 +12,10 @@ export class Tournament {
             ${i18n.t('tournaments.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            <button class="w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
               ${i18n.t('tournaments.create')}
             </button>
-            <button class="w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors">
+            <button class="w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
               ${i18n.t('tournaments.join')}
             </button>
           </div>

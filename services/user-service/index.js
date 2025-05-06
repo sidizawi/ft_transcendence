@@ -14,6 +14,7 @@ import friendRoutes from './routes/friend.js';
 import settingsRoutes from './routes/settings.js';
 import profileRoutes from './routes/profile.js';
 import gdprRoutes from './routes/gdpr.js';
+import deleteRoutes from './routes/delete.js';
 
 dotenv.config();
 
@@ -57,6 +58,7 @@ fastify.register(fastifyCors, {
   credentials: true
 });
 
+fastify.register(deleteRoutes, { prefix: '/delete' });
 fastify.register(settingsRoutes, { prefix: '/settings' });
 fastify.register(statsRoutes, { prefix: '/stats' });
 fastify.register(refreshRoutes, { prefix: '/refresh'});
