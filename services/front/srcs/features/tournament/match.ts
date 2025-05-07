@@ -28,19 +28,21 @@ class Match {
 		return match
 	}
 
-	static displayMatches(match: Match | null, depth: number = 0) : void {
+	static displayMatches(match: Match | null, round: number, depth: number = 0) : void {
 		if (match === null) {
 			return;
 		}
-		console.log(Array(depth).join("  ") + "Match:");
-		if (match.player1 !== null && match.player2 !== null) {
-			console.log(Array(depth + 1).join("  ") + "Player 1: " + match.player1);
-			console.log(Array(depth + 1).join("  ") + "Player 2: " + match.player2);
-			console.log(Array(depth + 1).join("  ") + "Winner: " + match.winner);
-			console.log(Array(depth + 1).join("  ") + "round: " + match.round);
+		if (round == match.round) {
+			console.log(Array(depth).join("  ") + "Match:");
+			if (match.player1 !== null || match.player2 !== null) {
+				console.log(Array(depth + 1).join("  ") + "Player 1: " + match.player1);
+				console.log(Array(depth + 1).join("  ") + "Player 2: " + match.player2);
+				console.log(Array(depth + 1).join("  ") + "Winner: " + match.winner);
+				console.log(Array(depth + 1).join("  ") + "round: " + match.round);
+			}
 		}
-		Match.displayMatches(match.left, depth + 1);
-		Match.displayMatches(match.right, depth + 1);
+		Match.displayMatches(match.left, round, depth + 1);
+		Match.displayMatches(match.right, round, depth + 1);
 	}
 
 	static playMatch(match: Match, round : number = 1) : boolean {
@@ -81,10 +83,8 @@ if (match !== null) {
 	Match.playMatch(match, 2);
 	Match.playMatch(match, 2);
 	Match.playMatch(match, 3);
-	// Match.displayMatches(match);
-	// Match.playMatch(match, 2);
-	// Match.displayMatches(match);
-	// Match.playMatch(match, 3);
-	Match.displayMatches(match);
+	Match.displayMatches(match, 1);
+	Match.displayMatches(match, 2);
+	Match.displayMatches(match, 3);
 }
 

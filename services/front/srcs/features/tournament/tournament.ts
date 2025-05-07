@@ -7,9 +7,9 @@ import { TokenManager } from '../../shared/utils/token';
 class Match {
 	left: Match | null = null;
 	right: Match | null = null;
-	winner: number | null = null;
-	player1: number | null = null;
-	player2: number | null = null;
+	winner: string | null = null;
+	player1: string | null = null;
+	player2: string | null = null;
 
 	round: number = 1;
 
@@ -18,7 +18,7 @@ class Match {
 		this.right = right;
 	}
 
-	static createMatches(players: number[]) : Match | null {
+	static createMatches(players: string[]) : Match | null {
 		if (players.length <= 1) {
 			return null;
 		} else if (players.length === 2) {
@@ -33,54 +33,13 @@ class Match {
 		match.round = (match.left?.round || 0) + 1;
 		return match
 	}
-
-	// static displayMatches(match: Match | null, depth: number = 0) : void {
-	// 	if (match === null) {
-	// 		return;
-	// 	}
-	// 	console.log(Array(depth).join("  ") + "Match:");
-	// 	if (match.player1 !== null && match.player2 !== null) {
-	// 		console.log(Array(depth + 1).join("  ") + "Player 1: " + match.player1);
-	// 		console.log(Array(depth + 1).join("  ") + "Player 2: " + match.player2);
-	// 		console.log(Array(depth + 1).join("  ") + "Winner: " + match.winner);
-	// 		console.log(Array(depth + 1).join("  ") + "round: " + match.round);
-	// 	}
-	// 	Match.displayMatches(match.left, depth + 1);
-	// 	Match.displayMatches(match.right, depth + 1);
-	// }
-
-	static playMatch(match: Match, round : number = 1) : boolean {
-    // todo: add game to choose the right one
-		let ret = false;
-		if (match.player1 !== null 
-			&& match.player2 !== null
-			&& match.winner === null 
-			&& round === match.round) {
-			match.winner = Math.random() < 0.5 ? match.player1 : match.player2;
-			console.log("Match between " + match.player1 + " vs " + match.player2 + " won by " + match.winner, "round: " + match.round);
-			return (true);
-		} else {
-			if (match.left !== null && !ret) {
-				ret = Match.playMatch(match.left, round);
-				if (match.left.winner !== null) {
-					match.player1 = match.left.winner;
-				}
-			}
-			if (match.right !== null && !ret) {
-				ret = Match.playMatch(match.right, round);
-				if (match.right.winner !== null) {
-					match.player2 = match.right.winner;
-				}
-			}
-		}
-		return (ret);
-	}
 }
-
 
 export class Tournament {
 
+  private rounds = 0;
   private name: string;
+  private type: string = "pong";
   private game: Match | null = null;
   private room: string | null = null;
   private ws : WebSocket | null = null;
@@ -106,10 +65,12 @@ export class Tournament {
     //   game,
     //   mode,
     //   room,
+    this.type = data.game;
     if (data.mode == "local") {
       this.renderWaitingRoom("Creating tournament", true);
-      // createPlayers, display creating players
-      // display matches
+      this.rounds = Math.log2(data.players);
+      this.generatePlayers(data.players);
+      this.renderMatchBoard(data.name);
       // play
     } else {
       this.room = data.room;
@@ -128,7 +89,7 @@ export class Tournament {
     this.room = null;
   }
 
-  shufflePlayers(players: number[]) {
+  shuffleLst(players: number[]) {
     for (let i = players.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [players[i], players[j]] = [players[j], players[i]];
@@ -137,10 +98,88 @@ export class Tournament {
   }
 
   generatePlayers(players: number) {
-    let pl = this.shufflePlayers([...Array(players).keys()]);
+    let pl = this.shuffleLst([...Array(players).keys()])
+      .map((el) => `player #${el + 1}`);
 
     this.game = Match.createMatches(pl);
   }
+
+  renderMatchBoard(name: string) {
+    const main = document.querySelector("main");
+
+    main!.innerHTML = `
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+            ${i18n.t('tournaments.title')} &nbsp;-&nbsp; ${name}
+          </h1>
+          <div id="matchBoard" class="flex flex-col items-start justify-center mb-4">
+          </div>
+          <button id="start" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            start
+          </button>
+        </div>
+      </div>
+    `;
+
+    // todo: translate
+    const rounds = ["Final", "Semi-Final", "Quarter-Final", "Eighth-Final", "Qualification"];
+
+    for (let round = 1; round <= this.rounds; round++) {
+      const matchBoard = document.getElementById("matchBoard");
+      matchBoard!.innerHTML += `
+        <div class="w-full flex flex-col items-start justify-center mb-4">
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">${rounds[this.rounds - round]}</h2>
+          <div id="round-${round}" class="w-full flex flex-col items-center justify-center mb-8">
+          </div>
+        </div>
+      `;
+      this.displayMatches(this.game, round);
+    }
+  }
+
+  displayMatches(match: Match | null, round: number, depth: number = 0) : void {
+		if (match === null) {
+			return;
+		}
+		if (round == match.round) {
+      const roundDiv = document.getElementById(`round-${round}`);
+      roundDiv!.innerHTML += `
+        <div class="w-full flex items-center justify-between mb-4 mx-8">
+          <p class="text-gray-600 dark:text-gray-400 text-center">player #${match?.player1 || "..."} vs player #${match?.player2 || "..."}</p>
+          <p class="text-gray-600 dark:text-gray-400 text-center">winner: ${match?.winner || "..."}</p>
+        </div>
+      `;
+		}
+		this.displayMatches(match.left, round, depth + 1);
+		this.displayMatches(match.right, round, depth + 1);
+	}
+
+	playMatch(match: Match, round : number = 1) : boolean {
+		let ret = false;
+		if (match.player1 !== null 
+			&& match.player2 !== null
+			&& match.winner === null 
+			&& round === match.round) {
+			match.winner = Math.random() < 0.5 ? match.player1 : match.player2;
+			console.log("Match between " + match.player1 + " vs " + match.player2 + " won by " + match.winner, "round: " + match.round);
+			return (true);
+		} else {
+			if (match.left !== null && !ret) {
+				ret = this.playMatch(match.left, round);
+				if (match.left.winner !== null) {
+					match.player1 = match.left.winner;
+				}
+			}
+			if (match.right !== null && !ret) {
+				ret = this.playMatch(match.right, round);
+				if (match.right.winner !== null) {
+					match.player2 = match.right.winner;
+				}
+			}
+		}
+		return (ret);
+	}
 
   renderWaitingRoom(message: string, leave: boolean = false) {
     const main = document.querySelector("main");
@@ -339,7 +378,6 @@ export class TournamentHomePage {
         return ;
       }
 
-      console.log("mode", mode);
       if (mode == "remote") {
         this.createRemoteTournament(name, players, code, game, pub);
       } else {
@@ -365,17 +403,20 @@ export class TournamentHomePage {
       if (target!.matches('#game-mode')) {
         const pub = document.getElementById("tournamentPublic") as HTMLInputElement;
         const code = document.getElementById("tournamentCode") as HTMLInputElement;
-        const options = (document.querySelector("#tournamentPlayers") as HTMLSelectElement).getElementsByTagName("option");
+        const players = (document.getElementById("tournamentPlayers") as HTMLSelectElement);
+        const options = players.getElementsByTagName("option");
         if (target.value == "local") {
           pub.checked = true;
           code.setAttribute("disabled", "");
           for (let i = 0; i < options.length; i++) {
             if (options[i].value != "4") {
               options[i].setAttribute("disabled", "");
+            } else {
+              options[i].setAttribute("selected", "");
             }
           }
-        } else if (!pub.checked) {
-          code.removeAttribute("disabled");
+          players.value = "4";
+        } else {
           for (let i = 0; i < options.length; i++) {
             if (options[i].value != "4") {
               options[i].removeAttribute("disabled");

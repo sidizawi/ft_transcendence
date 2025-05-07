@@ -13,6 +13,10 @@ ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
 
 	!!! change status of the user: connected or not, via chatService
 
+	Pong:
+		- block up and down scrolling
+		- close websocket when changing history
+
 
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
