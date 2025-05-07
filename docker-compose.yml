@@ -1,25 +1,40 @@
 #version: '3.8'
 
 services:
+  nginx:
+    build: ./services/nginx
+    container_name: nginx
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api-gateway
+      - front
+
   db:
     build: ./services/db
+    container_name: db
     ports:
       - "2999:2999"
     volumes:
-      - ./database:/app/data
+      - database:/app/data
+    develop:
+      watch:
+        - action: sync
+          path: ./services/db
+          target: /app
+          ignore:
+            - node_modules/
     env_file:
       - .env
       
   api-gateway:
     build: ./services/api-gateway
+    container_name: api-gateway
     ports:
-      - "3000:3000"
+      - "4000:4000"
     depends_on:
       - auth-service
       - game-service
-    volumes:
-      - ./services/front:/app/front
-      # - ./database:/app/data/
     develop:
       watch:
         - action: sync
@@ -32,11 +47,9 @@ services:
 
   auth-service:
     build: ./services/auth-service
+    container_name: auth-service
     ports:
       - "3001:3001"
-    volumes:
-      - ./services/front:/app/front
-      - database:/app/data
     develop:
       watch:
         - action: sync
@@ -51,6 +64,7 @@ services:
 
   front:
     build: ./services/front
+    container_name: front
     ports:
       - 8000:8000
     volumes:
@@ -68,10 +82,9 @@ services:
 
   game-service:
     build: ./services/game-service
+    container_name: game-service
     ports:
       - "3002:3002"
-    volumes:
-      - database:/app/data
     develop:
       watch:
         - action: sync
@@ -86,11 +99,9 @@ services:
 
   chat-service:
    build: ./services/chat-service
+   container_name: chat-service
    ports:
      - "3003:3003"
-   volumes:
-     - ./services/front:/app/front
-     - database:/app/data
    develop:
      watch:
        - action: sync
@@ -105,11 +116,10 @@ services:
 
   user-service:
     build: ./services/user-service
+    container_name: user-service
     ports:
       - "3004:3004"
     volumes:
-      - ./services/front:/app/front
-      - database:/app/data
       - shared-avatars:/app/uploads/avatars
     develop:
       watch:
@@ -129,7 +139,7 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: './database'
+      device: ${PWD}/services/db/database
   shared-avatars:
     driver: local
     driver_opts:

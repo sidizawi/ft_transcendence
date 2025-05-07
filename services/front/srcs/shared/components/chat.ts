@@ -34,26 +34,52 @@ export class Chat {
 
   render(): string {
     return `
-      <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-md">
-        <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-          <h2 class="text-xl font-semibold text-gray-800 dark:text-white">Chat</h2>
-        </div>
+      <div class="max-w-2xl mx-auto bg-light-0 dark:bg-dark-4 rounded-lg shadow-md">
+      <div class="p-4 border-b border-light-4/40 dark:border-dark-0/40">
+        <h2 class="text-xl font-semibold text-light-4 dark:text-dark-0 text-center">
+          <a 
+            href="/users/${this.friendUserName}"
+            class="mx-auto max-w-full truncate overflow-hidden whitespace-nowrap block"
+            style="max-width: 80%"
+          >
+            ${this.friendUserName}
+          </a>
+        </h2>
+      </div>
         
         <div id="chat-messages" class="h-96 overflow-y-auto p-4 space-y-4">
           <!-- Messages will be populated here -->
         </div>
 
-        <div class="p-4 border-t border-gray-200 dark:border-gray-700">
+        <div class="p-4 border-t border-light-4/40 dark:border-dark-0/40">
           <form id="chat-form" class="flex gap-2">
             <input 
               type="text" 
               id="message-input"
-              class="flex-1 rounded-lg border border-gray-300 dark:border-gray-600 p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+              class="
+                flex-1 rounded-lg p-2
+                border border-light-4/30
+                dark:border-dark-0/30
+                dark:bg-dark-4 <!-- pas de bg light -->
+                
+                placeholder-light-4/40
+                dark:placeholder-dark-0/40
+                text-light-4
+                dark:text-dark-0
+                
+                focus:outline-none
+
+                focus:border-light-3
+                dark:focus:border-dark-1
+                focus:ring-2
+                focus:ring-light-0
+                dark:focus:ring-dark-4
+              "
               placeholder="Type your message..."
             >
             <button 
               type="submit"
-              class="px-4 py-2 bg-orange dark:bg-nature text-white rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+              class="px-4 py-2 bg-light-3 dark:bg-dark-1 text-light-0 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
             >
               Send
             </button>
@@ -102,11 +128,11 @@ export class Chat {
     messageElement.innerHTML = `
       <div class="${
         isOwnMessage 
-          ? 'bg-orange/10 dark:bg-nature/10' 
-          : 'bg-gray-100 dark:bg-gray-700'
+          ? 'bg-light-3/10 dark:bg-dark-2/10' 
+          : 'bg-light-1 dark:bg-dark-3'
       } rounded-lg px-4 py-2 max-w-[80%]">
-        <p class="text-gray-800 dark:text-white">${this.escapeHtml(message.text)}</p>
-        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+        <p class="text-gray-800 dark:text-dark-0">${this.escapeHtml(message.text)}</p>
+        <p class="text-xs text-gray-500 dark:text-dark-2 mt-1">
           ${message.timestamp.toLocaleTimeString()}
         </p>
       </div>

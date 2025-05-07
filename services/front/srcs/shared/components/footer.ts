@@ -10,12 +10,12 @@ export class Footer {
 
   render(): string {
     return `
-      <footer class="bg-white dark:bg-gray-800 border-t dark:border-gray-700">
+      <footer class="bg-light-0 dark:bg-dark-4">
         <div class="container mx-auto px-4 py-4 flex items-center justify-between">
           <div id="language-selector-container" class="w-1/4">
             ${this.languageManager.renderSelector()}
           </div>
-          <div class="w-1/2 text-sm text-gray-600 dark:text-gray-400 text-center">
+          <div class="w-1/2 text-sm text-light-4/80 dark:text-dark-0/80 text-center">
             ${i18n.t('copyright')}
           </div>
           <div class="w-1/4"></div>

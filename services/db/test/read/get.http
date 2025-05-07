@@ -1,0 +1,6 @@
+POST http://localhost:2999/read/get HTTP/1.1
+Content-Type: application/json
+{
+    "query": "SELECT * FROM users WHERE username = ? or email = ?",
+    "params": ["dadadasd", "leo@19.be"]
+}

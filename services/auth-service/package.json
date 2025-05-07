@@ -18,7 +18,8 @@
 		"fastify-cors": "^6.0.3",
 		"google-auth-library": "^8.7.0",
 		"speakeasy": "^2.0.0",
-		"nodemailer": "^6.10.0"
+		"nodemailer": "^6.10.0",
+		"@fastify/helmet": "^12.0.0"
 	},
 	"devDependencies": {
 		"nodemon": "^2.0.20"

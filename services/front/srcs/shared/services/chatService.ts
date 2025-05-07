@@ -1,13 +1,15 @@
 import { User } from "../types/user";
 import { TokenManager } from "../utils/token";
 
-const CHAT_WS = `ws://${window.location.hostname}:3000/chat/message`;
+const host = window.location.hostname;
+const CHAT_WS = `wss://${host}:8080/ws/chat/message`;
 
 // todo: check if the token is removed to logout the user
 export class ChatService {
   private ws: WebSocket | null = null;
   private currentUser: User | null = null;
   private chatRooms : Map<string, (data: any) => void> = new Map();
+  private chatMessages : any[] = [];
 
   public setuped : boolean = false;
 
@@ -34,11 +36,17 @@ export class ChatService {
     if (this.setuped) {
       return;
     }
+
     const token = TokenManager.getToken();
+    if (!token) {
+      return;
+    }
 
     this.ws = new WebSocket(`${CHAT_WS}${token ? `?token=${token}` : ""}`);
 
     this.ws.onopen = () => {
+      console.log("WebSocket connection opened");
+      this.setuped = true;
       this.ws!.send(JSON.stringify({
         type: "new",
         userId: this.currentUser?.id,
@@ -65,8 +73,6 @@ export class ChatService {
         this.chatRooms.get(data.friend)?.(data);
       }
     }
-
-    this.setuped = true;
   }
 
   addNewChatRoom(friendUserName: string, callback: (data: any) => void) {
@@ -91,9 +97,15 @@ export class ChatService {
     if (!this.setuped) {
       return;
     }
-
     if (this.ws?.readyState !== WebSocket.OPEN) {
+      this.chatMessages.push(data);
       return ;
+    }
+    if (this.chatMessages.length > 0) {
+      this.chatMessages.forEach((message) => {
+        this.ws?.send(message);
+      });
+      this.chatMessages = [];
     }
     this.ws.send(data);
   }

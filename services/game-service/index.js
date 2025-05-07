@@ -1,4 +1,3 @@
-import db from './db.js';
 import dotenv from 'dotenv';
 import Fastify from 'fastify';
 import fastifyJwt 	from '@fastify/jwt';
@@ -11,9 +10,7 @@ dotenv.config();
 
 const fastify = Fastify({logger: true})
 
-fastify.decorate('db', db);
-
-await fastify.register(websocket);
+fastify.register(websocket);
 
 fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 
@@ -73,8 +70,8 @@ function setupNewGame(ws, mode, opponent = null) {
   }));
 }
 
-fastify.register((wsRoutes) => {
-  wsRoutes.get('/ws/pong', { websocket: true }, (ws, req) => {
+fastify.register(async function (wsRoutes) {
+  wsRoutes.get('/pong', { websocket: true }, (socket, req) => {
     console.log('Player connected');
     const { token } = req.query;
 

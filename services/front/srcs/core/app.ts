@@ -17,6 +17,8 @@ import { TokenManager } from '../shared/utils/token';
 import { Chat } from '../shared/components/chat';
 import { NotFound } from '../shared/components/notFound';
 import { FriendProfile } from '../features/profile/friendProfile';
+import { chatService } from '../main';
+import { FriendsTab } from '../shared/components/friendsTab';
 
 export class TranscendenceApp {
   private state = {
@@ -33,12 +35,13 @@ export class TranscendenceApp {
   private connect4: Connect4HomePage;
   private pong: PongHomePage;
   //private friendsList: FriendsList | null = null;
+  private friendsTab: FriendsTab | null = null;
 
   constructor() {
     // Check if user is already logged in
     const token = TokenManager.getToken();
     if (token) {
-      const user = TokenManager.getUserFromLocalStorage();
+      const user = TokenManager.getUserFromToken();
       if (user) {
         this.state.user = user;
         // Restore user data from localStorage if available
@@ -62,6 +65,7 @@ export class TranscendenceApp {
 
     this.checkBrowserCompatibility();
     this.initializeApp();
+    this.initializeFriendsTab();
     this.renderCurrentPage();
   }
 
@@ -75,20 +79,30 @@ export class TranscendenceApp {
     return !!this.state.user;
   }
 
+  private initializeFriendsTab() {
+    if (this.isLoggedIn() && !this.friendsTab) {
+      this.friendsTab = new FriendsTab();
+    }
+  }
+
   private handleLogin(user: User) {
     this.state.user = user;
     this.menu = new Menu(true, () => this.handleLogout());
     this.initializeApp();
+    this.initializeFriendsTab();
     this.router.navigateTo('/profile');
   }
 
   private handleLogout() {
-    // this.chat.clean();
-    // todo
+    chatService.clean();
     TokenManager.removeToken();
     localStorage.removeItem('user');
     this.state.user = null;
     this.menu = new Menu(false, () => this.handleLogout());
+    if (this.friendsTab) {
+      document.getElementById('friends-tab-container')?.remove();
+      this.friendsTab = null;
+    }
     this.initializeApp();
     this.router.navigateTo('/signin');
   }
@@ -99,7 +113,7 @@ export class TranscendenceApp {
       return i18n.t('chat');
     }
 
-    const userMatch = path.match(/^\/user\/(.+)$/);
+    const userMatch = path.match(/^\/users\/([^/]+)$/);
     if (userMatch) {
       return userMatch[1];
     }
@@ -132,7 +146,7 @@ export class TranscendenceApp {
 
   private initializeApp() {
     document.body.innerHTML = `
-      <div class="min-h-screen flex flex-col bg-gray-50 dark:bg-gray-900">
+      <div class="min-h-screen flex flex-col bg-light-1 dark:bg-dark-3">
         ${this.header.render(this.getPageTitle(window.location.pathname))}
 
         <div 
@@ -144,10 +158,8 @@ export class TranscendenceApp {
           </div>
         </div>
 
-        <main id="main-content" class="container mx-auto px-4 py-8 flex-grow">
+        <main id="main-content" class="pt-16 container mx-auto px-4 py-8 flex-grow">
         </main>
-
-        <div id="modal" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 hidden"></div>
 
         ${this.footer.render()}
       </div>
@@ -162,28 +174,28 @@ export class TranscendenceApp {
     this.menu.setupEventListeners();
   }
 
-  private renderCurrentPage() {
-    const path = this.router.checkAuthAndRedirect(window.location.pathname);
+  private async renderCurrentPage() {
+    const path = await this.router.checkAuthAndRedirect(window.location.pathname);
     const main = document.querySelector('main');
     if (!main) return;
 
     const chatMatch = path.match(/^\/chat\/(.+)$/);
     if (chatMatch && this.state.user) {
-      const username = chatMatch[1];
-      const chat = new Chat(username);
+      const userId = chatMatch[1];
+      const chat = new Chat(userId);
       main.innerHTML = chat.render();
       chat.setupEventListeners();
       return;
     }
 
-    const userMatch = path.match(/^\/users\/(.+)$/); //attention autorise tout apres /users
+    const userMatch = path.match(/^\/users\/([^/]+)$/);
     if (userMatch && this.state.user) {
       const username = userMatch[1];
       const friendProfile = new FriendProfile(username, '/img/default-avatar.jpg');
       main.innerHTML = friendProfile.render();
       friendProfile.setupEventListeners();
       return;
-    } //fct a checker
+    }
 
     const connect4Match = path.match(/^\/connect4\/(.+)$/)
     if (connect4Match) {
@@ -207,7 +219,6 @@ export class TranscendenceApp {
 
     const tournamentMatch = path.match(/^\/tournament\/(.+)$/)
     if (tournamentMatch) {
-      console.log(tournamentMatch[1]);
       if (tournamentMatch[1] == "join" || tournamentMatch[1] == "create") {
         new TournamentHomePage(tournamentMatch[1]);
         return ;
@@ -227,7 +238,7 @@ export class TranscendenceApp {
           profile.setupEventListeners();
         }
         break;
-      case '/profile/settings':
+        case '/profile/settings':
         if (this.state.user) {
           const settings = new Settings(this.state.user);
           main.innerHTML = settings.render();
@@ -263,6 +274,7 @@ export class TranscendenceApp {
         main.innerHTML = this.auth.renderSignUp();
         this.auth.setupAuthEventListeners(true);
         break;
+      case '/404':
       default:
         const notFound = new NotFound();
         main.innerHTML = notFound.render();
@@ -278,14 +290,14 @@ export class TranscendenceApp {
   private renderHomePage(main: Element) {
     main.innerHTML = `
       <div class="flex flex-col items-center justify-center min-h-[calc(100vh-200px)]">
-        <h1 class="text-4xl font-bold mb-6 text-gray-800 dark:text-white">${i18n.t('welcome')}</h1>
-        <p class="text-lg text-gray-600 dark:text-gray-400 mb-8 text-center max-w-2xl">
+        <h1 class="text-4xl font-bold mb-6 text-light-4 dark:text-dark-0">${i18n.t('welcome')}</h1>
+        <p class="text-lg text-light-4/80 dark:text-dark-0/80 mb-8 text-center max-w-2xl">
           ${i18n.t('description')}
         </p>
         <div class="space-y-4">
           <button 
             id="getStartedBtn" 
-            class="bg-orange dark:bg-nature text-white dark:text-nature-lightest px-6 py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
+            class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-6 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
           >
             ${i18n.t('getStarted')}
           </button>

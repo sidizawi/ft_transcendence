@@ -1,9 +1,14 @@
+import { stat } from "fs";
+import { getUserById, getUserByUsername, getAllUsersByUsername, updateStatusById } from "../services/userService.js";
+
+import bcrypt from 'bcrypt';
+
 async function profileRoutes(fastify ,options) {
     fastify.get('/', async (request, reply) => {
         await request.jwtVerify();
 	    const userId = request.user.id;
-
-        const userExists = fastify.db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+        
+        const userExists = await getUserById(userId);
         if (!userExists){
             return reply.code(400).send({ error: 'User doesnt exist'});
         }
@@ -15,26 +20,65 @@ async function profileRoutes(fastify ,options) {
             is_two_factor_enabled: userExists.is_two_factor_enabled === 1 ? true : false,
             google: userExists.google === 1 ? true : false,
         }
+        
+        reply.code(200);
         return ({ message: 'Successfully retrieved profile'}, profile)
     });
 
     fastify.get('/check-username/:username', async (request, reply) => {
         const { username } = request.params;
 
-        const userExists = fastify.db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+        const userExists = await getUserByUsername(username);
         if (!userExists){
             return reply.code(404).send({ error: 'Username doesnt exists'});
         }
         return reply.code(200).send({ message: 'Username exists'});
     });
 
+    fastify.post('/check-password', async (request, reply) => {
+        const { password } = request.body;
+        if (!password){
+            return reply.code(400).send({ error: 'Password is required'});
+        }
+
+        await request.jwtVerify();
+	    const userId = request.user.id;
+
+        const userExists = await getUserById(userId);
+        if (!userExists){
+            return reply.code(404).send({ error: 'User doesnt exist'});
+        }
+        const isPasswordValid = await bcrypt.compare(password, userExists.password);
+        if (isPasswordValid){
+            return reply.code(403).send({ error: 'Passwords must be different' });
+        }
+        return reply.code(200).send({ message: 'Passwords are different' });
+    });
+
     fastify.get('/all-username', async (request, reply) => {
-        const allUsers = fastify.db.prepare('SELECT username FROM users').all();
-        if (!allUsers){
+
+        const allUsers = await getAllUsersByUsername();
+        if (!allUsers || allUsers.length === 0){
             return reply.code(404).send({ error: 'No users found'});
         }
         const usernames = allUsers.map(user => user.username);
         return reply.code(200).send({ usernames });
+    });
+
+    fastify.post('/toggle-status', async (request, reply) => {
+        await request.jwtVerify();
+        const userId = request.user.id;
+
+        const user = await getUserById(userId);
+        if (!user){
+            return reply.code(404).send({ error: 'User doesnt exist'});
+        }
+
+        const newStatus = !user.status;
+
+        await updateStatusById(newStatus, userId);
+
+        return reply.code(200).send({ message: 'Status updated successfully', status: newStatus });
     });
 }
 

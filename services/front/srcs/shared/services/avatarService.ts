@@ -1,7 +1,7 @@
 import { TokenManager } from '../utils/token';
 
 const host = window.location.hostname;
-const AVATAR_API_URL = `http://${host}:3000/user/settings/avatar`;
+const AVATAR_API_URL = `https://${host}:8080/api/user/settings/avatar`;
 
 export class AvatarService {
   static async uploadAvatar(file: File): Promise<{ avatarPath: string }> {

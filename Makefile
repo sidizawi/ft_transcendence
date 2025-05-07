@@ -15,6 +15,7 @@ all: build up
 
 # Construire les images Docker
 build:
+	mkdir -p services/db/database
 	mkdir -p shared/avatars
 	chmod 777 shared/avatars
 	$(DOCKER_COMPOSE) build
