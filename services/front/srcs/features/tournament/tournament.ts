@@ -1,6 +1,7 @@
 import { app } from '../../main';
 import { ModalManager } from '../../shared/components/modal';
 import { i18n } from '../../shared/i18n';
+import { TournamentData } from '../../shared/types/game';
 import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
 
@@ -37,16 +38,23 @@ class Match {
 
 export class Tournament {
 
-  private rounds = 0;
-  private name: string;
-  private type: string = "pong";
+  private data: TournamentData;
   private game: Match | null = null;
   private room: string | null = null;
   private ws : WebSocket | null = null;
 
   constructor(path: string) {
-    this.name = decodeURI(path.split("/").filter((el) => el.length)[1]);
-    let storage = localStorage.getItem(`tournament-${this.name}`);
+    this.data = {
+      name: "",
+      round: 1,
+      plays: 0,
+      rounds: 0,
+      players: 0,
+      type: "pong",
+      mode: "local",
+    };
+    this.data.name = decodeURI(path.split("/").filter((el) => el.length)[1]);
+    let storage = localStorage.getItem(`tournament-${this.data.name}`);
     if (!storage) {
       // todo: translate
       ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
@@ -58,20 +66,11 @@ export class Tournament {
     // localStorage.removeItem(`tournament-${name}`);
 
     let data = JSON.parse(storage);
-    //   name,
-    //   players,
-    //   code,
-    //   pub,
-    //   game,
-    //   mode,
-    //   room,
-    this.type = data.game;
+    this.setupData(data);
     if (data.mode == "local") {
       this.renderWaitingRoom("Creating tournament", true);
-      this.rounds = Math.log2(data.players);
       this.generatePlayers(data.players);
       this.renderMatchBoard(data.name);
-      // play
     } else {
       this.room = data.room;
       this.renderWaitingRoom("Joining tournament", true);
@@ -81,6 +80,14 @@ export class Tournament {
       // display matches
       // play
     }
+  }
+
+  setupData(data: any) {
+    this.data.name = data.name;
+    this.data.type = data.game;
+    this.data.mode = data.mode;
+    this.data.players = data.players;
+    this.data.rounds = Math.log2(data.players);
   }
 
   clean() {
@@ -115,9 +122,11 @@ export class Tournament {
           </h1>
           <div id="matchBoard" class="flex flex-col items-start justify-center mb-4">
           </div>
-          <button id="start" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
-            start
-          </button>
+          <div class="w-full flex items-center justify-center">
+            <button id="start" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              start
+            </button>
+          </div>
         </div>
       </div>
     `;
@@ -125,17 +134,24 @@ export class Tournament {
     // todo: translate
     const rounds = ["Final", "Semi-Final", "Quarter-Final", "Eighth-Final", "Qualification"];
 
-    for (let round = 1; round <= this.rounds; round++) {
+    for (let round = 1; round <= this.data.rounds; round++) {
       const matchBoard = document.getElementById("matchBoard");
       matchBoard!.innerHTML += `
         <div class="w-full flex flex-col items-start justify-center mb-4">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">${rounds[this.rounds - round]}</h2>
+          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">${rounds[this.data.rounds - round]}</h2>
           <div id="round-${round}" class="w-full flex flex-col items-center justify-center mb-8">
           </div>
         </div>
       `;
       this.displayMatches(this.game, round);
     }
+
+    const start = document.getElementById("start");
+    start?.addEventListener('click', () => {
+      this.playMatch(this.game!, this.data.round);
+      this.data.plays++;
+      
+    });
   }
 
   displayMatches(match: Match | null, round: number, depth: number = 0) : void {
@@ -163,16 +179,21 @@ export class Tournament {
 			&& round === match.round) {
 			match.winner = Math.random() < 0.5 ? match.player1 : match.player2;
 			console.log("Match between " + match.player1 + " vs " + match.player2 + " won by " + match.winner, "round: " + match.round);
+      this.renderMatchBoard(this.data.name);
 			return (true);
 		} else {
-			if (match.left !== null && !ret) {
-				ret = this.playMatch(match.left, round);
+			if (match.left !== null) {
+        if (!ret) {
+          ret = this.playMatch(match.left, round);
+        }
 				if (match.left.winner !== null) {
 					match.player1 = match.left.winner;
 				}
 			}
-			if (match.right !== null && !ret) {
-				ret = this.playMatch(match.right, round);
+			if (match.right !== null) {
+        if (!ret) {
+  				ret = this.playMatch(match.right, round);
+        }
 				if (match.right.winner !== null) {
 					match.player2 = match.right.winner;
 				}
@@ -212,7 +233,7 @@ export class Tournament {
 
       leave?.addEventListener('click', () => {
         this.clean();
-        localStorage.removeItem(`tournament-${this.name}`);
+        localStorage.removeItem(`tournament-${this.data.name}`);
         app.router.navigateTo("/tournament");
       });
     }

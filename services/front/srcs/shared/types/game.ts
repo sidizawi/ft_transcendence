@@ -49,3 +49,13 @@ export interface FriendGameStats {
     avatar: string;
   }[];
 }
+
+export interface TournamentData {
+  name: string;
+  type: string;
+  mode: string;
+  round: number;
+  plays: number;
+  rounds: number;
+  players: number;
+}
