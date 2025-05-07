@@ -1,0 +1,2 @@
+GET http://localhost:3003/friend/check-blocked/LeoAgea HTTP/1.1
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MiwiaWF0IjoxNzQ2NDY1MDUyLCJleHAiOjE3NDY1NTE0NTJ9._nKDGD7R0QtEN-5_9fLI3jp2gCBCxAIRJUfmcTSyEzE

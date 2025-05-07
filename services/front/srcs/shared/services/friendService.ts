@@ -2,7 +2,7 @@ import { TokenManager } from '../utils/token';
 import { Friend } from '../types/friend';
 
 const host = window.location.hostname;
-const FRIEND_API_URL = `http://${host}:3000/chat/friend`;
+const FRIEND_API_URL = `https://${host}:8080/api/chat/friend`;
 
 export class FriendService {
   static async getFriendsList(): Promise<Friend[]> {
@@ -132,7 +132,6 @@ export class FriendService {
 
       return await response.json();
     } catch (error) {
-      console.error('Add friend error:', error);
       throw error;
     }
   }

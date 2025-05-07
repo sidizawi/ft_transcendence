@@ -6,6 +6,9 @@ import { Friend } from '../../shared/types/friend';
 import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
 
+const host = window.location.hostname;
+const CONNECT4_WS_URL = `wss://${host}:8080/ws/game/connect4`;
+
 export class Connect4 {
 
   private cols = 7;
@@ -235,8 +238,7 @@ export class Connect4 {
   setupWebSocket(type : string | null) {
     const token = TokenManager.getToken();
 
-    const protocol: string = window.location.protocol === "https:" ? "wss" : "ws";
-    this.ws = new WebSocket(`${protocol}://${window.location.hostname}:3000/game/connect4/friend${token ? "?token="+token : ""}`);
+    this.ws = new WebSocket(`${CONNECT4_WS_URL}/friend${token ? "?token="+token : ""}`);
 
     this.ws.onopen = () => {
       this.ws?.send(JSON.stringify({
@@ -334,10 +336,10 @@ export class Connect4 {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-white text-center mb-6">
             ${i18n.t('games.connect4.title')}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p class="text-light-4 dark:text-gray-400 text-center mb-8">
             waiting for your friend
           </p>
         </div>
@@ -523,9 +525,9 @@ export class Connect4HomePage {
 
   renderBtnConn(data: string, name: string): string {
     const token = TokenManager.getToken();
-    let className = "connect4Btn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors";
+    let className = "connect4Btn w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors";
     if (!token) {
-      className = "connect4Btn not-connected w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors";
+      className = "connect4Btn not-connected w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors";
     }
     return `
       <button data="${data}" class="${className}">
@@ -537,15 +539,15 @@ export class Connect4HomePage {
   render(): string {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('games.connect4.title')}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p class="text-light-4 dark:text-dark-0 text-center mb-8">
             ${i18n.t('games.connect4.description')}
           </p>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <button data="play_local" class="connect4Btn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+            <button data="play_local" class="connect4Btn w-full bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 py-3 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
               ${i18n.t('games.playLocal')}
             </button>
             ${this.renderBtnConn("friend_list", i18n.t('games.playVsFriend'))}

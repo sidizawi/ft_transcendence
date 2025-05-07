@@ -1,6 +1,6 @@
 import { aiThink, aiMove } from "./ai.js";
 import Ball from './Ball.js';
-import { createAndUpdateGameRecord } from '../db.js';
+import { insertGame } from '../services/gameService.js';
 import { inGameUsers } from '../index.js';
 
 /*
@@ -120,7 +120,7 @@ export const startGame = (gameId) => {
 };
 
 // Stop game - update to record results
-export const stopGame = (gameId, winner = null) => {
+export const stopGame = async (gameId, winner = null) => {
   const game = games[gameId];
   if (!game) return;
   
@@ -167,16 +167,18 @@ export const stopGame = (gameId, winner = null) => {
   });
   // Write completed game to database
   if ((leftPlayer && leftPlayer.userId) || (rightPlayer && rightPlayer.userId)) {
-    createAndUpdateGameRecord(
+    await insertGame(
       leftPlayer?.userId || 0,
       rightPlayer?.userId || 0,
       leftPlayer?.username || "Player 1",
       rightPlayer?.username || "Player 2",
+      "pong",
       game.scores.left,
       game.scores.right,
       winnerName,
       loserName
     );
+
     
     console.log(`Game ${gameId} saved to DB: ${winnerName} beat ${loserName}`);
     delete game[gameId];

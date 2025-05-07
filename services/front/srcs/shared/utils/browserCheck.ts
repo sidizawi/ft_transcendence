@@ -9,10 +9,10 @@ interface BrowserRequirements {
 
 export class BrowserCompatibility {
   private static minVersions: BrowserRequirements = {
-    chrome: '122',    // Latest stable Chrome
-    firefox: '123',   // Latest stable Firefox
-    chromium: '122',  // Latest stable Chromium
-    brave: '1.62'     // Latest stable Brave
+    chrome: '135',    // Minimum Chrome version
+    firefox: '137',   // Minimum Firefox version
+    chromium: '108',  // Minimum Chromium version
+    brave: '1.77'     // Minimum Brave version
   };
 
   static check(): boolean {
@@ -34,7 +34,7 @@ export class BrowserCompatibility {
       case 'brave':
         // Brave's user agent includes Chrome version, need to check for Brave specifically
         const isBrave = navigator.brave !== undefined;
-        return isBrave && majorVersion >= parseInt(this.minVersions.chrome);
+        return isBrave && majorVersion >= parseInt(this.minVersions.brave);
       default:
         return false;
     }
@@ -46,13 +46,15 @@ export class BrowserCompatibility {
     const browserVersion = browser.getBrowserVersion();
 
     const warningElement = document.createElement('div');
-    warningElement.className = 'fixed top-0 left-0 right-0 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100 px-4 py-3 text-center transform transition-transform duration-300 ease-in-out z-50';
+    warningElement.className = 'fixed top-0 left-0 right-0 bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100 px-4 py-3 text-center z-50';
     warningElement.innerHTML = `
       <div class="container mx-auto flex items-center justify-between">
         <div class="flex-1">
           <p class="font-medium">
             ⚠️ Your browser (${browserName} ${browserVersion}) might not be fully supported.
-            For the best experience, please use the latest version of Chrome (122+), Firefox (123+), Brave (1.62+), or Chromium (122+).
+            For the best experience, please use:
+            <br>
+            Chrome (135+), Firefox (137+), Brave (1.77+), or Chromium (108+)
           </p>
         </div>
         <button class="ml-4 text-yellow-900 dark:text-yellow-100 hover:text-yellow-700 dark:hover:text-yellow-300">
@@ -64,7 +66,9 @@ export class BrowserCompatibility {
     const closeButton = warningElement.querySelector('button');
     if (closeButton) {
       closeButton.addEventListener('click', () => {
+        warningElement.style.opacity = '0';
         warningElement.style.transform = 'translateY(-100%)';
+        warningElement.style.transition = 'opacity 0.3s ease-out, transform 0.3s ease-out';
         setTimeout(() => warningElement.remove(), 300);
       });
     }

@@ -1,7 +1,8 @@
 import { User } from "../types/user";
 import { TokenManager } from "../utils/token";
 
-const CHAT_WS = `ws://${window.location.hostname}:3000/chat/message`;
+const host = window.location.hostname;
+const CHAT_WS = `wss://${host}:8080/ws/chat/message`;
 
 // todo: check if the token is removed to logout the user
 export class ChatService {
@@ -44,6 +45,7 @@ export class ChatService {
     this.ws = new WebSocket(`${CHAT_WS}${token ? `?token=${token}` : ""}`);
 
     this.ws.onopen = () => {
+      console.log("WebSocket connection opened");
       this.setuped = true;
       this.ws!.send(JSON.stringify({
         type: "new",

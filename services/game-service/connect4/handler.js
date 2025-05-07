@@ -1,16 +1,20 @@
+import { getCountGameByPlayerId,
+	insertGame
+} from "../services/gameService.js";
+
 let ROWS = 6;
 let COLS = 7;
 
 let rooms = new Map();
 let sockets = new Map();
 
-function getRoomId(fastify, data) {
-	const userGames = fastify.db.prepare("SELECT COUNT(*) AS count FROM game WHERE playerid_1 = ? OR playerid_2 = ?").get(data.id, data.id);
+async function getRoomId(fastify, data) {
+	const userGames = await getCountGameByPlayerId(data.id);
 	console.log("user games", userGames);
 	return `${data.id}-game-${userGames.count || 0}`;
 }
 
-function handleNewConn(fastify, data, socket) {
+async function handleNewConn(fastify, data, socket) {
 	if (data.room) {
 		const room = rooms.get(data.room);
 		if (!room) {
@@ -51,7 +55,7 @@ function handleNewConn(fastify, data, socket) {
 		}))
 		return ;
 	}
-	const roomId = getRoomId(fastify, data);
+	const roomId = await getRoomId(fastify, data);
 	rooms.set(roomId, {
 		playerid_1: data.id,
 		player1Username: data.username,
@@ -191,7 +195,7 @@ function sendPlayedMessage(room, data) {
 	}
 }
 
-function handlePlay(fastify, data) {
+async function handlePlay(fastify, data) {
 	let room = rooms.get(data.room);
 
 	let row = room.columns[data.col];
@@ -216,13 +220,9 @@ function handlePlay(fastify, data) {
 			mode: "win",
 			winner: data.id == room.playerid_2
 		}));
-
-		let tmp = fastify.db.prepare("INSERT INTO game \
-			(playerid_1, playerid_2, username_1, username_2, game_type, score_1, score_2, player_win, player_lost) \
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		
 		if (data.id == room.playerid_1) {
-			tmp.run(
+			const params = [
 				room.playerid_1, 
 				room.playerid_2, 
 				room.player1Username, 
@@ -231,10 +231,11 @@ function handlePlay(fastify, data) {
 				1,
 				0,
 				room.player1Username,
-				room.player2Username,
-			);
+				room.player2Username
+			];
+			await insertGame(params);
 		} else {
-			tmp.run(
+			const params = [
 				room.playerid_1, 
 				room.playerid_2, 
 				room.player1Username, 
@@ -243,8 +244,9 @@ function handlePlay(fastify, data) {
 				0,
 				1,
 				room.player2Username,
-				room.player1Username,
-			);
+				room.player1Username
+			];
+			await insertGame(params);
 		}
 		rooms.delete(data.room);
 		sockets.delete(data.id == room.playerid_1 ? room.player1ws : room.player2ws);
@@ -268,11 +270,8 @@ function handlePlay(fastify, data) {
 			mode: "tie",
 		}));
 
-		let tmp = fastify.db.prepare("INSERT INTO game \
-			(playerid_1, playerid_2, username_1, username_2, game_type, score_1, score_2, player_win, player_lost) \
-			VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
 		// todo: to check
-		tmp.run(
+		const params = [
 			room.playerid_1, 
 			room.playerid_2, 
 			room.player1Username, 
@@ -282,7 +281,9 @@ function handlePlay(fastify, data) {
 			0,
 			room.player1Username,
 			room.player2Username,
-		);
+		];
+
+		await insertGame(params);
 
 		rooms.delete(data.room);
 		sockets.delete(data.id == room.playerid_1 ? room.player1ws : room.player2ws);
@@ -309,7 +310,7 @@ export const connect4Handler = async (fastify) => {
 
 		fastify.jwt.verify(token);
 
-		socket.on("message", (message) => {
+		socket.on("message", async (message) => {
 			const data = JSON.parse(message.toString());
 
 			console.log("data received", data);
@@ -323,13 +324,13 @@ export const connect4Handler = async (fastify) => {
 			}
 
 			if (data.mode == "new") {
-				handleNewConn(fastify, data, socket);
+				await handleNewConn(fastify, data, socket);
 			} else if (data.mode == "play") {
 				if (!data.room) {
 					socket.close();
 					return ;
 				}
-				handlePlay(fastify, data);
+				await handlePlay(fastify, data);
 			}
 		});
 

@@ -3,6 +3,7 @@ import { Friend } from '../../shared/types/friend';
 import { FriendService } from '../../shared/services/friendService';
 import { i18n } from '../../shared/i18n';
 import { FriendProfile } from '../profile/friendProfile';
+import { SVGIcons } from '../../shared/components/svg';
 
 export class Friends {
   private friends: Friend[] = [];
@@ -59,7 +60,7 @@ export class Friends {
   }
 
   private navigateToProfile(username: string) {
-    window.history.pushState(null, '', `/users/${username}`); //////// TO check
+    window.history.pushState(null, '', `/users/${username}`);
     const friendProfile = new FriendProfile(username, this.getFriendAvatar(username));
     const main = document.querySelector('main');
     if (main) {
@@ -70,7 +71,7 @@ export class Friends {
 
   private getFriendAvatar(username: string): string {
     const friend = this.friends.find(f => f.username2 === username);
-    return friend?.avatar || '/img/default-avatar.jpg';
+    return friend!.avatar || '/img/default-avatar.jpg';
   }
 
   private renderAddFriendModal(): string {
@@ -78,46 +79,65 @@ export class Friends {
 
     return `
       <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-          <h3 class="text-xl font-bold mb-4 text-gray-900 dark:text-white">
+        <div class="bg-light-0 dark:bg-dark-4 p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+          <h3 class="text-xl font-bold mb-4 text-light-4 dark:text-dark-0">
             ${i18n.t('addFriend')}
           </h3>
           <form id="add-friend-form" class="space-y-4">
             <div>
-              <label for="friend-username" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                ${i18n.t('enterUsername')}
-              </label>
               <input 
                 type="text" 
                 id="friend-username"
-                class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-2 focus:ring-orange dark:focus:ring-nature focus:border-transparent"
+                class="
+                  mt-1 block w-full
+                  rounded-md
+
+                  border border-light-4/30
+                  dark:border-dark-0/30
+                  bg-white <!-- why not working>
+                  dark:bg-dark-4
+                  
+                  placeholder-light-4/40
+                  dark:placeholder-dark-0/40
+                  text-light-4
+                  dark:text-dark-0
+
+                  focus:outline-none
+
+                  focus:border-light-3
+                  dark:focus:border-dark-1
+                  focus:ring-2
+                  focus:ring-light-0
+                  dark:focus:ring-dark-4
+
+                  px-3 py-2
+
+                  text-base
+                "                                      
                 placeholder="${i18n.t('enterUsername')}"
                 required
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
             </div>
-            <div id="add-friend-error" class="text-red-400 text-sm hidden"></div>
+            <div id="add-friend-error" class="mt-4 p-4 rounded-lg hidden"></div>
             <div class="flex justify-end space-x-3">
               <button 
                 type="button"
                 id="cancel-add-friend"
-                class="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
+                class="px-4 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 ${i18n.t('cancel')}
               </button>
               <button 
                 type="submit"
-                class="px-4 py-2 bg-orange dark:bg-nature text-white dark:text-nature-lightest rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 relative"
+                class="px-4 py-2 bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 relative"
                 ${this.isAddingFriend ? 'disabled' : ''}
               >
                 <span class="add-friend-text ${this.isAddingFriend ? 'invisible' : ''}">${i18n.t('add')}</span>
                 ${this.isAddingFriend ? `
                   <span class="absolute inset-0 flex items-center justify-center">
-                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
+                    ${SVGIcons.getLoadingIcon()}
                   </span>
                 ` : ''}
               </button>
@@ -131,10 +151,12 @@ export class Friends {
   render(): string {
     if (this.isLoading) {
       return `
-        <div class="max-w-4xl mx-auto px-4 py-8">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-            <div class="flex justify-center items-center h-64">
-              <div class="animate-spin rounded-full h-12 w-12 border-4 border-orange dark:border-nature border-t-transparent"></div>
+        <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+          <div class="max-w-4xl mx-auto px-4 py-8">
+            <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
+              <div class="flex justify-center items-center h-64">
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-light-3 dark:border-dark-1 border-t-transparent"></div>
+              </div>
             </div>
           </div>
         </div>
@@ -148,195 +170,238 @@ export class Friends {
     const blockedFriends = filteredFriends.filter(f => f.status === 'blocked');
 
     return `
-      <div class="max-w-4xl mx-auto px-4 py-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <div class="flex justify-between items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${i18n.t('friends')}</h1>
-            <button 
-              id="add-friend-button"
-              class="bg-orange dark:bg-nature text-white dark:text-nature-lightest px-4 py-2 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors"
-            >
-              ${i18n.t('addFriend')}
-            </button>
-          </div>
-
-          <input
-            type="text"
-            id="friends-search"
-            placeholder="${i18n.t('searchFriends')}"
-            value="${this.searchQuery}"
-            class="w-full p-3 mb-6 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange dark:focus:ring-nature"
-          />
-
-          ${receivingRequests.length > 0 ? `
-            <div class="mb-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('incomingRequests')}</h3>
-              <div class="space-y-3">
-                ${receivingRequests.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
-                      <img 
-                        src="${friend.avatar}" 
-                        alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
-                      >
-                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
-                    </div>
-                    <div class="space-x-2">
-                      <button 
-                        class="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-white transition-colors"
-                        data-action="accept"
-                        data-username="${friend.username2}"
-                      >
-                        ${i18n.t('accept')}
-                      </button>
-                      <button 
-                        class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-white transition-colors"
-                        data-action="reject"
-                        data-username="${friend.username2}"
-                      >
-                        ${i18n.t('reject')}
-                      </button>
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="max-w-4xl mx-auto px-4 py-8">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0">${i18n.t('friends')}</h1>
+              <button 
+                id="add-friend-button"
+                class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-4 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
+              >
+                ${i18n.t('add')}
+              </button>
             </div>
-          ` : ''}
 
-          ${sendingRequests.length > 0 ? `
-            <div class="mb-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('outgoingRequests')}</h3>
-              <div class="space-y-3">
-                ${sendingRequests.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
-                      <img 
-                        src="${friend.avatar}" 
-                        alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
-                      >
-                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
-                    </div>
-                    <button 
-                      class="bg-red-500 hover:bg-red-600 px-3 py-1.5 rounded text-white transition-colors"
-                      data-action="cancel"
-                      data-username="${friend.username2}"
-                    >
-                      ${i18n.t('cancel')}
-                    </button>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          ` : ''}
+            <input
+              type="text"
+              id="friends-search"
+              placeholder="${i18n.t('searchFriends')}"
+              value="${this.searchQuery}"
+              class="
+                w-full p-3 mb-6 rounded-lg
+                bg-light-1 dark:bg-dark-3
+                text-light-4 dark:text-dark-0
+                placeholder-light-3/60 dark:placeholder-dark-1/60
+                focus:outline-none focus:ring-2
+                focus:ring-light-3 dark:focus:ring-dark-1
+              "
+            />
 
-          <div class="mb-8">
-            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
-            ${acceptedFriends.length > 0 ? `
-              <div class="space-y-3">
-                ${acceptedFriends.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
-                      <div class="relative">
+            ${receivingRequests.length > 0 ? `
+              <div class="mb-8">
+                <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('receivedRequests')}</h3>
+                <div class="space-y-3">
+                  ${receivingRequests.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity max-w-[70%]" data-action="view-profile" data-username="${friend.username2}">
                         <img 
                           src="${friend.avatar}" 
                           alt="${friend.username2}" 
-                          class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
+                          class="w-10 h-10 rounded-full object-cover shrink-0"
                         >
-                        <span class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-gray-800"></span>
+                        <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
+                          ${friend.username2}
+                        </span>
                       </div>
-                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                      <div class="space-x-2">
+                        <button 
+                        class="
+                            text-light-4/80 dark:text-dark-0/80
+                            px-3 py-1.5 rounded-lg
+                            border border-light-4/80 dark:border-dark-0/80
+                            hover:text-light-0 dark:hover:text-dark-4
+                            hover:border-light-0 dark:hover:border-dark-4
+                            hover:bg-light-4 dark:hover:bg-dark-0
+                            transition-colors
+                          "
+                          data-action="accept"
+                          data-username="${friend.username2}"
+                        >
+                          ${SVGIcons.getAcceptIcon()}
+                        </button>
+                        <button 
+                          class="
+                            text-light-4/80 dark:text-dark-0/80
+                            px-3 py-1.5 rounded-lg
+                            border border-light-4/80 dark:border-dark-0/80
+                            hover:text-light-0 dark:hover:text-dark-4
+                            hover:border-light-0 dark:hover:border-dark-4
+                            hover:bg-light-4 dark:hover:bg-dark-0
+                            transition-colors
+                          "
+                          data-action="reject"
+                          data-username="${friend.username2}"
+                        >
+                          ${SVGIcons.getRejectIcon()}
+                        </button>
+                      </div>
                     </div>
-                    <div class="flex items-center space-x-3">
-                      <button 
-                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        data-action="block"
-                        data-username="${friend.username2}"
-                        title="${i18n.t('block')}"
-                      >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                        </svg>
-                      </button>
-                      <button 
-                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        data-action="delete"
-                        data-username="${friend.username2}"
-                        title="${i18n.t('delete')}"
-                      >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                      </button>
-                      <button 
-                        class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        data-action="chat"
-                        data-username="${friend.username2}"
-                        title="${i18n.t('chat')}"
-                      >
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                `).join('')}
+                  `).join('')}
+                </div>
               </div>
-            ` : `
-              <p class="text-gray-600 dark:text-gray-400 text-center py-8">
-                ${i18n.t('noFriendsYet')}
-              </p>
-            `}
-          </div>
+            ` : ''}
 
-          ${blockedFriends.length > 0 ? `
-            <div class="mt-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('blockedUsers')}</h3>
-              <div class="space-y-3">
-                ${blockedFriends.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
-                    <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
-                      <img 
-                        src="${friend.avatar}" 
-                        alt="${friend.username2}" 
-                        class="w-10 h-10 rounded-full object-cover grayscale hover:opacity-80 transition-opacity"
+            ${sendingRequests.length > 0 ? `
+              <div class="mb-8">
+                <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('sentRequests')}</h3>
+                <div class="space-y-3">
+                  ${sendingRequests.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover shrink-0"
+                        >
+                        <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
+                          ${friend.username2}
+                        </span>
+                      </div>
+                      <div class="flex items-center space-x-3">
+                      <button 
+                        class="
+                            text-light-4/80 dark:text-dark-0/80
+                            px-3 py-1.5 rounded-lg
+                            border border-light-4/80 dark:border-dark-0/80
+                            hover:text-light-0 dark:hover:text-dark-4
+                            hover:border-light-0 dark:hover:border-dark-4
+                            hover:bg-light-4 dark:hover:bg-dark-0
+                            transition-colors
+                          "
+                        data-action="cancel"
+                        data-username="${friend.username2}"
                       >
-                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                        ${i18n.t('cancel')}
+                      </button>
                     </div>
-                    <button 
-                      class="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors px-3 py-1.5 rounded border border-gray-300 dark:border-gray-600"
-                      data-action="unblock"
-                      data-username="${friend.username2}"
-                    >
-                      ${i18n.t('unblock')}
-                    </button>
-                  </div>
-                `).join('')}
+                    </div>
+                  `).join('')}
+                </div>
               </div>
+            ` : ''}
+
+            <div class="mb-8">
+              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('friendsList')}</h3>
+              ${acceptedFriends.length > 0 ? `
+                <div class="space-y-3">
+                  ${acceptedFriends.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover shrink-0"
+                        >
+                        <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
+                          ${friend.username2}
+                        </span>
+                      </div>
+                      <div class="flex items-center space-x-3">
+                        <button 
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors w-5 h-5"
+                          data-action="block"
+                          data-username="${friend.username2}"
+                          title="${i18n.t('block')}"
+                        >
+                          ${SVGIcons.getBlockIcon()}
+                        </button>
+                        <button 
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors w-5 h-5"
+                          data-action="delete"
+                          data-username="${friend.username2}"
+                          title="${i18n.t('delete')}"
+                        >
+                          ${SVGIcons.getDeleteIcon()}
+                        </button>
+                        <button 
+                          class="text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 transition-colors w-5 h-5"
+                          data-action="chat"
+                          data-username="${friend.username2}"
+                          title="${i18n.t('chat')}"
+                        >
+                          ${SVGIcons.getChatIcon()}
+                        </button>
+                      </div>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : `
+                <p class="text-light-4/80 dark:text-dark-0/80 text-center py-8">
+                  ${i18n.t('noFriendsYet')}
+                </p>
+              `}
             </div>
-          ` : ''}
-        </div>
 
-        <div class="mt-8 flex justify-center">
-          <a 
-            href="/profile"
-            class="px-6 py-2 bg-orange-lighter dark:bg-forest text-orange-darker dark:text-nature-lightest rounded-lg hover:bg-orange-lighter/90 dark:hover:bg-forest/90 transition-colors"
-          >
-            ${i18n.t('back')}
-          </a>
+            ${blockedFriends.length > 0 ? `
+              <div class="mt-8">
+                <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('blockedUsers')}</h3>
+                <div class="space-y-3">
+                  ${blockedFriends.map(friend => `
+                    <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
+                      <div class="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity max-w-[80%]" data-action="view-profile" data-username="${friend.username2}">
+                        <img 
+                          src="${friend.avatar}" 
+                          alt="${friend.username2}" 
+                          class="w-10 h-10 rounded-full object-cover shrink-0"
+                        >
+                        <span class="text-light-4 dark:text-dark-0 truncate overflow-hidden whitespace-nowrap block">
+                          ${friend.username2}
+                        </span>
+                      </div>
+                      <button 
+                        class="
+                          text-light-4/80 dark:text-dark-0/80
+                          px-3 py-1.5 rounded-lg
+                          border border-light-4/80 dark:border-dark-0/80
+                          hover:text-light-0 dark:hover:text-dark-4
+                          hover:border-light-0 dark:hover:border-dark-4
+                          hover:bg-light-4 dark:hover:bg-dark-0
+                          transition-colors
+                        "
+                        data-action="unblock"
+                        data-username="${friend.username2}"
+                      >
+                        ${i18n.t('unblock')}
+                      </button>
+                    </div>
+                  `).join('')}
+                </div>
+              </div>
+            ` : ''}
+          </div>
+          
+          <!-- Back Button -->
+          <div class="mt-8 flex justify-center">
+            <button 
+              id="backButton"
+              class="px-6 py-2 text-light-4/80 dark:text-dark-0/80 hover:text-light-4 dark:hover:text-dark-0 rounded-lg transition-colors"
+            >
+              ${i18n.t('back')}
+            </button>
+          </div>
         </div>
       </div>
-
       ${this.renderAddFriendModal()}
     `;
   }
 
   private showAddFriendError(message: string) {
-    const errorDiv = document.getElementById('add-friend-error');
-    if (errorDiv) {
-      errorDiv.textContent = message;
-      errorDiv.classList.remove('hidden');
+    const errorAddMessage = document.getElementById('add-friend-error');
+    if (errorAddMessage) {
+      errorAddMessage.textContent = message;
+      errorAddMessage.className = 'mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 text-center dark:text-red-400';
+      errorAddMessage.classList.remove('hidden');
     }
   }
 
@@ -348,21 +413,24 @@ export class Friends {
   }
 
   private async handleAddFriend(username: string) {
-    this.isAddingFriend = true;
     this.updateView();
-
+  
     try {
+      this.isAddingFriend = true;
       await FriendService.addFriend(username);
       this.addFriendOpen = false;
       await this.loadFriends();
     } catch (error) {
-      console.error('Error adding friend:', error);
-      this.showAddFriendError(error instanceof Error ? error.message : 'Failed to add friend');
-    } finally {
       this.isAddingFriend = false;
-      this.updateView();
+      this.showAddFriendError(error instanceof Error ? error.message : 'Failed to add friend');
+      return;
     }
+  
+    this.isAddingFriend = false;
+    this.updateView();
   }
+  
+  
 
   private async handleFriendAction(action: string, username: string) {
     try {
@@ -397,13 +465,17 @@ export class Friends {
           break;
       }
       await this.loadFriends();
+
+      // inform friendList changed
+      window.dispatchEvent(new CustomEvent('friendListChanged', {
+        detail: { username, action }
+      }));
     } catch (error) {
       console.error(`Error handling friend action ${action}:`, error);
     }
   }
 
   setupEventListeners() {
-    const friendsTab = document.getElementById('friends-tab');
     const addFriendButton = document.getElementById('add-friend-button');
     const searchInput = document.getElementById('friends-search') as HTMLInputElement;
 
@@ -446,12 +518,22 @@ export class Friends {
         e.stopPropagation();
         const action = button.getAttribute('data-action');
         const username = button.getAttribute('data-username');
-        // const userId = button.getAttribute('data-userid');
 
         if (action && username) {
           await this.handleFriendAction(action, username);
         }
       });
+    });
+
+    // Back button
+    const backButton = document.getElementById('backButton');
+    backButton?.addEventListener('click', () => {
+      console.log('previous', window.history.back);
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '/friends'; // Fallback if no history
+      }
     });
   }
 }

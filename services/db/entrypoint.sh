@@ -1,6 +1,6 @@
 #!/bin/sh
 
-DB_PATH="/app/data/management.db"
+DB_PATH="/app/data/database.db"
 
 sqlite3 "$DB_PATH" <<EOF
 CREATE TABLE IF NOT EXISTS users (
@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     email TEXT NOT NULL UNIQUE,
     password TEXT NOT NULL,
     avatar TEXT DEFAULT NULL,
-    game_data TEXT DEFAULT '{}',
+    privacy TEXT DEFAULT '{}',
     is_two_factor_enabled BOOLEAN DEFAULT 0,
     status BOOLEAN NOT NULL CHECK (status IN (0, 1)) DEFAULT 0,
     google BOOLEAN DEFAULT 0
@@ -91,5 +91,6 @@ EOF
 
 # Pour garder le conteneur en vie:
 #exec tail -f /dev/null
+echo "Database tables created successfully"
 
 sh /init.sh
