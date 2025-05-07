@@ -47,7 +47,14 @@ export class Pong {
       user: TokenManager.getUserFromLocalStorage(),
   };
 
+  private friend: String | null = null;
+
   constructor(type: string | null) {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (type == "online") {
+      this.friend = urlParams.get("friend");
+    }
     this.render();
     this.pongEventListener(type);
   }
@@ -111,7 +118,7 @@ export class Pong {
                 paddleWidth: this.PADDLE_WIDTH,
                 paddleHeight: this.PADDLE_HEIGHT,
                 ballSize: this.BALL_SIZE,
-                username: this.state.user?.username || '',
+                username: this.state.user?.username || ''
             }));
         }
     }
@@ -134,7 +141,8 @@ export class Pong {
           } else if (type == "online") {
             this.state.ws!.send(JSON.stringify({
               type: 'startGame',
-              mode: 'online'
+              mode: 'online',
+              friend: this.friend
             }));
           } else if (type == "playAgain") {
             this.state.ws!.send(JSON.stringify({
@@ -182,6 +190,7 @@ export class Pong {
             this.stopGame(data.winner);
         }
         else if (data.type === 'waitingOpponent') {
+            console.log("Waiting for opponent...");
             if (this.state.gameLoopId !== null) {
                 cancelAnimationFrame(this.state.gameLoopId);
             }

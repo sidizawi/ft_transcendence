@@ -17,7 +17,7 @@ await fastify.register(websocket);
 
 fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 
-export const waitingPlayers = [];
+export const friendMatchRequests = new Map();
 export const inGameUsers = new Set();
 
 //let sockets = new Map();
@@ -32,7 +32,7 @@ function setupNewGame(ws, mode, opponent = null) {
       message: 'You are already in a game'
     }));
   }
-  // Generate a unique game ID
+  // Generate a unique game ID 
   const gameId = `game-${Date.now()}`;
   // Create a new game with the client dimensions
   createGame(gameId, ws, ws.canvasDimensions);
@@ -98,6 +98,7 @@ fastify.register((wsRoutes) => {
             ballSize: data.ballSize
           };
           ws.username = data.username;
+
           return ws.send(JSON.stringify({
             type: 'starting',
           }));
@@ -113,26 +114,32 @@ fastify.register((wsRoutes) => {
           
           if (data.mode === 'online') {
             // For online mode, check waiting players first
-            if (waitingPlayers.length > 0) {
+            if (data.friend) {
               // Match with a waiting player
-              const opponent = waitingPlayers.shift();
-              console.log(`Matching with waiting player: ${opponent.username}`);
-              
-              // Create game with both players
-              setupNewGame(ws, 'online', opponent);
-            } else {
+              console.log(`Friend match requested with ${data.friend}`);
+              console.log(`Checking for friend ${friendMatchRequests.has(data.friend)}`);
+              if (friendMatchRequests.has(data.friend) && friendMatchRequests.get(data.friend).targetFriend === ws.username) {
+                const friendWs = friendMatchRequests.get(data.friend).socket;
+                friendMatchRequests.delete(data.friend);
+                // Create game with the friend
+                console.log(`Found friend ${data.friend}, starting game`);
+                setupNewGame(friendWs, 'online', ws);
+              }
+              else {
               // No waiting players, add to queue
-              waitingPlayers.push(ws);
-              console.log(`Added to waiting queue. Players waiting: ${waitingPlayers.length}`);
-              
+              console.log(`Adding ${ws.username} to waiting list`);
+              friendMatchRequests.set(ws.username, {
+                targetFriend: data.friend, 
+                socket: ws
+              });
               // Tell client they're waiting
               ws.send(JSON.stringify({
-                type: 'waitingOpponent'
-              }));
-            }
-          } else {
-            // Single player or two player modes
-            setupNewGame(ws, data.mode);
+                type: 'waitingOpponent',
+              }));}
+            }}
+          else {
+          // Single player or two player modes
+          setupNewGame(ws, data.mode);
           }
         }
         else if (data.type === 'paddleMove') {
@@ -146,9 +153,6 @@ fastify.register((wsRoutes) => {
     });
     // Handle disconnections
     ws.on('close', () => {
-      const idx = waitingPlayers.indexOf(ws);
-      if (idx !== -1) waitingPlayers.splice(idx, 1);
-
       if (ws.gameId && ws.username) {
         handleDisconnect(ws.gameId, ws.username);
       }

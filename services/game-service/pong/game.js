@@ -1,7 +1,7 @@
 import { aiThink, aiMove } from "./ai.js";
 import Ball from './Ball.js';
 import { createAndUpdateGameRecord } from '../db.js';
-import { inGameUsers, waitingPlayers } from '../index.js';
+import { inGameUsers, friendMatchRequests } from '../index.js';
 
 /*
   * TODO:
@@ -46,8 +46,6 @@ export const createGame = (gameId, wss, dimensions = null) => {
     status: 'waiting',
     dimensions: canvasDimensions,
     intervalId: null,
-    wss: wss,
-    lastUpdate: Date.now()
   };
 
   return games[gameId];
@@ -356,6 +354,7 @@ export const handleDisconnect = (gameId, username) => {
 
   // Remove from inGameUsers
   inGameUsers.delete(username);
+  friendMatchRequests.delete(username);
   // If game is in progress, end it
   if (game.status === 'playing') {
     stopGame(gameId);
