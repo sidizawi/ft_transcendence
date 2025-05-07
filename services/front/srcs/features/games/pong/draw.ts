@@ -1,5 +1,4 @@
 import { PongState } from "../../../shared/types/pong.ts";
-import Paddle from "./Paddle.ts";
 
 export const gameLoop = (state: PongState): void => {
   const {
