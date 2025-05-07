@@ -57,7 +57,7 @@ async function handleNewMessage(data) {
         friend = friend.id;
     }
     query = "INSERT INTO messages (sender_id, recipient_id, content, timestamp) VALUES (?, ?, ?, ?)";
-    await queryPost(query, [data.userId, friend, data.text, data.timestamp]);
+    query = await queryPost(query, [data.userId, friend, data.text, data.timestamp]);
 }
 
 async function changeStatus(username, status) {

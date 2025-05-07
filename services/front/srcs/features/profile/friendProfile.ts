@@ -1,4 +1,3 @@
-import { User } from '../../shared/types/user';
 import { FriendGameStats } from '../../shared/types/game';
 import { i18n } from '../../shared/i18n';
 import { StatsService } from '../../shared/services/statsService';

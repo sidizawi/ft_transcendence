@@ -4,6 +4,7 @@ import { FriendService } from '../../shared/services/friendService';
 import { i18n } from '../../shared/i18n';
 import { FriendProfile } from '../profile/friendProfile';
 import { SVGIcons } from '../../shared/components/svg';
+import { Chat } from '../../shared/components/chat';
 
 export class Friends {
   private friends: Friend[] = [];
@@ -51,13 +52,13 @@ export class Friends {
     );
   }
 
-  private openChatInNewTab(username: string) {
-    const chatUrl = `/chat/${username}`;
-    const chatWindow = window.open(chatUrl, `chat-${username}`, 'width=800,height=600');
-    if (chatWindow) {
-      chatWindow.focus();
-    }
-  }
+  // private openChatInNewTab(username: string) {
+  //   const chatUrl = `/chat/${username}`;
+  //   const chatWindow = window.open(chatUrl, `chat-${username}`, 'width=800,height=600');
+  //   if (chatWindow) {
+  //     chatWindow.focus();
+  //   }
+  // }
 
   private navigateToProfile(username: string) {
     window.history.pushState(null, '', `/users/${username}`);
@@ -435,7 +436,7 @@ export class Friends {
   private async handleFriendAction(action: string, username: string) {
     try {
       if (action === 'chat' && username) {
-        this.openChatInNewTab(username);
+        Chat.openChatTab(username);
         return;
       }
 

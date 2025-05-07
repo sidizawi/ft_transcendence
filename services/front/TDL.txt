@@ -2,7 +2,7 @@ ajouter status quand co et deco
 ajouter status partout
 Ajout notif si new message + new demande de connexion
 
-ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
+
 	friendsTab:
 		- pourquoi se referme entre profile et reste?
 		- Bon comportement sur friendProfile quand chqngement de friendStatus faire pareil partout

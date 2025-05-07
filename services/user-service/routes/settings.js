@@ -295,13 +295,13 @@ async function settingsRoutes(fastify, options) {
 		}
 	
 		const originalFileName = request.file.originalname;
-		const newFilePath = path.join('uploads/avatars', originalFileName);
+		const newFilePath = path.join('/uploads/avatars', originalFileName);
 	
-		if (fs.existsSync(newFilePath)) {
-			fs.unlinkSync(newFilePath);
+		if (fs.existsSync("/app" + newFilePath)) {
+			fs.unlinkSync("/app" + newFilePath);
 		}
 	
-		fs.renameSync(request.file.path, newFilePath);
+		fs.renameSync(request.file.path, "/app" + newFilePath);
 	
 		await updateAvatarById(newFilePath, userId);
 	

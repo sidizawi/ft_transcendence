@@ -95,6 +95,7 @@ export class ChatService {
 
   sendMessage(data: any) {
     if (!this.setuped) {
+      this.chatMessages.push(data);
       return;
     }
     if (this.ws?.readyState !== WebSocket.OPEN) {
