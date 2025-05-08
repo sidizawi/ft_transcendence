@@ -11,8 +11,7 @@ async function handleNewChatRoom(data, socket) {
         WHERE (sender_id = ? AND recipient_id = ?) \
         OR (sender_id = ? AND recipient_id = ?)"
     let dbMessages = await queryAll(query, [data.userId, friend.id, friend.id, data.userId]);
-    
-    console.log("dbMessages", dbMessages);
+
     const messages = dbMessages.map((mess) => {
         return {
             text: mess.content,
@@ -92,6 +91,11 @@ export default async function messageRoutes(fastify, options) {
                     handleNewConn(data, socket);
                 } else if (data.type == "newChat") {
                     handleNewChatRoom(data, socket);
+                } else if (data.type == "ping") {
+                    console.log("ping");
+                    socket.send(JSON.stringify({
+                        type: "pong"
+                    }));
                 } else {
                     handleNewMessage(data);
                 }

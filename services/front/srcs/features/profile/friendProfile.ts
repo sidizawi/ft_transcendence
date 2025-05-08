@@ -4,6 +4,7 @@ import { StatsService } from '../../shared/services/statsService';
 import { FriendService } from '../../shared/services/friendService';
 import { SVGIcons } from '../../shared/components/svg';
 import { processGames } from '../../shared/services/opponentService';
+import { Chat } from '../../shared/components/chat';
 
 export class FriendProfile {
   private pongStats: FriendGameStats | null = null;
@@ -96,15 +97,16 @@ export class FriendProfile {
     }
   }
 
-  private openChat() {
-    if (this.userId) {
-      const chatUrl = `/chat/${this.username}`;
-      const chatWindow = window.open(chatUrl, `chat-${this.username}`, 'width=800,height=600');
-      if (chatWindow) {
-        chatWindow.focus();
-      }
-    }
-  }
+  // private openChat() {
+  //   if (this.userId) {
+  //     const chatUrl = `/chat/${this.username}`;
+  //     // app.router.navigateTo(chatUrl);
+  //     const chatWindow = window.open(chatUrl, `chat-${this.username}`, 'width=800,height=600');
+  //     if (chatWindow) {
+  //       chatWindow.focus();
+  //     }
+  //   }
+  // }
 
   private renderActionButtons(): string {
     const buttons = [];
@@ -465,7 +467,7 @@ export class FriendProfile {
     const deleteFriendBtn = document.getElementById('deleteFriendBtn');
     const cancelRequestBtn = document.getElementById('cancelRequestBtn');
 
-    messageBtn?.addEventListener('click', () => this.openChat());
+    messageBtn?.addEventListener('click', () => Chat.openChatTab(this.username));
     addFriendBtn?.addEventListener('click', () => this.handleFriendAction('add'));
     blockUserBtn?.addEventListener('click', () => this.handleFriendAction('block'));
     unblockBtn?.addEventListener('click', () => this.handleFriendAction('unblock'));

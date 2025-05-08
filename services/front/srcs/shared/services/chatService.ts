@@ -61,6 +61,10 @@ export class ChatService {
           friend: friendUserName,
         }));
       })
+
+      this.chatMessages.forEach((mess) => {
+        this.ws?.send(mess);
+      })
     }
 
     this.ws.onmessage = (event) => {
@@ -72,6 +76,11 @@ export class ChatService {
       } else if (data.type == "messages") {
         this.chatRooms.get(data.friend)?.(data);
       }
+    }
+
+    this.ws.onclose = () => {
+      this.setuped = false;
+      this.setup();
     }
   }
 

@@ -368,7 +368,7 @@ export class Profile {
     const toggle2FABtn = document.getElementById('toggle2FA');
     const logoutBtn = document.getElementById('logoutBtn');
     const tabButtons = document.querySelectorAll('.tab-button') as NodeListOf<HTMLButtonElement>;
-  const tabContents = document.querySelectorAll('.tab-content') as NodeListOf<HTMLElement>;
+    const tabContents = document.querySelectorAll('.tab-content') as NodeListOf<HTMLElement>;
     const avatarUpload = document.getElementById('avatar-upload') as HTMLInputElement;
 
     // Avatar upload

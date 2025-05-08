@@ -62,7 +62,9 @@ Ajout notif si new message + new demande de connexion
 	Files:
 		- Clean up unused datas
 
-
+	websocket:
+		- websocket disconnected: timeout
+		- new tab
 
 
 
