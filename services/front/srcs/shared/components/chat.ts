@@ -41,16 +41,35 @@ export class Chat {
   }
 
   static openChatTab(username: string): void {
-    // If already open, just show
+    // If already open, just show and focus
     if (this.chatTabs.has(username)) {
       const existingTab = this.chatTabs.get(username)!;
       existingTab.style.display = 'block';
+  
+      // 1. Ensure it's expanded
+      const chatContent = existingTab.querySelector<HTMLDivElement>('.chat-content');
+      if (chatContent?.classList.contains('hidden')) {
+        chatContent.classList.remove('hidden');
+        const toggleBtn = existingTab.querySelector<HTMLButtonElement>('.toggle-chat');
+        toggleBtn?.setAttribute('aria-expanded', 'true');
+      }
+  
+      // 2. Scroll into view (optional smooth behavior)
+      existingTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+  
+      // 3. Focus the input so you can start typing immediately
+      const input = existingTab.querySelector<HTMLInputElement>('.message-input');
+      input?.focus();
+  
       return;
     }
 
     // Create new chat tab container
     const chatTab = document.createElement('div');
-    chatTab.className = 'fixed bottom-10 z-40';
+    // ○ add a marker class…
+    chatTab.className = 'chat-tab fixed bottom-10 z-40';
+    // ○ …and a data-attribute
+    chatTab.setAttribute('data-username', username);
     chatTab.style.minWidth = '300px';
 
     // Render and append (needed to measure width)
@@ -192,7 +211,9 @@ export class Chat {
   }
 
   private addMessage(message: { text: string; sender: string; timestamp: Date }): void {
-    const messagesContainer = document.querySelector('.chat-messages');
+    // ○ scope to this tab via its data-username
+    const selector = `.chat-tab[data-username="${this.friendUserName}"] .chat-messages`;
+    const messagesContainer = document.querySelector<HTMLDivElement>(selector);
     if (!messagesContainer) return;
 
     const messageElement = document.createElement('div');
