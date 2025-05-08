@@ -158,15 +158,15 @@ export class Tournament implements WebsocketPage {
     // todo: add translate
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-light-0 dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')} &nbsp;-&nbsp; ${name}
           </h1>
           <div id="matchBoard" class="flex flex-col items-start justify-center mb-4">
           </div>
           ${this.data.round <= this.data.rounds ? `
             <div class="w-full flex items-center justify-center">
-              <button id="start" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <button id="start" class="p-4 bg-light-3 dark:bg-dark-3 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
                 start
               </button>
             </div>
@@ -182,7 +182,7 @@ export class Tournament implements WebsocketPage {
       const matchBoard = document.getElementById("matchBoard");
       matchBoard!.innerHTML += `
         <div class="w-full flex flex-col items-start justify-center mb-4">
-          <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-4">${rounds[this.data.rounds - round]}</h2>
+          <h2 class="text-xl font-bold text-light-4 dark:text-dark-0 mb-4">${rounds[this.data.rounds - round]}</h2>
           <div id="round-${round}" class="w-full flex flex-col items-center justify-center mb-8">
           </div>
         </div>
@@ -218,8 +218,8 @@ export class Tournament implements WebsocketPage {
       const roundDiv = document.getElementById(`round-${round}`);
       roundDiv!.innerHTML += `
         <div class="w-full flex items-center justify-between mb-4 mx-8">
-          <p class="text-gray-600 dark:text-gray-400 text-center">${match?.player1 || "player #..."} vs ${match?.player2 || "player #..."}</p>
-          <p class="text-gray-600 dark:text-gray-400 text-center">winner: ${match?.winner || "..."}</p>
+          <p class="text-light-2 dark:text-dark-2 text-center">${match?.player1 || "player #..."} vs ${match?.player2 || "player #..."}</p>
+          <p class="text-light-2 dark:text-dark-2 text-center">winner: ${match?.winner || "..."}</p>
         </div>
       `;
 		}
@@ -285,16 +285,16 @@ export class Tournament implements WebsocketPage {
     // add previous btn
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-light-0 dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
-          <p id="waitingTournamentText" class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p id="waitingTournamentText" class="text-light-2 dark:text-dark-2 text-center mb-8">
             ${message}
           </p>
           ${leave ? `
             <div class="flex items-center justify-center">
-              <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <button id="leave" class="p-4 bg-light-3 dark:bg-dark-1 text-light-1 dark:text-dark-3 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
                 Leave
               </button>
             </div>
@@ -370,44 +370,55 @@ export class TournamentHomePage implements WebsocketPage {
     // todo: translate
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-light-0 dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p class="text-light-4/80 dark:text-dark-0/80 text-center mb-8">
             ${i18n.t('games.connect4.description')}
           </p>
           <div class="flex flex-col items-center  w-full">
             <form id="createTournamentForm">
               <div class="mb-4">
-                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Tournament name
                 </label>
-                <input id="tournamentName" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
-              </div>
+                <input id="tournamentName"
+                  class="
+                    mt-1 block w-full rounded-md px-3 py-2 text-sm
+                    border border-light-4/30 dark:border-dark-0/30
+                    bg-input dark:bg-dark-4
+                    text-light-4 ark:text-dark-0
+                    focus:outline-none
+                    focus:border-light-3 dark:focus:border-dark-1
+                    focus:ring-2
+                    focus:ring-light-0 dark:focus:ring-dark-4
+                  "/>
+                </div>
               <div class="mb-4">
-                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Game
                 </label>
-                <select name="game" id="game-type" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="game" id="game-type" 
+                class="w-full mt-1 block rounded-md border-gray-300 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                   <option value="pong" selected>${i18n.t('games.pong.title')}</option>
                   <option value="p4">${i18n.t('games.connect4.title')}</option>
                 </select>
               </div>
               <div class="mb-4">
-                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   mode
                 </label>
-                <select name="mode" id="game-mode" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="mode" id="game-mode" class="w-full mt-1 block rounded-md border-gray-300 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                   <option value="remote" selected>remote</option>
                   <option value="local">local</option>
                 </select>
               </div>
               <div class="mb-4">
-                <label for="tournamentPlayers" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentPlayers" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   number of players
                 </label>
-                <select name="players" id="tournamentPlayers" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="players" id="tournamentPlayers" class="w-full mt-1 block rounded-md border-gray-300 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 shadow-sm focus:border-blue-500 focus:ring-blue-500">
                   <option value="4" selected>4</option>
                   <option value="8">8</option>
                   <option value="16">16</option>
@@ -416,23 +427,34 @@ export class TournamentHomePage implements WebsocketPage {
               </div>
               <div class="flex items-center justify-start space-x-2 mb-4">
                 <input id="tournamentPrivate" type="radio" name="privacy" value="private"/>
-                <label for="tournamentPrivate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentPrivate" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Private
                 </label>
               </div>
               <div class="flex items-center justify-start space-x-2 mb-4">
                 <input id="tournamentPublic" checked="true" type="radio" name="privacy" value="public" />
-                <label for="tournamentPublic" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentPublic" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Public
                 </label>
               </div>
               <div class="mb-4">
-                <label for="tournamentCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentCode" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Tournament code *
                 </label>
-                <input id="tournamentCode" disabled class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-900"/>
+                <input id="tournamentCode" disabled
+                class="
+                    mt-1 block w-full rounded-md px-3 py-2 text-sm
+                    border border-light-4/30 dark:border-dark-0/30
+                    bg-input dark:bg-dark-4
+                    text-light-4 ark:text-dark-0
+                    focus:outline-none
+                    focus:border-light-3 dark:focus:border-dark-1
+                    focus:ring-2
+                    focus:ring-light-0 dark:focus:ring-dark-4
+                    disabled:bg-light-1 dark:disabled:bg-dark-3
+                  "/>
               </div>
-              <button type="submit" class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <button type="submit" class="w-full bg-light-3 dark:bg-dark-2 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                 Creat
               </button>
               <div id="error-message" class="mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400 hidden"></div>
@@ -595,16 +617,16 @@ export class TournamentHomePage implements WebsocketPage {
     // add previous btn
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-light-0 dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
-          <p id="waitingTournamentText" class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p id="waitingTournamentText" class="text-gray-600 dark:text-dark-2 text-center mb-8">
             ${message}
           </p>
           ${leave ? `
             <div class="flex items-center justify-center">
-              <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <button id="leave" class="p-4 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                 Leave
               </button>
             </div>
@@ -630,13 +652,13 @@ export class TournamentHomePage implements WebsocketPage {
     // add previous btn
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-light-0 dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
           ${data == null ?
             `
-            <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+            <p class="text-gray-600 dark:text-dark-2 text-center mb-8">
               loading tournaments 
             </p>
             ` : ""
@@ -646,13 +668,13 @@ export class TournamentHomePage implements WebsocketPage {
             data.map((room: any) =>
               `
               <div class="flex items-center justify-between mb-4">
-                <p class="text-gray-600 dark:text-gray-400 text-center">${room.name} - created by ${room.createdBy} - ${room.game}</p>
+                <p class="text-gray-600 dark:text-dark-2 text-center">${room.name} - created by ${room.createdBy} - ${room.game}</p>
                 <div class="flex items-center justify-center">
                   ${!room.pub ? `
-                    <input id="${room.room}-input" placeholder="tournament code" class="mx-2 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+                    <input id="${room.room}-input" placeholder="tournament code" class="mx-2 block rounded-md border-gray-300 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
                   ` : ""
                   }
-                  <button room="${room.room}" pub="${room.pub}" class="joinTournamentBtn p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                  <button room="${room.room}" pub="${room.pub}" class="joinTournamentBtn p-4 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                     join
                   </button>
                 </div>
@@ -661,14 +683,14 @@ export class TournamentHomePage implements WebsocketPage {
           }
           ${data && data.length == 0 ? `
             <div class="flex items-center justify-center flex-col mb-4">
-              <p class="text-gray-600 dark:text-gray-400 text-center mb-2">there are no open tournament</p>
-              <button id="create" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <p class="text-gray-600 dark:text-dark-2 text-center mb-2">there are no open tournament</p>
+              <button id="create" class="p-4 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                 Create a new tournament
               </button>
             </div>
             ` : `
               <div class="flex items-center justify-center">
-                <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                <button id="leave" class="p-4 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                   Leave
                 </button>
               </div>

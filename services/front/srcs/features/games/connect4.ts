@@ -347,11 +347,11 @@ export class Connect4 implements WebsocketPage {
   renderWaitingRoom() : string {
     return `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-light-4 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('games.connect4.title')}
           </h1>
-          <p class="text-light-4 dark:text-gray-400 text-center mb-8">
+          <p class="text-light-4 dark:text-dark-0 text-center mb-8">
             waiting for your friend
           </p>
         </div>
@@ -369,10 +369,10 @@ export class Connect4 implements WebsocketPage {
     let div = document.getElementById(id);
 
     if (div) {
-      div.classList.toggle("bg-orange");
-      div.classList.toggle("bg-orange-darker");
-      div.classList.toggle("dark:bg-nature");
-      div.classList.toggle("dark:bg-nature/90");
+      div.classList.toggle("bg-light-3");
+      div.classList.toggle("bg-light-4");
+      div.classList.toggle("dark:bg-dark-2");
+      div.classList.toggle("dark:bg-dark-2/90");
     }
   }
 
@@ -382,10 +382,10 @@ export class Connect4 implements WebsocketPage {
       return `
         <div class="flex flex-col items-center justify-center h-screen">
           <div class="mb-1 flex" style="width: 700px;">
-            <div id="player1Name" class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg transition-colors">
+            <div id="player1Name" class="flex items=center justify-center w-1/2 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-2-lightes px-6 py-2 rounded-lg transition-colors">
               <strong>${this.player1}</strong>  -  <p>${this.player2Color == 'red' ? 'yellow' : 'red'}</p>
             </div>
-            <div id="player2Name" class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg transition-colors">
+            <div id="player2Name" class="flex items=center justify-center w-1/2 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-2-lightes px-6 py-2 rounded-lg transition-colors">
               <strong>${this.player2}</strong>  -  <p>${this.player2Color}</p>
             </div>
           </div>
@@ -411,7 +411,7 @@ export class Connect4 implements WebsocketPage {
     backDiv!.innerHTML = `
       <button
         id="backBtn"
-        class="bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        class="bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-2-lightes px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
       >
         ${i18n.t('back')}
       </button>
@@ -470,9 +470,9 @@ export class Connect4HomePage {
     if (this.loading) {
       main!.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 py-8">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
             <div class="flex justify-center items-center h-64">
-              <div class="animate-spin rounded-full h-12 w-12 border-4 border-orange dark:border-nature border-t-transparent"></div>
+              <div class="animate-spin rounded-full h-12 w-12 border-4 border-light-3 dark:border-dark-2 border-t-transparent"></div>
             </div>
           </div>
         </div>
@@ -483,7 +483,7 @@ export class Connect4HomePage {
     // todo: translate
     main!.innerHTML = `
     <div class="max-w-4xl mx-auto px-4 py-8">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
           <div class="flex justify-start items-center mb-6">
             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${i18n.t('friends')}</h1>
           </div>
@@ -494,7 +494,7 @@ export class Connect4HomePage {
               <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
               <div class="space-y-3">
                 ${this.friendList.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-3/50 rounded-lg">
                     <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
@@ -505,7 +505,7 @@ export class Connect4HomePage {
                     </div>
                     <div class="space-x-2">
                       <button 
-                        class="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-white transition-colors"
+                        class="bg-green-500 hover:bg-green-600 px-3 py-1.5 roundedtext-light-0 transition-colors"
                         data-action="play"
                         data-username="${friend.username2}"
                       >
