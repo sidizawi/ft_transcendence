@@ -15,7 +15,7 @@ async function twofaRoutes(fastify) {
             const user = await getUserById(userId);
             if (!user) {
                 reply.code(404);
-                return { error: 'Utilisateur non trouvé' };
+                return { error: 'User not found' };
             }
       
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -27,17 +27,17 @@ async function twofaRoutes(fastify) {
             const mailOptions = {
                 from: `"Transcendence" <${process.env.EMAIL_MAIL}>`,
                 to: user.email,
-                subject: 'Votre code de vérification 2FA',
-                text: `Bonjour ${user.username},\n\nVotre code de vérification est : ${otp}\nIl expirera dans 10 minutes.\n\nCordialement,\nL'équipe Transcendence`
+                subject: 'Your 2FA verification code',
+                text: `Hello ${user.username},\n\nYour verification code is: ${otp}\nIt will expire in 10 minutes.\n\nSincerely,\nThe Transcendence team`
             };
       
             await transporter.sendMail(mailOptions);
             reply.code(200);
-            return { message: 'OTP envoyé par email' };
+            return { message: 'OTP sent by email' };
         } catch (err) {
             fastify.log.error(err);
             reply.code(500);
-            return { error: 'Erreur lors de l\'envoi de l\'email' };
+            return { error: 'Error sending email' };
         }
       });
       
@@ -46,29 +46,29 @@ async function twofaRoutes(fastify) {
           const { otp } = request.body;
           if (!otp) {
             reply.code(400);
-            return { error: 'Le code OTP est requis.' };
+            return { error: 'OTP code is required' };
           }
           const userId = request.user.id;
           const entry = otpCache[userId];
           if (!entry || Date.now() > entry.expires) {
-            reply.code(400);
-            return { error: 'Le code OTP a expiré ou n\'existe pas.' };
+            reply.code(401);
+            return { error: 'OTP code has expired or does not exist' };
           }
 
           if (entry.otp !== otp) {
-            reply.code(403);
-            return { error: 'Le code OTP est incorrect.' };
+            reply.code(401);
+            return { error: 'OTP code is incorrect' };
           }
           
           await update2faById(1, userId);
           
           delete otpCache[userId];
           reply.code(200);
-          return { message: '2FA activé avec succès.' };
+          return { message: '2FA successfully activated' };
         } catch (err) {
           fastify.log.error(err);
           reply.code(500);
-          return { error: 'Erreur lors de la vérification du code OTP.' };
+          return { error: 'Error verifying OTP code' };
         }
     });
       
@@ -78,25 +78,25 @@ async function twofaRoutes(fastify) {
         const { otp } = request.body;
         if (!otp) {
           reply.code(400);
-          return { error: 'Le code OTP est requis.' };
+          return { error: 'OTP code is required' };
         }
       
         const userId = request.user.id;
         const entry = otpCache[userId];
         if (!entry || Date.now() > entry.expires) {
-          reply.code(400);
-          return { error: 'Le code OTP a expiré ou n\'existe pas.' };
+          reply.code(401);
+          return { error: 'OTP code has expired or does not exist' };
         }
         if (entry.otp !== otp) {
-          reply.code(403);
-          return { error: 'Le code OTP est incorrect.' };
+          reply.code(401);
+          return { error: 'OTP code is incorrect' };
         }
 
         const user = await get2faById(userId);
 
         if (!user) {
           reply.code(404);
-          return { error: 'Utilisateur non trouvé' };
+          return { error: 'User not found' };
         }
       
         const currentTwoFactorState = user.is_two_factor_enabled;
@@ -105,13 +105,13 @@ async function twofaRoutes(fastify) {
         await update2faById(newTwoFactorState, userId);
 
         delete otpCache[userId];
-        const message = newTwoFactorState ? '2FA activé avec succès.' : '2FA désactivé avec succès.';
+        const message = newTwoFactorState ? '2FA successfully activated' : '2FA successfully deactivated';
         reply.code(200);
         return { message };
       } catch (err) {
         fastify.log.error(err);
         reply.code(500);
-        return { error: 'Erreur lors de la vérification du code OTP.' };
+        return { error: 'Error verifying OTP code' };
       }
     });
 }

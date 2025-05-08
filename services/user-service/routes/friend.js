@@ -12,7 +12,7 @@ async function friendRoutes(fastify, options) {
 
         const userExists = await getUserByUsername(username);
         if (!userExists){
-            return reply.code(400).send({ error: 'Username doesnt exist'});
+            return reply.code(400).send({ error: 'Username does not exist'});
         }
 
         const userId = userExists.id;
@@ -37,7 +37,7 @@ async function friendRoutes(fastify, options) {
 
         stats.winrate = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
         
-        return reply.code(201).send(stats)
+        return reply.code(200).send(stats);
     });
 
     fastify.get('/gameshistory/:game/:username', async(request, reply) => {
@@ -49,7 +49,7 @@ async function friendRoutes(fastify, options) {
 
         const userExists = await getUserByUsername(username);
         if (!userExists){
-            return reply.code(400).send({ error: 'Username doesnt exist'});
+            return reply.code(400).send({ error: 'Username does not exist'});
         }
 
         const userId = userExists.id;
@@ -84,7 +84,7 @@ async function friendRoutes(fastify, options) {
             }
         });
  
-        return reply.code(201).send(formattedGames);
+        return reply.code(200).send(formattedGames); 
     });
 
     fastify.get('/avatar/:username', async (request, reply) => {
@@ -92,10 +92,10 @@ async function friendRoutes(fastify, options) {
 
         const userExists = await getUserByUsername(username);
         if (!userExists){
-            return reply.code(400).send({ error: 'Username doesnt exist'});
+            return reply.code(404).send({ error: 'Username does not exist'}); 
         }
         
-        return reply.code(201).send(userExists.avatar);
+        return reply.code(200).send(userExists.avatar); 
     });
 }
 

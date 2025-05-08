@@ -14,21 +14,21 @@ async function registerRoutes(fastify) {
             const { username, email, password } = XSSanitizer(request.body);
             if (!username || !email || !password) {
                 reply.code(400);
-                return { error: 'Tous les champs sont requis' };
+                return { error: 'All fields are required' };
             }
             
             const userExists = await getUserByUsername(username);
             if (userExists) {
                 console.log('Userexist exit\n');
                 reply.code(400);
-                return { error: 'Cet username est déjà utilisé.' };
+                return { error: 'This username is already in use.' };
             }
     
             const emailExists = await getUserByEmail(email);
             if (emailExists) {
                 console.log('emailExist exit\n');
                 reply.code(400);
-                return { error: 'Cet email est déjà utilisé.' };
+                return { error: 'This email is already in use.' };
             }
     
             const hashedPassword = await bcrypt.hash(password, 10);

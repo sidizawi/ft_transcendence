@@ -10,20 +10,20 @@ async function loginRoutes(fastify) {
         
         if (!login || !password) {
             reply.code(400);
-            return { error: 'Login (email ou username) et mot de passe requis' };
+            return { error: 'Login (email or username) and password required' };
         }
         
         const user = await getUserByEmailAndUsername(login);
 
         if (!user) {
             reply.code(401);
-            return { error: 'Utilisateur non trouvé' };
+            return { error: 'User not found' };
         }
         
         const isValidPassword = await bcrypt.compare(password, user.password);
         if (!isValidPassword) {
             reply.code(401);
-            return { error: 'Mot de passe incorrect' };
+            return { error: 'Incorrect password' };
         }
         
         const token = fastify.jwt.sign({
@@ -31,7 +31,7 @@ async function loginRoutes(fastify) {
         });
         
         reply.code(200);
-        return { message: 'Utilisateur connecté avec succès', token };
+        return { message: 'User successfully logged in', token };
     });
     
 }

@@ -14,7 +14,7 @@ import { deleteConversationById } from "../services/conversationService.js";
 
 async function deleteRoutes(fastify) {
 
-    // Cette route check le mot de passe entre puis envois un code 2FA s'il est correct
+    // This route checks the password and sends a 2FA code if it is correct
 	fastify.post('/request', async (request, reply) => {
         try {
           await request.jwtVerify();
@@ -71,7 +71,7 @@ async function deleteRoutes(fastify) {
       });
     
     //TODO: test transaction
-    // Cette route verifie le code 2FA et supprime le compte s'il est correct
+    // This route verifies the 2FA code and deletes the account if it is correct
     fastify.delete('/confirm', async (request, reply) => {
       try {
         await request.jwtVerify();
@@ -92,7 +92,7 @@ async function deleteRoutes(fastify) {
         }
         
         try {
-            // Début de la transaction pour les opérations de suppression
+            // Start of transaction for deletion operations
             await beginTransaction();
               const userData = await getAvatarById(userId);
               if (userData && userData.avatar) {

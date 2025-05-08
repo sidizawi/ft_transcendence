@@ -89,7 +89,7 @@ async function friendRoutes(fastify, options) {
 		await deleteFriendship(actualid, friendid);
 		await deleteFriendship(friendid, actualid);
 	
-		reply.code(201);
+		reply.code(200);
 		return { message: 'Friend request successfully cancelled'};
 	});
 
@@ -127,7 +127,7 @@ async function friendRoutes(fastify, options) {
 		const paramsUpdate2 = [friendid, actualid];
 		await queryPost(queryUpdate, paramsUpdate2);
 
-		reply.code(201);
+		reply.code(200);
 		return { message: 'Friend request successfully accepted'};
 	});
 	
@@ -161,7 +161,7 @@ async function friendRoutes(fastify, options) {
 		await deleteFriendship(actualid, friendid);
 		await deleteFriendship(friendid, actualid);
 	
-		reply.code(201);
+		reply.code(200);
 		return { message: 'Friend request successfully rejected'};
 	});
 	
@@ -196,7 +196,7 @@ async function friendRoutes(fastify, options) {
 		await deleteFriendship(actualid, friendid);
 		await deleteFriendship(friendid, actualid);
 	
-		reply.code(201);
+		reply.code(200);
 		return { message: 'Friend request successfully deleted'};
 	});
 	
@@ -225,7 +225,7 @@ async function friendRoutes(fastify, options) {
 
 		await deleteFriendship(friendid, actualid);
 	
-		reply.code(201);
+		reply.code(200);
 		return { message: 'Friend request successfully blocked'};
 	});
 
@@ -258,8 +258,8 @@ async function friendRoutes(fastify, options) {
 
 		await deleteFriendship(actualid, friendid);
 
-		reply.code(201);
-		return { error: 'User successfully unblocked'};
+		reply.code(200);
+		return { message: 'User successfully unblocked'};
 	});
 
 	fastify.get('/friendlist', async (request, reply) => {

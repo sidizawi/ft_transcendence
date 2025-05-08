@@ -60,7 +60,7 @@ async function statsRoutes(fastify, options) {
 		];
 		await queryPost(query, params);
 		
-		reply.code(201).send({ message: 'Game saved' });
+		reply.code(200).send({ message: 'Game saved' });
   	});
 
 

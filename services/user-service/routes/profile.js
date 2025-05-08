@@ -10,7 +10,7 @@ async function profileRoutes(fastify ,options) {
         
         const userExists = await getUserById(userId);
         if (!userExists){
-            return reply.code(400).send({ error: 'User doesnt exist'});
+            return reply.code(404).send({ error: 'User does not exist'});
         }
 
         const profile = {
@@ -22,7 +22,7 @@ async function profileRoutes(fastify ,options) {
         }
         
         reply.code(200);
-        return ({ message: 'Successfully retrieved profile'}, profile)
+        return profile;
     });
 
     fastify.get('/check-username/:username', async (request, reply) => {
@@ -30,7 +30,7 @@ async function profileRoutes(fastify ,options) {
 
         const userExists = await getUserByUsername(username);
         if (!userExists){
-            return reply.code(404).send({ error: 'Username doesnt exists'});
+            return reply.code(404).send({ error: 'Username does not exist'});
         }
         return reply.code(200).send({ message: 'Username exists'});
     });
@@ -46,7 +46,7 @@ async function profileRoutes(fastify ,options) {
 
         const userExists = await getUserById(userId);
         if (!userExists){
-            return reply.code(404).send({ error: 'User doesnt exist'});
+            return reply.code(404).send({ error: 'User does not exist'});
         }
 
         const isPasswordValid = await bcrypt.compare(password, userExists.password);
@@ -72,7 +72,7 @@ async function profileRoutes(fastify ,options) {
 
         const user = await getUserById(userId);
         if (!user){
-            return reply.code(404).send({ error: 'User doesnt exist'});
+            return reply.code(404).send({ error: 'User does not exist'});
         }
 
         const newStatus = !user.status;
