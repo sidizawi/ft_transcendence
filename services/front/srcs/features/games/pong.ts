@@ -31,6 +31,7 @@ export class Pong implements WebsocketPage {
       rightPlayer: null,
       leftPlayerScore: 0,
       rightPlayerScore: 0,
+      playerSide: null,
       keys: {},
       singlePlayer: false,
       gameStarted: false,
@@ -50,7 +51,14 @@ export class Pong implements WebsocketPage {
       user: TokenManager.getUserFromLocalStorage(),
   };
 
+  private friend: String | null = null;
+
   constructor(type: string | null) {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    if (type == "online") {
+      this.friend = urlParams.get("friend");
+    }
     this.render();
     this.pongEventListener(type);
   }
@@ -140,7 +148,7 @@ export class Pong implements WebsocketPage {
                 paddleWidth: this.PADDLE_WIDTH,
                 paddleHeight: this.PADDLE_HEIGHT,
                 ballSize: this.BALL_SIZE,
-                username: this.state.user?.username || '',
+                username: this.state.user?.username || ''
             }));
         }
     }
@@ -163,7 +171,8 @@ export class Pong implements WebsocketPage {
           } else if (type == "online") {
             this.state.ws!.send(JSON.stringify({
               type: 'startGame',
-              mode: 'online'
+              mode: 'online',
+              friend: this.friend
             }));
           } else if (type == "playAgain") {
             this.state.ws!.send(JSON.stringify({
@@ -172,7 +181,13 @@ export class Pong implements WebsocketPage {
             }));
           }
         }
+        else if (data.type === 'gameJoined') {
+            this.state.playerSide = data.side;
+        }
         else if (data.type === 'gameStarted') {
+            if (data.mode !== 'online' && data.mode !== 'singlePlayer') {
+              this.state.playerSide = null;
+            }
             this.state.gameStarted = true;
             this.state.singlePlayer = data.mode === 'singlePlayer';
             this.state.leftPlayerScore = 0;
@@ -186,7 +201,8 @@ export class Pong implements WebsocketPage {
             if (data.scores) {
                 this.state.leftPlayerScore = data.scores.left;
                 this.state.rightPlayerScore = data.scores.right;
-            }            
+            }
+
             if (data.ball && this.state.ball) {
                 this.state.ball.x = data.ball.x;
                 this.state.ball.y = data.ball.y;
@@ -204,6 +220,7 @@ export class Pong implements WebsocketPage {
             this.stopGame(data.winner);
         }
         else if (data.type === 'waitingOpponent') {
+            console.log("Waiting for opponent...");
             if (this.state.gameLoopId !== null) {
                 cancelAnimationFrame(this.state.gameLoopId);
             }

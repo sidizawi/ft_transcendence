@@ -10,6 +10,7 @@ export interface PongState {
 	rightPlayer: Paddle | null;
 	leftPlayerScore: number;
 	rightPlayerScore: number;
+	playerSide: 'left' | 'right' | null;
 	gameStarted: boolean;
 	gamePlayed: boolean;
 	keys: Record<string, boolean>;
@@ -27,7 +28,7 @@ export interface PongState {
 	aiInterval: number | null;
 	aiKeys: Record<string, boolean>;
 	scores?: { left: number; right: number };
-  user: User | null;
+	user: User | null;
 }
 
 export const BUTTON_WIDTH = 300;

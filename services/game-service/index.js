@@ -14,7 +14,7 @@ fastify.register(websocket);
 
 fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 
-export const waitingPlayers = [];
+export const friendMatchRequests = new Map();
 export const inGameUsers = new Set();
 
 //let sockets = new Map();
@@ -22,39 +22,23 @@ export const inGameUsers = new Set();
 // Helper function for creating games
 function setupNewGame(ws, mode, opponent = null) {
   // Check if user is already in a game
+  console.log(`Checking if user is already in a game: ${ws.username} ${inGameUsers.has(ws.username)}`);
   if (ws.username && inGameUsers.has(ws.username)) {
     return ws.send(JSON.stringify({
       type: 'error',
       message: 'You are already in a game'
     }));
   }
-  inGameUsers.add(ws.username);
-  // Generate a unique game ID
+  // Generate a unique game ID 
   const gameId = `game-${Date.now()}`;
   // Create a new game with the client dimensions
   createGame(gameId, ws, ws.canvasDimensions);
   
   // Add the main player to the game
-  const side = addPlayer(gameId, ws.username, ws);
+  addPlayer(gameId, ws.username, ws);
   
   // Store game ID with the connection
   ws.gameId = gameId;
-  
-  console.log(`New game created: gameId=${gameId}, username=${ws.username}`);
-  
-  // Send confirmation to client
-  ws.send(JSON.stringify({
-    type: 'gameJoined',
-    gameId,
-    username: ws.username,
-    side
-  }));
-  
-  // Tell client game is started
-  ws.send(JSON.stringify({
-    type: 'gameStarted',
-    mode
-  }));
   
   // Handle different opponent types based on mode
   if (mode === 'singlePlayer') {
@@ -69,17 +53,8 @@ function setupNewGame(ws, mode, opponent = null) {
   }
   else if (mode === 'online' && opponent) {
     // Add the opponent and notify them
-    const oppSide = side === 'left' ? 'right' : 'left';
+    opponent.gameId = gameId; 
     addPlayer(gameId, opponent.username, opponent);
-    opponent.gameId = gameId;
-    inGameUsers.add(opponent.username);
-    opponent.send(JSON.stringify({
-      type: 'gameJoined',
-      gameId,
-      username: opponent.username,
-      side: oppSide
-    }));
-    
     opponent.send(JSON.stringify({
       type: 'gameStarted',
       mode: 'online'
@@ -88,8 +63,11 @@ function setupNewGame(ws, mode, opponent = null) {
   
   // Start the game
   startGame(gameId);
-  
-  return gameId;
+  // Tell client game is started
+  return ws.send(JSON.stringify({
+    type: 'gameStarted',
+    mode
+  }));
 }
 
 fastify.register(async function (wsRoutes) {
@@ -105,12 +83,8 @@ fastify.register(async function (wsRoutes) {
 		fastify.jwt.verify(token);
 
      ws.on('message', (message) => {
-      //if (!(ws in sockets)) {
-      //  sockets.set(ws, {username});
-      //}
       try {
         const data = JSON.parse(message.toString());
-        console.log('Received:', data);
 
         if (data.type === 'dimensions and username') {
           ws.canvasDimensions = {
@@ -121,6 +95,7 @@ fastify.register(async function (wsRoutes) {
             ballSize: data.ballSize
           };
           ws.username = data.username;
+
           return ws.send(JSON.stringify({
             type: 'starting',
           }));
@@ -136,31 +111,37 @@ fastify.register(async function (wsRoutes) {
           
           if (data.mode === 'online') {
             // For online mode, check waiting players first
-            if (waitingPlayers.length > 0) {
+            if (data.friend) {
               // Match with a waiting player
-              const opponent = waitingPlayers.shift();
-              console.log(`Matching with waiting player: ${opponent.username}`);
-              
-              // Create game with both players
-              setupNewGame(ws, 'online', opponent);
-            } else {
+              console.log(`Friend match requested with ${data.friend}`);
+              console.log(`Checking for friend ${friendMatchRequests.has(data.friend)}`);
+              if (friendMatchRequests.has(data.friend) && friendMatchRequests.get(data.friend).targetFriend === ws.username) {
+                const friendWs = friendMatchRequests.get(data.friend).socket;
+                friendMatchRequests.delete(data.friend);
+                // Create game with the friend
+                console.log(`Found friend ${data.friend}, starting game`);
+                setupNewGame(friendWs, 'online', ws);
+              }
+              else {
               // No waiting players, add to queue
-              waitingPlayers.push(ws);
-              console.log(`Added to waiting queue. Players waiting: ${waitingPlayers.length}`);
-              
+              console.log(`Adding ${ws.username} to waiting list`);
+              friendMatchRequests.set(ws.username, {
+                targetFriend: data.friend, 
+                socket: ws
+              });
               // Tell client they're waiting
               ws.send(JSON.stringify({
-                type: 'waitingOpponent'
-              }));
-            }
-          } else {
-            // Single player or two player modes
-            setupNewGame(ws, data.mode);
+                type: 'waitingOpponent',
+              }));}
+            }}
+          else {
+          // Single player or two player modes
+          setupNewGame(ws, data.mode);
           }
         }
         else if (data.type === 'paddleMove') {
           if (ws.gameId && ws.username) {
-            updatePlayerPosition(ws.gameId, ws.username, data);
+            updatePlayerPosition(ws.gameId, data.side, data.y);
           }
         }
       } catch (error) {
@@ -169,10 +150,10 @@ fastify.register(async function (wsRoutes) {
     });
     // Handle disconnections
     ws.on('close', () => {
-      console.log('Player disconnected');
       if (ws.gameId && ws.username) {
         handleDisconnect(ws.gameId, ws.username);
       }
+      console.log('Player disconnected');
     });
   });
 });
