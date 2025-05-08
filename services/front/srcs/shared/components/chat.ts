@@ -18,11 +18,11 @@ export class Chat {
     this.friendUserName = friendUserName;
     this.currentUser = TokenManager.getUserFromLocalStorage();
 
+    // Subscribe to incoming messages and history responses
     chatService.addNewChatRoom(this.friendUserName, (data) => this.receiveMessage(data));
   }
 
   receiveMessage(data: any) {
-    console.log('chat received:', data);
     if (data.type === 'message') {
       this.addMessage({
         text: data.text,
@@ -41,52 +41,52 @@ export class Chat {
   }
 
   static openChatTab(username: string): void {
-    // If already open, just show and focus
+    // If already open, re-show, focus, and reload history
     if (this.chatTabs.has(username)) {
       const existingTab = this.chatTabs.get(username)!;
       existingTab.style.display = 'block';
-  
-      // 1. Ensure it's expanded
+
+      // Ensure it's expanded
       const chatContent = existingTab.querySelector<HTMLDivElement>('.chat-content');
       if (chatContent?.classList.contains('hidden')) {
         chatContent.classList.remove('hidden');
         const toggleBtn = existingTab.querySelector<HTMLButtonElement>('.toggle-chat');
         toggleBtn?.setAttribute('aria-expanded', 'true');
       }
-  
-      // 2. Scroll into view (optional smooth behavior)
+
+      // Scroll into view
       existingTab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
-  
-      // 3. Focus the input so you can start typing immediately
+
+      // Focus the input
       const input = existingTab.querySelector<HTMLInputElement>('.message-input');
       input?.focus();
-  
+
       return;
     }
 
     // Create new chat tab container
     const chatTab = document.createElement('div');
-    // ○ add a marker class…
     chatTab.className = 'chat-tab fixed bottom-10 z-40';
-    // ○ …and a data-attribute
     chatTab.setAttribute('data-username', username);
     chatTab.style.minWidth = '300px';
 
-    // Render and append (needed to measure width)
+    // Instantiate Chat which subscribes and will render history
     const chat = new Chat(username);
+
+    // Render UI and append
     chatTab.innerHTML = chat.render();
     document.body.appendChild(chatTab);
 
-    // Measure width after append and lock it in
+    // Measure and lock width
     const tabWidth = chatTab.getBoundingClientRect().width;
     chatTab.style.width = `${tabWidth}px`;
 
-    // Calculate its position based on existing tabs
+    // Position new tab
     const index = this.chatTabs.size;
     const position = this.baseRight + index * (tabWidth + this.gap);
     chatTab.style.right = `${position}px`;
 
-    // Add close button into header
+    // Add close button
     const closeButton = document.createElement('button');
     closeButton.className = 'absolute top-4 right-6 text-light-0 dark:text-dark-4 hover:text-light-4 dark:hover:text-dark-0 p-1 w-5 h-5';
     closeButton.innerHTML = SVGIcons.getRejectIcon();
@@ -98,23 +98,28 @@ export class Chat {
     const headerBtn = chatTab.querySelector('.toggle-chat');
     if (headerBtn) headerBtn.appendChild(closeButton);
 
-    // Scope selectors to this tab
+    // Set up UI interactions
     const toggleBtn = chatTab.querySelector<HTMLButtonElement>('.toggle-chat')!;
     const chatContent = chatTab.querySelector<HTMLDivElement>('.chat-content')!;
     const form = chatTab.querySelector<HTMLFormElement>('.chat-form')!;
     const input = chatTab.querySelector<HTMLInputElement>('.message-input')!;
 
-    // Minimize/maximize
     toggleBtn.addEventListener('click', () => {
       chat.isOpen = !chat.isOpen;
       chatContent.classList.toggle('hidden');
       toggleBtn.setAttribute('aria-expanded', String(chat.isOpen));
+
+      if (chat.isOpen) {
+        // allow the browser to reflow the now-visible container
+        setTimeout(() => {
+          const msgs = chatContent.querySelector<HTMLDivElement>('.chat-messages')!;
+          msgs.scrollTop = msgs.scrollHeight;
+        }, 0);
+      }
     });
-    // Prevent link click from toggling
     const link = toggleBtn.querySelector('a');
     link?.addEventListener('click', (e) => e.stopPropagation());
 
-    // Send message
     form.addEventListener('submit', (e) => {
       e.preventDefault();
       if (!input.value.trim()) return;
@@ -211,7 +216,6 @@ export class Chat {
   }
 
   private addMessage(message: { text: string; sender: string; timestamp: Date }): void {
-    // ○ scope to this tab via its data-username
     const selector = `.chat-tab[data-username="${this.friendUserName}"] .chat-messages`;
     const messagesContainer = document.querySelector<HTMLDivElement>(selector);
     if (!messagesContainer) return;

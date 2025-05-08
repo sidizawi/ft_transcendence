@@ -32,10 +32,8 @@ Ajout notif si new message + new demande de connexion
 			- langue des mails
 				- errror code unifie qu'on peut traduire dans dico
 		- Attention message erreur quand vient du back -> ne peut traduire
-			- enlever tous les codes d'erreur
 
 	PARTOUT:
-		- console du navigateur renvoit ERREUR
 		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
 		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
 		- si token non re-sent (supp ou autre) rediriger vers sign in
