@@ -225,7 +225,9 @@ export class TranscendenceApp {
 
     const tournamentMatch = path.match(/^\/tournament\/(.+)$/)
     if (tournamentMatch) {
-      if (tournamentMatch[1] == "join" || tournamentMatch[1] == "create") {
+      if (tournamentMatch[1] == "join"
+          || tournamentMatch[1] == "create" 
+          || tournamentMatch[1] == "localPlayers") {
         this.currentPage = new TournamentHomePage(tournamentMatch[1]);
         return ;
       }

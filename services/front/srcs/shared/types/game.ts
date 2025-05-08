@@ -50,19 +50,16 @@ export interface FriendGameStats {
   }[];
 }
 
-export interface TournamentData {
-  round: number;
-  plays: number;
-  rounds: number;
-}
-
 export interface TournamentStorage {
   name: string;
-  players: number;
   code: string;
   pub: boolean;
   game: string;
   mode: string;
   room?: string;
+  round: number;
+  plays: number;
+  players: number;
+  playersList: string[];
   winners?: Map<number, string>;
 }

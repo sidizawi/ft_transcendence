@@ -3,7 +3,7 @@ import { i18n } from '../../shared/i18n';
 import { User } from '../../shared/types/user';
 import { WebsocketPage } from '../../shared/types/app';
 import { TokenManager } from '../../shared/utils/token';
-import { TournamentData, TournamentStorage } from '../../shared/types/game';
+import { TournamentStorage } from '../../shared/types/game';
 import { ModalManager } from '../../shared/components/modal';
 import { Connect4 } from '../games/connect4';
 
@@ -81,18 +81,13 @@ class Match {
 
 export class Tournament implements WebsocketPage {
 
-  private data: TournamentData;
+  private rounds = 0;
   private storage: TournamentStorage | undefined;
   private game: Match | null = null;
   private room: string | null = null;
   private ws : WebSocket | null = null;
 
   constructor(path: string) {
-    this.data = {
-      round: 1,
-      plays: 0,
-      rounds: 0,
-    };
     let name = decodeURI(path.split("/").filter((el) => el.length)[1]);
     let storage = localStorage.getItem(`tournament-${name}`);
     if (!storage) {
@@ -103,19 +98,31 @@ export class Tournament implements WebsocketPage {
       }, 100);
       return ;
     }
-    //ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
-    // localStorage.removeItem(`tournament-${name}`);
 
     this.storage = this.parseStorage(storage);
-    this.data.plays = this.storage.players / 2;
-    this.data.rounds = Math.log2(this.storage.players);
+    if (!this.storage) {
+      // todo: translate
+      ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
+      setTimeout(() => {
+        app.router.navigateTo("/tournament");
+      }, 100);
+      return ;
+    }
+
+    if (!this.storage?.round) {
+      this.storage.round = 1;
+    }
+    if (!this.storage?.plays) {
+      this.storage.plays = this.storage.players / 2;
+    }
+    this.rounds = Math.log2(this.storage.players);
     if (!this.storage.winners) {
       this.storage.winners = new Map();
     }
     if (this.storage.mode == "local") {
       this.renderWaitingRoom("Creating tournament", true);
-      this.generatePlayers(this.storage.players);
-      this.renderMatchBoard(this.storage.name);
+      this.createMatches();
+      this.renderMatchBoard();
     } else {
       this.room = this.storage.room!;
       this.renderWaitingRoom("Joining tournament", true);
@@ -133,26 +140,18 @@ export class Tournament implements WebsocketPage {
     this.room = null;
   }
 
-  shuffleLst(players: number[]) {
-    for (let i = players.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [players[i], players[j]] = [players[j], players[i]];
-    }
-    return players;
-  }
-
-  generatePlayers(players: number) {
-    let pl = this.shuffleLst([...Array(players).keys()])
-      .map((el) => `player #${el + 1}`);
-
-    this.game = Match.createMatches(pl);
+  createMatches() {
+    this.game = Match.createMatches(this.storage!.playersList!);
     Match.indexing(this.game!, this.storage!.players - 1);
     if (this.storage?.winners?.size) {
       Match.updateFromMap(this.game!, this.storage.winners);
     }
+    if (this.game?.winner) {
+      this.storage!.round = this.rounds + 1;
+    }
   }
 
-  renderMatchBoard(name: string) {
+  renderMatchBoard() {
     const main = document.querySelector("main");
 
     // todo: add translate
@@ -160,17 +159,23 @@ export class Tournament implements WebsocketPage {
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
-            ${i18n.t('tournaments.title')} &nbsp;-&nbsp; ${name}
+            ${i18n.t('tournaments.title')} &nbsp;-&nbsp; ${this.storage?.name}
           </h1>
           <div id="matchBoard" class="flex flex-col items-start justify-center mb-4">
           </div>
-          ${this.data.round <= this.data.rounds ? `
+          ${this.storage!.round <= this.rounds ? `
             <div class="w-full flex items-center justify-center">
               <button id="start" class="p-4 bg-light-3 dark:bg-dark-3 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
                 start
               </button>
             </div>
-          ` : ""}
+          ` : `
+            <div class="w-full flex items-center justify-center">
+              <button id="back" class="p-4 bg-light-3 dark:bg-dark-3 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
+                back
+              </button>
+            </div>
+          `}
         </div>
       </div>
     `;
@@ -178,11 +183,11 @@ export class Tournament implements WebsocketPage {
     // todo: translate
     const rounds = ["Final", "Semi-Final", "Quarter-Final", "Eighth-Final", "Qualification"];
 
-    for (let round = 1; round <= this.data.rounds; round++) {
+    for (let round = 1; round <= this.rounds; round++) {
       const matchBoard = document.getElementById("matchBoard");
       matchBoard!.innerHTML += `
         <div class="w-full flex flex-col items-start justify-center mb-4">
-          <h2 class="text-xl font-bold text-light-4 dark:text-dark-0 mb-4">${rounds[this.data.rounds - round]}</h2>
+          <h2 class="text-xl font-bold text-light-4 dark:text-dark-0 mb-4">${rounds[this.rounds - round]}</h2>
           <div id="round-${round}" class="w-full flex flex-col items-center justify-center mb-8">
           </div>
         </div>
@@ -192,20 +197,15 @@ export class Tournament implements WebsocketPage {
 
     const start = document.getElementById("start");
     start?.addEventListener('click', () => {
-      if (this.data.round > this.data.rounds)
+      if (this.storage!.round > this.rounds)
         return ;
-      this.playMatch(this.game!, this.data.round);
-      //this.renderMatchBoard(this.data.name);
-      this.data.plays--;
-      if (this.data.plays == 0) {
-        this.data.round++;
-        this.data.plays = Math.pow(2, this.data.rounds - this.data.round);
-      }
-      // todo: translate
-      if (this.data.round > this.data.rounds) {
-        ModalManager.openModal(i18n.t('tournaments.title'), `the winner is: ${this.game?.winner}`);
-      }
-      console.log("round: " + this.data.round, "plays: " + this.data.plays, "rounds: " + this.data.rounds);
+      this.playMatch(this.game!, this.storage?.round);
+    });
+
+    const back = document.getElementById("back");
+    back?.addEventListener('click', () => {
+      localStorage.removeItem(`tournament-${this.storage?.name}`);
+      app.router.navigateTo("/tournament");
     });
   }
 
@@ -243,25 +243,44 @@ export class Tournament implements WebsocketPage {
     }))
   }
 
+  laucnhGame(match: Match) {
+    new Connect4("play_local", match.player1, match.player2, (winner: string) => {
+      match.winner = winner;
+      if (match.parent !== null && match.parent.left == match) {
+        match.parent.player1 = match.winner;
+      } else if (match.parent !== null && match.parent.right == match) {
+        match.parent.player2 = match.winner;
+      }
+      console.log("Match between " + match.player1 + " vs " + match.player2 + 
+        " won by " + match.winner, "round: " + match.round);
+      this.storage?.winners?.set(match.index, winner);
+      this.storage!.plays--;
+      if (this.storage!.plays == 0) {
+        this.storage!.round++;
+        this.storage!.plays = Math.pow(2, this.rounds - this.storage!.round);
+      }
+      this.setStorage(this.storage!.name);
+      this.renderMatchBoard();
+      // todo: translate
+      if (this.storage!.round > this.rounds) {
+        ModalManager.openModal(i18n.t('tournaments.title'), `the winner is: ${this.game?.winner}`);
+      }
+      console.log("round: " + this.storage!.round, "plays: " + this.storage!.plays, "rounds: " + this.rounds);
+    });
+  }
+
 	playMatch(match: Match, round : number = 1) : boolean {
 		let ret = false;
 		if (match.player1 !== null 
 			&& match.player2 !== null
 			&& match.winner === null 
 			&& round === match.round) {
-      new Connect4("play_local", match.player1, match.player2, (winner: string) => {
-        match.winner = winner;
-        if (match.parent !== null && match.parent.left == match) {
-          match.parent.player1 = match.winner;
-        } else if (match.parent !== null && match.parent.right == match) {
-          match.parent.player2 = match.winner;
-        }
-        console.log("Match between " + match.player1 + " vs " + match.player2 + " won by " + match.winner, "round: " + match.round);
-        this.renderMatchBoard(this.storage!.name);
-        console.log(typeof(this.storage?.winners), this.storage?.winners);
-        this.storage?.winners?.set(match.index, winner);
-        this.setStorage(this.storage!.name);
-      });
+      // todo: announce the match, callback in modal
+      ModalManager.openModal(
+        i18n.t('tournaments.title'), 
+        `Match between ${match.player1} vs ${match.player2}`,
+        () => this.laucnhGame(match)
+      );
 			return (true);
 		} else {
 			if (match.left !== null) {
@@ -330,6 +349,8 @@ export class TournamentHomePage implements WebsocketPage {
       this.setupCreateTournament();
     } else if (path == "join") {
       this.setupJoinTournament();
+    } else if (path == "localPlayers") {
+      this.createLocalTournament();
     }
   }
 
@@ -367,7 +388,19 @@ export class TournamentHomePage implements WebsocketPage {
   setupCreateTournament() {
     const main = document.querySelector("main");
 
+    const inputClass = `
+      rounded-md px-3 py-2 text-sm
+      border border-light-4/30 dark:border-dark-0/30
+      bg-input dark:bg-dark-4
+      text-light-4 dark:text-dark-0
+      focus:outline-none
+      focus:border-light-3 dark:focus:border-dark-1
+      focus:ring-2
+      focus:ring-light-0 dark:focus:ring-dark-4
+    `;
+
     // todo: translate
+    // add description to the tournament
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
@@ -377,30 +410,21 @@ export class TournamentHomePage implements WebsocketPage {
           <p class="text-light-4/80 dark:text-dark-0/80 text-center mb-8">
             ${i18n.t('games.connect4.description')}
           </p>
-          <div class="flex flex-col items-center  w-full">
-            <form id="createTournamentForm">
+          <div class="flex flex-col items-center w-full">
+            <form id="createTournamentForm" class="w-1/2">
               <div class="mb-4">
                 <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Tournament name
                 </label>
                 <input id="tournamentName"
-                  class="
-                    mt-1 block w-full rounded-md px-3 py-2 text-sm
-                    border border-light-4/30 dark:border-dark-0/30
-                    bg-input dark:bg-dark-4
-                    text-light-4 ark:text-dark-0
-                    focus:outline-none
-                    focus:border-light-3 dark:focus:border-dark-1
-                    focus:ring-2
-                    focus:ring-light-0 dark:focus:ring-dark-4
-                  "/>
+                  class="mt-1 block w-full ${inputClass}"/>
                 </div>
               <div class="mb-4">
                 <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Game
                 </label>
                 <select name="game" id="game-type" 
-                class="w-full mt-1 block rounded-md border-gray-300 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                class="w-full mt-1 block ${inputClass}">
                   <option value="pong" selected>${i18n.t('games.pong.title')}</option>
                   <option value="p4">${i18n.t('games.connect4.title')}</option>
                 </select>
@@ -409,7 +433,7 @@ export class TournamentHomePage implements WebsocketPage {
                 <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   mode
                 </label>
-                <select name="mode" id="game-mode" class="w-full mt-1 block rounded-md border-gray-300 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="mode" id="game-mode" class="w-full mt-1 block ${inputClass}">
                   <option value="remote" selected>remote</option>
                   <option value="local">local</option>
                 </select>
@@ -418,7 +442,7 @@ export class TournamentHomePage implements WebsocketPage {
                 <label for="tournamentPlayers" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   number of players
                 </label>
-                <select name="players" id="tournamentPlayers" class="w-full mt-1 block rounded-md border-gray-300 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="players" id="tournamentPlayers" class="w-full mt-1 block ${inputClass}">
                   <option value="4" selected>4</option>
                   <option value="8">8</option>
                   <option value="16">16</option>
@@ -441,18 +465,7 @@ export class TournamentHomePage implements WebsocketPage {
                 <label for="tournamentCode" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Tournament code *
                 </label>
-                <input id="tournamentCode" disabled
-                class="
-                    mt-1 block w-full rounded-md px-3 py-2 text-sm
-                    border border-light-4/30 dark:border-dark-0/30
-                    bg-input dark:bg-dark-4
-                    text-light-4 ark:text-dark-0
-                    focus:outline-none
-                    focus:border-light-3 dark:focus:border-dark-1
-                    focus:ring-2
-                    focus:ring-light-0 dark:focus:ring-dark-4
-                    disabled:bg-light-1 dark:disabled:bg-dark-3
-                  "/>
+                <input id="tournamentCode" disabled class="mt-1 block w-full ${inputClass} disabled:bg-light-1 dark:disabled:bg-dark-3"/>
               </div>
               <button type="submit" class="w-full bg-light-3 dark:bg-dark-2 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                 Creat
@@ -504,7 +517,19 @@ export class TournamentHomePage implements WebsocketPage {
       if (mode == "remote") {
         this.createRemoteTournament(name, players, code, game, pub);
       } else {
-        this.createLocalTournament(name, players, code, game, pub);
+        // this.createLocalTournament(name, players, code, game, pub);
+        localStorage.setItem(`tournament-${name}`, JSON.stringify({
+          name,
+          players,
+          code,
+          pub,
+          game,
+          mode: "local",
+          room: null,
+          winners: null,
+          playersList: null,
+        }));    
+        app.router.navigateTo("/tournament/localPlayers?name="+name);
       }
     })
 
@@ -550,19 +575,91 @@ export class TournamentHomePage implements WebsocketPage {
     })
   }
 
-  createLocalTournament(name: string, players: number, code: string, game: string, pub: boolean) {
-    localStorage.setItem(`tournament-${name}`, JSON.stringify({
-      name,
-      players,
-      code,
-      pub,
-      game,
-      mode: "local",
-      room: null,
-      winners: null,
-    }));
+  createLocalTournament() {
+    let name = new URLSearchParams(window.location.search).get("name");
+    let storage = localStorage.getItem(`tournament-${name}`);
+    console.log("storage", storage, "name", name);
+    if (!storage) {
+      // todo: translate
+      ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
+      setTimeout(() => {
+        app.router.navigateTo("/tournament");
+      }, 100);
+      return ;
+    }
+    let data = JSON.parse(storage!) as TournamentStorage;
 
-    app.router.navigateTo("/tournament/local/"+name);
+    const main = document.querySelector("main");
+
+    let inputs = "";
+
+    for (let i = 0; i < data.players; i++) {
+      inputs += `
+        <div class="mb-4 w-1/2">
+          <label for="player-${i}" class="block text-sm font-medium text-light-4 dark:text-dark-0">
+            Player ${i + 1}
+          </label>
+          <input id="player-${i}" type="text" minlength="2" placeholder="name of player #${i + 1}" class="
+            mt-1 block w-full rounded-md px-3 py-2 text-sm
+            border border-light-4/30
+            dark:border-dark-0/30
+            dark:bg-dark-4
+            placeholder-light-4/40
+            dark:placeholder-dark-0/40
+            text-light-4
+            dark:text-dark-0
+            focus:outline-none
+            focus:border-light-3
+            dark:focus:border-dark-1
+            focus:ring-2
+            focus:ring-light-0
+            dark:focus:ring-dark-4
+          "/>
+        </div>
+      `;
+    }
+
+    // todo: add translate
+    main!.innerHTML = `
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
+            Name your players
+          </h1>
+          <form id="namePlayers" class="w-full flex flex-col items-center">
+            ${inputs}
+            <button type="submit" class="bg-light-3 px-6 py-2 dark:bg-dark-2 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
+              Start
+            </button>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("namePlayers")?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      console.log("submitted");
+      const players = [];
+      for (let i = 0; i < data.players; i++) {
+        const player = (document.getElementById(`player-${i}`) as HTMLInputElement).value;
+        if (player.length < 2) {
+          ModalManager.openModal(i18n.t('tournaments.title'), "name should be at least 4 characters");
+          return ;
+        }
+        players.push(player);
+      }
+      data.playersList = this.shuffleLst(players);
+      localStorage.setItem(`tournament-${name}`, JSON.stringify(data));
+      app.router.navigateTo("/tournament/local/"+name);
+    });
+  }
+
+  shuffleLst(players: string[]) {
+    for (let i = players.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [players[i], players[j]] = [players[j], players[i]];
+    }
+    return players;
   }
 
   createRemoteTournament(name: string, players: number, code: string, game: string, pub: boolean) {

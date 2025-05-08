@@ -20,9 +20,9 @@ ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
 		- close websocket when changing history
 
 	Tournament:
-		- announce next match
-		- send message to user
-		- alias in local
+		- send message to user (remote)
+		- remote
+		- pong
 
 	connect4:
 		- matchmaking

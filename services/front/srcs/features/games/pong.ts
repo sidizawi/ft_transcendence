@@ -80,6 +80,9 @@ export class Pong implements WebsocketPage {
     this.state.ws =  null;
     this.state.waitingOpponent =  false;
     this.state.animationRunning =  false;
+
+    document.removeEventListener("keydown", (event) => handleKeyDown(event, this.state));
+    document.removeEventListener("keyup", (event) => handleKeyUp(event, this.state));
   }
 
   stopGame(winner: string): void {
