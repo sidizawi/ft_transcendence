@@ -1,3 +1,5 @@
+import { ChatService } from "../services/chatService";
+
 export const translations = {
   de: {
     translation: {
@@ -117,55 +119,55 @@ export const translations = {
       pageNotFoundDesc: 'Die angeforderte Seite existiert nicht.',
       backToHome: 'Zurück zur Startseite',
       settings : {
-        // Auth & General
-      signIn: 'Anmelden',
-      signUp: 'Registrieren',
-      signOut: 'Abmelden',
-      username: 'Benutzername',
-      email: 'E-Mail',
-      password: 'Passwort',
-      newPassword: 'Neues Passwort',
-      confirmPassword: 'Passwort bestätigen',
-      profile: 'Profil',
-      editProfile: 'Profil bearbeiten',
-      settings: 'Einstellungen',
-      save: 'Speichern',
-      cancel: 'Abbrechen',
-      saveChanges: 'Änderungen speichern',
-      back: 'Zurück',
+          // Auth & General
+        signIn: 'Anmelden',
+        signUp: 'Registrieren',
+        signOut: 'Abmelden',
+        username: 'Benutzername',
+        email: 'E-Mail',
+        password: 'Passwort',
+        newPassword: 'Neues Passwort',
+        confirmPassword: 'Passwort bestätigen',
+        profile: 'Profil',
+        editProfile: 'Profil bearbeiten',
+        settings: 'Einstellungen',
+        save: 'Speichern',
+        cancel: 'Abbrechen',
+        saveChanges: 'Änderungen speichern',
+        back: 'Zurück',
 
-      //SignUp
-      usernameFormatError: 'Der Benutzername darf nicht leer sein oder Leerzeichen enthalten',
-      emailFormatError: 'Bitte geben Sie eine gültige E-Mail-Adresse ein',
-      emptyPassword: 'Passwort darf nicht leer sein',
-      emptyAllFields: 'Bitte füllen Sie vor dem Absenden alle Felder aus',
-      passwordStrengthError: 'Das Passwort muss mindestens 8 Zeichen lang sein und einen Großbuchstaben und ein Sonderzeichen enthalten.',
-      or : 'oder',
-      
-      // Profile & Settings
-      changePhoto: 'Foto ändern',
-      uploadAvatar: 'Avatar hochladen',
-      personalInfo: 'Persönliche Informationen',
-      accountSettings: 'Kontoeinstellungen',
-      enable2FA: '2FA aktivieren',
-      disable2FA: '2FA deaktivieren',
-      twoFactorAuth: 'Zwei-Faktor-Authentifizierung',
-      
-      // Validation & Messages
-      required: 'Erforderlich',
-      invalidEmail: 'Ungültige E-Mail-Adresse',
-      passwordMismatch: 'Passwörter stimmen nicht überein',
-      updateSuccess: 'ErfolgreAich aktualisiert',
-      updateError: 'Aktualisierung fehlgeschlagen',
-      
-      // Notes & Descriptions
-      updateOneAtTime: 'Sie können nur ein Feld gleichzeitig aktualisieren (Benutzername, E-Mail oder Passwort)',
-      
-      // 404 Page
-      pageNotFound: 'Seite nicht gefunden',
-      pageNotFoundDesc: 'Die angeforderte Seite existiert nicht.',
-      backToHome: 'Zurück zur Startseite'
-      }
+        //SignUp
+        usernameFormatError: 'Der Benutzername darf nicht leer sein oder Leerzeichen enthalten',
+        emailFormatError: 'Bitte geben Sie eine gültige E-Mail-Adresse ein',
+        emptyPassword: 'Passwort darf nicht leer sein',
+        emptyAllFields: 'Bitte füllen Sie vor dem Absenden alle Felder aus',
+        passwordStrengthError: 'Das Passwort muss mindestens 8 Zeichen lang sein und einen Großbuchstaben und ein Sonderzeichen enthalten.',
+        or : 'oder',
+        
+        // Profile & Settings
+        changePhoto: 'Foto ändern',
+        uploadAvatar: 'Avatar hochladen',
+        personalInfo: 'Persönliche Informationen',
+        accountSettings: 'Kontoeinstellungen',
+        enable2FA: '2FA aktivieren',
+        disable2FA: '2FA deaktivieren',
+        twoFactorAuth: 'Zwei-Faktor-Authentifizierung',
+        
+        // Validation & Messages
+        required: 'Erforderlich',
+        invalidEmail: 'Ungültige E-Mail-Adresse',
+        passwordMismatch: 'Passwörter stimmen nicht überein',
+        updateSuccess: 'ErfolgreAich aktualisiert',
+        updateError: 'Aktualisierung fehlgeschlagen',
+        
+        // Notes & Descriptions`
+        updateOneAtTime: 'Sie können nur ein Feld gleichzeitig aktualisieren (Benutzername, E-Mail oder Passwort)',
+        
+        // 404 Page
+        pageNotFound: 'Seite nicht gefunden',
+        pageNotFoundDesc: 'Die angeforderte Seite existiert nicht.',
+        backToHome: 'Zurück zur Startseite'
+      },
     }
   },
   en: {
@@ -331,7 +333,69 @@ export const translations = {
         // 404 Page
         pageNotFound: 'Page Not Found',
         pageNotFoundDesc: 'The page you are looking for does not exist.',
-        backToHome: 'Back to Home'
+        backToHome: 'Back to Home',
+
+        authService: {
+          error: {
+            jwtUnauthorized: 'JWT unauthorized',
+            userNotFound: 'User not found',
+            errorSendingEmail: 'Error sending OTP code email',
+            otpCodeIsRequired: 'OTP-Code is required',
+            otpCodeHasExpiredOrInvalid: 'OTP-Code has expired or is invalid',
+            otpCodeIsInvalid: 'OTP-Code is invalid',
+            errorVerifyingOtpCode: 'Error verifying OTP code',
+            idTokenNotProvidedByGoogle: 'ID-Token not provided by Google',
+            errorGoogleAuth: 'Error during Google authentication',
+            loginAndPasswordIsRequired: 'Login and password are required',
+            passwordInvalid: 'Password is invalid',
+            fieldsAreRequired: 'All fields are required',
+            usernameMustBeUnique: 'Username must be unique, please choose another one',
+            emailMustBeUnique: 'Email must be unique, please choose another one'
+          },
+          message: {
+            otpSendByEmail: 'OTP code sent to your email',
+            twofaEnabled: '2FA activated',
+            twofaDisabled: '2FA deactivated',
+            googleAuthSuccess: 'Google authentication successful',
+            loginSuccess: 'Login successful',
+            registerSuccess: 'Register successful'
+          },
+        },
+        chatService: {
+          error: {
+            usernameIsRequired: 'Username is required',
+            userNotFound: 'User not found',
+            usernameCannotBeYourself: 'Username cannot be yourself',
+            usernameNotFound: 'Username not found',
+            unknownUser: 'Unknown user',
+            userAlreadyAdded: 'User already added',
+            userIsNotFriend: 'User is not your friend',
+            friendlistEmpty: 'Friendlist is empty',
+            userIsBlocked: 'User is blocked',
+            userIsNotBlocked: 'User is not blocked'
+          },
+          message: {
+            userAddSuccess: 'User successfully added',
+            userCancelSuccess: 'Friend request successfully canceled',
+            userAcceptSuccess: 'Friend request successfully accepted',
+            userRejectSuccess: 'Friend request successfully rejected',
+            userDeleteSuccess: 'Friend successfully deleted',
+            userBlockSuccess: 'User successfully blocked',
+            userUnblockSuccess: 'User successfully unblocked',
+            friendlistSuccess: 'Retrieved friend list successfully',
+            sendlistSuccess: 'Retrieved sent list successfully',
+            receivedlistSuccess: 'Retrieved received list successfully',
+            blocklistSuccess: 'Retrieved block list successfully'
+          }
+        },
+        userService: {
+          delete: {
+            userNotFound: 'Benutzer nicht gefunden',
+            passwordIsRequired: 'Passwort ist erforderlich',
+            passwordInvalid: 'Passwort ungültig',
+            verificationEmailSent: 'Bestätigungs-E-Mail gesendet'
+          }
+        }
       }
     }
   },

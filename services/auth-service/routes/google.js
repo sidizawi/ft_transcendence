@@ -10,11 +10,11 @@ async function googleRoutes(fastify) {
 
     fastify.post('/callback', async (request, reply) => {
         try {
-          console.log('Google callback received');
+          // console.log('Google callback received');
           const { id_token } = request.body;
           if (!id_token) {
             reply.code(400);
-            return { error: 'ID token not provided by Google' };
+            return { error: 'authService.error.idTokenNotProvidedByGoogle' };
           }
           const ticket = await googleClient.verifyIdToken({
             idToken: id_token,
@@ -39,12 +39,12 @@ async function googleRoutes(fastify) {
         });
       
             reply.code(200);
-            return { message: 'Google authentication successful', token };
+            return { message: 'authService.message.googleAuthSuccess', token };
         } 
         catch (error) 
         {
           fastify.log.error(error);
-          reply.code(500).send({ error: "Error during Google authentication" });
+          reply.code(500).send({ error: 'authService.error.errorGoogleAuth' });
         }
     });
     

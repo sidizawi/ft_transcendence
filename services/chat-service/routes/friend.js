@@ -13,7 +13,7 @@ async function friendRoutes(fastify, options) {
 		const { username } = XSSanitizer(request.body);
 		if (!username){
 			reply.code(400);
-			return { error: 'Username needed'};
+			return { error: 'usernameIsRequired'};
 		}
 	
 		await request.jwtVerify();
@@ -22,19 +22,19 @@ async function friendRoutes(fastify, options) {
 		const actualUser = await getUserById(actualid);
 		if (!actualUser) {
 			reply.code(400);
-			return { error: 'User not found'};
+			return { error: 'userNotFound'};
 		}
 		const actualuser = actualUser.username;
 
 		if (actualuser === username){
 			reply.code(400)
-			return { error: 'Cannot add yourself'}
+			return { error: 'usernameCannotBeYourself'}
 		}
 
 		const userExists = await getUserByUsername(username);
 		if (!userExists) {
 			reply.code(400);
-			return { error: 'Username doesnt exist'};
+			return { error: 'usernameNotFound'};
 		}
 
 		const friendid = userExists.id;
@@ -47,14 +47,14 @@ async function friendRoutes(fastify, options) {
 			await addFriendship(friendid, actualid, 'receiving');
 
 			reply.code(201);
-			return { message: 'User successfully added'};
+			return { message: 'userAddSuccess'};
 		} else if (!actualUserRow && friendRow) {
 			reply.code(400);
-			return { error: 'Unknown user'}; //when you're blocked, you cannot add this person
+			return { error: 'unknownUser'}; //when you're blocked, you cannot add this person
 		}
 		else{
 			reply.code(500);
-			return { error: 'Username already friendlist'};
+			return { error: 'userAlreadyAdded'};
 		}
 
 	});
@@ -63,7 +63,7 @@ async function friendRoutes(fastify, options) {
 		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
-			return { error: 'Friendusername needed'};
+			return { error: 'usernameIsRequired'};
 		}
 	
 		await request.jwtVerify();
@@ -73,7 +73,7 @@ async function friendRoutes(fastify, options) {
 
 		if (!friendExists) {
 			reply.code(400);
-			return { error: 'Username doesnt exist'};
+			return { error: 'userNotFound'};
 		}
 
 		const friendid = friendExists.id;
@@ -83,21 +83,21 @@ async function friendRoutes(fastify, options) {
 	
 		if (sendingStatus.status !== 'sending' || receivingStatus.status !== 'receiving'){
 			reply.code(400);
-			return { error: 'Wrong relationship between friends'};
+			return { error: 'userIsNotFriend'};
 		}
 	
 		await deleteFriendship(actualid, friendid);
 		await deleteFriendship(friendid, actualid);
 	
 		reply.code(200);
-		return { message: 'Friend request successfully cancelled'};
+		return { message: 'userCancelSuccess'};
 	});
 
 	fastify.patch('/accept', async (request, reply) => {
 		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
-			return { error: 'Friendusername needed'};
+			return { error: 'usernameIsRequired'};
 		}
 	
 		await request.jwtVerify();
@@ -107,7 +107,7 @@ async function friendRoutes(fastify, options) {
 
 		if (!friendExists) {
 			reply.code(400);
-			return { error: 'Username doesnt exist'};
+			return { error: 'userNotFound'};
 		}
 
 		const friendid = friendExists.id;
@@ -117,7 +117,7 @@ async function friendRoutes(fastify, options) {
 
 		if (sending.status !== 'sending' || receiving.status !== 'receiving'){
 			reply.code(400);
-			return { error: 'Wrong relationship between friends'};
+			return { error: 'userIsNotFriend'};
 		}
 	
 		const queryUpdate = `UPDATE friend SET status ='accepted' WHERE (userid1, userid2) = (?, ?)`;
@@ -128,14 +128,14 @@ async function friendRoutes(fastify, options) {
 		await queryPost(queryUpdate, paramsUpdate2);
 
 		reply.code(200);
-		return { message: 'Friend request successfully accepted'};
+		return { message: 'userAcceptSuccess'};
 	});
 	
 	fastify.patch('/reject', async (request, reply) => {
 		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
-			return { error: 'Friendusername needed'};
+			return { error: 'usernameIsRequired'};
 		}
 	
 		await request.jwtVerify();
@@ -145,7 +145,7 @@ async function friendRoutes(fastify, options) {
 
 		if (!friendExists) {
 			reply.code(400);
-			return { error: 'Username doesnt exist'};
+			return { error: 'userNotFound'};
 		}
 
 		const friendid = friendExists.id;
@@ -155,21 +155,21 @@ async function friendRoutes(fastify, options) {
 	
 		if (sendingStatus.status !== 'sending' || receivStatus.status !== 'receiving'){
 			reply.code(400);
-			return { error: 'Wrong relationship between friends'};
+			return { error: 'userIsNotFriend'};
 		}
 	
 		await deleteFriendship(actualid, friendid);
 		await deleteFriendship(friendid, actualid);
 	
 		reply.code(200);
-		return { message: 'Friend request successfully rejected'};
+		return { message: 'userRejectSuccess'};
 	});
 	
 	fastify.delete('/delete', async (request, reply) => {
 		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
-			return { error: 'Friendusername needed'};
+			return { error: 'usernameIsRequired'};
 		}
 	
 		await request.jwtVerify();
@@ -179,7 +179,7 @@ async function friendRoutes(fastify, options) {
 
 		if (!friendExists) {
 			reply.code(400);
-			return { error: 'Username doesnt exist'};
+			return { error: 'userNotFound'};
 		}
 
 		const friendid = friendExists.id;
@@ -189,7 +189,7 @@ async function friendRoutes(fastify, options) {
 	
 		if (actualUser.status !== 'accepted' || friendUser.status !== 'accepted'){
 			reply.code(400);
-			return { error: 'Wrong relationship between friends'};
+			return { error: 'userIsNotFriend'};
 		}
 	
 
@@ -197,14 +197,14 @@ async function friendRoutes(fastify, options) {
 		await deleteFriendship(friendid, actualid);
 	
 		reply.code(200);
-		return { message: 'Friend request successfully deleted'};
+		return { message: 'userDeleteSuccess'};
 	});
 	
 	fastify.patch('/block', async (request, reply) => {
 		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
-			return { error: 'Friendusername needed'};
+			return { error: 'usernameIsRequired'};
 		}
 	
 		await request.jwtVerify();
@@ -214,7 +214,7 @@ async function friendRoutes(fastify, options) {
 
 		if (!friendExists) {
 			reply.code(400);
-			return { error: 'Username doesnt exist'};
+			return { error: 'userNotFound'};
 		}
 
 		const friendid = friendExists.id;
@@ -226,14 +226,14 @@ async function friendRoutes(fastify, options) {
 		await deleteFriendship(friendid, actualid);
 	
 		reply.code(200);
-		return { message: 'Friend request successfully blocked'};
+		return { message: 'userBlockSuccess'};
 	});
 
 	fastify.patch('/unblock', async (request, reply) => {
 		const { friendusername } = XSSanitizer(request.body);
 		if (!friendusername){
 			reply.code(400);
-			return { error: 'Friendusername needed'};
+			return { error: 'usernameIsRequired'};
 		}
 	
 		await request.jwtVerify();
@@ -243,7 +243,7 @@ async function friendRoutes(fastify, options) {
 
 		if (!friendExists) {
 			reply.code(400);
-			return { error: 'Username doesnt exist'};
+			return { error: 'userNotFound'};
 		}
 
 		const friendid = friendExists.id;
@@ -253,13 +253,13 @@ async function friendRoutes(fastify, options) {
 
 		if (actualRow.status !== 'blocked' || blockedRow){
 			reply.code(400);
-			return { error: 'Wrong relationship between friends'};
+			return { error: 'userIsNotFriend'};
 		}
 
 		await deleteFriendship(actualid, friendid);
 
 		reply.code(200);
-		return { message: 'User successfully unblocked'};
+		return { message: 'userUnblockSuccess'};
 	});
 
 	fastify.get('/friendlist', async (request, reply) => {
@@ -275,7 +275,7 @@ async function friendRoutes(fastify, options) {
 		const userfriends = await queryAll(query, params);
 
 		if (!userfriends || userfriends.length === 0){
-			return { message: 'No friends found', friendData: [] };
+			return { message: 'friendlistEmpty', friendData: [] };
 		}
 		
 		const friendData = userfriends.map(friend => ({
@@ -284,7 +284,7 @@ async function friendRoutes(fastify, options) {
 			avatar: friend.avatar || '/img/default-avatar.jpg',
 		}));
 
-		return { message: 'Successfully retrieve friend list', friendData };
+		return { message: 'friendlistSuccess', friendData };
 	});
 
 	fastify.get('/sendinglist', async (request, reply) => {
@@ -305,7 +305,7 @@ async function friendRoutes(fastify, options) {
 			avatar: item.avatar || '/img/default-avatar.jpg',
 		}));
 
-		return { message: 'Successfully retrieve request list', onlyUsername };
+		return { message: 'sendlistSuccess', onlyUsername };
 	});
 
 	fastify.get('/receivinglist', async (request, reply) => {
@@ -326,7 +326,7 @@ async function friendRoutes(fastify, options) {
 			avatar: item.avatar || '/img/default-avatar.jpg',
 		}));
 
-		return { message: 'Successfully retrieve request list', onlyUsername };
+		return { message: 'receivedlistSuccess', onlyUsername };
 	});
 
 	fastify.get('/blockedlist', async (request, reply) => {
@@ -348,14 +348,14 @@ async function friendRoutes(fastify, options) {
             avatar: item.avatar || '/img/default-avatar.jpg',
         }));  
 		
-		return { message: 'Successfully retrieve blocked list', onlyUsername };
+		return { message: 'blocklistSuccess', onlyUsername };
     });
 
 	fastify.get('/check-blocked/:friendUsername', async (request, reply) => {
 		const friendUsername = request.params.friendUsername;
 		if (!friendUsername){
 			reply.code(400);
-			return { error: 'Friendusername needed'};
+			return { error: 'usernameIsRequired'};
 		}
 
 		await request.jwtVerify();
@@ -365,7 +365,7 @@ async function friendRoutes(fastify, options) {
 
 		if (!friendExists) {
 			reply.code(400);
-			return { error: 'Username doesnt exist'};
+			return { error: 'userNotFound'};
 		}
 
 		const friendid = friendExists.id;
@@ -379,9 +379,9 @@ async function friendRoutes(fastify, options) {
 		const blockedlist = await queryAll(query, params);
 
 		if (blockedlist.length > 0) {
-			return { message: 'User is blocked', isBlocked: true };
+			return { message: 'userIsBlocked', isBlocked: true };
 		} else {
-			return { message: 'User is not blocked', isBlocked: false };
+			return { message: 'userIsNotBlocked', isBlocked: false };
 		}
 	});
 }

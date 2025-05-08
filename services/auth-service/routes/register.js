@@ -9,44 +9,36 @@ import { getUserByUsername,
 async function registerRoutes(fastify) {
 
     fastify.post('/', async (request, reply) => {
-        try {
-            
-            const { username, email, password } = XSSanitizer(request.body);
-            if (!username || !email || !password) {
-                reply.code(400);
-                return { error: 'All fields are required' };
-            }
-            
-            const userExists = await getUserByUsername(username);
-            if (userExists) {
-                console.log('Userexist exit\n');
-                reply.code(400);
-                return { error: 'This username is already in use.' };
-            }
-    
-            const emailExists = await getUserByEmail(email);
-            if (emailExists) {
-                console.log('emailExist exit\n');
-                reply.code(400);
-                return { error: 'This email is already in use.' };
-            }
-    
-            const hashedPassword = await bcrypt.hash(password, 10);
-
-            await insertUser(username, email, hashedPassword, '/img/default-avatar.jpg', "{}", 0, 1, 0);
-
-            const user = await getUserByUsername(username);
-
-            const token = fastify.jwt.sign({
-              id: user.id
-            });
-
-            reply.code(201);
-            return { message: 'User registered successfully', token};
-        }catch (error) {
-            console.error('Error in registration route:', error);
-            return reply.code(500).send({ error: 'Internal server error' });
+        const { username, email, password } = XSSanitizer(request.body);
+        if (!username || !email || !password) {
+            reply.code(400);
+            return { error: 'authService.error.fieldsAreRequired' };
         }
+        
+        const userExists = await getUserByUsername(username);
+        if (userExists) {
+            reply.code(400);
+            return { error: 'authService.error.usernameMustBeUnique' };
+        }
+
+        const emailExists = await getUserByEmail(email);
+        if (emailExists) {
+            reply.code(400);
+            return { error: 'authService.error.emailMustBeUnique' };
+        }
+
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        await insertUser(username, email, hashedPassword, '/img/default-avatar.jpg', "{}", 0, 1, 0);
+
+        const user = await getUserByUsername(username);
+
+        const token = fastify.jwt.sign({
+            id: user.id
+        });
+
+        reply.code(201);
+        return { message: 'authService.message.registerSuccess', token};
     });
 
 }

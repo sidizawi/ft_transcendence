@@ -15,7 +15,7 @@ async function twofaRoutes(fastify) {
             const user = await getUserById(userId);
             if (!user) {
                 reply.code(404);
-                return { error: 'User not found' };
+                return { error: 'authService.error.userNotFound' };
             }
       
             const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -33,11 +33,11 @@ async function twofaRoutes(fastify) {
       
             await transporter.sendMail(mailOptions);
             reply.code(200);
-            return { message: 'OTP sent by email' };
+            return { message: 'authService.message.otpSendByEmail' };
         } catch (err) {
             fastify.log.error(err);
             reply.code(500);
-            return { error: 'Error sending email' };
+            return { error: 'authService.error.errorSendingEmail' };
         }
       });
       
@@ -46,29 +46,29 @@ async function twofaRoutes(fastify) {
           const { otp } = request.body;
           if (!otp) {
             reply.code(400);
-            return { error: 'OTP code is required' };
+            return { error: 'authService.error.otpCodeIsRequired' };
           }
           const userId = request.user.id;
           const entry = otpCache[userId];
           if (!entry || Date.now() > entry.expires) {
             reply.code(401);
-            return { error: 'OTP code has expired or does not exist' };
+            return { error: 'authService.error.otpCodeHasExpiredOrInvalid' };
           }
 
           if (entry.otp !== otp) {
             reply.code(401);
-            return { error: 'OTP code is incorrect' };
+            return { error: 'authService.error.otpCodeIsInvalid' };
           }
           
           await update2faById(1, userId);
           
           delete otpCache[userId];
           reply.code(200);
-          return { message: '2FA successfully activated' };
+          return { message: 'authService.message.twofaEnabled' };
         } catch (err) {
           fastify.log.error(err);
           reply.code(500);
-          return { error: 'Error verifying OTP code' };
+          return { error: 'authService.error.errorVerifyingOtpCode' };
         }
     });
       
@@ -78,25 +78,25 @@ async function twofaRoutes(fastify) {
         const { otp } = request.body;
         if (!otp) {
           reply.code(400);
-          return { error: 'OTP code is required' };
+          return { error: 'authService.error.otpCodeIsRequired' };
         }
       
         const userId = request.user.id;
         const entry = otpCache[userId];
         if (!entry || Date.now() > entry.expires) {
           reply.code(401);
-          return { error: 'OTP code has expired or does not exist' };
+          return { error: 'authService.error.otpCodeHasExpiredOrInvalid' };
         }
         if (entry.otp !== otp) {
           reply.code(401);
-          return { error: 'OTP code is incorrect' };
+          return { error: 'authService.error.otpCodeIsInvalid' };
         }
 
         const user = await get2faById(userId);
 
         if (!user) {
           reply.code(404);
-          return { error: 'User not found' };
+          return { error: 'authService.error.userNotFound' };
         }
       
         const currentTwoFactorState = user.is_two_factor_enabled;
@@ -105,13 +105,13 @@ async function twofaRoutes(fastify) {
         await update2faById(newTwoFactorState, userId);
 
         delete otpCache[userId];
-        const message = newTwoFactorState ? '2FA successfully activated' : '2FA successfully deactivated';
+        const message = newTwoFactorState ? 'authService.message.twofaEnabled' : 'authService.message.twofaDisabled';
         reply.code(200);
         return { message };
       } catch (err) {
         fastify.log.error(err);
         reply.code(500);
-        return { error: 'Error verifying OTP code' };
+        return { error: 'authService.error.errorVerifyingOtpCode' };
       }
     });
 }

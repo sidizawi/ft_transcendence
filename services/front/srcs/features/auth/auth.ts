@@ -70,8 +70,10 @@ export class Auth {
       
       // Fetch user profile after successful login
       await this.fetchAndSetUserProfile();
-    } catch (error) {
-      this.showError(error instanceof Error ? error.message : i18n.t('loginError'));
+    } catch (error: any) {
+      console.log('Error during login:', error.message);
+      console.log(i18n.t(error.message));
+      this.showError(i18n.t(error.message));
     }
   }
 
@@ -583,6 +585,7 @@ export class Auth {
         const passwordInput = document.getElementById('password') as HTMLInputElement;
   
         if (identifierInput && passwordInput) {
+          console.log('ici');
           await this.handleLogin(
             identifierInput.value,
             passwordInput.value
