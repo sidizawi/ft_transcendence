@@ -16,7 +16,7 @@ async function statsRoutes(fastify, options) {
 	*/
 	fastify.post('/savegamestat', async (request, reply) => {
 		const { opponent, score, game } = request.body;
-		await request.jwtVerify();
+				await request.jwtVerify();
 
 		const userId = request.user.id;
 

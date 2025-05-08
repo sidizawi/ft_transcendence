@@ -311,7 +311,6 @@ async function settingsRoutes(fastify, options) {
 		});
 	});
 
-	// Inclure l'URL de l'avatar dans les réponses utilisateur
 	fastify.get('/profile', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
@@ -321,13 +320,10 @@ async function settingsRoutes(fastify, options) {
 			return reply.code(404).send({ error: 'User not found' });
 		}
 
-		// Ajouter l'URL complète de l'avatar
 		user.avatarUrl = user.avatar ? `${request.protocol}://${request.hostname}/avatars/${path.basename(user.avatar)}` : null;
-
 		reply.code(200).send(user);
 
-	});
-    
+	});  
 }
 
 export default settingsRoutes;
