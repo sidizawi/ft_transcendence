@@ -88,7 +88,7 @@ export class Chat {
 
     // Add close button
     const closeButton = document.createElement('button');
-    closeButton.className = 'absolute top-4 right-6 text-light-0 dark:text-dark-4 hover:text-light-4 dark:hover:text-dark-0 p-1 w-5 h-5';
+    closeButton.className = `absolute top-4 right-6 p-1 w-5 h-5 text-light-0 dark:text-dark-4 hover:scale-110`
     closeButton.innerHTML = SVGIcons.getRejectIcon();
     closeButton.addEventListener('click', () => {
       chatTab.remove();

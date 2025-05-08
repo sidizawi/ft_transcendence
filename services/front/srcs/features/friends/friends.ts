@@ -191,6 +191,7 @@ export class Friends {
               value="${this.searchQuery}"
               class="
                 w-full p-3 mb-6 rounded-lg
+                border-none
                 bg-light-1 dark:bg-dark-3
                 text-light-4 dark:text-dark-0
                 placeholder-light-3/60 dark:placeholder-dark-1/60

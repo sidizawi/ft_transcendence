@@ -1,4 +1,3 @@
-import { app } from '../../main';
 import { i18n } from '../i18n';
 
 export class Menu {
