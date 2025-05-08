@@ -10,6 +10,7 @@ export class ModalManager {
 
 		modal.innerHTML = this.renderModal(title, message);
 		modal.classList.remove('hidden');
+		modal.classList.add("fixed", "inset-0", "z-50", "flex", "items-center", "justify-center", "bg-black/30", "backdrop-blur-sm");
 
 		let closeModal = document.getElementById('closeModal');
 
@@ -26,7 +27,7 @@ export class ModalManager {
 
 	static renderModal(title: string, message: string) : string {
 		return `
-			<div class="bg-light-0 rounded-lg shadow-lg max-w-md w-full p-6">
+			<div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg max-w-md w-full p-6">
 				<div class="flex justify-between items-center mb-4">
 					<h2 class="text-2xl font-bold text-light-4 dark:text-dark-0 text-center">${title}</h2>
 				</div>

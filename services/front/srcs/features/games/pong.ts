@@ -2,6 +2,7 @@ import { app } from '../../main.ts';
 import { ModalManager } from '../../shared/components/modal.ts';
 import { i18n } from '../../shared/i18n';
 import { FriendService } from '../../shared/services/friendService.ts';
+import { WebsocketPage } from '../../shared/types/app.ts';
 import { Friend } from '../../shared/types/friend.ts';
 import { PongState } from '../../shared/types/pong.ts';
 import { TokenManager } from '../../shared/utils/token';
@@ -13,7 +14,7 @@ import Paddle from './pong/Paddle';
 const host = window.location.hostname;
 const PONG_WS_URL = `wss://${host}:8080/ws/game/pong`;
 
-export class Pong {
+export class Pong implements WebsocketPage {
 
   private BALL_SIZE = 10;
   private BALL_SPEED_X = 7;
@@ -54,6 +55,33 @@ export class Pong {
     this.pongEventListener(type);
   }
 
+  destroy() {
+    this.state.ws?.close();
+    this.state.canvas =  null;
+    this.state.ctx =  null;
+    this.state.ball =  null;
+    this.state.leftPlayer =  null;
+    this.state.rightPlayer =  null;
+    this.state.leftPlayerScore =  0;
+    this.state.rightPlayerScore =  0;
+    this.state.keys =  {};
+    this.state.singlePlayer =  false;
+    this.state.gameStarted =  false;
+    this.state.gamePlayed =  false;
+    this.state.winner =  null;
+    this.state.hoverSinglePlayer =  false;
+    this.state.hoverTwoPlayers =  false;
+    this.state.hoverPlayAgain =  false;
+    this.state.hoverMainMenu =  false;
+    this.state.hoverOnline =  false;
+    this.state.gameLoopId =  null;
+    this.state.aiInterval =  null;
+    this.state.aiKeys =  {};
+    this.state.ws =  null;
+    this.state.waitingOpponent =  false;
+    this.state.animationRunning =  false;
+  }
+
   stopGame(winner: string): void {
     // Game state flags
     this.state.gameStarted = false;
@@ -82,10 +110,7 @@ export class Pong {
     app.router.navigateTo("/pong");
   }
 
-  clean() {}
-
   pongEventListener(type: string | null) {
-    this.clean();
     this.state.canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
     this.state.ctx = this.state.canvas.getContext("2d");
     

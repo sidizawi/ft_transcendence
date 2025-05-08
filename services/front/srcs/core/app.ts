@@ -1,3 +1,4 @@
+
 import '../style.css';
 import { BrowserCompatibility } from '../shared/utils/browserCheck';
 import { Menu } from '../shared/components/menu';
@@ -19,6 +20,7 @@ import { NotFound } from '../shared/components/notFound';
 import { FriendProfile } from '../features/profile/friendProfile';
 import { chatService } from '../main';
 import { FriendsTab } from '../shared/components/friendsTab';
+import { WebsocketPage } from '../shared/types/app';
 
 export class TranscendenceApp {
   private state = {
@@ -34,8 +36,9 @@ export class TranscendenceApp {
   private footer: Footer;
   private connect4: Connect4HomePage;
   private pong: PongHomePage;
-  //private friendsList: FriendsList | null = null;
   private friendsTab: FriendsTab | null = null;
+  //private friendsList: FriendsList | null = null;
+  private currentPage: WebsocketPage | null = null;
 
   constructor() {
     // Check if user is already logged in
@@ -161,6 +164,7 @@ export class TranscendenceApp {
         <main id="main-content" class="pt-16 container mx-auto px-4 py-8 flex-grow">
         </main>
 
+        <div id="modal"></div>
         ${this.footer.render()}
       </div>
     `;
@@ -176,6 +180,8 @@ export class TranscendenceApp {
 
   private async renderCurrentPage() {
     const path = await this.router.checkAuthAndRedirect(window.location.pathname);
+    this.currentPage?.destroy();
+    this.currentPage = null;
     const main = document.querySelector('main');
     if (!main) return;
 
@@ -203,7 +209,7 @@ export class TranscendenceApp {
         new Connect4HomePage("friend_list");
         return ;
       }
-      new Connect4(connect4Match[1]);
+      this.currentPage = new Connect4(connect4Match[1]);
       return ;
     }
 
@@ -213,17 +219,17 @@ export class TranscendenceApp {
         new PongHomePage("friend_list");
         return ;
       }
-      new Pong(pongMatch[1]);
+      this.currentPage = new Pong(pongMatch[1]);
       return ;
     }
 
     const tournamentMatch = path.match(/^\/tournament\/(.+)$/)
     if (tournamentMatch) {
       if (tournamentMatch[1] == "join" || tournamentMatch[1] == "create") {
-        new TournamentHomePage(tournamentMatch[1]);
+        this.currentPage = new TournamentHomePage(tournamentMatch[1]);
         return ;
       }
-      new Tournament(tournamentMatch[1]);
+      this.currentPage = new Tournament(tournamentMatch[1]);
       return ;
     }
 

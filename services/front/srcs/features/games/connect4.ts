@@ -2,6 +2,7 @@ import { app, chatService } from '../../main';
 import { ModalManager } from '../../shared/components/modal';
 import { i18n } from '../../shared/i18n';
 import { FriendService } from '../../shared/services/friendService';
+import { WebsocketPage } from '../../shared/types/app';
 import { Friend } from '../../shared/types/friend';
 import { User } from '../../shared/types/user';
 import { TokenManager } from '../../shared/utils/token';
@@ -9,7 +10,7 @@ import { TokenManager } from '../../shared/utils/token';
 const host = window.location.hostname;
 const CONNECT4_WS_URL = `wss://${host}:8080/ws/game/connect4`;
 
-export class Connect4 {
+export class Connect4 implements WebsocketPage {
 
   private cols = 7;
   private rows = 6;
@@ -26,23 +27,32 @@ export class Connect4 {
   private room: string | null;
   private ws : WebSocket | null;
   private friend: string | null;
-  private opponent: string | null;
-  private opponentColor: string | null;
+  private player1: string | null;
+  private player2: string | null;
+  private player2Color: string | null;
   private data = new Array(42).fill('X');
   private columns = new Array(7).fill(5);
+  private callback: ((winner: string) => void) | null = null;
   private canvas = null as HTMLCanvasElement | null;
   private ctx = null as CanvasRenderingContext2D | null;
   private coinRadius = (this.cellSize - this.coinPadding * 2) / 2;
 
-  constructor(type : string | null) {
+  constructor(
+      type : string | null, 
+      player1: string | null = null, 
+      player2: string | null = null, 
+      callback: ((winner: string) => void) | null = null
+    ) {
     const urlParams = new URLSearchParams(window.location.search);
     this.room = urlParams.get("room");
     this.friend = urlParams.get("friend");
     this.ws = null;
-    this.opponent = null;
-    this.opponentColor = null;
+    this.player2 = player2 || "yellow";
+    this.player2Color = "yellow";
+    this.callback = callback;
     this.user = TokenManager.getUserFromLocalStorage();
-  
+    this.player1 = player1 || this.user?.username || "red";
+    
     if (type == "play_vs_friend" && !this.friend && !this.room) {
       // todo: check the error: app initialized
       app.router.navigateTo("/connect4");
@@ -65,6 +75,21 @@ export class Connect4 {
     }
   }
 
+  destroy() {
+    this.ws?.close();
+    this.ws = null;
+    this.won = false;
+    this.online = false;
+    this.myTurn = false;
+    this.player1 = null;
+    this.player2 = null;
+    this.data.fill('X');
+    this.columns.fill(5);
+    this.callback = null;
+    this.player = this.red;
+    this.player2Color = null;
+  }
+
   drop(x: number, y: number, targetY: number, speed: number, col: number, row: number) {
     // Redraw the board on each frame
     this.drawBoard();
@@ -85,13 +110,14 @@ export class Connect4 {
       this.canPlay = this.myTurn;
       this.data[row * this.cols + col] = this.player == this.red ? 'R' : 'Y';
       if (!this.online && this.checkWin()) {
-        ModalManager.openModal(i18n.t('games.connect4.title'), `player ${this.player == this.red ? "red" : "yellow"} won`);
-        this.renderBackBtn();
+        ModalManager.openModal(i18n.t('games.connect4.title'), `${this.player == this.red ? this.player1 : this.player2} won`);
+        this.renderBackBtn(this.player == this.red ? this.player1 : this.player2);
         this.won = true;
       }
       this.toggleColors();
       if (!this.online && this.data.every((elem) => elem != 'X')) {
         ModalManager.openModal(i18n.t('games.connect4.title'), "No winner this time, it's a tie!");
+        this.renderBackBtn(this.player == this.red ? this.player1 : this.player2);
       }
       this.player = this.player == this.red ? this.yellow : this.red;
     }
@@ -178,7 +204,8 @@ export class Connect4 {
     this.ctx = this.canvas!.getContext('2d');
 
     if (!this.online) {
-      ModalManager.openModal(i18n.t('games.connect4.title'), "player red start first");
+      this.player2Color = "yellow";
+      ModalManager.openModal(i18n.t('games.connect4.title'), `${this.player1} start first`);
     }
 
     this.canvas!.addEventListener('click', (event) => {
@@ -205,7 +232,6 @@ export class Connect4 {
       }
       this.animateCoin(col, this.columns[col]);
       this.columns[col]--;
-
     });
     this.drawBoard();
   }
@@ -275,8 +301,8 @@ export class Connect4 {
         }
         this.canPlay = message.color == 'R';
         this.myTurn = this.canPlay;
-        this.opponent = message.opponent;
-        this.opponentColor = message.color == 'R' ? "yellow" : "red";
+        this.player2 = message.opponent;
+        this.player2Color = message.color == 'R' ? "yellow" : "red";
         const main = document.querySelector("main");
         main!.innerHTML = this.renderCanvas();
         this.toggleColor(this.canPlay ? "player1" : "player2");
@@ -309,20 +335,6 @@ export class Connect4 {
       app.router.navigateTo("/connect4");
       ModalManager.openModal(i18n.t('games.connect4.title'), "connection lost");
     }
-  }
-
-  clean() {
-    let ws = this.ws;
-    this.ws = null;
-    ws?.close();
-    this.won = false;
-    this.online = false;
-    this.myTurn = false;
-    this.opponent = null;
-    this.player = this.red;
-    this.opponentColor = null;
-    this.data.fill('X');
-    this.columns.fill(5);
   }
 
   cleanWs() {
@@ -365,45 +377,56 @@ export class Connect4 {
   }
 
   renderCanvas(): string {
-    if (this.online) {
+    //if (this.online) {
       // todo: check for the width, and translate
       return `
         <div class="flex flex-col items-center justify-center h-screen">
           <div class="mb-1 flex" style="width: 700px;">
             <div id="player1Name" class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg transition-colors">
-              <strong>${this.user?.username}</strong>  -  <p>${this.opponentColor == 'red' ? 'yellow' : 'red'}</p>
+              <strong>${this.player1}</strong>  -  <p>${this.player2Color == 'red' ? 'yellow' : 'red'}</p>
             </div>
             <div id="player2Name" class="flex items=center justify-center w-1/2 bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg transition-colors">
-              <strong>${this.opponent}</strong>  -  <p>${this.opponentColor}</p>
+              <strong>${this.player2}</strong>  -  <p>${this.player2Color}</p>
             </div>
           </div>
           <canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>
-          <div class="mt-4 flex justify-center" id="backBtn">
+          <div class="mt-4 flex justify-center" id="backDiv">
           </div>
         </div>
       `;      
-    }
-    return `
-      <div class="flex flex-col items-center justify-center h-screen">
-        <canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>
-        <div class="mt-4 flex justify-center" id="backBtn">
-        </div>
-      </div>
-    `;
+    //}
+    //return `
+    //  <div class="flex flex-col items-center justify-center h-screen">
+    //    <canvas id="connect4Canvas" width="700" height="600" class="bg-[#0077b6] shadow-[0_0_10px_rgba(0,0,0,0.5)] cursor-pointer"></canvas>
+    //    <div class="mt-4 flex justify-center" id="backDiv">
+    //    </div>
+    //  </div>
+    //`;
   }
 
-  renderBackBtn() {
-    const backBtn = document.getElementById("backBtn");
+  renderBackBtn(winner: string | null = null) {
+    const backDiv = document.getElementById("backDiv");
 
     // todo: check SAP, just go back, but remove data
-    backBtn!.innerHTML = `
-      <a 
-        href="/connect4"
+    backDiv!.innerHTML = `
+      <button
+        id="backBtn"
         class="bg-orange dark:bg-nature text-white dark:text-nature-lightes px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
       >
         ${i18n.t('back')}
-      </a>
+      </button>
     `
+
+    const backBtn = document.getElementById("backBtn");
+    backBtn?.addEventListener('click', () => {
+      if (this.callback && winner) {
+        this.callback(winner);
+        this.destroy();
+        return ;
+      }
+      this.destroy();
+      app.router.navigateTo("/connect4");
+    })
   }
 }
 
