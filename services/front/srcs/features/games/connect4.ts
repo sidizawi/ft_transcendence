@@ -382,10 +382,10 @@ export class Connect4 implements WebsocketPage {
       return `
         <div class="flex flex-col items-center justify-center h-screen">
           <div class="mb-1 flex" style="width: 700px;">
-            <div id="player1Name" class="flex items=center justify-center w-1/2 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-2-lightes px-6 py-2 rounded-lg transition-colors">
+            <div id="player1Name" class="flex items=center justify-center w-1/2 bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-6 py-2 rounded-lg transition-colors">
               <strong>${this.player1}</strong>  -  <p>${this.player2Color == 'red' ? 'yellow' : 'red'}</p>
             </div>
-            <div id="player2Name" class="flex items=center justify-center w-1/2 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-2-lightes px-6 py-2 rounded-lg transition-colors">
+            <div id="player2Name" class="flex items=center justify-center w-1/2 bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-6 py-2 rounded-lg transition-colors">
               <strong>${this.player2}</strong>  -  <p>${this.player2Color}</p>
             </div>
           </div>
@@ -411,7 +411,7 @@ export class Connect4 implements WebsocketPage {
     backDiv!.innerHTML = `
       <button
         id="backBtn"
-        class="bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-2-lightes px-6 py-2 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors"
+        class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-6 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
       >
         ${i18n.t('back')}
       </button>
@@ -472,7 +472,7 @@ export class Connect4HomePage {
         <div class="max-w-4xl mx-auto px-4 py-8">
           <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
             <div class="flex justify-center items-center h-64">
-              <div class="animate-spin rounded-full h-12 w-12 border-4 border-light-3 dark:border-dark-2 border-t-transparent"></div>
+              <div class="animate-spin rounded-full h-12 w-12 border-4 border-light-3 dark:border-dark-1 border-t-transparent"></div>
             </div>
           </div>
         </div>
@@ -485,27 +485,32 @@ export class Connect4HomePage {
     <div class="max-w-4xl mx-auto px-4 py-8">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
           <div class="flex justify-start items-center mb-6">
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${i18n.t('friends')}</h1>
+            <h1 class="text-2xl font-bold text-light-4 dark:text-dark-0">${i18n.t('friends')}</h1>
           </div>
 
 
           ${this.friendList.length > 0 ? `
             <div class="mb-8">
-              <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
+              <h3 class="text-lg font-semibold text-light-4 dark:text-dark-0 mb-4">${i18n.t('friendsList')}</h3>
               <div class="space-y-3">
                 ${this.friendList.map(friend => `
-                  <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-3/50 rounded-lg">
+                  <div class="flex items-center justify-between p-4 bg-light-1 dark:bg-dark-3 rounded-lg">
                     <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
                       <img 
                         src="${friend.avatar}" 
                         alt="${friend.username2}" 
                         class="w-10 h-10 rounded-full object-cover hover:opacity-80 transition-opacity"
                       >
-                      <span class="text-gray-900 dark:text-white">${friend.username2}</span>
+                      <span class="text-light-4 dark:text-dark-0">${friend.username2}</span>
                     </div>
                     <div class="space-x-2">
                       <button 
-                        class="bg-green-500 hover:bg-green-600 px-3 py-1.5 roundedtext-light-0 transition-colors"
+                        class="text-light-4/80 dark:text-dark-0/80
+                          px-3 py-1.5 rounded-lg
+                          border border-light-4/80 dark:border-dark-0/80
+                          hover:text-light-0 dark:hover:text-dark-4
+                          hover:bg-light-4 dark:hover:bg-dark-0
+                          transition-colors"
                         data-action="play"
                         data-username="${friend.username2}"
                       >
