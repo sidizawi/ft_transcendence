@@ -10,7 +10,7 @@ dotenv.config();
 
 const fastify = Fastify({logger: true})
 
-fastify.register(websocket);
+await fastify.register(websocket);
 
 fastify.register(fastifyJwt, {secret:process.env.JWT_SECRET})
 
@@ -32,7 +32,7 @@ function setupNewGame(ws, mode, opponent = null) {
   // Generate a unique game ID 
   const gameId = `game-${Date.now()}`;
   // Create a new game with the client dimensions
-  createGame(gameId, ws, ws.canvasDimensions);
+  createGame(gameId, ws.canvasDimensions);
   
   // Add the main player to the game
   addPlayer(gameId, ws.username, ws);
@@ -70,11 +70,12 @@ function setupNewGame(ws, mode, opponent = null) {
   }));
 }
 
-fastify.register(async function (wsRoutes) {
-  wsRoutes.get('/pong', { websocket: true }, (socket, req) => {
+fastify.register((wsRoutes) => {
+  wsRoutes.get('/pong', { websocket: true }, (ws, req) => {
     console.log('Player connected');
     const { token } = req.query;
 
+    console.log('Token:', token);
     if (!token)  {
        ws.close();
        return ;
@@ -95,7 +96,6 @@ fastify.register(async function (wsRoutes) {
             ballSize: data.ballSize
           };
           ws.username = data.username;
-
           return ws.send(JSON.stringify({
             type: 'starting',
           }));
@@ -107,19 +107,15 @@ fastify.register(async function (wsRoutes) {
               message: 'Username not set'
             }));
           }
-          console.log(`Starting new game in ${data.mode} mode`);
           
           if (data.mode === 'online') {
             // For online mode, check waiting players first
             if (data.friend) {
               // Match with a waiting player
-              console.log(`Friend match requested with ${data.friend}`);
-              console.log(`Checking for friend ${friendMatchRequests.has(data.friend)}`);
               if (friendMatchRequests.has(data.friend) && friendMatchRequests.get(data.friend).targetFriend === ws.username) {
                 const friendWs = friendMatchRequests.get(data.friend).socket;
                 friendMatchRequests.delete(data.friend);
                 // Create game with the friend
-                console.log(`Found friend ${data.friend}, starting game`);
                 setupNewGame(friendWs, 'online', ws);
               }
               else {
