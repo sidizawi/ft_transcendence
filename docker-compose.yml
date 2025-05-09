@@ -9,8 +9,8 @@ services:
     develop:
       watch:
         - action: sync
-          path: ./services/nginx
-          target: /
+          path: ./services/nginx/conf
+          target: /etc/nginx/
     depends_on:
       - api-gateway
       - front

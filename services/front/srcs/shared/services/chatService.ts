@@ -16,10 +16,6 @@ export class ChatService {
 
   constructor() {
     this.currentUser = TokenManager.getUserFromLocalStorage();
-    if (!this.currentUser) {
-      this.setuped = false;
-      return;
-    }
     this.setup();
   }
 
@@ -37,22 +33,30 @@ export class ChatService {
   /**
    * Establish WebSocket connection and register handlers
    */
-  private setup() {
+  public setup() {
     if (this.setuped) return;
     const token = TokenManager.getToken();
     if (!token) return;
-
+    
     this.ws = new WebSocket(`${CHAT_WS}?token=${token}`);
 
     this.ws.onopen = () => {
-      console.log("WebSocket connected");
       this.setuped = true;
+
+      if (!this.currentUser) {
+        this.currentUser = TokenManager.getUserFromLocalStorage();
+        if (!this.currentUser) {
+          this.clean();
+          // todo: check if redirect to login is needed
+          return ;
+        }
+      }
 
       // register session
       this.ws!.send(JSON.stringify({
         type: "new",
-        userId: this.currentUser!.id,
-        user: this.currentUser!.username,
+        userId: this.currentUser.id,
+        user: this.currentUser.username,
       }));
 
       // flush any queued control or message frames
@@ -70,8 +74,6 @@ export class ChatService {
 
     this.ws.onclose = () => {
       this.setuped = false;
-      // reconnect
-      this.setup();
     };
   }
 

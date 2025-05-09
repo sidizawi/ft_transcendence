@@ -28,29 +28,38 @@ async function handleNewChatRoom(data, socket) {
 }
 
 function handleNewConn(data, socket) {
-    sockets[data.user] = socket;
-    users[socket] = {
+    sockets.set(data.user, socket);
+    users.set(socket, {
         user: data.user,
         userId: data.userId
-    };
+    });
     changeStatus(data.user, true);
 }
 
 async function handleNewMessage(data) {
-    if (data.friend in sockets) {
-        sockets[data.friend].send(JSON.stringify({
-            type: "message",
-            sender: data.user,
-            text: data.text,
-            timestamp: data.timestamp,
-            friend: data.user
-        }));
+    let query;
+    let friend = null;
+    if (sockets.has(data.friend)) {
+        let friendSocket = sockets.get(data.friend);
+
+        if (friendSocket.readyState === 1) {
+            friendSocket.send(JSON.stringify({
+                type: "message",
+                sender: data.user,
+                text: data.text,
+                timestamp: data.timestamp,
+                friend: data.user
+            }));
+            if (users.has(friendSocket)) {
+                friend = users.get(friendSocket);
+                if (friend) {
+                    friend = friend.userId;
+                }
+            }
+        }
     }
 
-    let friend, query;
-    if (data.friend in sockets) {
-        friend = users[sockets[data.friend]].userId;
-    } else {
+    if (!friend) {
         query = "SELECT id FROM users WHERE username = ?";
         friend = await queryGet(query, data.friend);
         friend = friend.id;
@@ -91,21 +100,16 @@ export default async function messageRoutes(fastify, options) {
                     handleNewConn(data, socket);
                 } else if (data.type == "newChat") {
                     handleNewChatRoom(data, socket);
-                } else if (data.type == "ping") {
-                    console.log("ping");
-                    socket.send(JSON.stringify({
-                        type: "pong"
-                    }));
                 } else {
                     handleNewMessage(data);
                 }
             });
 
             socket.on('close', () => {
-                let user = users[socket];
+                let user = users.get(socket);
                 if (user) {
-                    delete sockets[user.user];
-                    delete users[socket];
+                    sockets.delete(user.user);
+                    users.delete(socket);
                     changeStatus(user.user, false);
                     fastify.log.info(`Client disconnected ${user.user}`);
                 }

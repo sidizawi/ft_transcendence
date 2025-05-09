@@ -24,7 +24,9 @@ Ajout notif si new message + new demande de connexion
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
 
-
+	Sidi:
+		- remove all '!' chars
+		- check Map variables
 
 	BACK:
 		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
