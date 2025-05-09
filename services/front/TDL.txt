@@ -8,11 +8,27 @@ ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
 		- Bon comportement sur friendProfile quand chqngement de friendStatus faire pareil partout
 			-> ne se ferme pas, rafraichit
 
-	Login:
+	error and warning:
 		- check 401, token expired
+		- check all error code from back are the same in the front
+		- check all error type from back are the same in the front
 
 	!!! change status of the user: connected or not, via chatService
 
+	Pong:
+		- block up and down scrolling
+		- close websocket when changing history
+
+	Tournament:
+		- send message to user (remote)
+		- remote
+		- pong
+
+	connect4:
+		- matchmaking
+	
+	user:
+		- add level
 
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
@@ -23,7 +39,7 @@ ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
 
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
-
+		- I add someone, that person add me => error
 
 
 	BACK:

@@ -49,3 +49,17 @@ export interface FriendGameStats {
     avatar: string;
   }[];
 }
+
+export interface TournamentStorage {
+  name: string;
+  code: string;
+  pub: boolean;
+  game: string;
+  mode: string;
+  room?: string;
+  round: number;
+  plays: number;
+  players: number;
+  playersList: string[];
+  winners?: Map<number, string>;
+}

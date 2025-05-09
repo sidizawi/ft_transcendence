@@ -1,24 +1,29 @@
 import { app } from '../../main';
-import { ModalManager } from '../../shared/components/modal';
 import { i18n } from '../../shared/i18n';
 import { User } from '../../shared/types/user';
+import { WebsocketPage } from '../../shared/types/app';
 import { TokenManager } from '../../shared/utils/token';
+import { TournamentStorage } from '../../shared/types/game';
+import { ModalManager } from '../../shared/components/modal';
+import { Connect4 } from '../games/connect4';
 
 class Match {
 	left: Match | null = null;
 	right: Match | null = null;
-	winner: number | null = null;
-	player1: number | null = null;
-	player2: number | null = null;
+	parent: Match | null = null;
+	winner: string | null = null;
+	player1: string | null = null;
+	player2: string | null = null;
 
-	round: number = 1;
+	round = 1;
+  index = 0;
 
 	constructor(left: Match | null = null, right: Match | null = null) {
 		this.left = left;
 		this.right = right;
 	}
 
-	static createMatches(players: number[]) : Match | null {
+	static createMatches(players: string[]) : Match | null {
 		if (players.length <= 1) {
 			return null;
 		} else if (players.length === 2) {
@@ -29,65 +34,62 @@ class Match {
 		}
 		let match = new Match();
 		match.left = Match.createMatches(players.slice(0, Math.floor(players.length / 2)));
+    if (match.left)
+      match.left.parent = match;
 		match.right = Match.createMatches(players.slice(Math.floor(players.length / 2)));
+    if (match.right)
+      match.right.parent = match;
 		match.round = (match.left?.round || 0) + 1;
 		return match
 	}
 
-	// static displayMatches(match: Match | null, depth: number = 0) : void {
-	// 	if (match === null) {
-	// 		return;
-	// 	}
-	// 	console.log(Array(depth).join("  ") + "Match:");
-	// 	if (match.player1 !== null && match.player2 !== null) {
-	// 		console.log(Array(depth + 1).join("  ") + "Player 1: " + match.player1);
-	// 		console.log(Array(depth + 1).join("  ") + "Player 2: " + match.player2);
-	// 		console.log(Array(depth + 1).join("  ") + "Winner: " + match.winner);
-	// 		console.log(Array(depth + 1).join("  ") + "round: " + match.round);
-	// 	}
-	// 	Match.displayMatches(match.left, depth + 1);
-	// 	Match.displayMatches(match.right, depth + 1);
-	// }
+  static indexing(match: Match, idx: number) {
+    const queue = [match]
 
-	static playMatch(match: Match, round : number = 1) : boolean {
-    // todo: add game to choose the right one
-		let ret = false;
-		if (match.player1 !== null 
-			&& match.player2 !== null
-			&& match.winner === null 
-			&& round === match.round) {
-			match.winner = Math.random() < 0.5 ? match.player1 : match.player2;
-			console.log("Match between " + match.player1 + " vs " + match.player2 + " won by " + match.winner, "round: " + match.round);
-			return (true);
-		} else {
-			if (match.left !== null && !ret) {
-				ret = Match.playMatch(match.left, round);
-				if (match.left.winner !== null) {
-					match.player1 = match.left.winner;
-				}
-			}
-			if (match.right !== null && !ret) {
-				ret = Match.playMatch(match.right, round);
-				if (match.right.winner !== null) {
-					match.player2 = match.right.winner;
-				}
-			}
-		}
-		return (ret);
-	}
+    while (queue.length > 0) {
+      const m = queue.shift();
+      if (!m)
+        continue;
+
+      m.index = idx--;
+
+      if (m.right)
+        queue.push(m.right);
+      if (m.left)
+        queue.push(m.left);
+    }
+  }
+
+  static updateFromMap(match: Match, map: Map<number, string>) {
+    if (map.has(match.index)) {
+      match.winner = map.get(match.index) || null;
+    }
+    if (match.left) {
+      this.updateFromMap(match.left, map);
+      if (match.left.winner) {
+        match.player1 = match.left.winner;
+      }
+    }
+    if (match.right) {
+      this.updateFromMap(match.right, map);
+      if (match.right.winner) {
+        match.player2 = match.right.winner;
+      }
+    }
+  }
 }
 
+export class Tournament implements WebsocketPage {
 
-export class Tournament {
-
-  private name: string;
+  private rounds = 0;
+  private storage: TournamentStorage | undefined;
   private game: Match | null = null;
   private room: string | null = null;
   private ws : WebSocket | null = null;
 
   constructor(path: string) {
-    this.name = decodeURI(path.split("/").filter((el) => el.length)[1]);
-    let storage = localStorage.getItem(`tournament-${this.name}`);
+    let name = decodeURI(path.split("/").filter((el) => el.length)[1]);
+    let storage = localStorage.getItem(`tournament-${name}`);
     if (!storage) {
       // todo: translate
       ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
@@ -96,23 +98,33 @@ export class Tournament {
       }, 100);
       return ;
     }
-    // localStorage.removeItem(`tournament-${name}`);
 
-    let data = JSON.parse(storage);
-    //   name,
-    //   players,
-    //   code,
-    //   pub,
-    //   game,
-    //   mode,
-    //   room,
-    if (data.mode == "local") {
+    this.storage = this.parseStorage(storage);
+    if (!this.storage) {
+      // todo: translate
+      ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
+      setTimeout(() => {
+        app.router.navigateTo("/tournament");
+      }, 100);
+      return ;
+    }
+
+    if (!this.storage?.round) {
+      this.storage.round = 1;
+    }
+    if (!this.storage?.plays) {
+      this.storage.plays = this.storage.players / 2;
+    }
+    this.rounds = Math.log2(this.storage.players);
+    if (!this.storage.winners) {
+      this.storage.winners = new Map();
+    }
+    if (this.storage.mode == "local") {
       this.renderWaitingRoom("Creating tournament", true);
-      // createPlayers, display creating players
-      // display matches
-      // play
+      this.createMatches();
+      this.renderMatchBoard();
     } else {
-      this.room = data.room;
+      this.room = this.storage.room!;
       this.renderWaitingRoom("Joining tournament", true);
       // connect to the server
       // display waiting room
@@ -122,25 +134,168 @@ export class Tournament {
     }
   }
 
-  clean() {
+  destroy() {
     this.ws?.close();
     this.ws = null;
     this.room = null;
   }
 
-  shufflePlayers(players: number[]) {
-    for (let i = players.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [players[i], players[j]] = [players[j], players[i]];
+  createMatches() {
+    this.game = Match.createMatches(this.storage!.playersList!);
+    Match.indexing(this.game!, this.storage!.players - 1);
+    if (this.storage?.winners?.size) {
+      Match.updateFromMap(this.game!, this.storage.winners);
     }
-    return players;
+    if (this.game?.winner) {
+      this.storage!.round = this.rounds + 1;
+    }
   }
 
-  generatePlayers(players: number) {
-    let pl = this.shufflePlayers([...Array(players).keys()]);
+  renderMatchBoard() {
+    const main = document.querySelector("main");
 
-    this.game = Match.createMatches(pl);
+    // todo: add translate
+    main!.innerHTML = `
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
+            ${i18n.t('tournaments.title')} &nbsp;-&nbsp; ${this.storage?.name}
+          </h1>
+          <div id="matchBoard" class="flex flex-col items-start justify-center mb-4">
+          </div>
+          ${this.storage!.round <= this.rounds ? `
+            <div class="w-full flex items-center justify-center">
+              <button id="start" class="p-4 bg-light-3 dark:bg-dark-3 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
+                start
+              </button>
+            </div>
+          ` : `
+            <div class="w-full flex items-center justify-center">
+              <button id="back" class="p-4 bg-light-3 dark:bg-dark-3 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
+                back
+              </button>
+            </div>
+          `}
+        </div>
+      </div>
+    `;
+
+    // todo: translate
+    const rounds = ["Final", "Semi-Final", "Quarter-Final", "Eighth-Final", "Qualification"];
+
+    for (let round = 1; round <= this.rounds; round++) {
+      const matchBoard = document.getElementById("matchBoard");
+      matchBoard!.innerHTML += `
+        <div class="w-full flex flex-col items-start justify-center mb-4">
+          <h2 class="text-xl font-bold text-light-4 dark:text-dark-0 mb-4">${rounds[this.rounds - round]}</h2>
+          <div id="round-${round}" class="w-full flex flex-col items-center justify-center mb-8">
+          </div>
+        </div>
+      `;
+      this.displayMatches(this.game, round);
+    }
+
+    const start = document.getElementById("start");
+    start?.addEventListener('click', () => {
+      if (this.storage!.round > this.rounds)
+        return ;
+      this.playMatch(this.game!, this.storage?.round);
+    });
+
+    const back = document.getElementById("back");
+    back?.addEventListener('click', () => {
+      localStorage.removeItem(`tournament-${this.storage?.name}`);
+      app.router.navigateTo("/tournament");
+    });
   }
+
+  displayMatches(match: Match | null, round: number, depth: number = 0) : void {
+
+		if (match === null) {
+			return;
+		}
+		if (round == match.round) {
+      const roundDiv = document.getElementById(`round-${round}`);
+      roundDiv!.innerHTML += `
+        <div class="w-full flex items-center justify-between mb-4 mx-8">
+          <p class="text-light-2 dark:text-dark-2 text-center">${match?.player1 || "player #..."} vs ${match?.player2 || "player #..."}</p>
+          <p class="text-light-2 dark:text-dark-2 text-center">winner: ${match?.winner || "..."}</p>
+        </div>
+      `;
+		}
+		this.displayMatches(match.left, round, depth + 1);
+		this.displayMatches(match.right, round, depth + 1);
+	}
+
+  parseStorage(storage: string) : TournamentStorage {
+    let data = JSON.parse(storage);
+
+    return {
+      ...data,
+      winners: new Map(data.winners)
+    }
+  }
+
+  setStorage(name: string) {
+    localStorage.setItem(`tournament-${name}`, JSON.stringify({
+      ...this.storage,
+      winners: Array.from(this.storage!.winners!.entries())
+    }))
+  }
+
+  laucnhGame(match: Match) {
+    new Connect4("play_local", match.player1, match.player2, (winner: string) => {
+      match.winner = winner;
+      if (match.parent !== null && match.parent.left == match) {
+        match.parent.player1 = match.winner;
+      } else if (match.parent !== null && match.parent.right == match) {
+        match.parent.player2 = match.winner;
+      }
+      console.log("Match between " + match.player1 + " vs " + match.player2 + 
+        " won by " + match.winner, "round: " + match.round);
+      this.storage?.winners?.set(match.index, winner);
+      this.storage!.plays--;
+      if (this.storage!.plays == 0) {
+        this.storage!.round++;
+        this.storage!.plays = Math.pow(2, this.rounds - this.storage!.round);
+      }
+      this.setStorage(this.storage!.name);
+      this.renderMatchBoard();
+      // todo: translate
+      if (this.storage!.round > this.rounds) {
+        ModalManager.openModal(i18n.t('tournaments.title'), `the winner is: ${this.game?.winner}`);
+      }
+      console.log("round: " + this.storage!.round, "plays: " + this.storage!.plays, "rounds: " + this.rounds);
+    });
+  }
+
+	playMatch(match: Match, round : number = 1) : boolean {
+		let ret = false;
+		if (match.player1 !== null 
+			&& match.player2 !== null
+			&& match.winner === null 
+			&& round === match.round) {
+      // todo: announce the match, callback in modal
+      ModalManager.openModal(
+        i18n.t('tournaments.title'), 
+        `Match between ${match.player1} vs ${match.player2}`,
+        () => this.laucnhGame(match)
+      );
+			return (true);
+		} else {
+			if (match.left !== null) {
+        if (!ret) {
+          ret = this.playMatch(match.left, round);
+        }
+			}
+			if (match.right !== null) {
+        if (!ret) {
+  				ret = this.playMatch(match.right, round);
+        }
+			}
+		}
+		return (ret);
+	}
 
   renderWaitingRoom(message: string, leave: boolean = false) {
     const main = document.querySelector("main");
@@ -149,16 +304,16 @@ export class Tournament {
     // add previous btn
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
-          <p id="waitingTournamentText" class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p id="waitingTournamentText" class="text-light-2 dark:text-dark-2 text-center mb-8">
             ${message}
           </p>
           ${leave ? `
             <div class="flex items-center justify-center">
-              <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <button id="leave" class="p-4 bg-light-3 dark:bg-dark-1 text-light-1 dark:text-dark-3 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
                 Leave
               </button>
             </div>
@@ -172,15 +327,14 @@ export class Tournament {
       const leave = document.getElementById("leave");
 
       leave?.addEventListener('click', () => {
-        this.clean();
-        localStorage.removeItem(`tournament-${this.name}`);
+        localStorage.removeItem(`tournament-${this.storage?.name}`);
         app.router.navigateTo("/tournament");
       });
     }
   }
 }
 
-export class TournamentHomePage {
+export class TournamentHomePage implements WebsocketPage {
 
   private user: User | null;
   private ws: WebSocket | null;
@@ -195,7 +349,14 @@ export class TournamentHomePage {
       this.setupCreateTournament();
     } else if (path == "join") {
       this.setupJoinTournament();
+    } else if (path == "localPlayers") {
+      this.createLocalTournament();
     }
+  }
+
+  destroy() {
+    this.ws?.close();
+    this.ws = null;
   }
 
   setupTournamentPage() {
@@ -227,47 +388,61 @@ export class TournamentHomePage {
   setupCreateTournament() {
     const main = document.querySelector("main");
 
+    const inputClass = `
+      rounded-md px-3 py-2 text-sm
+      border border-light-4/30 dark:border-dark-0/30
+      bg-input dark:bg-dark-4
+      text-light-4 dark:text-dark-0
+      focus:outline-none
+      focus:border-light-3 dark:focus:border-dark-1
+      focus:ring-2
+      focus:ring-light-0 dark:focus:ring-dark-4
+    `;
+
     // todo: translate
+    // add description to the tournament
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
-          <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p class="text-light-4/80 dark:text-dark-0/80 text-center mb-8">
             ${i18n.t('games.connect4.description')}
           </p>
-          <div class="flex flex-col items-center  w-full">
-            <form id="createTournamentForm">
+          <div class="flex flex-col items-center w-full">
+            <form id="createTournamentForm" class="w-1/2">
               <div class="mb-4">
-                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Tournament name
                 </label>
-                <input id="tournamentName" class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
-              </div>
+                <input id="tournamentName"
+                  class="mt-1 block w-full ${inputClass}"/>
+                </div>
               <div class="mb-4">
-                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Game
                 </label>
-                <select name="game" id="game-type" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="game" id="game-type" 
+                class="w-full mt-1 block ${inputClass}">
                   <option value="pong" selected>${i18n.t('games.pong.title')}</option>
                   <option value="p4">${i18n.t('games.connect4.title')}</option>
                 </select>
               </div>
               <div class="mb-4">
-                <label for="tournamentName" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentName" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   mode
                 </label>
-                <select name="mode" id="game-mode" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="mode" id="game-mode" class="w-full mt-1 block ${inputClass}">
                   <option value="remote" selected>remote</option>
                   <option value="local">local</option>
                 </select>
               </div>
               <div class="mb-4">
-                <label for="tournamentPlayers" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentPlayers" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   number of players
                 </label>
-                <select name="players" id="tournamentPlayers" class="w-full mt-1 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500">
+                <select name="players" id="tournamentPlayers" class="w-full mt-1 block ${inputClass}">
                   <option value="4" selected>4</option>
                   <option value="8">8</option>
                   <option value="16">16</option>
@@ -276,23 +451,23 @@ export class TournamentHomePage {
               </div>
               <div class="flex items-center justify-start space-x-2 mb-4">
                 <input id="tournamentPrivate" type="radio" name="privacy" value="private"/>
-                <label for="tournamentPrivate" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentPrivate" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Private
                 </label>
               </div>
               <div class="flex items-center justify-start space-x-2 mb-4">
                 <input id="tournamentPublic" checked="true" type="radio" name="privacy" value="public" />
-                <label for="tournamentPublic" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentPublic" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Public
                 </label>
               </div>
               <div class="mb-4">
-                <label for="tournamentCode" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                <label for="tournamentCode" class="block text-sm font-medium text-light-4 dark:text-dark-0">
                   Tournament code *
                 </label>
-                <input id="tournamentCode" disabled class="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 disabled:bg-gray-100 dark:disabled:bg-gray-900"/>
+                <input id="tournamentCode" disabled class="mt-1 block w-full ${inputClass} disabled:bg-light-1 dark:disabled:bg-dark-3"/>
               </div>
-              <button type="submit" class="w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <button type="submit" class="w-full bg-light-3 dark:bg-dark-2 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                 Creat
               </button>
               <div id="error-message" class="mt-4 p-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/50 dark:text-red-400 hidden"></div>
@@ -339,11 +514,22 @@ export class TournamentHomePage {
         return ;
       }
 
-      console.log("mode", mode);
       if (mode == "remote") {
         this.createRemoteTournament(name, players, code, game, pub);
       } else {
-        this.createLocalTournament(name, players, code, game, pub);
+        // this.createLocalTournament(name, players, code, game, pub);
+        localStorage.setItem(`tournament-${name}`, JSON.stringify({
+          name,
+          players,
+          code,
+          pub,
+          game,
+          mode: "local",
+          room: null,
+          winners: null,
+          playersList: null,
+        }));    
+        app.router.navigateTo("/tournament/localPlayers?name="+name);
       }
     })
 
@@ -365,17 +551,20 @@ export class TournamentHomePage {
       if (target!.matches('#game-mode')) {
         const pub = document.getElementById("tournamentPublic") as HTMLInputElement;
         const code = document.getElementById("tournamentCode") as HTMLInputElement;
-        const options = (document.querySelector("#tournamentPlayers") as HTMLSelectElement).getElementsByTagName("option");
+        const players = (document.getElementById("tournamentPlayers") as HTMLSelectElement);
+        const options = players.getElementsByTagName("option");
         if (target.value == "local") {
           pub.checked = true;
           code.setAttribute("disabled", "");
           for (let i = 0; i < options.length; i++) {
             if (options[i].value != "4") {
               options[i].setAttribute("disabled", "");
+            } else {
+              options[i].setAttribute("selected", "");
             }
           }
-        } else if (!pub.checked) {
-          code.removeAttribute("disabled");
+          players.value = "4";
+        } else {
           for (let i = 0; i < options.length; i++) {
             if (options[i].value != "4") {
               options[i].removeAttribute("disabled");
@@ -386,17 +575,91 @@ export class TournamentHomePage {
     })
   }
 
-  createLocalTournament(name: string, players: number, code: string, game: string, pub: boolean) {
-    localStorage.setItem(`tournament-${name}`, JSON.stringify({
-      name,
-      players,
-      code,
-      pub,
-      game,
-      mode: "local",
-    }));
+  createLocalTournament() {
+    let name = new URLSearchParams(window.location.search).get("name");
+    let storage = localStorage.getItem(`tournament-${name}`);
+    console.log("storage", storage, "name", name);
+    if (!storage) {
+      // todo: translate
+      ModalManager.openModal(i18n.t('tournaments.title'), "tournament not found");
+      setTimeout(() => {
+        app.router.navigateTo("/tournament");
+      }, 100);
+      return ;
+    }
+    let data = JSON.parse(storage!) as TournamentStorage;
 
-    app.router.navigateTo("/tournament/local/"+name);
+    const main = document.querySelector("main");
+
+    let inputs = "";
+
+    for (let i = 0; i < data.players; i++) {
+      inputs += `
+        <div class="mb-4 w-1/2">
+          <label for="player-${i}" class="block text-sm font-medium text-light-4 dark:text-dark-0">
+            Player ${i + 1}
+          </label>
+          <input id="player-${i}" type="text" minlength="2" placeholder="name of player #${i + 1}" class="
+            mt-1 block w-full rounded-md px-3 py-2 text-sm
+            border border-light-4/30
+            dark:border-dark-0/30
+            dark:bg-dark-4
+            placeholder-light-4/40
+            dark:placeholder-dark-0/40
+            text-light-4
+            dark:text-dark-0
+            focus:outline-none
+            focus:border-light-3
+            dark:focus:border-dark-1
+            focus:ring-2
+            focus:ring-light-0
+            dark:focus:ring-dark-4
+          "/>
+        </div>
+      `;
+    }
+
+    // todo: add translate
+    main!.innerHTML = `
+      <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
+            Name your players
+          </h1>
+          <form id="namePlayers" class="w-full flex flex-col items-center">
+            ${inputs}
+            <button type="submit" class="bg-light-3 px-6 py-2 dark:bg-dark-2 text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
+              Start
+            </button>
+          </form>
+        </div>
+      </div>
+    `;
+
+    document.getElementById("namePlayers")?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      console.log("submitted");
+      const players = [];
+      for (let i = 0; i < data.players; i++) {
+        const player = (document.getElementById(`player-${i}`) as HTMLInputElement).value;
+        if (player.length < 2) {
+          ModalManager.openModal(i18n.t('tournaments.title'), "name should be at least 4 characters");
+          return ;
+        }
+        players.push(player);
+      }
+      data.playersList = this.shuffleLst(players);
+      localStorage.setItem(`tournament-${name}`, JSON.stringify(data));
+      app.router.navigateTo("/tournament/local/"+name);
+    });
+  }
+
+  shuffleLst(players: string[]) {
+    for (let i = players.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [players[i], players[j]] = [players[j], players[i]];
+    }
+    return players;
   }
 
   createRemoteTournament(name: string, players: number, code: string, game: string, pub: boolean) {
@@ -433,7 +696,8 @@ export class TournamentHomePage {
           pub,
           game,
           mode: "remote",
-          room: message.room
+          room: message.room,
+          winners: null,
         }));
 
         app.router.navigateTo("/tournament/remote/"+message.room);
@@ -450,16 +714,16 @@ export class TournamentHomePage {
     // add previous btn
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
-          <p id="waitingTournamentText" class="text-gray-600 dark:text-gray-400 text-center mb-8">
+          <p id="waitingTournamentText" class="text-gray-600 dark:text-dark-2 text-center mb-8">
             ${message}
           </p>
           ${leave ? `
             <div class="flex items-center justify-center">
-              <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <button id="leave" class="p-4 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                 Leave
               </button>
             </div>
@@ -473,15 +737,9 @@ export class TournamentHomePage {
       const leave = document.getElementById("leave");
 
       leave?.addEventListener('click', () => {
-        this.clean();
         app.router.navigateTo("/tournament");
       });
     }
-  }
-
-  clean() {
-    this.ws?.close();
-    this.ws = null;
   }
 
   renderJoinTournamentRoom(data : any = null) {
@@ -491,13 +749,13 @@ export class TournamentHomePage {
     // add previous btn
     main!.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
-          <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
+        <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
             ${i18n.t('tournaments.title')}
           </h1>
           ${data == null ?
             `
-            <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+            <p class="text-gray-600 dark:text-dark-2 text-center mb-8">
               loading tournaments 
             </p>
             ` : ""
@@ -507,13 +765,13 @@ export class TournamentHomePage {
             data.map((room: any) =>
               `
               <div class="flex items-center justify-between mb-4">
-                <p class="text-gray-600 dark:text-gray-400 text-center">${room.name} - created by ${room.createdBy} - ${room.game}</p>
+                <p class="text-gray-600 dark:text-dark-2 text-center">${room.name} - created by ${room.createdBy} - ${room.game}</p>
                 <div class="flex items-center justify-center">
                   ${!room.pub ? `
-                    <input id="${room.room}-input" placeholder="tournament code" class="mx-2 block rounded-md border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
+                    <input id="${room.room}-input" placeholder="tournament code" class="mx-2 block rounded-md border-gray-300 dark:text-dark-3 dark:bg-dark-3 dark:text-dark-0 shadow-sm focus:border-blue-500 focus:ring-blue-500"/>
                   ` : ""
                   }
-                  <button room="${room.room}" pub="${room.pub}" class="joinTournamentBtn p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                  <button room="${room.room}" pub="${room.pub}" class="joinTournamentBtn p-4 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                     join
                   </button>
                 </div>
@@ -522,14 +780,14 @@ export class TournamentHomePage {
           }
           ${data && data.length == 0 ? `
             <div class="flex items-center justify-center flex-col mb-4">
-              <p class="text-gray-600 dark:text-gray-400 text-center mb-2">there are no open tournament</p>
-              <button id="create" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <p class="text-gray-600 dark:text-dark-2 text-center mb-2">there are no open tournament</p>
+              <button id="create" class="p-4 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                 Create a new tournament
               </button>
             </div>
             ` : `
               <div class="flex items-center justify-center">
-                <button id="leave" class="p-4 bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+                <button id="leave" class="p-4 bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                   Leave
                 </button>
               </div>
@@ -547,7 +805,6 @@ export class TournamentHomePage {
     });
 
     create?.addEventListener('click', () => {
-      this.clean();
       app.router.navigateTo("/tournament/create");
     });
     
@@ -600,7 +857,7 @@ export class TournamentHomePage {
         this.renderJoinTournamentRoom(data.lst);
       } else if (data.mode == "joined") {
         // todo: send to tournament remote page
-        this.clean();
+        this.destroy(); // todo: remove this
         this.renderWaitingRoom("joined", true);
       } else if (data.mode == "cant_join") {
         this.ws?.send(JSON.stringify({
@@ -613,10 +870,11 @@ export class TournamentHomePage {
       }
     }
 
-    window.addEventListener("beforeunload", () => {
-      this.clean();
-      console.log("loaded window");
-    });
+    // todo: check this
+    //window.addEventListener("beforeunload", () => {
+    //  this.destroy();
+    //  console.log("loaded window");
+    //});
 
     this.renderJoinTournamentRoom();
   }

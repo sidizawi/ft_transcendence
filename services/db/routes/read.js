@@ -15,8 +15,6 @@ async function readRoutes(fastify){
     fastify.post('/all', async (request, reply) =>{
         const { query, params } = request.body;
 
-        console.log(params);
-
         if (!query){
             return reply.code(400).send({ error: 'Expected query and params'});
         }

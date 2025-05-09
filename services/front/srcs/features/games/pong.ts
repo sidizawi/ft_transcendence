@@ -2,6 +2,7 @@ import { app, chatService } from '../../main.ts';
 import { ModalManager } from '../../shared/components/modal.ts';
 import { i18n } from '../../shared/i18n';
 import { FriendService } from '../../shared/services/friendService.ts';
+import { WebsocketPage } from '../../shared/types/app.ts';
 import { Friend } from '../../shared/types/friend.ts';
 import { PongState } from '../../shared/types/pong.ts';
 import { User } from '../../shared/types/user.ts';
@@ -14,7 +15,7 @@ import Paddle from './pong/Paddle';
 const host = window.location.hostname;
 const PONG_WS_URL = `wss://${host}:8080/ws/game/pong`;
 
-export class Pong {
+export class Pong implements WebsocketPage {
 
   private BALL_SIZE = 10;
   private BALL_SPEED_X = 7;
@@ -63,6 +64,36 @@ export class Pong {
     this.pongEventListener(type);
   }
 
+  destroy() {
+    this.state.ws?.close();
+    this.state.canvas =  null;
+    this.state.ctx =  null;
+    this.state.ball =  null;
+    this.state.leftPlayer =  null;
+    this.state.rightPlayer =  null;
+    this.state.leftPlayerScore =  0;
+    this.state.rightPlayerScore =  0;
+    this.state.keys =  {};
+    this.state.singlePlayer =  false;
+    this.state.gameStarted =  false;
+    this.state.gamePlayed =  false;
+    this.state.winner =  null;
+    this.state.hoverSinglePlayer =  false;
+    this.state.hoverTwoPlayers =  false;
+    this.state.hoverPlayAgain =  false;
+    this.state.hoverMainMenu =  false;
+    this.state.hoverOnline =  false;
+    this.state.gameLoopId =  null;
+    this.state.aiInterval =  null;
+    this.state.aiKeys =  {};
+    this.state.ws =  null;
+    this.state.waitingOpponent =  false;
+    this.state.animationRunning =  false;
+
+    document.removeEventListener("keydown", (event) => handleKeyDown(event, this.state));
+    document.removeEventListener("keyup", (event) => handleKeyUp(event, this.state));
+  }
+
   stopGame(winner: string): void {
     // Game state flags
     this.state.gameStarted = false;
@@ -91,10 +122,7 @@ export class Pong {
     app.router.navigateTo("/pong");
   }
 
-  clean() {}
-
   pongEventListener(type: string | null) {
-    this.clean();
     this.state.canvas = document.getElementById("pongCanvas") as HTMLCanvasElement;
     this.state.ctx = this.state.canvas.getContext("2d");
     
@@ -257,9 +285,9 @@ export class PongHomePage {
       if (this.loading) {
         main!.innerHTML = `
           <div class="max-w-4xl mx-auto px-4 py-8">
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+            <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
               <div class="flex justify-center items-center h-64">
-                <div class="animate-spin rounded-full h-12 w-12 border-4 border-orange dark:border-nature border-t-transparent"></div>
+                <div class="animate-spin rounded-full h-12 w-12 border-4 border-light-3 dark:border-dark-2 border-t-transparent"></div>
               </div>
             </div>
           </div>
@@ -270,7 +298,7 @@ export class PongHomePage {
       // todo: translate
       main!.innerHTML = `
       <div class="max-w-4xl mx-auto px-4 py-8">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
             <div class="flex justify-start items-center mb-6">
               <h1 class="text-2xl font-bold text-gray-900 dark:text-white">${i18n.t('friends')}</h1>
             </div>
@@ -281,7 +309,7 @@ export class PongHomePage {
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">${i18n.t('friendsList')}</h3>
                 <div class="space-y-3">
                   ${this.friendList.map(friend => `
-                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-dark-3/50 rounded-lg">
                       <div class="flex items-center space-x-3 cursor-pointer" data-action="view-profile" data-username="${friend.username2}">
                         <img 
                           src="${friend.avatar}" 
@@ -292,7 +320,7 @@ export class PongHomePage {
                       </div>
                       <div class="space-x-2">
                         <button 
-                          class="bg-green-500 hover:bg-green-600 px-3 py-1.5 rounded text-white transition-colors"
+                          class="bg-green-500 hover:bg-green-600 px-3 py-1.5 roundedtext-light-0 transition-colors"
                           data-action="play"
                           data-username="${friend.username2}"
                         >
@@ -344,24 +372,24 @@ export class PongHomePage {
 
     className(token: string | null) : string {
       if (!token) {
-        return "not-connected w-full bg-orange-light dark:bg-nature-light text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-light/90 dark:hover:bg-nature-light/90 transition-colors";
+        return "not-connected w-full bg-light-2 dark:bg-dark-1text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-2/90 dark:hover:bg-dark-1/90 transition-colors";
       }
-      return "w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors";
+      return "w-full bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors";
     }
 
     render(): string {
       const token = TokenManager.getToken();
       return `
         <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
-          <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-4xl w-full">
+          <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
             <h1 class="text-3xl font-bold text-gray-900 dark:text-white text-center mb-6">
               ${i18n.t('games.pong.title')}
             </h1>
-            <p class="text-gray-600 dark:text-gray-400 text-center mb-8">
+            <p class="text-gray-600 dark:text-dark-2 text-center mb-8">
               ${i18n.t('games.pong.description')}
             </p>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button data="twoPlayer" class="pongPlayBtn w-full bg-orange dark:bg-nature text-white dark:text-nature-lightest py-3 rounded-lg hover:bg-orange-darker dark:hover:bg-nature/90 transition-colors">
+              <button data="twoPlayer" class="pongPlayBtn w-full bg-light-3 dark:bg-dark-2text-light-0 dark:text-dark-0 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-2/90 transition-colors">
                 ${i18n.t('games.playLocal')}
               </button>
               <button data="playVsFriend" class="pongPlayBtn ${this.className(token)}">
