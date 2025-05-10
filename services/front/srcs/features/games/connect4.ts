@@ -261,8 +261,9 @@ export class Connect4 {
         this.room = message.room;
         //ModalManager.openModal(i18n.t('games.connect4.title'), `here is the link to the game: http://${window.location.hostname}:8000/connect4/play_vs_friend?room=${message.room}`);
         chatService.sendMessage(JSON.stringify({
-          type: "message",
-          text: `${this.user} is inviting you to a connect 4 game: http://${window.location.hostname}:8000/connect4/play_vs_friend?room=${message.room}`,
+          type: "game",
+          text: `<a href="https://${window.location.hostname}:8080/connect4/play_vs_friend?room=${message.room}">\
+            ${this.user?.username} is inviting you to a connect 4 game</a>`,
           user: this.user?.username,
           userId: this.user?.id,
           friend: this.friend,

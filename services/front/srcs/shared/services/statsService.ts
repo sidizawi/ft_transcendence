@@ -109,7 +109,8 @@ export class StatsService {
           result: game.playerWin === game.opponent ? 'loss' : 'win',
           opponent: game.opponent,
           score: game.score || '',
-          avatar: game.avatar
+          avatar: game.avatar,
+          online: game.online,
         }))
       };
     } catch (error) {

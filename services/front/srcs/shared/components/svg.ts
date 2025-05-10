@@ -36,6 +36,19 @@ export class SVGIcons {
     `;
   }
 
+  static getGameIcon(): string {
+    return `
+      <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <!-- Left paddle -->
+        <rect x="2" y="6" width="2" height="12" rx="1" />
+        <!-- Right paddle -->
+        <rect x="20" y="6" width="2" height="12" rx="1" />
+        <!-- Ball -->
+        <circle cx="12" cy="12" r="1.5" fill="currentColor" />
+      </svg>
+    `;
+  }
+
   static getBlockIcon(): string {
     return `
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

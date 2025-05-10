@@ -26,6 +26,7 @@ export class TranscendenceApp {
   };
 
   public router: Router;
+  public friendsTab: FriendsTab | null = null;
 
   private menu: Menu;
   private auth: Auth;
@@ -34,7 +35,6 @@ export class TranscendenceApp {
   private connect4: Connect4HomePage;
   private pong: PongHomePage;
   //private friendsList: FriendsList | null = null;
-  private friendsTab: FriendsTab | null = null;
 
   constructor() {
     // Check if user is already logged in

@@ -9,6 +9,7 @@ type GameBase = { opponent: string; avatar: string };
 
 async function isOpponentValid(username: string): Promise<boolean> {
   try {
+    // todo: remove this, the next call check if the user exist
     const existRes = await fetch(`${USER_API_URL}/check-username/${username}`, {
       headers: TokenManager.getAuthHeaders(),
     });

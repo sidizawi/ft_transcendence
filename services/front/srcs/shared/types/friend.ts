@@ -7,4 +7,11 @@ export interface Friend {
   username2: string;
   status: FriendStatus;
   avatar?: string;
+  online: boolean;
+}
+
+export interface FriendStatusUpdate {
+  type: string;
+  friend: string;
+  status: boolean;
 }

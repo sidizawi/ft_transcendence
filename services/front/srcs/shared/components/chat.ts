@@ -1,7 +1,7 @@
 import { User } from '../types/user';
 import { TokenManager } from '../utils/token';
 import { SVGIcons } from '../../shared/components/svg';
-import { chatService } from '../../main';
+import { app, chatService } from '../../main';
 
 export class Chat {
   private friendUserName: string;
@@ -86,6 +86,27 @@ export class Chat {
     const position = this.baseRight + index * (tabWidth + this.gap);
     chatTab.style.right = `${position}px`;
 
+    // Add play icon
+    const gameButton = document.createElement('button');
+    gameButton.className = `absolute top-4 left-6 p-1 w-5 h-5 text-light-0 dark:text-dark-4 hover:scale-110`
+    gameButton.innerHTML = SVGIcons.getGameIcon();
+    gameButton.addEventListener('click', () => {
+      // todo: translate
+      chat.sendMessage(`<a href="https://${window.location.hostname}:8080/pong/online?friend=${chat.currentUser?.username}">\
+        ${chat.currentUser?.username} is invinting you to play a pong game</a>`
+      , "game");
+      app.router.navigateTo(`/pong/online?friend=${username}`);
+    });
+    const headerBtn = chatTab.querySelector('.toggle-chat');
+    if (headerBtn) headerBtn.appendChild(gameButton);
+
+    // Add redirect to friend
+    const redirectLink = document.createElement("a");
+    redirectLink.className = "inline-block truncate max-w-[80%] text-center text-light-0 dark:text-dark-4 hover:underline";
+    redirectLink.innerText = chat.friendUserName;
+    redirectLink.href = `/users/${chat.friendUserName}`;
+    if (headerBtn) headerBtn.appendChild(redirectLink);
+
     // Add close button
     const closeButton = document.createElement('button');
     closeButton.className = `absolute top-4 right-6 p-1 w-5 h-5 text-light-0 dark:text-dark-4 hover:scale-110`
@@ -95,7 +116,6 @@ export class Chat {
       this.chatTabs.delete(username);
       this.repositionTabs();
     });
-    const headerBtn = chatTab.querySelector('.toggle-chat');
     if (headerBtn) headerBtn.appendChild(closeButton);
 
     // Set up UI interactions
@@ -124,26 +144,30 @@ export class Chat {
       e.preventDefault();
       if (!input.value.trim()) return;
 
-      const timestamp = new Date();
-      chat.addMessage({
-        text: input.value,
-        sender: chat.currentUser?.username || 'unknown',
-        timestamp,
-      });
-      chatService.sendMessage(
-        JSON.stringify({
-          type: 'message',
-          text: input.value,
-          user: chat.currentUser?.username,
-          userId: chat.currentUser?.id,
-          friend: chat.friendUserName,
-          timestamp,
-        })
-      );
+      chat.sendMessage(input.value);
       input.value = '';
     });
 
     this.chatTabs.set(username, chatTab);
+  }
+
+  private sendMessage(message: string, tp: string = "message") {
+    const timestamp = new Date();
+    this.addMessage({
+      text: this.escapeHtml(message),
+      sender: this.currentUser?.username || 'unknown',
+      timestamp,
+    });
+    chatService.sendMessage(
+      JSON.stringify({
+        type: tp,
+        text: message,
+        user: this.currentUser?.username,
+        userId: this.currentUser?.id,
+        friend: this.friendUserName,
+        timestamp,
+      })
+    );
   }
 
   private static repositionTabs(): void {
@@ -169,13 +193,6 @@ export class Chat {
             transition-colors flex items-center justify-center"
           aria-expanded="${this.isOpen}"
         >
-          <a
-            href="/users/${this.friendUserName}"
-            class="inline-block truncate max-w-[80%] text-center
-                  text-light-0 dark:text-dark-4 hover:underline"
-          >
-            ${this.friendUserName}
-          </a>
         </button>
 
         <div class="chat-content ${this.isOpen ? '' : 'hidden'}">
@@ -228,7 +245,7 @@ export class Chat {
       <div class="${
         isOwnMessage ? 'bg-light-3/10 dark:bg-dark-2/10' : 'bg-light-1 dark:bg-dark-3'
       } rounded-lg px-4 py-2 max-w-[80%]">
-        <p class="text-gray-800 dark:text-dark-0">${this.escapeHtml(message.text)}</p>
+        <p class="text-gray-800 dark:text-dark-0">${message.text}</p>
         <p class="text-xs text-gray-500 dark:text-dark-2 mt-1">
           ${message.timestamp.toLocaleTimeString()}
         </p>

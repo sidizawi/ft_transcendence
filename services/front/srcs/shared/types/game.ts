@@ -21,6 +21,7 @@ export interface GameStats {
     opponent: string;
     score: string;
     avatar: string;
+    online: boolean;
   }[];
 }
 

@@ -2,9 +2,10 @@
 import dotenv from 'dotenv';
 
 import { queryPost, queryAll } from '../services/query.js';
-import { getUserById,
+import {
+	getUserById,
 	getUserByUsername,
- } from '../services/userService.js';
+} from '../services/userService.js';
 
 dotenv.config();
 
@@ -59,58 +60,62 @@ async function statsRoutes(fastify, options) {
 			playerLost,
 		];
 		await queryPost(query, params);
-		
+
 		reply.code(201).send({ message: 'Game saved' });
-  	});
+	});
 
 
 	fastify.get('/gameshistory/:game?', async (request, reply) => {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const gameType = request.params.game;
-	  
+
 		if (gameType && gameType !== 'pong' && gameType !== 'p4') {
-		  return reply.code(400).send({ error: 'Invalid game type' });
+			return reply.code(400).send({ error: 'Invalid game type' });
 		}
-		
+
 		const query = `
 		  SELECT 
 			g.*,
-			CASE 
-			  WHEN g.playerid_1 = ? THEN (SELECT avatar FROM users WHERE id = g.playerid_2)
-			  ELSE (SELECT avatar FROM users WHERE id = g.playerid_1)
-			END as avatar
+			u.avatar,
+			u.status as online
 		  FROM game g
+		  JOIN users u
+		  	ON u.id = CASE 
+				WHEN g.playerid_1 = ? THEN g.playerid_2
+				ELSE g.playerid_1
+				END
 		  WHERE (g.playerid_1 = ? OR g.playerid_2 = ?)
 		  ${gameType ? ' AND g.game_type = ?' : ''}
 		  ORDER BY g.date DESC
 		`;
 		const params = gameType ? [userId, userId, userId, gameType] : [userId, userId, userId];
-	  
+
 		const games = await queryAll(query, params);
-	  
+
 		if (!games || games.length === 0) {
-		  return reply.code(204).send({ msg: 'No content' });
+			return reply.code(204).send({ msg: 'No content' });
 		}
-	  
+
 		if (games.length > 10) {
-		  games.splice(10);
+			games.splice(10);
 		}
-	  
+
 		const formattedGames = games.map(game => {
-		  return {
-			id: game.id,
-			// Determine the opponent's username:
-			opponent: game.playerid_1 === userId ? game.username_2 : game.username_1,
-			// Format the score appropriately:
-			score: game.playerid_1 === userId ? `${game.score_1}-${game.score_2}` : `${game.score_2}-${game.score_1}`,
-			playerWin: game.playerid_1 === userId ? game.player_win : game.player_lost,
-			game: game.game_type,
-			date: game.date,
-			avatar: game.avatar  // This now correctly holds the opponent's avatar string.
-		  };
+			return {
+				id: game.id,
+				// Determine the opponent's username:
+				opponent: game.playerid_1 === userId ? game.username_2 : game.username_1,
+				// Format the score appropriately:
+				score: game.playerid_1 === userId ? `${game.score_1}-${game.score_2}` : `${game.score_2}-${game.score_1}`,
+				playerWin: game.playerid_1 === userId ? game.player_win : game.player_lost,
+				game: game.game_type,
+				date: game.date,
+				avatar: game.avatar,  // This now correctly holds the opponent's avatar string.
+				online: game.online
+			};
 		});
-	  
+
 		reply.code(200).send(formattedGames);
 	});
 
@@ -118,10 +123,10 @@ async function statsRoutes(fastify, options) {
 		await request.jwtVerify();
 		const userId = request.user.id;
 		const gameType = request.params.game;
-		
+
 		let query = 'SELECT * FROM game WHERE (playerid_1 = ? OR playerid_2 = ?)';
 		let params = [userId, userId];
-		
+
 		if (gameType && gameType !== 'pong' && gameType !== 'p4') {
 			return reply.code(400).send({ error: 'Invalid game type' });
 		}
@@ -129,33 +134,33 @@ async function statsRoutes(fastify, options) {
 			query += ' AND game_type = ?';
 			params.push(gameType);
 		}
-		
+
 		const games = await queryAll(query, params);
 		if (!games || games.length === 0) {
 			return reply.code(204).send({ msg: 'No content' });
 		}
-		
+
 		const stats = {
 			totalGames: games.length,
 			wins: games.filter(game => {
-			// Determine the current user's username based on which player they are.
-			const currentUserName = game.playerid_1 === userId ? game.username_1 : game.username_2;
-			return game.player_win === currentUserName;
+				// Determine the current user's username based on which player they are.
+				const currentUserName = game.playerid_1 === userId ? game.username_1 : game.username_2;
+				return game.player_win === currentUserName;
 			}).length,
 			losses: games.filter(game => {
-			const currentUserName = game.playerid_1 === userId ? game.username_1 : game.username_2;
-			return game.player_lost === currentUserName;
+				const currentUserName = game.playerid_1 === userId ? game.username_1 : game.username_2;
+				return game.player_lost === currentUserName;
 			}).length,
 			winrate: 0
 		};
-		
+
 		stats.winrate = stats.totalGames > 0 ? Math.round((stats.wins / stats.totalGames) * 100) : 0;
-		
+
 		if (games.length > 10) games.splice(10);
-		
+
 		reply.code(200).send(stats);
 	});
-	  
+
 }
 
 export default statsRoutes;

@@ -1,3 +1,4 @@
+import { app } from "../../main";
 import { User } from "../types/user";
 import { TokenManager } from "../utils/token";
 
@@ -69,6 +70,10 @@ export class ChatService {
       // for both 'message' and 'messages', dispatch to handler
       if (data.type === "message" || data.type === "messages") {
         this.chatRooms.get(data.friend)?.(data);
+      } else if (data.type == "friendStatus") {
+        if (app.friendsTab) {
+          app.friendsTab.updateFriendStatus(data);
+        }
       }
     };
 
