@@ -3,13 +3,6 @@ import { aiThink, aiMove } from "./ai.js";
 import { insertGame } from '../services/gameService.js';
 import { inGameUsers, friendMatchRequests } from '../index.js';
 
-/*
-  * TODO:
-  * gameover: handleDisconnect --> should be good 
-  * friend 
-  * block keys remote --> should be good
-*/
-
 
 // Game constants
 export const WINNING_SCORE = 4;
@@ -20,7 +13,7 @@ const PADDLE_SPEED = 7;
 const games = {};
 
 // Initialize a new game
-export const createGame = (gameId, wss, dimensions = null) => {
+export const createGame = (gameId, dimensions = null) => {
   if (games[gameId]) return games[gameId]; // Game already exists
   
   // Use provided dimensions or fallback to defaults
@@ -213,20 +206,30 @@ const resetBall = (gameId, towardsLeft) => {
   game.ball.x = width / 2;
   game.ball.y = height / 2;
   
+  // Initially set the ball's speed to zero (stationary)
+  game.ball.speedX = 0;
+  game.ball.speedY = 0;
+  
   // Generate a random angle between -45 and 45 degrees
   const angle = (Math.random() * 90 - 45) * (Math.PI / 180);
   
-  // Set the ball's speed based on the angle
-  const speed = BALL_SPEED;
-  game.ball.speedX = speed * Math.cos(angle);
-  game.ball.speedY = speed * Math.sin(angle);
+  // Broadcast the centered ball position immediately
+  broadcastGameState(gameId);
   
-  // Ensure the ball moves towards the specified side
-  if (towardsLeft) {
-    game.ball.speedX = -Math.abs(game.ball.speedX);
-  } else {
-    game.ball.speedX = Math.abs(game.ball.speedX);
-  }
+  // Wait 1 second, then set the ball in motion
+  setTimeout(() => {
+    if (!game || game.status !== 'playing') return;
+    
+    const speed = BALL_SPEED;
+    game.ball.speedX = speed * Math.cos(angle);
+    game.ball.speedY = speed * Math.sin(angle);
+    
+    // Ensure the ball moves towards the specified side
+    if (towardsLeft) {
+      game.ball.speedX = -Math.abs(game.ball.speedX);
+    } else {
+      game.ball.speedX = Math.abs(game.ball.speedX);
+    }}, 1000);
 };
 
 // Main game update function

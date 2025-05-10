@@ -1,10 +1,11 @@
-import { app } from '../../main.ts';
+import { app, chatService } from '../../main.ts';
 import { ModalManager } from '../../shared/components/modal.ts';
 import { i18n } from '../../shared/i18n';
 import { FriendService } from '../../shared/services/friendService.ts';
 import { WebsocketPage } from '../../shared/types/app.ts';
 import { Friend } from '../../shared/types/friend.ts';
 import { PongState } from '../../shared/types/pong.ts';
+import { User } from '../../shared/types/user.ts';
 import { TokenManager } from '../../shared/utils/token';
 import Ball from './pong/Ball';
 import { drawWaitingScreen, gameLoop } from './pong/draw';
@@ -139,7 +140,6 @@ export class Pong implements WebsocketPage {
 
     this.state.ws.onopen = (): void => {
         console.log("Connected to server");
-
         if (this.state.ws) {
             this.state.ws.send(JSON.stringify({
                 type: 'dimensions and username',
@@ -152,7 +152,6 @@ export class Pong implements WebsocketPage {
             }));
         }
     }
-
     this.state.ws.onmessage = (event: MessageEvent): void => {
         const data = JSON.parse(event.data);
         console.log("Received from server:", data);
@@ -249,6 +248,7 @@ export class Pong implements WebsocketPage {
 export class PongHomePage {
     private loading = true;
     private friendList: Friend[] = [];
+    private user: User | null = TokenManager.getUserFromLocalStorage();
   
     constructor(type: string | null = null) {
       if (type == "friend_list") {
@@ -342,12 +342,21 @@ export class PongHomePage {
           e.stopPropagation();
           const username = button.getAttribute('data-username');
   
+          // todo: translate
+          chatService.sendMessage(JSON.stringify({
+            type: "message",
+            text: `${this.user?.username} is inviting you to a pong game: https://${window.location.hostname}:8080/pong/online?friend=${this.user?.username}`,
+            user: this.user?.username,
+            userId: this.user?.id,
+            friend: username,
+            timestamp: new Date(),
+          }));
           app.router.navigateTo(`/pong/online?friend=${username}`);
         });
       });
   
     }
-  
+
     async loadFriendList() {
       try {
         this.loading = true;
