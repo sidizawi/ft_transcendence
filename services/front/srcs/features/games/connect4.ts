@@ -62,16 +62,19 @@ export class Connect4 implements WebsocketPage {
     }
 
     const main = document.querySelector('main');
+    if (!main) {
+      return ;
+    }
 
     if (type == "play_local") {
       this.myTurn = true;
-      main!.innerHTML = this.renderCanvas();
+      main.innerHTML = this.renderCanvas();
       this.setupCanvasEventListener();
     } else {
       this.canPlay = false;
       this.online = true;
       this.setupWebSocket(type);
-      main!.innerHTML = this.renderWaitingRoom();
+      main.innerHTML = this.renderWaitingRoom();
     }
   }
 
@@ -94,12 +97,14 @@ export class Connect4 implements WebsocketPage {
     // Redraw the board on each frame
     this.drawBoard();
     
+    if (!this.ctx) return;
+
     // Draw the coin at its current position
-    this.ctx!.beginPath();
-    this.ctx!.arc(x, y, this.coinRadius, 0, Math.PI * 2);
-    this.ctx!.fillStyle = this.player;
-    this.ctx!.fill();
-    this.ctx!.closePath();
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, this.coinRadius, 0, Math.PI * 2);
+    this.ctx.fillStyle = this.player;
+    this.ctx.fill();
+    this.ctx.closePath();
     
     // Continue animating until the coin reaches the target y-coordinate
     if (y < targetY) {
@@ -201,18 +206,18 @@ export class Connect4 implements WebsocketPage {
 
   setupCanvasEventListener() {
     this.canvas = document.getElementById('connect4Canvas') as HTMLCanvasElement;
-    this.ctx = this.canvas!.getContext('2d');
+    this.ctx = this.canvas.getContext('2d');
 
     if (!this.online) {
       this.player2Color = "yellow";
       ModalManager.openModal(i18n.t('games.connect4.title'), `${this.player1} start first`);
     }
 
-    this.canvas!.addEventListener('click', (event) => {
-      if (this.won || !this.canPlay) {
+    this.canvas.addEventListener('click', (event) => {
+      if (this.won || !this.canPlay || !this.canvas) {
         return ;
       }
-      const rect = this.canvas!.getBoundingClientRect();
+      const rect = this.canvas.getBoundingClientRect();
       const x = event.clientX - rect.left;
       const col = Math.floor(x / this.cellSize);
       if (this.columns[col] < 0) {
@@ -237,8 +242,9 @@ export class Connect4 implements WebsocketPage {
   }
 
   drawBoard() {
-    this.ctx!.fillStyle = '#0077b6';
-    this.ctx!.fillRect(0, 0, this.canvas!.width, this.canvas!.height);
+    if (!this.ctx || !this.canvas) return ;
+    this.ctx.fillStyle = '#0077b6';
+    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
     
     // Draw empty slots as white circles
     for (let row = 0; row < this.rows; row++) {
@@ -246,17 +252,17 @@ export class Connect4 implements WebsocketPage {
         const x = col * this.cellSize + this.cellSize / 2;
         const y = row * this.cellSize + this.cellSize / 2;
         
-        this.ctx!.beginPath();
-        this.ctx!.arc(x, y, this.coinRadius, 0, Math.PI * 2);
+        this.ctx.beginPath();
+        this.ctx.arc(x, y, this.coinRadius, 0, Math.PI * 2);
         if (this.data[row * this.cols + col] == 'R') {
-          this.ctx!.fillStyle = this.red;
+          this.ctx.fillStyle = this.red;
         } else if (this.data[row * this.cols + col] == 'Y') {
-          this.ctx!.fillStyle = this.yellow;
+          this.ctx.fillStyle = this.yellow;
         } else {
-          this.ctx!.fillStyle = '#f4f4f4';
+          this.ctx.fillStyle = '#f4f4f4';
         }
-        this.ctx!.fill();
-        this.ctx!.closePath();
+        this.ctx.fill();
+        this.ctx.closePath();
       }
     }
   }
@@ -305,7 +311,8 @@ export class Connect4 implements WebsocketPage {
         this.player2 = message.opponent;
         this.player2Color = message.color == 'R' ? "yellow" : "red";
         const main = document.querySelector("main");
-        main!.innerHTML = this.renderCanvas();
+        if (!main) return ;
+        main.innerHTML = this.renderCanvas();
         this.toggleColor(this.canPlay ? "player1" : "player2");
         this.setupCanvasEventListener();
       } else if (message.mode == "win") {
@@ -408,8 +415,10 @@ export class Connect4 implements WebsocketPage {
   renderBackBtn(winner: string | null = null) {
     const backDiv = document.getElementById("backDiv");
 
+    if (!backDiv) return ;
+  
     // todo: check SAP, just go back, but remove data
-    backDiv!.innerHTML = `
+    backDiv.innerHTML = `
       <button
         id="backBtn"
         class="bg-light-3 dark:bg-dark-1 text-light-0 dark:text-dark-4 px-6 py-2 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors"
@@ -468,8 +477,10 @@ export class Connect4HomePage {
   renderFriendList() {
     const main = document.querySelector("main");
 
+    if (!main) return ;
+
     if (this.loading) {
-      main!.innerHTML = `
+      main.innerHTML = `
         <div class="max-w-4xl mx-auto px-4 py-8">
           <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
             <div class="flex justify-center items-center h-64">
@@ -482,7 +493,7 @@ export class Connect4HomePage {
     }
 
     // todo: translate
-    main!.innerHTML = `
+    main.innerHTML = `
     <div class="max-w-4xl mx-auto px-4 py-8">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
           <div class="flex justify-start items-center mb-6">

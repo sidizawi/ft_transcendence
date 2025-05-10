@@ -83,12 +83,25 @@ class Match {
 export class Tournament implements WebsocketPage {
 
   private rounds = 0;
-  private storage: TournamentStorage | undefined;
+  private storage: TournamentStorage;
   private game: Match | null = null;
   private room: string | null = null;
   private ws : WebSocket | null = null;
 
   constructor(path: string) {
+    this.storage = {
+      name: "",
+      code: "",
+      pub: true,
+      game: "",
+      mode: "",
+      room: "",
+      round: 0,
+      plays: 0,
+      players: 0,
+      playersList: [],
+      winners: null
+    };
     let name = decodeURI(path.split("/").filter((el) => el.length)[1]);
     let storage = localStorage.getItem(`tournament-${name}`);
     if (!storage) {
@@ -110,10 +123,10 @@ export class Tournament implements WebsocketPage {
       return ;
     }
 
-    if (!this.storage?.round) {
+    if (!this.storage.round) {
       this.storage.round = 1;
     }
-    if (!this.storage?.plays) {
+    if (!this.storage.plays) {
       this.storage.plays = this.storage.players / 2;
     }
     this.rounds = Math.log2(this.storage.players);
@@ -142,29 +155,30 @@ export class Tournament implements WebsocketPage {
   }
 
   createMatches() {
-    this.game = Match.createMatches(this.storage!.playersList!);
-    Match.indexing(this.game!, this.storage!.players - 1);
-    if (this.storage?.winners?.size) {
+    this.game = Match.createMatches(this.storage.playersList!);
+    Match.indexing(this.game!, this.storage.players - 1);
+    if (this.storage.winners && this.storage.winners.size) {
       Match.updateFromMap(this.game!, this.storage.winners);
     }
-    if (this.game?.winner) {
-      this.storage!.round = this.rounds + 1;
+    if (this.game && this.game.winner) {
+      this.storage.round = this.rounds + 1;
     }
   }
 
   renderMatchBoard() {
     const main = document.querySelector("main");
+    if (!main) return ; // todo: check should I redirect or open a modal?
 
     // todo: add translate
-    main!.innerHTML = `
+    main.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
-            ${i18n.t('tournaments.title')} &nbsp;-&nbsp; ${this.storage?.name}
+            ${i18n.t('tournaments.title')} &nbsp;-&nbsp; ${this.storage.name}
           </h1>
           <div id="matchBoard" class="flex flex-col items-start justify-center mb-4">
           </div>
-          ${this.storage!.round <= this.rounds ? `
+          ${this.storage.round <= this.rounds ? `
             <div class="w-full flex items-center justify-center">
               <button id="start" class="p-4 bg-light-3 dark:bg-dark-3 text-light-0 dark:text-dark-4 py-3 rounded-lg hover:bg-light-4 dark:hover:bg-dark-0 transition-colors">
                 start
@@ -186,7 +200,9 @@ export class Tournament implements WebsocketPage {
 
     for (let round = 1; round <= this.rounds; round++) {
       const matchBoard = document.getElementById("matchBoard");
-      matchBoard!.innerHTML += `
+      if (!matchBoard) continue ;
+
+      matchBoard.innerHTML += `
         <div class="w-full flex flex-col items-start justify-center mb-4">
           <h2 class="text-xl font-bold text-light-4 dark:text-dark-0 mb-4">${rounds[this.rounds - round]}</h2>
           <div id="round-${round}" class="w-full flex flex-col items-center justify-center mb-8">
@@ -197,17 +213,21 @@ export class Tournament implements WebsocketPage {
     }
 
     const start = document.getElementById("start");
-    start?.addEventListener('click', () => {
-      if (this.storage!.round > this.rounds)
-        return ;
-      this.playMatch(this.game!, this.storage?.round);
-    });
+    if (start) {
+      start.addEventListener('click', () => {
+        if (this.storage.round > this.rounds)
+          return ;
+        this.playMatch(this.game!, this.storage.round);
+      });
+    }
 
     const back = document.getElementById("back");
-    back?.addEventListener('click', () => {
-      localStorage.removeItem(`tournament-${this.storage?.name}`);
-      app.router.navigateTo("/tournament");
-    });
+    if (back) {
+      back.addEventListener('click', () => {
+        localStorage.removeItem(`tournament-${this.storage.name}`);
+        app.router.navigateTo("/tournament");
+      });
+    }
   }
 
   displayMatches(match: Match | null, round: number, depth: number = 0) : void {
@@ -217,10 +237,12 @@ export class Tournament implements WebsocketPage {
 		}
 		if (round == match.round) {
       const roundDiv = document.getElementById(`round-${round}`);
-      roundDiv!.innerHTML += `
+      if (!roundDiv) return ; // todo: check should I redirect or open a modal?
+
+      roundDiv.innerHTML += `
         <div class="w-full flex items-center justify-between mb-4 mx-8">
-          <p class="text-light-3 dark:text-dark-1 text-center">${match?.player1 || "player #..."} vs ${match?.player2 || "player #..."}</p>
-          <p class="text-light-3 dark:text-dark-1 text-center">winner: ${match?.winner || "..."}</p>
+          <p class="text-light-3 dark:text-dark-1 text-center">${match.player1 || "player #..."} vs ${match.player2 || "player #..."}</p>
+          <p class="text-light-3 dark:text-dark-1 text-center">winner: ${match.winner || "..."}</p>
         </div>
       `;
 		}
@@ -240,11 +262,11 @@ export class Tournament implements WebsocketPage {
   setStorage(name: string) {
     localStorage.setItem(`tournament-${name}`, JSON.stringify({
       ...this.storage,
-      winners: Array.from(this.storage!.winners!.entries())
+      winners: this.storage.winners != null ? Array.from(this.storage.winners.entries()) : null,
     }))
   }
 
-  laucnhGame(match: Match) {
+  launchGame(match: Match) {
     new Connect4("play_local", match.player1, match.player2, (winner: string) => {
       match.winner = winner;
       if (match.parent !== null && match.parent.left == match) {
@@ -254,19 +276,19 @@ export class Tournament implements WebsocketPage {
       }
       console.log("Match between " + match.player1 + " vs " + match.player2 + 
         " won by " + match.winner, "round: " + match.round);
-      this.storage?.winners?.set(match.index, winner);
-      this.storage!.plays--;
-      if (this.storage!.plays == 0) {
-        this.storage!.round++;
-        this.storage!.plays = Math.pow(2, this.rounds - this.storage!.round);
+      this.storage.winners?.set(match.index, winner);
+      this.storage.plays--;
+      if (this.storage.plays == 0) {
+        this.storage.round++;
+        this.storage.plays = Math.pow(2, this.rounds - this.storage.round);
       }
-      this.setStorage(this.storage!.name);
+      this.setStorage(this.storage.name);
       this.renderMatchBoard();
       // todo: translate
-      if (this.storage!.round > this.rounds) {
-        ModalManager.openModal(i18n.t('tournaments.title'), `the winner is: ${this.game?.winner}`);
+      if (this.storage.round > this.rounds && this.game) {
+        ModalManager.openModal(i18n.t('tournaments.title'), `the winner is: ${this.game.winner}`);
       }
-      console.log("round: " + this.storage!.round, "plays: " + this.storage!.plays, "rounds: " + this.rounds);
+      console.log("round: " + this.storage.round, "plays: " + this.storage.plays, "rounds: " + this.rounds);
     });
   }
 
@@ -280,7 +302,7 @@ export class Tournament implements WebsocketPage {
       ModalManager.openModal(
         i18n.t('tournaments.title'), 
         `Match between ${match.player1} vs ${match.player2}`,
-        () => this.laucnhGame(match)
+        () => this.launchGame(match)
       );
 			return (true);
 		} else {
@@ -300,10 +322,11 @@ export class Tournament implements WebsocketPage {
 
   renderWaitingRoom(message: string, leave: boolean = false) {
     const main = document.querySelector("main");
+    if (!main) return ; // todo: check should I redirect or open a modal?
 
     // todo: add translate
     // add previous btn
-    main!.innerHTML = `
+    main.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
@@ -326,9 +349,10 @@ export class Tournament implements WebsocketPage {
 
     if (leave) {
       const leave = document.getElementById("leave");
+      if (!leave) return ;
 
-      leave?.addEventListener('click', () => {
-        localStorage.removeItem(`tournament-${this.storage?.name}`);
+      leave.addEventListener('click', () => {
+        localStorage.removeItem(`tournament-${this.storage.name}`);
         app.router.navigateTo("/tournament");
       });
     }
@@ -343,6 +367,7 @@ export class TournamentHomePage implements WebsocketPage {
   constructor(path: string | null = null) {
     this.ws = null;
     this.user = TokenManager.getUserFromLocalStorage();
+    if (!this.user) return ; // todo: check should I redirect or open a modal?
 
     if (!path) {
       this.setupTournamentPage();
@@ -362,9 +387,10 @@ export class TournamentHomePage implements WebsocketPage {
 
   setupTournamentPage() {
     const main = document.querySelector("main");
+    if (!main) return ; // todo: check should I redirect or open a modal?
 
     // todo add previous btn
-    main!.innerHTML = this.render()
+    main.innerHTML = this.render()
 
     const tournamentBtn = document.querySelectorAll(".tournamentBtn");
 
@@ -388,6 +414,7 @@ export class TournamentHomePage implements WebsocketPage {
 
   setupCreateTournament() {
     const main = document.querySelector("main");
+    if (!main) return ; // todo: check should I redirect or open a modal?
 
     const inputClass = `
       rounded-md px-3 py-2 text-sm
@@ -402,7 +429,7 @@ export class TournamentHomePage implements WebsocketPage {
 
     // todo: translate
     // add description to the tournament
-    main!.innerHTML = `
+    main.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
@@ -551,8 +578,10 @@ export class TournamentHomePage implements WebsocketPage {
 
     function showError(message: string) {
       const error = document.getElementById("error-message");
-      error!.innerText = message;
-      error?.classList.remove("hidden");
+      if (!error) return ;
+
+      error.innerText = message;
+      error.classList.remove("hidden");
     }
 
     form?.addEventListener('submit', (event) => {
@@ -605,20 +634,20 @@ export class TournamentHomePage implements WebsocketPage {
 
     form?.addEventListener('change', (event) => {
       const target = event.target as HTMLInputElement;
-      if (target!.matches('input[name="privacy"]')) {
+      if (target.matches('input[name="privacy"]')) {
         const value = target.value;
 
         const code = document.getElementById("tournamentCode") as HTMLInputElement;
         const mode = (document.getElementById("game-mode") as HTMLInputElement).value;
 
-        code!.value = "";
+        code.value = "";
         if (value == "public") {
-          code?.setAttribute("disabled", "");
+          code.setAttribute("disabled", "");
         } else if (mode == "remote") {
-          code?.removeAttribute("disabled");
+          code.removeAttribute("disabled");
         }
       }
-      if (target!.matches('#game-mode')) {
+      if (target.matches('#game-mode')) {
         const pub = document.getElementById("tournamentPublic") as HTMLInputElement;
         const code = document.getElementById("tournamentCode") as HTMLInputElement;
         const players = (document.getElementById("tournamentPlayers") as HTMLSelectElement);
@@ -660,6 +689,7 @@ export class TournamentHomePage implements WebsocketPage {
     let data = JSON.parse(storage!) as TournamentStorage;
 
     const main = document.querySelector("main");
+    if (!main) return ; // todo: check should I redirect or open a modal?
 
     let inputs = "";
 
@@ -685,7 +715,7 @@ export class TournamentHomePage implements WebsocketPage {
     }
 
     // todo: add translate
-    main!.innerHTML = `
+    main.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
@@ -774,10 +804,11 @@ export class TournamentHomePage implements WebsocketPage {
 
   renderWaitingRoom(message: string, leave: boolean = false) {
     const main = document.querySelector("main");
+    if (!main) return ; // todo: check should I redirect or open a modal?
 
     // todo: add translate
     // add previous btn
-    main!.innerHTML = `
+    main.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
@@ -809,10 +840,11 @@ export class TournamentHomePage implements WebsocketPage {
 
   renderJoinTournamentRoom(data : any = null) {
     const main = document.querySelector("main");
+    if (!main) return ; // todo: check should I redirect or open a modal?
 
     // todo: add translate
     // add previous btn
-    main!.innerHTML = `
+    main.innerHTML = `
       <div class="min-h-[calc(100vh-200px)] flex flex-col items-center justify-center p-4">
         <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-8 max-w-4xl w-full">
           <h1 class="text-3xl font-bold text-light-4 dark:text-dark-0 text-center mb-6">
@@ -882,7 +914,7 @@ export class TournamentHomePage implements WebsocketPage {
 
         let code = null;
         if (!pub) {
-          code = (document.getElementById(`${room}-input`) as HTMLInputElement)?.value;
+          code = (document.getElementById(`${room}-input`) as HTMLInputElement).value;
         }
 
         this.ws?.send(JSON.stringify({
@@ -934,12 +966,6 @@ export class TournamentHomePage implements WebsocketPage {
         ModalManager.openModal(i18n.t('tournaments.title'), data.message);
       }
     }
-
-    // todo: check this
-    //window.addEventListener("beforeunload", () => {
-    //  this.destroy();
-    //  console.log("loaded window");
-    //});
 
     this.renderJoinTournamentRoom();
   }

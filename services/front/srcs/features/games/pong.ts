@@ -158,23 +158,23 @@ export class Pong implements WebsocketPage {
         
         if (data.type === 'starting') {
           if (type == "singlePlayer") {
-            this.state.ws!.send(JSON.stringify({
+            this.state.ws?.send(JSON.stringify({
               type: 'startGame',
               mode: 'singlePlayer'
             }));
           } else if (type == "twoPlayer") {
-            this.state.ws!.send(JSON.stringify({
+            this.state.ws?.send(JSON.stringify({
               type: 'startGame',
               mode: 'twoPlayer'
             }));
           } else if (type == "online") {
-            this.state.ws!.send(JSON.stringify({
+            this.state.ws?.send(JSON.stringify({
               type: 'startGame',
               mode: 'online',
               friend: this.friend
             }));
           } else if (type == "playAgain") {
-            this.state.ws!.send(JSON.stringify({
+            this.state.ws?.send(JSON.stringify({
               type: 'startGame',
               mode: this.state.singlePlayer ? 'singlePlayer' : 'twoPlayer' // todo: add online
             }));
@@ -236,8 +236,9 @@ export class Pong implements WebsocketPage {
 
   render() {
     const main = document.querySelector("main");
+    if (!main) return ;
 
-    main!.innerHTML = `
+    main.innerHTML = `
       <div class="flex items-center justify-center h-screen">
         <canvas id="pongCanvas" width="800" height="600" class="bg-black block mx-auto">
       </div>
@@ -281,9 +282,11 @@ export class PongHomePage {
   
     renderFriendList() {
       const main = document.querySelector("main");
-  
+ 
+      if (!main) return ;
+      
       if (this.loading) {
-        main!.innerHTML = `
+        main.innerHTML = `
           <div class="max-w-4xl mx-auto px-4 py-8">
             <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
               <div class="flex justify-center items-center h-64">
@@ -296,7 +299,7 @@ export class PongHomePage {
       }
   
       // todo: translate
-      main!.innerHTML = `
+      main.innerHTML = `
       <div class="max-w-4xl mx-auto px-4 py-8">
           <div class="bg-light-0 dark:bg-dark-4 rounded-lg shadow-lg p-6">
             <div class="flex justify-start items-center mb-6">

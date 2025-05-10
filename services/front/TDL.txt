@@ -3,32 +3,10 @@ ajouter status partout
 Ajout notif si new message + new demande de connexion
 
 
-	friendsTab:
-		- pourquoi se referme entre profile et reste?
-		- Bon comportement sur friendProfile quand chqngement de friendStatus faire pareil partout
-			-> ne se ferme pas, rafraichit
-
 	error and warning:
 		- check 401, token expired
 		- check all error code from back are the same in the front
 		- check all error type from back are the same in the front
-
-	!!! change status of the user: connected or not, via chatService
-
-	Pong:
-		- block up and down scrolling
-		- close websocket when changing history
-
-	Tournament:
-		- send message to user (remote)
-		- remote
-		- pong
-
-	connect4:
-		- matchmaking
-	
-	user:
-		- add level
 
 	Settings page:
 		- changer window.href.location ----> refresh pour rediriger
@@ -40,11 +18,6 @@ Ajout notif si new message + new demande de connexion
 	Friends page:
 		- Search barre -> API ou fetch dymamique -> web socket? :(((
 		- I add someone, that person add me => error
-
-
-	Sidi:
-		- remove all '!' chars
-		- check Map variables
 
 	BACK:
 		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
@@ -58,8 +31,6 @@ Ajout notif si new message + new demande de connexion
 		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
 		- si token non re-sent (supp ou autre) rediriger vers sign in
 		- / accepter comme URL?
-	
-
 
 
 	Visuel:
@@ -84,12 +55,10 @@ Ajout notif si new message + new demande de connexion
 		- websocket disconnected: timeout
 		- new tab
 
-
-
-
-
-
 	connect 4:
+		- add level to user
+		- matchmaking
+		- generate an example of a tie match
 		- add translation
 		- create AI algo
 		- add timer
@@ -105,19 +74,15 @@ Ajout notif si new message + new demande de connexion
 		- canvas
 		- add previous and next btn
 		- save to db
+		- send message to user (remote)
+		- remote
+		- pong
 
 	games:
 		- check how to change href
 
-	chat:
-		- check connection
-		- update read
-		- add a general chat
-
 	pong:
 		- check if the websocket is closed
-
-
 
 
       let url = "http://localhost:3001/login";

@@ -54,7 +54,7 @@ export class ChatService {
       }
 
       // register session
-      this.ws!.send(JSON.stringify({
+      this.ws?.send(JSON.stringify({
         type: "new",
         userId: this.currentUser.id,
         user: this.currentUser.username,
@@ -114,10 +114,14 @@ export class ChatService {
    * Request full history from backend via WS control frame
    */
   public requestHistory(friendUserName: string) {
+    if (!this.currentUser) {
+      return ;
+    }
+
     const payload = JSON.stringify({
       type: "newChat",
-      user: this.currentUser!.username,
-      userId: this.currentUser!.id,
+      user: this.currentUser.username,
+      userId: this.currentUser.id,
       friend: friendUserName,
     });
     if (this.setuped && this.ws?.readyState === WebSocket.OPEN) {

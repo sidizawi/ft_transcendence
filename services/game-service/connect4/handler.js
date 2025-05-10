@@ -327,6 +327,12 @@ export const connect4Handler = async (fastify) => {
 				await handleNewConn(fastify, data, socket);
 			} else if (data.mode == "play") {
 				if (!data.room) {
+					// todo: check if need to send a message
+					socket.close();
+					return ;
+				}
+				if (!rooms.has(data.room)) {
+					// todo: check if need to send a message
 					socket.close();
 					return ;
 				}

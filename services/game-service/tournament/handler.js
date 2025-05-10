@@ -52,6 +52,9 @@ function handleCreateTournament(socket, data) {
 
 function handleListTournament(socket) {
 	const lst = openTournaments.map((id) => {
+		if (!tournamentRooms.has(id)) {
+			return null;
+		}
 		let room = tournamentRooms.get(id);
 		if (!room) {
 			return null;

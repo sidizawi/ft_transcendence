@@ -62,5 +62,5 @@ export interface TournamentStorage {
   plays: number;
   players: number;
   playersList: string[];
-  winners?: Map<number, string>;
+  winners: Map<number, string> | null;
 }
