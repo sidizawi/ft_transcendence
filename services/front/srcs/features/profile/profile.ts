@@ -12,6 +12,7 @@ export class Profile {
   private connect4Stats: GameStats | null = null;
 
   constructor(private user: User, private onLogout: () => void) {
+    // todo: check: user doesn't exist
     this.loadGameStats();
   }
 
@@ -332,10 +333,11 @@ export class Profile {
                         alt="${game.opponent}"
                         class="w-8 h-8 rounded-full object-cover"
                       >
-                      ${game.opponent !== 'Unknown_user' ? `
+                      ${game.opponent !== 'Unknown_user' && game.online ? `
                         <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-on-btn-light-0 dark:bg-on-btn-dark-0"></span>
+                      ` : `
                         <span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-off-btn-light-0 dark:bg-off-btn-dark-0"></span>
-                      ` : ''}
+                      `}
                     </div>
                     <a 
                       href="/users/${game.opponent}" 
@@ -368,7 +370,7 @@ export class Profile {
     const toggle2FABtn = document.getElementById('toggle2FA');
     const logoutBtn = document.getElementById('logoutBtn');
     const tabButtons = document.querySelectorAll('.tab-button') as NodeListOf<HTMLButtonElement>;
-  const tabContents = document.querySelectorAll('.tab-content') as NodeListOf<HTMLElement>;
+    const tabContents = document.querySelectorAll('.tab-content') as NodeListOf<HTMLElement>;
     const avatarUpload = document.getElementById('avatar-upload') as HTMLInputElement;
 
     // Avatar upload

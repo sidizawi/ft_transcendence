@@ -1,30 +1,29 @@
+import { app } from "../../main";
 import { User } from "../types/user";
 import { TokenManager } from "../utils/token";
 
 const host = window.location.hostname;
 const CHAT_WS = `wss://${host}:8080/ws/chat/message`;
 
-// todo: check if the token is removed to logout the user
+/**
+ * ChatService handles WebSocket messaging and history retrieval via WS 'newChat' control frames.
+ */
 export class ChatService {
   private ws: WebSocket | null = null;
   private currentUser: User | null = null;
-  private chatRooms : Map<string, (data: any) => void> = new Map();
-  private chatMessages : any[] = [];
-
-  public setuped : boolean = false;
+  private chatRooms: Map<string, (data: any) => void> = new Map();
+  private chatQueue: string[] = [];
+  public setuped: boolean = false;
 
   constructor() {
     this.currentUser = TokenManager.getUserFromLocalStorage();
-
-    if (!this.currentUser) {
-      this.setuped = false;
-      return;
-    }
-
     this.setup();
   }
 
-  clean() {
+  /**
+   * Close WS and reset state
+   */
+  public clean() {
     if (this.ws) {
       this.ws.close();
       this.ws = null;
@@ -32,81 +31,100 @@ export class ChatService {
     this.setuped = false;
   }
 
-  setup() {
-    if (this.setuped) {
-      return;
-    }
-
+  /**
+   * Establish WebSocket connection and register handlers
+   */
+  public setup() {
+    if (this.setuped) return;
     const token = TokenManager.getToken();
-    if (!token) {
-      return;
-    }
-
-    this.ws = new WebSocket(`${CHAT_WS}${token ? `?token=${token}` : ""}`);
+    if (!token) return;
+    
+    this.ws = new WebSocket(`${CHAT_WS}?token=${token}`);
 
     this.ws.onopen = () => {
-      console.log("WebSocket connection opened");
       this.setuped = true;
+
+      if (!this.currentUser) {
+        this.currentUser = TokenManager.getUserFromLocalStorage();
+        if (!this.currentUser) {
+          this.clean();
+          // todo: check if redirect to login is needed
+          return ;
+        }
+      }
+
+      // register session
       this.ws!.send(JSON.stringify({
         type: "new",
-        userId: this.currentUser?.id,
-        user: this.currentUser?.username,
+        userId: this.currentUser.id,
+        user: this.currentUser.username,
       }));
 
-      this.chatRooms.forEach((fn, friendUserName) => {
-        this.ws?.send(JSON.stringify({
-          type: "newChat",
-          user: this.currentUser?.username,
-          userId: this.currentUser?.id,
-          friend: friendUserName,
-        }));
-      })
-    }
+      // flush any queued control or message frames
+      this.chatQueue.forEach((frame) => this.ws?.send(frame));
+      this.chatQueue = [];
+    };
 
     this.ws.onmessage = (event) => {
-      let data = JSON.parse(event.data.toString());
-
-      console.log("data received:", data);
-      if (data.type == "message") {
+      const data = JSON.parse(event.data.toString());
+      // for both 'message' and 'messages', dispatch to handler
+      if (data.type === "message" || data.type === "messages") {
         this.chatRooms.get(data.friend)?.(data);
-      } else if (data.type == "messages") {
-        this.chatRooms.get(data.friend)?.(data);
+      } else if (data.type == "friendStatus") {
+        if (app.friendsTab) {
+          app.friendsTab.updateFriendStatus(data);
+        }
       }
-    }
+    };
+
+    this.ws.onclose = () => {
+      this.setuped = false;
+    };
   }
 
-  addNewChatRoom(friendUserName: string, callback: (data: any) => void) {
-    if (this.chatRooms.has(friendUserName)) {
-      return;
+  /**
+   * Subscribe to a chat room, invoking callback on incoming data.
+   * Also triggers history load.
+   */
+  public addNewChatRoom(friendUserName: string, callback: (data: any) => void) {
+    if (!this.chatRooms.has(friendUserName)) {
+      this.chatRooms.set(friendUserName, callback);
     }
-    this.chatRooms.set(friendUserName, callback);
-
-    if (this.ws?.readyState !== WebSocket.OPEN) {
-      return ;
-    }
-
-    this.ws.send(JSON.stringify({
-      type: "newChat",
-      user: this.currentUser?.username,
-      userId: this.currentUser?.id,
-      friend: friendUserName,
-    }));
+    // request history immediately
+    this.requestHistory(friendUserName);
   }
 
-  sendMessage(data: any) {
-    if (!this.setuped) {
+  /**
+   * Sends a text message over WS, or queues if not ready
+   */
+  public sendMessage(data: string) {
+    if (!this.setuped || this.ws?.readyState !== WebSocket.OPEN) {
+      this.chatQueue.push(data);
       return;
     }
-    if (this.ws?.readyState !== WebSocket.OPEN) {
-      this.chatMessages.push(data);
-      return ;
-    }
-    if (this.chatMessages.length > 0) {
-      this.chatMessages.forEach((message) => {
-        this.ws?.send(message);
-      });
-      this.chatMessages = [];
+    // flush any queued frames first
+    if (this.chatQueue.length) {
+      this.chatQueue.forEach((frame) => this.ws?.send(frame));
+      this.chatQueue = [];
     }
     this.ws.send(data);
+  }
+
+  /**
+   * Request full history from backend via WS control frame
+   */
+  public requestHistory(friendUserName: string) {
+    const payload = JSON.stringify({
+      type: "newChat",
+      user: this.currentUser!.username,
+      userId: this.currentUser!.id,
+      friend: friendUserName,
+    });
+    if (this.setuped && this.ws?.readyState === WebSocket.OPEN) {
+      this.ws.send(payload);
+    } else {
+      // will be sent on next onopen
+      this.chatQueue.push(payload);
+    }
   }
 }

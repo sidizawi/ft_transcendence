@@ -2,7 +2,7 @@ ajouter status quand co et deco
 ajouter status partout
 Ajout notif si new message + new demande de connexion
 
-ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
+
 	friendsTab:
 		- pourquoi se referme entre profile et reste?
 		- Bon comportement sur friendProfile quand chqngement de friendStatus faire pareil partout
@@ -42,16 +42,18 @@ ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
 		- I add someone, that person add me => error
 
 
+	Sidi:
+		- remove all '!' chars
+		- check Map variables
+
 	BACK:
 		- pas safe acceder image quand pas log + ajout ID personne devant nom img?
 		- twoFactorAuth/translations:
 			- langue des mails
 				- errror code unifie qu'on peut traduire dans dico
 		- Attention message erreur quand vient du back -> ne peut traduire
-			- enlever tous les codes d'erreur
 
 	PARTOUT:
-		- console du navigateur renvoit ERREUR
 		- chgmnt TOKEN force, attention, class user ne se met pas a jour car pas d'appel de back
 		- probleme TRANSLATION (i.e. tous les champs vide dans signup)
 		- si token non re-sent (supp ou autre) rediriger vers sign in
@@ -78,7 +80,9 @@ ATTENTION SETTING PAS de caracteres speciaux sinon injonctions SQL
 	Files:
 		- Clean up unused datas
 
-
+	websocket:
+		- websocket disconnected: timeout
+		- new tab
 
 
 

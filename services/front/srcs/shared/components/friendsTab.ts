@@ -1,7 +1,8 @@
-import { Friend } from '../types/friend';
+import { Friend, FriendStatusUpdate } from '../types/friend';
 import { FriendService } from '../services/friendService';
 import { i18n } from '../i18n';
 import { SVGIcons } from '../../shared/components/svg';
+import { Chat } from './chat';
 
 export class FriendsTab {
   private isOpen = false;
@@ -34,11 +35,19 @@ export class FriendsTab {
     }
   }
 
+  updateFriendStatus(data: FriendStatusUpdate) {
+    this.friends.map(friend => {
+      if (friend.username2 == data.friend) {
+        friend.online = data.status;
+      }
+    })
+    this.updateView();
+  }
 
   render(): string {
-    const accepted   = this.friends.filter(f => f.status === 'accepted');
-    const onlineFriends     = accepted.filter(f => f.status);
-    const offlineFriends    = accepted.filter(f => !f.status);
+    const accepted        = this.friends.filter(f => f.status === 'accepted');
+    const onlineFriends   = accepted.filter(f => f.online);
+    const offlineFriends  = accepted.filter(f => !f.online);
   
     return `
       <div class="fixed bottom-10 right-10 flex flex-col items-end z-40">
@@ -196,7 +205,6 @@ export class FriendsTab {
 
 
   setupEventListeners() {
-
     const tabButton = document.getElementById('friends-tab-button')!;
     const panel     = document.getElementById('friends-panel')!;
     const label     = document.getElementById('friends-tab-label')!;
@@ -243,10 +251,9 @@ export class FriendsTab {
       if (friendItem) {
         const username = friendItem.getAttribute('data-username');
         if (username) {
-          window.location.href = `/chat/${username}`;
+          Chat.openChatTab(username);
         }
       }
     });
-
   }
 }

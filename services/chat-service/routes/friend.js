@@ -53,7 +53,7 @@ async function friendRoutes(fastify, options) {
 			return { error: 'Unknown user'}; //when you're blocked, you cannot add this person
 		}
 		else{
-			reply.code(500);
+			reply.code(500); // todo: check
 			return { error: 'Username already friendlist'};
 		}
 
@@ -256,6 +256,7 @@ async function friendRoutes(fastify, options) {
 			return { error: 'Wrong relationship between friends'};
 		}
 
+		// todo: is it normal to delete instead of unblock?
 		await deleteFriendship(actualid, friendid);
 
 		reply.code(201);
@@ -267,7 +268,7 @@ async function friendRoutes(fastify, options) {
 		const userId = request.user.id;
 
 		const query = `
-			SELECT f.*, u.id, u.username, u.avatar 
+			SELECT f.*, u.id, u.username, u.avatar, u.status as online
 			FROM friend f 
 			JOIN users u ON f.userid2 = u.id 
 			WHERE f.userid1 = ? AND f.status = 'accepted'`;
@@ -282,6 +283,7 @@ async function friendRoutes(fastify, options) {
 			id: friend.id,
 			username: friend.username,
 			avatar: friend.avatar || '/img/default-avatar.jpg',
+			online: friend.online,
 		}));
 
 		return { message: 'Successfully retrieve friend list', friendData };
@@ -292,7 +294,7 @@ async function friendRoutes(fastify, options) {
 		const userId = request.user.id;
 
 		const query = `
-			SELECT f.*, u.id, u.username, u.avatar 
+			SELECT f.*, u.id, u.username, u.avatar, u.status as online 
 			FROM friend f 
 			JOIN users u ON f.userid2 = u.id 
 			WHERE f.userid1 = ? AND f.status = 'sending'`;
@@ -303,6 +305,7 @@ async function friendRoutes(fastify, options) {
 			username2: item.username,
 			id: item.id,
 			avatar: item.avatar || '/img/default-avatar.jpg',
+			online: item.online,
 		}));
 
 		return { message: 'Successfully retrieve request list', onlyUsername };
@@ -312,8 +315,9 @@ async function friendRoutes(fastify, options) {
 		await request.jwtVerify();
 		const userId = request.user.id;
 
+		// todo: check online, is it for the actual user or the friend?
 		const query = `
-			SELECT f.*, u.id, u.username, u.avatar 
+			SELECT f.*, u.id, u.username, u.avatar, u.status as online
 			FROM friend f 
 			JOIN users u ON f.userid2 = u.id 
 			WHERE f.userid1 = ? AND f.status = 'receiving'`;
@@ -324,6 +328,7 @@ async function friendRoutes(fastify, options) {
 			username2: item.username,
 			id: item.id,
 			avatar: item.avatar || '/img/default-avatar.jpg',
+			online: item.online,
 		}));
 
 		return { message: 'Successfully retrieve request list', onlyUsername };
@@ -335,7 +340,7 @@ async function friendRoutes(fastify, options) {
 
 
 		const query = `
-            SELECT f.*, u.id, u.username, u.avatar
+            SELECT f.*, u.id, u.username, u.avatar, u.status as online
             FROM friend f
             JOIN users u ON f.userid2 = u.id
             WHERE f.userid1 = ? AND f.status = 'blocked'`;
@@ -346,7 +351,8 @@ async function friendRoutes(fastify, options) {
             username2: item.username,
             id: item.id,
             avatar: item.avatar || '/img/default-avatar.jpg',
-        }));  
+			online: item.online,
+        }));
 		
 		return { message: 'Successfully retrieve blocked list', onlyUsername };
     });

@@ -15,7 +15,6 @@ import { Header } from '../shared/components/header';
 import { Footer } from '../shared/components/footer';
 import { i18n } from '../shared/i18n';
 import { TokenManager } from '../shared/utils/token';
-import { Chat } from '../shared/components/chat';
 import { NotFound } from '../shared/components/notFound';
 import { FriendProfile } from '../features/profile/friendProfile';
 import { chatService } from '../main';
@@ -29,6 +28,7 @@ export class TranscendenceApp {
   };
 
   public router: Router;
+  public friendsTab: FriendsTab | null = null;
 
   private menu: Menu;
   private auth: Auth;
@@ -36,7 +36,6 @@ export class TranscendenceApp {
   private footer: Footer;
   private connect4: Connect4HomePage;
   private pong: PongHomePage;
-  private friendsTab: FriendsTab | null = null;
   //private friendsList: FriendsList | null = null;
   private currentPage: WebsocketPage | null = null;
 
@@ -70,6 +69,7 @@ export class TranscendenceApp {
     this.initializeApp();
     this.initializeFriendsTab();
     this.renderCurrentPage();
+
   }
 
   private checkBrowserCompatibility() {
@@ -184,15 +184,6 @@ export class TranscendenceApp {
     this.currentPage = null;
     const main = document.querySelector('main');
     if (!main) return;
-
-    const chatMatch = path.match(/^\/chat\/(.+)$/);
-    if (chatMatch && this.state.user) {
-      const userId = chatMatch[1];
-      const chat = new Chat(userId);
-      main.innerHTML = chat.render();
-      chat.setupEventListeners();
-      return;
-    }
 
     const userMatch = path.match(/^\/users\/([^/]+)$/);
     if (userMatch && this.state.user) {

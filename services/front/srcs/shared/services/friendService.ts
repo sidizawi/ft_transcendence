@@ -59,7 +59,8 @@ export class FriendService {
             username1: currentUser?.username || '',
             username2: friend.username,
             status: 'accepted',
-            avatar: friend.avatar
+            avatar: friend.avatar,
+            online: friend.online,
           });
         });
       }
@@ -73,7 +74,8 @@ export class FriendService {
             username1: currentUser?.username || '',
             username2: request.username2,
             status: 'receiving',
-            avatar: request.avatar
+            avatar: request.avatar,
+            online: request.online,
           });
         });
       }
@@ -87,7 +89,8 @@ export class FriendService {
             username1: currentUser?.username || '',
             username2: request.username2,
             status: 'sending',
-            avatar: request.avatar
+            avatar: request.avatar,
+            online: request.online
           });
         });
       }
@@ -101,7 +104,8 @@ export class FriendService {
             username1: currentUser?.username || '',
             username2: blocked.username2,
             status: 'blocked',
-            avatar: blocked.avatar
+            avatar: blocked.avatar,
+            online: blocked.online
           });
         });
       }

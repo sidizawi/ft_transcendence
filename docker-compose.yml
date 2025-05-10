@@ -6,6 +6,11 @@ services:
     container_name: nginx
     ports:
       - "8080:8080"
+    develop:
+      watch:
+        - action: sync
+          path: ./services/nginx/conf
+          target: /etc/nginx/
     depends_on:
       - api-gateway
       - front
